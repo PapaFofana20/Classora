@@ -27,20 +27,15 @@ function renderTitle(title: string) {
 /**
  * Hero des pages publiques secondaires (Fonctionnalités, Tarifs, Écoles, À propos, Contact).
  *
- * Reprend exactement la matière du hero de l'accueil : bloc rounded-3xl vert forêt,
- * photo en object-cover, mêmes deux dégradés d'overlay, boutons ArrowButton existants.
- * Aucune pastille, aucun badge, aucune étiquette de section.
- *
- * La navbar est rendue par PublicLayout juste au-dessus : la marge négative
- * (`-mt-*` / `pt-*` compensées) fait remonter le bloc derrière elle, qui reste
- * `sticky` et flottante au défilement avec les mêmes marges — sans dupliquer
- * ni modifier le composant Navbar.
+ * Bloc arrondi DANS le Container, à `var(--hero-top-gap)` du haut de page : aucune
+ * place n'est réservée pour la navbar, qui est fixe et le chevauche visuellement.
+ * Le contenu du hero commence à `var(--nav-clearance)` pour ne jamais passer dessous.
  */
 export function PageHero({ title, description, primaryCta, secondaryCta, image, size = "md" }: PageHeroProps) {
   const height = size === "lg" ? "min-h-[400px] md:min-h-[460px] max-h-[480px]" : "min-h-[400px] md:min-h-[420px] max-h-[480px]";
 
   return (
-    <section className="-mt-[76px] px-3 pt-[76px] sm:-mt-[84px] sm:px-5 sm:pt-[84px]">
+    <section className="mt-hero-top mb-hero-bottom px-gutter">
       <div className={cn("relative overflow-hidden rounded-3xl bg-forest", height)}>
         <img
           src={image.src}
@@ -55,8 +50,11 @@ export function PageHero({ title, description, primaryCta, secondaryCta, image, 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/70 to-forest/30" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-forest/80 via-transparent to-transparent" aria-hidden="true" />
+        {/* Tiers supérieur densifié (0 → 100 % de la hauteur de la navbar) : la barre
+            reste lisible sur toutes les photos. */}
+        <div className="absolute inset-x-0 top-0 h-nav-clearance bg-gradient-to-b from-forest/85 via-forest/55 to-transparent" aria-hidden="true" />
 
-        <div className={cn("animate-hero-fade relative z-10 flex flex-col justify-end p-6 pt-32 md:p-10 md:pt-40", height)}>
+        <div className={cn("animate-hero-fade relative z-10 flex flex-col justify-end px-6 pb-6 pt-nav-clearance md:px-10 md:pb-10", height)}>
           <div className="max-w-2xl">
             <h1 className="text-balance text-[clamp(2rem,_1.3rem+2.6vw,_3.25rem)] font-bold leading-[1.1] text-white">{renderTitle(title)}</h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-white/85 md:text-lg">{description}</p>
