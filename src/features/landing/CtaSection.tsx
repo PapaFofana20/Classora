@@ -8,7 +8,7 @@ export function CtaSection() {
       <Reveal>
         <Container>
           <div className="relative overflow-hidden rounded-3xl bg-lime p-8 text-center sm:p-16">
-          <div className="absolute -left-10 -top-10 size-48 rounded-full bg-white/30" aria-hidden="true" />
+            <div className="absolute -left-10 -top-10 size-48 rounded-full bg-white/30" aria-hidden="true" />
           <div className="absolute -bottom-16 -right-10 size-64 rounded-full bg-forest/10" aria-hidden="true" />
           <h2 id="cta-title" className="relative mx-auto max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-forest sm:text-5xl">
             Prêt à digitaliser votre <span className="font-serif font-semibold italic">école</span> pour 2026-2027 ?
