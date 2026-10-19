@@ -60,6 +60,65 @@
   }
 }
 
+/* ==========================================================================
+   TOKENS DE MISE EN PAGE PUBLIQUE — source de vérité unique.
+   Aucune de ces valeurs ne doit être réécrite ailleurs (classes ou inline).
+   Points de rupture = breakpoints Tailwind : sm 40rem / md 48rem / lg 64rem.
+   ========================================================================== */
+:root {
+  /* Marge blanche latérale du Container (le padding horizontal commun). */
+  --gutter: 16px;
+  /* Marge blanche au-dessus du hero (le hero démarre tout en haut de page). */
+  --hero-top-gap: 12px;
+  /* Espace entre la navbar fixe et les bords arrondis du hero. */
+  --nav-inset: 16px;
+  /* Hauteur de la barre de navigation. */
+  --nav-h: 52px;
+  /* Décalage vertical de la navbar depuis le haut du viewport. */
+  --nav-top: calc(var(--hero-top-gap) + var(--nav-inset));
+  /* Hauteur réservée au-dessus du contenu du hero (navbar + respiration). */
+  --nav-clearance: calc(var(--nav-top) + var(--nav-h) + 32px);
+  /* Espace sous le hero avant la première section (mt-8 / mt-10 / mt-14). */
+  --hero-bottom-gap: 32px;
+  /* Marge blanche sous le footer (pb-4 / pb-6). */
+  --footer-bottom-pad: 16px;
+
+  /* Échelle d'empilement : la navbar passe sous les surcouches. */
+  --z-nav: 50;
+  --z-overlay: 70;
+  --z-modal: 80;
+  --z-toast: 100;
+}
+
+@media (min-width: 40rem) {
+  :root { --gutter: 24px; --hero-top-gap: 16px; --hero-bottom-gap: 40px; --footer-bottom-pad: 24px; }
+}
+@media (min-width: 48rem) {
+  :root { --nav-inset: 20px; --nav-h: 60px; }
+}
+@media (min-width: 64rem) {
+  :root { --gutter: 40px; --hero-bottom-gap: 56px; }
+}
+
+/* Équivalents Tailwind : `inline` garde la référence à la variable CSS,
+   donc les classes restent synchronisées avec les media queries ci-dessus. */
+@theme inline {
+  --spacing-gutter: var(--gutter);
+  --spacing-hero-top: var(--hero-top-gap);
+  --spacing-hero-bottom: var(--hero-bottom-gap);
+  --spacing-nav-inset: var(--nav-inset);
+  --spacing-nav-top: var(--nav-top);
+  --spacing-nav-clearance: var(--nav-clearance);
+  --height-nav: var(--nav-h);
+  --z-index-nav: var(--z-nav);
+  --z-index-overlay: var(--z-overlay);
+  --z-index-modal: var(--z-modal);
+  --z-index-toast: var(--z-toast);
+}
+
+/* Liens d'ancre : le titre ciblé ne doit jamais se retrouver sous la navbar. */
+[id] { scroll-margin-top: var(--nav-clearance); }
+
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-sans);
