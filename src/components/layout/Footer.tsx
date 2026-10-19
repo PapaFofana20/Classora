@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 import { CONTACT, footerColumns } from "@/data/landing";
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Brand";
+import { Container } from "./Container";
 
 export function Footer() {
   return (
-    <footer className="px-3 pb-3 sm:px-5 sm:pb-5">
-      <div className="mx-auto max-w-[1280px] rounded-3xl bg-forest p-8 text-white sm:p-12">
+    <footer>
+      <Container className="pb-4 sm:pb-6">
+        <div className="rounded-3xl bg-forest p-8 text-white sm:p-12">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_2fr]">
           <div>
             <Logo dark />
@@ -52,7 +54,8 @@ export function Footer() {
             Données hébergées de manière sécurisée
           </p>
         </div>
-      </div>
+        </div>
+      </Container>
     </footer>
   );
 }

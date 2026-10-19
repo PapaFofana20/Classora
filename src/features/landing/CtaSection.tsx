@@ -1,11 +1,13 @@
 import { ArrowButton } from "@/components/ui/ArrowButton";
 import { Reveal } from "@/components/ui/Reveal";
+import { Container } from "@/components/layout/Container";
 
 export function CtaSection() {
   return (
-    <section className="px-3 pb-6 pt-10 sm:px-5" aria-labelledby="cta-title">
+    <section className="pb-6 pt-10" aria-labelledby="cta-title">
       <Reveal>
-        <div className="relative mx-auto max-w-[1280px] overflow-hidden rounded-3xl bg-lime p-8 text-center sm:p-16">
+        <Container>
+          <div className="relative overflow-hidden rounded-3xl bg-lime p-8 text-center sm:p-16">
           <div className="absolute -left-10 -top-10 size-48 rounded-full bg-white/30" aria-hidden="true" />
           <div className="absolute -bottom-16 -right-10 size-64 rounded-full bg-forest/10" aria-hidden="true" />
           <h2 id="cta-title" className="relative mx-auto max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-forest sm:text-5xl">
@@ -20,7 +22,8 @@ export function CtaSection() {
               Essayer un compte démo
             </ArrowButton>
           </div>
-        </div>
+          </div>
+        </Container>
       </Reveal>
     </section>
   );
