@@ -10,7 +10,7 @@ import { images } from "@/data/landing";
 export function Hero() {
   return (
     <section className="mt-hero-top mb-hero-bottom px-gutter">
-      <div className="relative flex min-h-[640px] flex-col justify-end overflow-hidden rounded-3xl bg-forest">
+      <div className="relative flex min-h-[660px] flex-col justify-end overflow-hidden rounded-3xl bg-forest">
         <img src={images.hero} alt="Élèves souriants dans une salle de classe au Sénégal" className="absolute inset-0 size-full object-cover" fetchPriority="high" />
         <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/70 to-forest/30" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-forest/80 via-transparent to-transparent" aria-hidden="true" />
