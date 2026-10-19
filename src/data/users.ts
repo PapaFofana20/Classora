@@ -13,14 +13,14 @@ const caStudent = students.find((s) => s.id === "s-ca-002");
 
 export const users: User[] = [
   /* ---- Collège Sainte Marie (école de démonstration principale) ---- */
-  { id: "u-dir", schoolId: SCHOOL_IDS.sainteMarie, email: "directeur@ecoleconnect.sn", passwordHash: HASH, firstName: "Aïssatou", lastName: "Diallo", phone: "77 300 11 22", role: "directeur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED },
-  { id: "u-eco", schoolId: SCHOOL_IDS.sainteMarie, email: "econome@ecoleconnect.sn", passwordHash: HASH, firstName: "Mame Diarra", lastName: "Gaye", phone: "78 410 22 33", role: "econome", status: "ACTIF", mustChangePassword: false, createdAt: CREATED },
-  { id: "u-sur", schoolId: SCHOOL_IDS.sainteMarie, email: "surveillant@ecoleconnect.sn", passwordHash: HASH, firstName: "Modou", lastName: "Lô", phone: "76 220 10 45", role: "surveillant", status: "ACTIF", mustChangePassword: false, createdAt: CREATED },
-  { id: "u-inst", schoolId: SCHOOL_IDS.sainteMarie, email: "instituteur@ecoleconnect.sn", passwordHash: HASH, firstName: "Moussa", lastName: "Sarr", phone: "77 560 71 02", role: "instituteur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, teacherId: "ti-cm2a" },
-  { id: "u-math", schoolId: SCHOOL_IDS.sainteMarie, email: "prof.maths@ecoleconnect.sn", passwordHash: HASH, firstName: "Ibrahima", lastName: "Diop", phone: "77 810 45 66", role: "professeur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, teacherId: "t-math1" },
-  { id: "u-fr", schoolId: SCHOOL_IDS.sainteMarie, email: "prof.francais@ecoleconnect.sn", passwordHash: HASH, firstName: "Awa", lastName: "Fall", phone: "77 905 11 28", role: "professeur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, teacherId: "t-fr1" },
-  { id: "u-parent", schoolId: SCHOOL_IDS.sainteMarie, email: "parent@ecoleconnect.sn", passwordHash: HASH, firstName: "Fatou", lastName: "Ndiaye", phone: "77 412 56 90", role: "parent", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, parentId: "p-demo" },
-  { id: "u-eleve", schoolId: SCHOOL_IDS.sainteMarie, email: "eleve@ecoleconnect.sn", passwordHash: HASH, firstName: "Aïda", lastName: "Ndiaye", phone: "77 412 56 90", role: "eleve", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, studentId: "s-aida" },
+  { id: "u-dir", schoolId: SCHOOL_IDS.sainteMarie, email: "directeur@classora.sn", passwordHash: HASH, firstName: "Aïssatou", lastName: "Diallo", phone: "77 300 11 22", role: "directeur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED },
+  { id: "u-eco", schoolId: SCHOOL_IDS.sainteMarie, email: "econome@classora.sn", passwordHash: HASH, firstName: "Mame Diarra", lastName: "Gaye", phone: "78 410 22 33", role: "econome", status: "ACTIF", mustChangePassword: false, createdAt: CREATED },
+  { id: "u-sur", schoolId: SCHOOL_IDS.sainteMarie, email: "surveillant@classora.sn", passwordHash: HASH, firstName: "Modou", lastName: "Lô", phone: "76 220 10 45", role: "surveillant", status: "ACTIF", mustChangePassword: false, createdAt: CREATED },
+  { id: "u-inst", schoolId: SCHOOL_IDS.sainteMarie, email: "instituteur@classora.sn", passwordHash: HASH, firstName: "Moussa", lastName: "Sarr", phone: "77 560 71 02", role: "instituteur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, teacherId: "ti-cm2a" },
+  { id: "u-math", schoolId: SCHOOL_IDS.sainteMarie, email: "prof.maths@classora.sn", passwordHash: HASH, firstName: "Ibrahima", lastName: "Diop", phone: "77 810 45 66", role: "professeur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, teacherId: "t-math1" },
+  { id: "u-fr", schoolId: SCHOOL_IDS.sainteMarie, email: "prof.francais@classora.sn", passwordHash: HASH, firstName: "Awa", lastName: "Fall", phone: "77 905 11 28", role: "professeur", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, teacherId: "t-fr1" },
+  { id: "u-parent", schoolId: SCHOOL_IDS.sainteMarie, email: "parent@classora.sn", passwordHash: HASH, firstName: "Fatou", lastName: "Ndiaye", phone: "77 412 56 90", role: "parent", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, parentId: "p-demo" },
+  { id: "u-eleve", schoolId: SCHOOL_IDS.sainteMarie, email: "eleve@classora.sn", passwordHash: HASH, firstName: "Aïda", lastName: "Ndiaye", phone: "77 412 56 90", role: "eleve", status: "ACTIF", mustChangePassword: false, createdAt: CREATED, studentId: "s-aida" },
 
   /* ---- Groupe Scolaire Cheikh Anta (Thiès) : abonnement bientôt expiré ---- */
   { id: "u-ca-dir", schoolId: SCHOOL_IDS.cheikhAnta, email: "direction@cheikhanta-ecole.sn", passwordHash: HASH, firstName: "Ousmane", lastName: "Ndiaye", phone: "77 240 18 09", role: "directeur", status: "ACTIF", mustChangePassword: false, createdAt: "2026-09-02T08:30" },
@@ -54,14 +54,14 @@ export interface DemoAccount {
 export const DEMO_PARENT_CODES = childCodesOf("p-demo");
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
-  { email: "directeur@ecoleconnect.sn", label: "Directeur", hint: "Collège Sainte Marie · vue complète", icon: "admin_panel_settings", role: "directeur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "econome@ecoleconnect.sn", label: "Économe", hint: "Paiements et relances", icon: "payments", role: "econome", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "instituteur@ecoleconnect.sn", label: "Instituteur · CM2 A", hint: "Toutes les matières de sa classe", icon: "child_care", role: "instituteur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "prof.maths@ecoleconnect.sn", label: "Prof. de Maths", hint: "6ème A, 5ème B, 3ème A · principal 5ème B", icon: "calculate", role: "professeur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "prof.francais@ecoleconnect.sn", label: "Prof. de Français", hint: "2nde L, Tle L", icon: "menu_book", role: "professeur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "surveillant@ecoleconnect.sn", label: "Surveillant général", hint: "Absences et discipline", icon: "shield_person", role: "surveillant", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "eleve@ecoleconnect.sn", label: "Élève", hint: "Aïda Ndiaye · CE2 A", icon: "backpack", role: "eleve", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
-  { email: "parent@ecoleconnect.sn", label: "Parent · 2 enfants", hint: "Codes enfants : voir l'aide", icon: "family_restroom", role: "parent", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "directeur@classora.sn", label: "Directeur", hint: "Collège Sainte Marie · vue complète", icon: "admin_panel_settings", role: "directeur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "econome@classora.sn", label: "Économe", hint: "Paiements et relances", icon: "payments", role: "econome", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "instituteur@classora.sn", label: "Instituteur · CM2 A", hint: "Toutes les matières de sa classe", icon: "child_care", role: "instituteur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "prof.maths@classora.sn", label: "Prof. de Maths", hint: "6ème A, 5ème B, 3ème A · principal 5ème B", icon: "calculate", role: "professeur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "prof.francais@classora.sn", label: "Prof. de Français", hint: "2nde L, Tle L", icon: "menu_book", role: "professeur", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "surveillant@classora.sn", label: "Surveillant général", hint: "Absences et discipline", icon: "shield_person", role: "surveillant", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "eleve@classora.sn", label: "Élève", hint: "Aïda Ndiaye · CE2 A", icon: "backpack", role: "eleve", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
+  { email: "parent@classora.sn", label: "Parent · 2 enfants", hint: "Codes enfants : voir l'aide", icon: "family_restroom", role: "parent", schoolId: SCHOOL_IDS.sainteMarie, schoolName: "Collège Sainte Marie" },
   { email: "direction@cheikhanta-ecole.sn", label: "Directeur · Cheikh Anta", hint: "Thiès · abonnement bientôt expiré", icon: "admin_panel_settings", role: "directeur", schoolId: SCHOOL_IDS.cheikhAnta, schoolName: "Groupe Scolaire Cheikh Anta" },
   { email: "contact@institut-horizon.sn", label: "Directeur · Institut Horizon", hint: "Mbour · école en lecture seule", icon: "admin_panel_settings", role: "directeur", schoolId: SCHOOL_IDS.horizon, schoolName: "Institut Horizon" },
   { email: "direction@teranga-ecole.sn", label: "Directeur · Teranga", hint: "Saint-Louis · accès bloqué", icon: "admin_panel_settings", role: "directeur", schoolId: SCHOOL_IDS.teranga, schoolName: "Complexe Scolaire Teranga" },

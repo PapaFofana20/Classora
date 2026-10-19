@@ -10,7 +10,7 @@ interface TeachingContextValue extends TeacherData {
 }
 
 const TeachingContext = createContext<TeachingContextValue | null>(null);
-const STORAGE_KEY = "ecoleconnect_active_context";
+const STORAGE_KEY = "classora_active_context";
 
 export function TeachingProvider({ children }: { children: ReactNode }) {
   const data = useTeacherAssignments();

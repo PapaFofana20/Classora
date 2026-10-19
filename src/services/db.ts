@@ -61,7 +61,7 @@ export interface Database {
   settings: SchoolSettings[];
 }
 
-const KEY = "ecoleconnect_db_v3";
+const KEY = "classora_db_v3";
 
 function seed(): Database {
   return structuredClone({

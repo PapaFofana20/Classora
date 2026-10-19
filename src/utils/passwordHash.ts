@@ -8,7 +8,7 @@
  */
 
 /** Sel fixe de la démo (le vrai serait aléatoire, stocké avec l'empreinte). */
-const DEMO_SALT = "ecoleconnect::demo::2026";
+const DEMO_SALT = "classora::demo::2026";
 
 const fnv1a = (input: string, seed: number): number => {
   let h = seed >>> 0;

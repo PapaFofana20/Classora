@@ -17,7 +17,7 @@ export const parents: Parent[] = [
     firstName: "Fatou",
     lastName: "Ndiaye",
     phone: "77 412 56 90",
-    email: "parent@ecoleconnect.sn",
+    email: "parent@classora.sn",
     address: "Sicap Liberté 4, Dakar",
   },
 ];

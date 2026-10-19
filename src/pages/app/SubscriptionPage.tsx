@@ -73,7 +73,7 @@ export default function SubscriptionPage() {
   return (
     <>
       <PageHeader
-        title="Abonnement EcoleConnect"
+        title="Abonnement Classora"
         subtitle="Visible et achetable uniquement par le directeur de l'école."
         actions={
           receipt ? (

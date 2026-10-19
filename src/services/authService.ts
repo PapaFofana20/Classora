@@ -7,7 +7,7 @@ import { canManageStaff, isStaffRole } from "@/utils/permissions";
 import { db, persist, respond, schoolOf, uid } from "./db";
 import { buildPaymentPlan } from "./paymentService";
 
-const SESSION_KEY = "ecoleconnect_session";
+const SESSION_KEY = "classora_session";
 
 function toSession(u: User): SessionUser {
   const { passwordHash: _hash, ...rest } = u;

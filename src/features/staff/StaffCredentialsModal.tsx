@@ -22,7 +22,7 @@ export function credentialsMessage(credentials: StaffCredentials, school: School
   return [
     `Bonjour ${credentials.firstName},`,
     ``,
-    `Votre accès EcoleConnect (${school?.name ?? "votre école"}) est prêt.`,
+    `Votre accès Classora (${school?.name ?? "votre école"}) est prêt.`,
     ``,
     `🔑 Lien de connexion : ${link}`,
     `✉️ E-mail : ${credentials.email}`,

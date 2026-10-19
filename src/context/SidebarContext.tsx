@@ -8,7 +8,7 @@ export const SIDEBAR_DELTA = SIDEBAR_EXPANDED - SIDEBAR_COLLAPSED;
 /** En dessous de cette largeur de contenu restante, le survol est désactivé (clic sur le logo). */
 export const MIN_CONTENT_WIDTH = 720;
 
-const STORAGE_KEY = "ecoleconnect_sidebar_pinned";
+const STORAGE_KEY = "classora_sidebar_pinned";
 
 function readPinned(): boolean {
   try {

@@ -3,10 +3,10 @@ import { cn } from "@/utils/cn";
 
 export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?: string; to?: string }) {
   return (
-    <Link to={to} aria-label="SCOLIA, retour à l'accueil" className="inline-flex items-center">
+    <Link to={to} aria-label="CLASSORA, retour à l'accueil" className="inline-flex items-center">
       <img
         src={dark ? "/images/logo-lime.png" : "/images/logo-dark.png"}
-        alt="SCOLIA"
+        alt="CLASSORA"
         width={240}
         height={46}
         className={cn("w-auto", className ?? "h-8")}

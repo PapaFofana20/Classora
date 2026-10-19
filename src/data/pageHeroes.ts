@@ -44,7 +44,7 @@ export const pageHeroes: Record<"fonctionnalites" | "tarifs" | "ecoles" | "aprop
   },
   ecoles: {
     title: "Une plateforme pensée pour les *écoles* privées du Sénégal",
-    description: "Découvrez comment les établissements privés organisent leurs classes, leurs notes et leurs paiements avec EcoleConnect.",
+    description: "Découvrez comment les établissements privés organisent leurs classes, leurs notes et leurs paiements avec Classora.",
     primaryCta: { label: "Créer un compte", to: "/inscription" },
     image: { src: enseignantsImg, alt: "Enseignante devant un tableau noir face à ses élèves", objectPosition: "35% 35%", width: 1536, height: 1024 },
   },

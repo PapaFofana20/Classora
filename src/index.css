@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Design system EcoleConnect (équivalent du tailwind.config en Tailwind v4) */
+/* Design system Classora (équivalent du tailwind.config en Tailwind v4) */
 @theme {
   --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;

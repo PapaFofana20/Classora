@@ -1,7 +1,7 @@
 import type { Plan } from "@/types";
 
 /**
- * Formules d'abonnement EcoleConnect — prix en FCFA, par mois ou par an.
+ * Formules d'abonnement Classora — prix en FCFA, par mois ou par an.
  * La limite `studentLimit` borne le nombre d'élèves approuvés : au-delà,
  * la direction doit changer de formule (voir services/registrationService).
  */

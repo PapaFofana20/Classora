@@ -13,7 +13,7 @@ interface ChildContextValue {
 }
 
 const ChildContext = createContext<ChildContextValue | null>(null);
-const STORAGE_KEY = "ecoleconnect_active_child";
+const STORAGE_KEY = "classora_active_child";
 
 /** Sélecteur d'enfant : un compte parent, plusieurs enfants (cycles différents possibles). */
 export function ChildProvider({ children }: { children: ReactNode }) {

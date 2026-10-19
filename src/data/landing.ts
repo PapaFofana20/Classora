@@ -11,7 +11,7 @@ export const images = { hero: heroImg, about: aboutImg, auth: authImg };
 
 export const CONTACT = {
   phone: "+221 77 000 12 34",
-  email: "contact@ecoleconnect.sn",
+  email: "contact@classora.sn",
   address: "Immeuble Teranga, Point E, Dakar, Sénégal",
   hours: "Du lundi au vendredi, 8 h – 18 h",
 };
@@ -127,7 +127,7 @@ export interface Testimonial {
 }
 
 export const testimonials: Testimonial[] = [
-  { id: "t1", quote: "Depuis EcoleConnect, nos bulletins sortent en une journée au lieu de deux semaines. Les parents paient par Wave sans se déplacer.", name: "Aïssatou Diallo", role: "Directrice", school: "Complexe Scolaire Les Almadies, Dakar" },
+  { id: "t1", quote: "Depuis Classora, nos bulletins sortent en une journée au lieu de deux semaines. Les parents paient par Wave sans se déplacer.", name: "Aïssatou Diallo", role: "Directrice", school: "Complexe Scolaire Les Almadies, Dakar" },
   { id: "t2", quote: "La matrice des affectations nous a évité des erreurs d'emploi du temps. Chaque professeur voit uniquement ses classes.", name: "Dr Mbaye Seck", role: "Directeur des études", school: "Institut Horizon, Thiès" },
   { id: "t3", quote: "Les impayés ont baissé de 35 % en un trimestre grâce aux relances et au paiement mobile money.", name: "Mame Diarra Gaye", role: "Économe", school: "Groupe Les Baobabs, Mbour" },
 ];
@@ -138,12 +138,12 @@ export interface Faq {
 }
 
 export const faqs: Faq[] = [
-  { q: "EcoleConnect convient-il à une école élémentaire uniquement ?", a: "Oui. Vous choisissez les cycles proposés par votre école (élémentaire, moyen, secondaire). Chaque cycle a son modèle de bulletin et ses règles : un instituteur titulaire à l'élémentaire, plusieurs professeurs au moyen et secondaire." },
+  { q: "Classora convient-il à une école élémentaire uniquement ?", a: "Oui. Vous choisissez les cycles proposés par votre école (élémentaire, moyen, secondaire). Chaque cycle a son modèle de bulletin et ses règles : un instituteur titulaire à l'élémentaire, plusieurs professeurs au moyen et secondaire." },
   { q: "Comment fonctionne le paiement par Wave, Orange Money ou Free Money ?", a: "Le parent choisit l'échéance à régler, sélectionne son opérateur et valide le paiement depuis son téléphone. Le reçu est généré immédiatement et l'économe voit le paiement en temps réel." },
   { q: "Un parent avec plusieurs enfants a-t-il plusieurs comptes ?", a: "Non. Un seul compte parent permet de suivre tous les enfants, même dans des cycles différents, grâce à un sélecteur d'enfant. La réduction fratrie est appliquée automatiquement." },
   { q: "Un professeur peut-il modifier les notes d'une autre classe ?", a: "Non. Un enseignant ne voit et ne saisit que les notes des couples classe/matière qui lui sont affectés. Le professeur principal dispose en plus d'une lecture de toutes les matières de sa classe." },
   { q: "Les bulletins respectent-ils le système sénégalais ?", a: "Oui. Devoirs et composition, coefficients par série, rang, appréciation du conseil de classe, conduite et absences. Les examens CFEE, BFEM et BAC sont pris en compte dans l'organisation des niveaux." },
-  { q: "L'application fonctionne-t-elle avec une connexion lente ?", a: "EcoleConnect est conçu pour les connexions mobiles : pages légères, images compressées et chargement progressif." },
+  { q: "L'application fonctionne-t-elle avec une connexion lente ?", a: "Classora est conçu pour les connexions mobiles : pages légères, images compressées et chargement progressif." },
 ];
 
 export const schoolPartners = [

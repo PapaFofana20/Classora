@@ -110,7 +110,7 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
         {expanded ? (
           <Logo dark to="/" />
         ) : (
-          <button type="button" onClick={onLogoClick} aria-label={onLogoClick ? "Déplier le menu" : "EcoleConnect, retour à l'accueil"} className="grid size-10 place-items-center rounded-xl bg-lime text-forest">
+          <button type="button" onClick={onLogoClick} aria-label={onLogoClick ? "Déplier le menu" : "Classora, retour à l'accueil"} className="grid size-10 place-items-center rounded-xl bg-lime text-forest">
             <Icon name="school" fill className="text-[24px]" />
           </button>
         )}
