@@ -11,7 +11,7 @@ export function Footer() {
         <div className="rounded-3xl bg-forest p-8 text-white sm:p-12">
           <div className="grid gap-10 lg:grid-cols-[1.4fr_2fr]">
           <div>
-            <Logo dark />
+            <Logo dark className="h-10" />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/75">
               La plateforme de gestion des écoles privées au Sénégal : inscriptions, bulletins automatiques, paiements mobile money et messagerie parents-enseignants.
             </p>

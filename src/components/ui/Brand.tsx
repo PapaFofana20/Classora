@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
-import { Icon } from "./Icon";
 
 export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?: string; to?: string }) {
   return (
-    <Link to={to} aria-label="EcoleConnect, retour à l'accueil" className={cn("inline-flex items-center gap-2.5", className)}>
-      <span className={cn("grid size-10 place-items-center rounded-xl", dark ? "bg-lime text-forest" : "bg-forest text-lime")}>
-        <Icon name="school" fill className="text-[24px]" />
-      </span>
-      <span className={cn("text-lg font-extrabold tracking-tight", dark ? "text-white" : "text-forest")}>
-        Ecole<span className="font-serif font-semibold italic">Connect</span>
-      </span>
+    <Link to={to} aria-label="SCOLIA, retour à l'accueil" className="inline-flex items-center">
+      <img
+        src={dark ? "/images/logo-lime.png" : "/images/logo-dark.png"}
+        alt="SCOLIA"
+        width={240}
+        height={46}
+        className={cn("w-auto", className ?? "h-8")}
+      />
     </Link>
   );
 }
