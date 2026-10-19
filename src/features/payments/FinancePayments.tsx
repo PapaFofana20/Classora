@@ -1,0 +1,196 @@
+import { useEffect, useMemo, useState } from "react";
+import { AsyncView } from "@/components/ui/AsyncView";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
+import { Pagination } from "@/components/ui/Pagination";
+import { Select } from "@/components/ui/Select";
+import { SkeletonTable } from "@/components/ui/Skeleton";
+import { StatCard } from "@/components/ui/StatCard";
+import { Table, type Column } from "@/components/ui/Table";
+import { Tabs } from "@/components/ui/Tabs";
+import { useCurrentUser } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import { TODAY_ISO } from "@/data/school";
+import { useAsync } from "@/hooks/useAsync";
+import { useDebounce } from "@/hooks/useDebounce";
+import { listPaymentRows, recordCashPayment, sendReminders } from "@/services/paymentService";
+import type { PaymentRow } from "@/services/paymentRows";
+import { formatCurrency, formatDate } from "@/utils/format";
+import { PAY_METHOD_LABELS, PAY_STATUS_LABELS, remaining, sum } from "@/utils/payments";
+import { PAY_TONE } from "./ParentPayments";
+import { Receipt } from "./Receipt";
+
+const PAGE = 12;
+
+interface Debtor {
+  studentId: string;
+  studentName: string;
+  className: string;
+  parentName: string;
+  parentPhone: string;
+  count: number;
+  total: number;
+}
+
+export function FinancePayments({ schoolName, canAct }: { schoolName: string; canAct: boolean }) {
+  const user = useCurrentUser();
+  const { toast } = useToast();
+  const state = useAsync(() => listPaymentRows(user), [user.id]);
+  const [tab, setTab] = useState("echeances");
+  const [q, setQ] = useState("");
+  const dq = useDebounce(q, 250);
+  const [cls, setCls] = useState("");
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [cash, setCash] = useState<PaymentRow | null>(null);
+  const [amount, setAmount] = useState("");
+  const [receipt, setReceipt] = useState<PaymentRow | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  const rows = useMemo(() => state.data ?? [], [state.data]);
+  useEffect(() => setPage(1), [dq, cls, status, tab]);
+
+  const due = rows.filter((p) => p.dueDate <= TODAY_ISO);
+  const expected = sum(due.map((p) => p.amount));
+  const collected = sum(due.map((p) => p.paidAmount));
+  const classes = Array.from(new Set(rows.map((r) => r.className))).sort((a, b) => a.localeCompare(b, "fr", { numeric: true }));
+
+  const filtered = useMemo(() => {
+    const t = dq.trim().toLowerCase();
+    return rows
+      .filter((p) => (!t || `${p.studentName} ${p.parentName}`.toLowerCase().includes(t)) && (!cls || p.className === cls) && (!status || p.status === status))
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.studentName.localeCompare(b.studentName));
+  }, [rows, dq, cls, status]);
+
+  const debtors = useMemo<Debtor[]>(() => {
+    const map = new Map<string, Debtor>();
+    rows.filter((p) => p.dueDate <= TODAY_ISO && remaining(p) > 0).forEach((p) => {
+      const d = map.get(p.studentId) ?? { studentId: p.studentId, studentName: p.studentName, className: p.className, parentName: p.parentName, parentPhone: p.parentPhone, count: 0, total: 0 };
+      d.count += 1;
+      d.total += remaining(p);
+      map.set(p.studentId, d);
+    });
+    return Array.from(map.values()).filter((d) => (!cls || d.className === cls) && (!dq || `${d.studentName} ${d.parentName}`.toLowerCase().includes(dq.toLowerCase()))).sort((a, b) => b.total - a.total);
+  }, [rows, cls, dq]);
+
+  const cashAmount = Number(amount);
+  const cashErr = cash && (!(cashAmount > 0) || cashAmount > remaining(cash)) ? `Montant entre 1 et ${formatCurrency(remaining(cash))}.` : null;
+
+  const doCash = async () => {
+    if (!cash || cashErr) return;
+    setBusy(true);
+    try {
+      const r = await recordCashPayment(user, cash.id, cashAmount);
+      toast(`${formatCurrency(cashAmount)} encaissés pour ${cash.studentName}.`);
+      setCash(null);
+      state.reload();
+      setReceipt(r);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Encaissement impossible.", "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remind = async () => {
+    setBusy(true);
+    try {
+      const n = await sendReminders(user, picked);
+      toast(`Relance envoyée à ${n} famille${n > 1 ? "s" : ""}.`);
+      setPicked([]);
+    } catch {
+      toast("Envoi impossible.", "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const actions = (p: PaymentRow) => (
+    <div className="flex justify-end gap-2">
+      {canAct && remaining(p) > 0 && <Button size="sm" variant="primary" onClick={() => { setCash(p); setAmount(String(remaining(p))); }}>Encaisser</Button>}
+      {p.paidAmount > 0 && <Button size="sm" variant="outline" icon="receipt_long" aria-label={`Reçu de ${p.studentName}`} onClick={() => setReceipt(p)} />}
+    </div>
+  );
+  const cols: Column<PaymentRow>[] = [
+    { key: "s", header: "Élève", render: (p) => <span><strong>{p.studentName}</strong><span className="block text-xs text-neutral-500">{p.className}</span></span> },
+    { key: "l", header: "Échéance", render: (p) => p.label },
+    { key: "d", header: "Date limite", render: (p) => formatDate(p.dueDate) },
+    { key: "a", header: "Montant", align: "right", render: (p) => formatCurrency(p.amount) },
+    { key: "p", header: "Payé", align: "right", render: (p) => formatCurrency(p.paidAmount) },
+    { key: "st", header: "Statut", render: (p) => <Badge tone={PAY_TONE[p.status]}>{PAY_STATUS_LABELS[p.status]}</Badge> },
+    { key: "ac", header: <span className="sr-only">Actions</span>, align: "right", render: actions },
+  ];
+  const debtorCols: Column<Debtor>[] = [
+    { key: "c", header: <span className="sr-only">Sélection</span>, render: (d) => <input type="checkbox" className="size-5 accent-forest" aria-label={`Sélectionner ${d.studentName}`} checked={picked.includes(d.studentId)} onChange={() => setPicked((p) => (p.includes(d.studentId) ? p.filter((x) => x !== d.studentId) : [...p, d.studentId]))} /> },
+    { key: "s", header: "Élève", render: (d) => <span><strong>{d.studentName}</strong><span className="block text-xs text-neutral-500">{d.className}</span></span> },
+    { key: "p", header: "Parent", render: (d) => <span>{d.parentName}<span className="block text-xs text-neutral-500">{d.parentPhone}</span></span> },
+    { key: "n", header: "Échéances", align: "center", render: (d) => d.count },
+    { key: "t", header: "Total dû", align: "right", render: (d) => <strong className="text-danger">{formatCurrency(d.total)}</strong> },
+  ];
+  const receiptRows = filtered.filter((p) => p.paidAmount > 0 && p.paidAt).sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""));
+  const receiptCols: Column<PaymentRow>[] = [
+    { key: "d", header: "Date", render: (p) => formatDate(p.paidAt) },
+    { key: "r", header: "Référence", render: (p) => p.reference ?? "—" },
+    { key: "s", header: "Élève", render: (p) => p.studentName },
+    { key: "l", header: "Échéance", render: (p) => p.label },
+    { key: "m", header: "Moyen", render: (p) => (p.method ? <Badge tone="info">{PAY_METHOD_LABELS[p.method]}</Badge> : "—") },
+    { key: "a", header: "Montant", align: "right", render: (p) => formatCurrency(p.paidAmount) },
+    { key: "x", header: <span className="sr-only">Reçu</span>, align: "right", render: actions },
+  ];
+  const list = tab === "recus" ? receiptRows : filtered;
+
+  return (
+    <AsyncView state={state} skeleton={<SkeletonTable />}>
+      {() => (
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard dark icon="account_balance_wallet" label="Encaissé" value={formatCurrency(collected)} />
+            <StatCard icon="request_quote" label="Attendu à ce jour" value={formatCurrency(expected)} />
+            <StatCard icon="warning" label="Impayés" value={formatCurrency(expected - collected)} badge={{ text: `${debtors.length} élèves`, tone: "down" }} />
+            <StatCard icon="percent" label="Recouvrement" value={`${expected ? Math.round((collected / expected) * 100) : 0} %`} />
+          </div>
+          <Tabs label="Paiements" value={tab} onChange={setTab} items={[{ id: "echeances", label: "Échéances", icon: "calendar_month" }, { id: "impayes", label: "Impayés et relances", icon: "notifications_active", badge: debtors.length }, { id: "recus", label: "Reçus", icon: "receipt_long" }]} />
+          <Card>
+            <div className="grid gap-3 md:grid-cols-3">
+              <Input aria-label="Rechercher" icon="search" placeholder="Élève ou parent…" value={q} onChange={(e) => setQ(e.target.value)} />
+              <Select compact aria-label="Classe" placeholder="Toutes les classes" value={cls} onChange={(e) => setCls(e.target.value)} options={classes.map((c) => ({ value: c, label: c }))} />
+              {tab === "echeances" && <Select compact aria-label="Statut" placeholder="Tous les statuts" value={status} onChange={(e) => setStatus(e.target.value)} options={Object.entries(PAY_STATUS_LABELS).map(([value, label]) => ({ value, label }))} />}
+            </div>
+          </Card>
+          {tab === "impayes" ? (
+            <>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button variant="outline" onClick={() => setPicked(picked.length === debtors.length ? [] : debtors.map((d) => d.studentId))}>{picked.length === debtors.length && debtors.length ? "Tout désélectionner" : "Tout sélectionner"}</Button>
+                {canAct && <Button icon="send" disabled={picked.length === 0} loading={busy} onClick={() => void remind()}>Envoyer une relance ({picked.length})</Button>}
+              </div>
+              {debtors.length === 0 ? <EmptyState icon="verified" title="Aucun impayé" text="Toutes les échéances échues sont réglées." /> : <Card padded={false} className="p-2"><Table caption="Élèves avec échéances impayées" columns={debtorCols} rows={debtors} rowKey={(d) => d.studentId} /></Card>}
+            </>
+          ) : list.length === 0 ? (
+            <EmptyState icon="search_off" title="Aucun résultat" text="Modifiez vos filtres." />
+          ) : (
+            <Card padded={false} className="p-2">
+              <Table caption="Paiements" columns={tab === "recus" ? receiptCols : cols} rows={list.slice((page - 1) * PAGE, page * PAGE)} rowKey={(p) => p.id} />
+              <div className="px-4 pb-4"><Pagination page={page} pageSize={PAGE} total={list.length} onChange={setPage} /></div>
+            </Card>
+          )}
+          <Modal open={!!cash} onClose={() => setCash(null)} title="Encaisser un paiement en espèces" size="sm" footer={<><Button variant="outline" onClick={() => setCash(null)}>Annuler</Button><Button variant="dark" loading={busy} disabled={!!cashErr} onClick={() => void doCash()}>Valider l'encaissement</Button></>}>
+            {cash && (
+              <div className="space-y-4">
+                <p className="text-sm"><strong>{cash.studentName}</strong> · {cash.label}<br />Reste dû : <strong>{formatCurrency(remaining(cash))}</strong></p>
+                <Input label="Montant encaissé (FCFA)" type="number" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} error={cashErr} />
+              </div>
+            )}
+          </Modal>
+          <Modal open={!!receipt} onClose={() => setReceipt(null)} title="Reçu de paiement" footer={<><Button variant="outline" icon="print" onClick={() => window.print()}>Imprimer</Button><Button variant="dark" onClick={() => setReceipt(null)}>Fermer</Button></>}>
+            {receipt && <Receipt payments={[receipt]} schoolName={schoolName} />}
+          </Modal>
+        </div>
+      )}
+    </AsyncView>
+  );
+}
