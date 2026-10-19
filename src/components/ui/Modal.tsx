@@ -34,7 +34,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
 
   if (!open) return null;
   return (
-    <div className="no-print fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-4" role="presentation">
+    <div className="no-print fixed inset-0 z-modal flex items-end justify-center p-0 sm:items-center sm:p-4" role="presentation">
       <div className="absolute inset-0 bg-forest/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div
         ref={ref}
