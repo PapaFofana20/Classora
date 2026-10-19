@@ -72,7 +72,7 @@ export function Navbar() {
               scrolled ? "border-forest/10 bg-white shadow-card" : "border-transparent bg-white/90 shadow-soft backdrop-blur-md",
             )}
           >
-            <Logo />
+            <Logo className="h-7" />
             {/* La ligne complète (logo + 6 liens + téléphone + 2 boutons) ne tient
                 qu'à partir de 1280 px : gouttière 40 px + inset 20 px de chaque côté
                 du Container de 1280 px max. En dessous, barre compacte + menu. */}
