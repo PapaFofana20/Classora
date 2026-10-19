@@ -109,6 +109,7 @@
   --spacing-nav-inset: var(--nav-inset);
   --spacing-nav-top: var(--nav-top);
   --spacing-nav-clearance: var(--nav-clearance);
+  --spacing-footer-bottom: var(--footer-bottom-pad);
   --height-nav: var(--nav-h);
   --z-index-nav: var(--z-nav);
   --z-index-overlay: var(--z-overlay);

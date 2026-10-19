@@ -7,7 +7,7 @@ import { Container } from "./Container";
 export function Footer() {
   return (
     <footer>
-      <Container className="pb-4 sm:pb-6">
+      <Container className="pb-footer-bottom">
         <div className="rounded-3xl bg-forest p-8 text-white sm:p-12">
           <div className="grid gap-10 lg:grid-cols-[1.4fr_2fr]">
           <div>
