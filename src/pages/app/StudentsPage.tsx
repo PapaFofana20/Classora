@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/Brand";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { FilterSheet } from "@/components/ui/FilterSheet";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { LinkButton } from "@/components/ui/Button";
@@ -34,6 +35,7 @@ export default function StudentsPage() {
   const [cycle, setCycle] = useState("");
   const [pay, setPay] = useState("");
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const classId = params.get("classe") ?? "";
   const showMoney = user.role === "directeur" || user.role === "econome";
   const rows = useMemo(() => state.data ?? [], [state.data]);
@@ -88,6 +90,15 @@ export default function StudentsPage() {
     { key: "go", header: <span className="sr-only">Ouvrir</span>, align: "right", render: () => <Icon name="chevron_right" className="text-neutral-400" /> },
   ];
 
+  const activeFilters = [cycle, classId, pay].filter(Boolean).length;
+  const filterFields = (
+    <>
+      <Select compact aria-label="Filtrer par cycle" placeholder="Tous les cycles" value={cycle} onChange={(e) => { setCycle(e.target.value); setParams({}); }} options={CYCLES.map((c) => ({ value: c, label: CYCLE_LABELS[c] }))} />
+      <Select compact aria-label="Filtrer par classe" placeholder="Toutes les classes" value={classId} onChange={(e) => setParams(e.target.value ? { classe: e.target.value } : {})} options={classOptions} />
+      {showMoney && <Select compact aria-label="Filtrer par statut de paiement" placeholder="Tous les paiements" value={pay} onChange={(e) => setPay(e.target.value)} options={Object.entries(STUDENT_STATUS_LABELS).map(([value, label]) => ({ value, label }))} />}
+    </>
+  );
+
   return (
     <>
       <PageHeader
@@ -98,11 +109,28 @@ export default function StudentsPage() {
       <Card className="mb-4">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <Input aria-label="Rechercher un élève" icon="search" placeholder="Nom, matricule, parent…" value={q} onChange={(e) => setQ(e.target.value)} />
-          <Select compact aria-label="Filtrer par cycle" placeholder="Tous les cycles" value={cycle} onChange={(e) => { setCycle(e.target.value); setParams({}); }} options={CYCLES.map((c) => ({ value: c, label: CYCLE_LABELS[c] }))} />
-          <Select compact aria-label="Filtrer par classe" placeholder="Toutes les classes" value={classId} onChange={(e) => setParams(e.target.value ? { classe: e.target.value } : {})} options={classOptions} />
-          {showMoney && <Select compact aria-label="Filtrer par statut de paiement" placeholder="Tous les paiements" value={pay} onChange={(e) => setPay(e.target.value)} options={Object.entries(STUDENT_STATUS_LABELS).map(([value, label]) => ({ value, label }))} />}
+          <div className="hidden md:contents">{filterFields}</div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 md:hidden">
+          <button type="button" onClick={() => setFiltersOpen(true)} className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-white px-4 text-sm font-semibold text-forest">
+            <Icon name="tune" className="text-[20px]" />
+            Filtres
+            {activeFilters > 0 && <span className="grid min-w-6 place-items-center rounded-full bg-lime px-1.5 text-xs font-bold leading-6 text-forest">{activeFilters}</span>}
+          </button>
+          {activeFilters > 0 && (
+            <button type="button" onClick={() => { setCycle(""); setPay(""); setParams({}); }} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-neutral-600">
+              Réinitialiser
+            </button>
+          )}
         </div>
       </Card>
+      <FilterSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        footer={<button type="button" onClick={() => setFiltersOpen(false)} className="min-h-12 w-full rounded-full bg-forest text-sm font-semibold text-white">Afficher les résultats</button>}
+      >
+        <div className="grid gap-3">{filterFields}</div>
+      </FilterSheet>
       <AsyncView state={state} skeleton={<SkeletonTable />}>
         {() =>
           filtered.length === 0 ? (

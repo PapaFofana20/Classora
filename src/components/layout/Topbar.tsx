@@ -46,16 +46,16 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
   const fullName = `${user.firstName} ${user.lastName}`;
 
   return (
-    <header className="no-print sticky top-0 z-30 -mx-4 mb-6 border-b border-neutral-200/60 bg-mist/90 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={onMenu} aria-label="Ouvrir le menu" className="grid size-11 place-items-center rounded-full bg-white shadow-card lg:hidden">
+    <header className="no-print sticky top-0 z-30 -mx-4 mb-4 border-b border-neutral-200/60 bg-mist/90 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur md:-mx-8 md:mb-6 md:px-8 md:pb-3 md:pt-[calc(0.75rem+env(safe-area-inset-top))] lg:py-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <button type="button" onClick={onMenu} aria-label="Ouvrir le menu" className="grid size-11 shrink-0 place-items-center rounded-full bg-white shadow-card lg:hidden">
           <Icon name="menu" />
         </button>
         <div className="min-w-0">
           <SchoolMark name={school.schoolName || "Mon école"} matricule={school.school?.matricule || undefined} size={40} />
           <p className="mt-1 hidden text-xs text-neutral-500 sm:block">{formatLongDate(TODAY_ISO)}</p>
         </div>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
           {user.role === "professeur" && <ContextSwitcher id="ctx-desktop" contexts={contexts} value={active?.key} onChange={setActiveKey} className="hidden w-60 md:block" />}
           {user.role === "parent" && <ChildSwitcher id="child-desktop" className="hidden w-52 md:block" />}
           <Link to="/app/messages" aria-label={count ? `Messages, ${count} non lu${count > 1 ? "s" : ""}` : "Messages"} className="relative grid size-11 place-items-center rounded-full bg-white shadow-card transition hover:bg-lime-soft">
@@ -63,7 +63,7 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
             {count > 0 && <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-danger px-1 text-[11px] font-bold leading-5 text-white">{count}</span>}
           </Link>
           <div className="relative" ref={ref}>
-            <button type="button" onClick={() => setMenu((m) => !m)} aria-haspopup="menu" aria-expanded={menu} className="flex min-h-11 items-center gap-3 rounded-full bg-white py-1 pl-1 pr-4 shadow-card">
+            <button type="button" onClick={() => setMenu((m) => !m)} aria-haspopup="menu" aria-expanded={menu} className="flex min-h-11 items-center gap-3 rounded-full bg-white py-1 pl-1 pr-1 shadow-card sm:pr-4">
               <Avatar name={fullName} size={36} />
               <span className="hidden text-left sm:block">
                 <span className="block text-sm font-bold leading-tight text-ink">{fullName}</span>
@@ -85,12 +85,12 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
             )}
           </div>
         </div>
-        {(user.role === "professeur" || user.role === "parent") && (
-          <div className="w-full md:hidden">
-            {user.role === "professeur" ? <ContextSwitcher id="ctx-mobile" contexts={contexts} value={active?.key} onChange={setActiveKey} /> : <ChildSwitcher id="child-mobile" />}
-          </div>
-        )}
       </div>
+      {(user.role === "professeur" || user.role === "parent") && (
+        <div className="mt-2 md:hidden">
+          {user.role === "professeur" ? <ContextSwitcher id="ctx-mobile" contexts={contexts} value={active?.key} onChange={setActiveKey} /> : <ChildSwitcher id="child-mobile" />}
+        </div>
+      )}
     </header>
   );
 }

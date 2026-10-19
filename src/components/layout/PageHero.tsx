@@ -8,7 +8,6 @@ export interface PageHeroProps {
   primaryCta?: { label: string; to: string };
   secondaryCta?: { label: string; to: string };
   image: { src: string; alt: string; objectPosition?: string; width?: number; height?: number };
-  size?: "md" | "lg";
 }
 
 /** Découpe le titre : `*mot*` → Playfair Display italique lime, sans cadre ni poignée. */
@@ -31,8 +30,8 @@ function renderTitle(title: string) {
  * place n'est réservée pour la navbar, qui est fixe et le chevauche visuellement.
  * Le contenu du hero commence à `var(--nav-clearance)` pour ne jamais passer dessous.
  */
-export function PageHero({ title, description, primaryCta, secondaryCta, image, size = "md" }: PageHeroProps) {
-  const height = size === "lg" ? "min-h-[400px] md:min-h-[460px] max-h-[480px]" : "min-h-[400px] md:min-h-[420px] max-h-[480px]";
+export function PageHero({ title, description, primaryCta, secondaryCta, image }: PageHeroProps) {
+  const height = "min-h-[560px] lg:min-h-[640px]";
 
   return (
     <section className="mt-hero-top mb-hero-bottom px-gutter">

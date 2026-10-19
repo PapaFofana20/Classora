@@ -25,8 +25,6 @@ export interface PageHeroData {
   primaryCta?: PageHeroCta;
   secondaryCta?: PageHeroCta;
   image: PageHeroImage;
-  /** "md" : bloc standard. "lg" : un cran plus haut (page tariffs). */
-  size?: "md" | "lg";
 }
 
 /** Contenus des 5 heroes de pages publiques secondaires. */
@@ -43,7 +41,6 @@ export const pageHeroes: Record<"fonctionnalites" | "tarifs" | "ecoles" | "aprop
     description: "Choisissez la formule adaptée à l'effectif de votre école. Paiement par Wave, Orange Money ou Free Money.",
     primaryCta: { label: "Créer un compte", to: "/inscription" },
     image: { src: paiementsImg, alt: "Parent effectuant un paiement depuis son téléphone", objectPosition: "60% 45%", width: 1370, height: 1148 },
-    size: "lg",
   },
   ecoles: {
     title: "Une plateforme pensée pour les *écoles* privées du Sénégal",

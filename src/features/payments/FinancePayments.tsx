@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { FilterSheet } from "@/components/ui/FilterSheet";
+import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Pagination } from "@/components/ui/Pagination";
@@ -46,6 +48,7 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
   const [cls, setCls] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [cash, setCash] = useState<PaymentRow | null>(null);
   const [amount, setAmount] = useState("");
   const [receipt, setReceipt] = useState<PaymentRow | null>(null);
@@ -126,7 +129,7 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
     { key: "ac", header: <span className="sr-only">Actions</span>, align: "right", render: actions },
   ];
   const debtorCols: Column<Debtor>[] = [
-    { key: "c", header: <span className="sr-only">Sélection</span>, render: (d) => <input type="checkbox" className="size-5 accent-forest" aria-label={`Sélectionner ${d.studentName}`} checked={picked.includes(d.studentId)} onChange={() => setPicked((p) => (p.includes(d.studentId) ? p.filter((x) => x !== d.studentId) : [...p, d.studentId]))} /> },
+    { key: "c", header: <span className="sr-only">Sélection</span>, render: (d) => <label className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-mist"><input type="checkbox" className="size-5 accent-forest" aria-label={`Sélectionner ${d.studentName}`} checked={picked.includes(d.studentId)} onChange={() => setPicked((p) => (p.includes(d.studentId) ? p.filter((x) => x !== d.studentId) : [...p, d.studentId]))} /></label> },
     { key: "s", header: "Élève", render: (d) => <span><strong>{d.studentName}</strong><span className="block text-xs text-neutral-500">{d.className}</span></span> },
     { key: "p", header: "Parent", render: (d) => <span>{d.parentName}<span className="block text-xs text-neutral-500">{d.parentPhone}</span></span> },
     { key: "n", header: "Échéances", align: "center", render: (d) => d.count },
@@ -143,6 +146,13 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
     { key: "x", header: <span className="sr-only">Reçu</span>, align: "right", render: actions },
   ];
   const list = tab === "recus" ? receiptRows : filtered;
+  const activeFilters = [cls, status].filter(Boolean).length;
+  const filterFields = (
+    <>
+      <Select compact aria-label="Classe" placeholder="Toutes les classes" value={cls} onChange={(e) => setCls(e.target.value)} options={classes.map((c) => ({ value: c, label: c }))} />
+      {tab === "echeances" && <Select compact aria-label="Statut" placeholder="Tous les statuts" value={status} onChange={(e) => setStatus(e.target.value)} options={Object.entries(PAY_STATUS_LABELS).map(([value, label]) => ({ value, label }))} />}
+    </>
+  );
 
   return (
     <AsyncView state={state} skeleton={<SkeletonTable />}>
@@ -158,10 +168,28 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
           <Card>
             <div className="grid gap-3 md:grid-cols-3">
               <Input aria-label="Rechercher" icon="search" placeholder="Élève ou parent…" value={q} onChange={(e) => setQ(e.target.value)} />
-              <Select compact aria-label="Classe" placeholder="Toutes les classes" value={cls} onChange={(e) => setCls(e.target.value)} options={classes.map((c) => ({ value: c, label: c }))} />
-              {tab === "echeances" && <Select compact aria-label="Statut" placeholder="Tous les statuts" value={status} onChange={(e) => setStatus(e.target.value)} options={Object.entries(PAY_STATUS_LABELS).map(([value, label]) => ({ value, label }))} />}
+              <div className="hidden md:contents">{filterFields}</div>
+            </div>
+            <div className="mt-3 flex items-center gap-2 md:hidden">
+              <button type="button" onClick={() => setFiltersOpen(true)} className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-white px-4 text-sm font-semibold text-forest">
+                <Icon name="tune" className="text-[20px]" />
+                Filtres
+                {activeFilters > 0 && <span className="grid min-w-6 place-items-center rounded-full bg-lime px-1.5 text-xs font-bold leading-6 text-forest">{activeFilters}</span>}
+              </button>
+              {activeFilters > 0 && (
+                <button type="button" onClick={() => { setCls(""); setStatus(""); }} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-neutral-600">
+                  Réinitialiser
+                </button>
+              )}
             </div>
           </Card>
+          <FilterSheet
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            footer={<button type="button" onClick={() => setFiltersOpen(false)} className="min-h-12 w-full rounded-full bg-forest text-sm font-semibold text-white">Afficher les résultats</button>}
+          >
+            <div className="grid gap-3">{filterFields}</div>
+          </FilterSheet>
           {tab === "impayes" ? (
             <>
               <div className="flex flex-wrap items-center gap-3">

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { FilterSheet } from "@/components/ui/FilterSheet";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
@@ -38,6 +39,7 @@ export default function StaffPage() {
   const [q, setQ] = useState("");
   const dq = useDebounce(q, 250);
   const [role, setRole] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<StaffRow | null>(null);
   const [busy, setBusy] = useState(false);
@@ -101,6 +103,8 @@ export default function StaffPage() {
     }
   };
 
+  const roleFilter = <Select compact aria-label="Filtrer par rôle" placeholder="Tous les rôles" value={role} onChange={(e) => setRole(e.target.value)} options={Object.entries(STAFF_ROLE_LABELS).map(([value, label]) => ({ value, label }))} />;
+
   const staffCols: Column<StaffRow>[] = [
     { key: "who", header: "Personnel", render: (s) => (<div className="flex items-center gap-3"><Avatar name={`${s.firstName} ${s.lastName}`} size={38} /><div><p className="font-semibold">{s.firstName} {s.lastName}</p><p className="text-xs text-neutral-500">{s.email}</p></div></div>) },
     { key: "role", header: "Rôle", render: (s) => <Badge tone={s.role === "instituteur" ? "info" : "lime"}>{STAFF_ROLE_LABELS[s.role as keyof typeof STAFF_ROLE_LABELS] ?? s.role}</Badge> },
@@ -145,9 +149,28 @@ export default function StaffPage() {
       <Card className="mb-4">
         <div className="grid gap-3 md:grid-cols-2">
           <Input aria-label="Rechercher" icon="search" placeholder="Nom, e-mail…" value={q} onChange={(e) => setQ(e.target.value)} />
-          <Select compact aria-label="Filtrer par rôle" placeholder="Tous les rôles" value={role} onChange={(e) => setRole(e.target.value)} options={Object.entries(STAFF_ROLE_LABELS).map(([value, label]) => ({ value, label }))} />
+          <div className="hidden md:contents">{roleFilter}</div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 md:hidden">
+          <button type="button" onClick={() => setFiltersOpen(true)} className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-neutral-300 bg-white px-4 text-sm font-semibold text-forest">
+            <Icon name="tune" className="text-[20px]" />
+            Filtres
+            {role && <span className="grid min-w-6 place-items-center rounded-full bg-lime px-1.5 text-xs font-bold leading-6 text-forest">1</span>}
+          </button>
+          {role && (
+            <button type="button" onClick={() => setRole("")} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-neutral-600">
+              Réinitialiser
+            </button>
+          )}
         </div>
       </Card>
+      <FilterSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        footer={<button type="button" onClick={() => setFiltersOpen(false)} className="min-h-12 w-full rounded-full bg-forest text-sm font-semibold text-white">Afficher les résultats</button>}
+      >
+        {roleFilter}
+      </FilterSheet>
       <Tabs
         className="mb-4"
         label="Vue du personnel"

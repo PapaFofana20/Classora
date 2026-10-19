@@ -54,13 +54,15 @@ export function PendingList({ pending, history, onApprove, onReject, busy, limit
       header: <span className="sr-only">Sélection</span>,
       render: (r) =>
         r.status === "EN_ATTENTE" ? (
-          <input
-            type="checkbox"
-            className="size-5 accent-forest"
-            aria-label={`Sélectionner ${r.firstName} ${r.lastName}`}
-            checked={picked.includes(r.id)}
-            onChange={() => setPicked((p) => (p.includes(r.id) ? p.filter((x) => x !== r.id) : [...p, r.id]))}
-          />
+          <label className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-mist">
+            <input
+              type="checkbox"
+              className="size-5 accent-forest"
+              aria-label={`SǸlectionner ${r.firstName} ${r.lastName}`}
+              checked={picked.includes(r.id)}
+              onChange={() => setPicked((p) => (p.includes(r.id) ? p.filter((x) => x !== r.id) : [...p, r.id]))}
+            />
+          </label>
         ) : (
           <Icon name="check_circle" className="text-leaf" />
         ),

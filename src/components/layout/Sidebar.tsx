@@ -14,6 +14,7 @@ import { ROLE_LABELS } from "@/utils/permissions";
 import { Logo, SchoolMark, schoolInitials } from "@/components/ui/Brand";
 import { Icon } from "@/components/ui/Icon";
 import { useAsync } from "@/hooks/useAsync";
+import { useModalBehavior } from "@/hooks/useModalBehavior";
 
 /** Zone de tolérance (px) : le pointeur qui sort à moins de 8 px du bord ne déclenche pas le repli. */
 const EDGE_TOLERANCE = 8;
@@ -178,10 +179,12 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
   const sidebar = useSidebar();
   const pending = useAsync(() => (active.role === "directeur" ? countPendingFor(active.schoolId) : Promise.resolve(0)), [active.id, pathname]);
   const columnRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   // Le tiroir mobile force l'ouverture sans toucher à l'épinglage mémorisé.
   const expanded = sidebar.expanded || drawerOpen;
 
   useEffect(onClose, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  useModalBehavior(drawerOpen, onClose, drawerRef);
 
   const handlers = sidebar.hoverEnabled ? sidebar.handlers : {};
 
@@ -217,8 +220,15 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
       {drawerOpen && (
         <div className="no-print fixed inset-0 z-[70] lg:hidden">
           <div className="absolute inset-0 bg-forest/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-          <aside className="absolute inset-y-0 left-0 w-[19rem] max-w-[88vw] overflow-hidden rounded-r-3xl bg-forest shadow-soft" aria-label="Menu">
-            <button type="button" onClick={onClose} aria-label="Fermer le menu" className="absolute right-3 top-4 z-10 grid size-11 place-items-center rounded-full bg-white/10 text-white">
+          <aside
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+            tabIndex={-1}
+            className="absolute inset-y-0 left-0 w-[19rem] max-w-[88vw] overflow-hidden rounded-r-3xl bg-forest pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-soft focus:outline-none"
+          >
+            <button type="button" onClick={onClose} aria-label="Fermer le menu" className="absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-10 grid size-11 place-items-center rounded-full bg-white/10 text-white">
               <Icon name="close" />
             </button>
             <SidebarContent user={active} pending={pending.data ?? 0} expanded onNavigate={onClose} />

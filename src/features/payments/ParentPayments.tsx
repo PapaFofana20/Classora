@@ -42,7 +42,7 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
   if (!loading && !self && children.length === 0) return <EmptyState icon="child_care" title="Aucun enfant rattaché" />;
 
   const cols: Column<PaymentRow>[] = [
-    { key: "sel", header: <span className="sr-only">Sélection</span>, render: (p) => (remaining(p) > 0 ? <input type="checkbox" className="size-5 accent-forest" checked={selected.includes(p.id)} onChange={() => toggle(p.id)} aria-label={`Sélectionner ${p.label}`} /> : <Icon name="check_circle" fill className="text-leaf" />) },
+    { key: "sel", header: <span className="sr-only">Sélection</span>, render: (p) => (remaining(p) > 0 ? <label className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-mist"><input type="checkbox" className="size-5 accent-forest" checked={selected.includes(p.id)} onChange={() => toggle(p.id)} aria-label={`Sélectionner ${p.label}`} /></label> : <Icon name="check_circle" fill className="text-leaf" />) },
     { key: "l", header: "Échéance", render: (p) => <span className="font-semibold">{p.label}</span> },
     { key: "d", header: "Date limite", render: (p) => formatDate(p.dueDate) },
     { key: "a", header: "Montant", align: "right", render: (p) => formatCurrency(p.amount) },
