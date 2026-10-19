@@ -1,21 +1,14 @@
+import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
+import { pageHeroes } from "@/data/pageHeroes";
 import { aboutStats, aboutValues, images } from "@/data/landing";
 import { timeline } from "@/data/pages";
 import { CtaSection } from "@/features/landing/CtaSection";
-import { Highlight } from "@/features/landing/Highlight";
-import { PageHero } from "@/features/landing/PageHero";
 
 export default function AboutPage() {
   return (
     <>
-      <PageHero
-        title={
-          <>
-            Au service de l'école <Highlight>sénégalaise</Highlight>
-          </>
-        }
-        text="EcoleConnect aide les directeurs, enseignants et parents à gagner du temps et à se concentrer sur l'essentiel : la réussite des élèves."
-      />
+      <PageHero {...pageHeroes.apropos} />
       <section className="mx-auto max-w-[1280px] px-5 sm:px-8">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl bg-lime p-2 shadow-pop">

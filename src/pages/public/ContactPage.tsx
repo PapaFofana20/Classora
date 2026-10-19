@@ -1,9 +1,9 @@
+import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACT } from "@/data/landing";
+import { pageHeroes } from "@/data/pageHeroes";
 import { ContactForm } from "@/features/landing/ContactForm";
-import { Highlight } from "@/features/landing/Highlight";
-import { PageHero } from "@/features/landing/PageHero";
 
 const infos = [
   { label: "Téléphone", value: CONTACT.phone },
@@ -15,14 +15,7 @@ const infos = [
 export default function ContactPage() {
   return (
     <>
-      <PageHero
-        title={
-          <>
-            Parlons de votre <Highlight>école</Highlight>
-          </>
-        }
-        text="Demandez une démonstration personnalisée ou posez-nous vos questions : notre équipe vous répond sous 24 heures."
-      />
+      <PageHero {...pageHeroes.contact} />
       <section className="mx-auto grid max-w-[1280px] gap-8 px-5 pb-20 sm:px-8 lg:grid-cols-[1.4fr_1fr]">
         <Reveal>
           <ContactForm />

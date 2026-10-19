@@ -1,30 +1,17 @@
-import { ArrowButton } from "@/components/ui/ArrowButton";
+import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { features } from "@/data/landing";
+import { pageHeroes } from "@/data/pageHeroes";
 import { roleHighlights } from "@/data/pages";
 import { CtaSection } from "@/features/landing/CtaSection";
-import { Highlight } from "@/features/landing/Highlight";
-import { PageHero } from "@/features/landing/PageHero";
 import { StepsBento } from "@/features/landing/StepsBento";
 import { cn } from "@/utils/cn";
 
 export default function FeaturesPage() {
   return (
     <>
-      <PageHero
-        title={
-          <>
-            Tout pour gérer votre école, <Highlight>simplement</Highlight>
-          </>
-        }
-        text="Des inscriptions aux bulletins, des paiements mobile money à la messagerie : EcoleConnect couvre le quotidien des écoles privées sénégalaises."
-      >
-        <ArrowButton to="/inscription">Créer un compte</ArrowButton>
-        <ArrowButton to="/connexion" tone="white">
-          Essayer la démo
-        </ArrowButton>
-      </PageHero>
+      <PageHero {...pageHeroes.fonctionnalites} />
 
       <div className="mx-auto max-w-[1280px] space-y-16 px-5 py-10 sm:px-8">
         {features.map((f, i) => (

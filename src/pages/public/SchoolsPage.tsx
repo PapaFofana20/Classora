@@ -1,23 +1,16 @@
+import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
+import { pageHeroes } from "@/data/pageHeroes";
 import { aboutStats, schoolPartners } from "@/data/landing";
 import { CtaSection } from "@/features/landing/CtaSection";
-import { Highlight } from "@/features/landing/Highlight";
-import { PageHero } from "@/features/landing/PageHero";
 import { TestimonialsSection } from "@/features/landing/TestimonialsSection";
 import { initials } from "@/utils/format";
 
 export default function SchoolsPage() {
   return (
     <>
-      <PageHero
-        title={
-          <>
-            Elles nous font <Highlight>confiance</Highlight>
-          </>
-        }
-        text="Des complexes scolaires de Dakar aux écoles de région, EcoleConnect accompagne tous les cycles : élémentaire, moyen et secondaire."
-      />
+      <PageHero {...pageHeroes.ecoles} />
       <section className="mx-auto max-w-[1280px] px-5 pb-10 sm:px-8" aria-label="Liste des écoles partenaires">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
