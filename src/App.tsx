@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactElement } from "react";
-import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -48,7 +48,7 @@ const guard = (roles: keyof typeof ROUTE_ROLES, element: ReactElement) => <RoleR
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
           <SchoolProvider>
@@ -104,6 +104,6 @@ export default function App() {
           </SchoolProvider>
         </AuthProvider>
       </ToastProvider>
-    </HashRouter>
+    </BrowserRouter>
   );
 }

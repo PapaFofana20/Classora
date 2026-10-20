@@ -1,7 +1,8 @@
 import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
-import { aboutStats, aboutValues, images } from "@/data/landing";
+import { aboutStats, aboutValues } from "@/data/landing";
+import aboutTeamImg from "@/assets/images/about-team.jpg";
 import { timeline } from "@/data/pages";
 import { CtaSection } from "@/features/landing/CtaSection";
 
@@ -12,7 +13,7 @@ export default function AboutPage() {
       <section className="mx-auto max-w-[1280px] px-5 sm:px-8">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl bg-lime p-2 shadow-pop">
-            <img src={images.about} alt="L'équipe pédagogique d'une école partenaire" className="aspect-[16/8] w-full rounded-[1.25rem] object-cover" loading="lazy" />
+            <img src={aboutTeamImg} alt="L'équipe pédagogique d'une école partenaire" className="aspect-[16/8] w-full rounded-[1.25rem] object-cover" loading="lazy" />
           </div>
         </Reveal>
       </section>

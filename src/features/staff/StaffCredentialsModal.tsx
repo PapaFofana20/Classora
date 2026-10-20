@@ -5,7 +5,7 @@ import type { StaffCredentials } from "@/services/authService";
 import type { School } from "@/types";
 
 /** Lien de connexion transmis aux enseignants. */
-export const connexionLink = (): string => `${window.location.origin}${window.location.pathname}#/connexion`;
+export const connexionLink = (): string => `${window.location.origin}${import.meta.env.BASE_URL}connexion`;
 
 interface Props {
   open: boolean;

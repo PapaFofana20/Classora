@@ -9,9 +9,9 @@ import { toggleRegistration } from "@/services/schoolService";
 import type { School } from "@/types";
 import { MATRICULE_ALPHABET, MATRICULE_LENGTH } from "@/utils/matricule";
 
-/** Lien d'inscription pré-rempli avec le matricule (compatible hash-router). */
+/** Lien d'inscription pré-rempli avec le matricule. */
 export function signupLink(matricule: string): string {
-  return `${window.location.origin}${window.location.pathname}#/inscription?matricule=${matricule}`;
+  return `${window.location.origin}${import.meta.env.BASE_URL}inscription?matricule=${matricule}`;
 }
 
 /** Message WhatsApp prêt à envoyer aux familles. */

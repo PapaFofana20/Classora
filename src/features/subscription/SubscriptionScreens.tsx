@@ -109,7 +109,7 @@ export function ContactSchoolScreen({ schoolName }: { schoolName: string }) {
         {schoolName} n'accepte plus les accès pour le moment. L'espace École est réactivé dès que l'abonnement de l'école est renouvelé.
       </p>
       <div className="mt-6">
-        <Button variant="outline" icon="logout" onClick={() => window.location.assign("#/connexion")}>
+        <Button variant="outline" icon="logout" onClick={() => window.location.assign("/connexion")}>
           Se déconnecter
         </Button>
       </div>

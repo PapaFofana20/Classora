@@ -1,5 +1,11 @@
 import heroImg from "@/assets/images/hero.jpg";
-import aboutImg from "@/assets/images/about.jpg";
+import hero1Img from "@/assets/images/hero-1.jpg";
+import hero2Img from "@/assets/images/hero-2.jpg";
+import hero3Img from "@/assets/images/hero-3.jpg";
+import hero4Img from "@/assets/images/hero-4.jpg";
+import hero5Img from "@/assets/images/hero-5.jpg";
+import hero6Img from "@/assets/images/hero-6.jpg";
+import aboutImg from "@/assets/images/about-home.jpg";
 import authImg from "@/assets/images/auth.jpg";
 import inscriptionsImg from "@/assets/images/feature-inscriptions.jpg";
 import bulletinsImg from "@/assets/images/feature-bulletins.jpg";
@@ -8,6 +14,20 @@ import messagerieImg from "@/assets/images/feature-messagerie.jpg";
 import enseignantsImg from "@/assets/images/feature-enseignants.jpg";
 
 export const images = { hero: heroImg, about: aboutImg, auth: authImg };
+
+export interface HeroSlide {
+  src: string;
+  alt: string;
+}
+
+export const heroSlides: HeroSlide[] = [
+  { src: hero1Img, alt: "Élève consultant son téléphone dans une salle de classe au Sénégal" },
+  { src: hero2Img, alt: "Enseignante souriante devant son ordinateur dans une salle de classe" },
+  { src: hero3Img, alt: "Deux membres de l'équipe Classora dans un couloir d'école" },
+  { src: hero4Img, alt: "Quatre élèves travaillant sur des ordinateurs à la bibliothèque" },
+  { src: hero5Img, alt: "L'équipe Classora serre la main d'un directeur d'école" },
+  { src: hero6Img, alt: "Membre de l'équipe Classora devant une école sénégalaise" },
+];
 
 export const CONTACT = {
   phone: "+221 77 000 12 34",

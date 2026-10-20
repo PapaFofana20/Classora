@@ -1,17 +1,43 @@
+import { useEffect, useState } from "react";
 import { ArrowButton } from "@/components/ui/ArrowButton";
 import { Highlight } from "@/features/landing/Highlight";
-import { images } from "@/data/landing";
+import { heroSlides } from "@/data/landing";
+
+const SLIDE_DURATION = 8000;
 
 /**
- * Hero de l'accueil : même contrat que PageHero — bloc arrondi dans le Container,
+ * Hero de l'accueil : carrousel d'images en arrière-plan (fondu enchaîné toutes
+ * les 8 s), même contrat que PageHero — bloc arrondi dans le Container,
  * `var(--hero-top-gap)` sous le haut de page, navbar fixe chevauchée (aucune place
  * réservée dans le flux) et contenu repoussé à `var(--nav-clearance)`.
  */
 export function Hero() {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setActive((current) => (current + 1) % heroSlides.length);
+    }, SLIDE_DURATION);
+    return () => window.clearTimeout(id);
+  }, [active]);
+
   return (
     <section className="mt-hero-top mb-hero-bottom px-gutter">
-      <div className="relative flex min-h-[660px] flex-col justify-end overflow-hidden rounded-3xl bg-forest">
-        <img src={images.hero} alt="Élèves souriants dans une salle de classe au Sénégal" className="absolute inset-0 size-full object-cover" fetchPriority="high" />
+      <div className="relative flex min-h-[560px] flex-col justify-end overflow-hidden rounded-3xl bg-forest lg:min-h-[540px]">
+        {heroSlides.map((slide, index) => (
+          <img
+            key={slide.src}
+            src={slide.src}
+            alt={slide.alt}
+            aria-hidden={index !== active}
+            loading={index === 0 ? "eager" : "lazy"}
+            fetchPriority={index === 0 ? "high" : "low"}
+            decoding="async"
+            className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${
+              index === active ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
         <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/70 to-forest/30" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-forest/80 via-transparent to-transparent" aria-hidden="true" />
         {/* Tiers supérieur densifié : lisibilité de la navbar sur toutes les photos. */}
@@ -29,6 +55,22 @@ export function Hero() {
               </ArrowButton>
             </div>
           </div>
+        </div>
+
+        <div className="absolute bottom-10 right-10 z-10 hidden items-center gap-2 sm:flex lg:bottom-14 lg:right-14" role="tablist" aria-label="Images du carrousel">
+          {heroSlides.map((slide, index) => (
+            <button
+              key={slide.src}
+              type="button"
+              role="tab"
+              aria-label={`Image ${index + 1} sur ${heroSlides.length}`}
+              aria-selected={index === active}
+              onClick={() => setActive(index)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                index === active ? "w-8 bg-lime" : "w-3 bg-white/50 hover:bg-white/80"
+              }`}
+            />
+          ))}
         </div>
       </div>
     </section>
