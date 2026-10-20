@@ -10,7 +10,7 @@ export interface HoverExpandOptions {
 export interface HoverExpandHandlers {
   onPointerEnter: () => void;
   onPointerLeave: () => void;
-  onFocusCapture: () => void;
+  onFocusCapture: (event: FocusEvent<HTMLElement>) => void;
   onBlurCapture: (event: FocusEvent<HTMLElement>) => void;
 }
 
@@ -80,7 +80,17 @@ export function useHoverExpand({ openDelay = 120, closeDelay = 250 }: HoverExpan
     scheduleCollapse();
   }, [scheduleCollapse]);
 
-  const onFocusCapture = useCallback(() => {
+  const onFocusCapture = useCallback((event: FocusEvent<HTMLElement>) => {
+    const target = event.target;
+    // Seul le focus Clavier (:focus-visible) maintient la sidebar déployée.
+    // Le focus donné par un clic pointeur (navigation par onglet) ne doit pas
+    // bloquer le repli programmé, sinon la sidebar reste déployée "plantée".
+    if (!(target instanceof Element) || !target.matches(":focus-visible")) {
+      // Un clic pointeur supprime un éventuel suivi clavier : la sortie du
+      // pointeur redevient seule décisionnaire pour le repli.
+      if (flags.current.focusWithin) setFocusWithin(false);
+      return;
+    }
     clearTimers();
     setFocusWithin(true);
     setExpanded(true);
