@@ -19,6 +19,10 @@ build/
 .DS_Store
 Thumbs.db
 
+# Supabase (branche temporaire local / artifacts)
+supabase/.temp/
+supabase/.branches/
+
 # Logs
 *.log
 npm-debug.log*
