@@ -1,7 +1,9 @@
 /**
- * Webhook des prestataires de paiement (Wave / Orange Money / free Money).
- * Corrps BRUT signé HMAC-SHA256 (en-tête x-scolia-signature), idempotent :
+ * Webhook des prestataires de paiement (Wave / Orange Money / Free Money).
+ * Corps BRUT signé HMAC-SHA256 (en-tête x-scolia-signature), idempotent :
  * rejouer la confirmation ne modifie ni l'échéance, ni les événements.
+ * Le type de transaction (tx_kind) détermine la suite : abonnement d'école
+ * (apply_paid_subscription) ou échéance scolaire (apply_paid_installment).
  */
 
 import { audit, getAuthenticatedUser, serviceClient } from "../_shared/auth.ts";
@@ -45,10 +47,11 @@ Deno.serve(async (req) => {
       return badRequest("Statut de paiement invalide (succeeded ou failed attendu).");
     }
 
-    // La transaction doit exister (créée par start-subscription).
+    // La transaction doit exister (créée par start-subscription ou
+    // start_installment_payments) ; le type détermine l'application.
     const { data: tx } = await svc
       .from("payment_transactions")
-      .select("id, school_id, status")
+      .select("id, school_id, status, tx_kind")
       .eq("provider", provider)
       .eq("provider_ref", providerRef)
       .maybeSingle();
@@ -56,12 +59,49 @@ Deno.serve(async (req) => {
       return notFound("Transaction inconnue. Aucun paiement n'a été initialisé pour cette référence.");
     }
 
+    const payload = (body["payload"] ?? {}) as Record<string, unknown>;
+
+    if (tx.tx_kind === "installment") {
+      // Échéance scolaire : encaissement idempotent sur payments.
+      const { data: result, error: applyError } = await svc.rpc("apply_paid_installment", {
+        p_provider: provider,
+        p_provider_ref: providerRef,
+        p_status: status,
+        p_payload: payload,
+      });
+      if (applyError || !result) {
+        if (typeof applyError?.message === "string" && applyError.message.startsWith("Transaction inconnue.")) {
+          return notFound(applyError.message);
+        }
+        return serverError();
+      }
+      await audit(svc, {
+        schoolId: tx.school_id,
+        actorId: null,
+        actorRole: "service_role",
+        action: status === "succeeded" ? "installment_payment_confirmed" : "installment_payment_failed",
+        entity: "payment_transactions",
+        entityId: tx.id,
+        payload: { provider, reference: providerRef, status },
+      });
+      const paymentStatus = (result as Record<string, unknown>).status ?? null;
+      return ok({
+        reference: providerRef,
+        status: paymentStatus ?? "succeeded",
+        idempotent: (result as Record<string, unknown>).idempotent ?? false,
+        paymentId: (result as Record<string, unknown>).payment_id ?? null,
+        message: status === "succeeded"
+          ? "Paiement confirmé. Votre échéance est réglée."
+          : "Paiement refusé par le prestataire. Réessayez ou choisissez un autre moyen.",
+      });
+    }
+
     const { data: result, error: applyError } = await svc
       .rpc("apply_paid_subscription", {
         p_provider: provider,
         p_provider_ref: providerRef,
         p_status: status,
-        p_payload: (body["payload"] ?? {}) as Record<string, unknown>,
+        p_payload: payload,
       });
     if (applyError || !result) {
       if (typeof applyError?.message === "string" && applyError.message.startsWith("Transaction inconnue.")) {
