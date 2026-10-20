@@ -23,7 +23,7 @@ export function Hero() {
 
   return (
     <section className="mt-hero-top mb-hero-bottom px-gutter">
-      <div className="relative flex min-h-[560px] flex-col justify-end overflow-hidden rounded-3xl bg-forest lg:min-h-[540px]">
+      <div className="relative flex min-h-[680px] flex-col justify-end overflow-hidden rounded-3xl bg-forest sm:min-h-[640px] lg:min-h-[540px]">
         {heroSlides.map((slide, index) => (
           <img
             key={slide.src}
