@@ -31,7 +31,7 @@ function renderTitle(title: string) {
  * Le contenu du hero commence à `var(--nav-clearance)` pour ne jamais passer dessous.
  */
 export function PageHero({ title, description, primaryCta, secondaryCta, image }: PageHeroProps) {
-  const height = "min-h-[680px] sm:min-h-[640px] lg:min-h-[540px]";
+  const height = "min-h-[720px] sm:min-h-[640px] lg:min-h-[540px]";
 
   return (
     <section className="mt-hero-top mb-hero-bottom px-gutter">
