@@ -103,7 +103,7 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
   const remind = async () => {
     setBusy(true);
     try {
-      const n = await sendReminders(user, picked);
+      const n = await sendReminders(picked);
       toast(`Relance envoyée à ${n} famille${n > 1 ? "s" : ""}.`);
       setPicked([]);
     } catch {

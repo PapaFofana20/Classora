@@ -1,11 +1,10 @@
 import type { PayMethod, Plan, Subscription, SubscriptionStatus } from "@/types";
-import { plans, planById, priceFor } from "@/data/plans";
+import { plans, planById } from "@/data/plans";
 import { TODAY_ISO } from "@/data/school";
-import { addDaysIso } from "@/utils/dates";
-import { generateMatricule } from "@/utils/matricule";
 import { computeSubscriptionInfo, type SubscriptionInfo } from "@/utils/subscription";
 import { isValidSnPhone } from "@/utils/format";
-import { db, persist, respond, schoolOf, studentsOf, uid } from "./db";
+import { db, hydrate, respond, schoolOf, studentsOf } from "./db";
+import { callFunction } from "@/lib/functions";
 
 /** Dernière subscription connue d'une école (la plus récente). */
 export function lastSubscription(schoolId: string): Subscription | null {
@@ -52,54 +51,73 @@ export interface PurchaseResult {
   paidAtIso: string;
 }
 
-const paymentRef = (method: PayMethod): string => {
-  const prefix = method === "wave" ? "WV" : method === "orange_money" ? "OM" : "FM";
-  const n = () => String(Math.floor(1000 + Math.random() * 8999));
-  return `${prefix}-${n()}-${n()}`;
-};
+interface StartTx {
+  reference: string;
+  amount: number;
+  method: Exclude<PayMethod, "especes">;
+  status: string;
+}
+
+interface ConfirmTx {
+  matricule?: string | null;
+  matriculeCreated?: boolean;
+  amount?: number;
+}
+
+/** Sandbox : confirmation directe du paiement créé par start-subscription. */
+const WEBHOOK_SECRET = (import.meta.env.VITE_WEBHOOK_SECRET as string | undefined) ?? "scolia-dev-secret";
+
+async function startSubscriptionTx(input: PurchaseInput): Promise<StartTx> {
+  return (await callFunction("start-subscription", {
+    planId: input.planId,
+    cycle: input.cycle,
+    method: input.method,
+    phone: input.phone.trim(),
+  })) as StartTx;
+}
+
+async function confirmSubscription(reference: string, method: string): Promise<ConfirmTx> {
+  return (await callFunction("payment-webhook", {
+    provider: method,
+    reference,
+    status: "succeeded",
+    secret: WEBHOOK_SECRET,
+  })) as ConfirmTx;
+}
 
 /**
- * Paiement simulé (Wave / Orange Money / Free Money).
+ * Achat via Edge Functions : start-subscription (transaction PENDING, prix
+ * serveur) puis paiement Wave / Orange / Free confirmé par le webhook.
  * Seul le directeur peut acheter : `schoolId` doit être celui de sa session.
- * Le matricule n'est généré qu'ici, après un paiement réussi.
+ * Le matricule n'est généré qu'au premier paiement réussi, jamais après.
  */
 export const purchase = (actorSchoolId: string, input: PurchaseInput): Promise<PurchaseResult> =>
-  respond(
-    () => {
-      if (schoolOf(input.schoolId)?.id !== actorSchoolId) throw new Error("Vous ne pouvez acheter un abonnement que pour votre propre école.");
-      if (!isValidSnPhone(input.phone)) throw new Error("Numéro invalide. Format attendu : 77 123 45 67.");
-      return applySubscription(input.schoolId, input.planId, input.cycle, input.method);
-    },
-    1200,
-    1800,
-  );
-
-/** Renouvellement par le directeur : conserve le matricule, repart de la date du jour. */
-export const renew = (actorSchoolId: string, cycle: "monthly" | "yearly" = "yearly"): Promise<PurchaseResult> =>
-  respond(() => {
-    const current = lastSubscription(actorSchoolId);
-    if (!current) throw new Error("Aucun abonnement à renouveler. Choisissez une formule.");
-    return applySubscription(actorSchoolId, current.plan, cycle, current.method);
-  }, 900, 1400);
-
-function applySubscription(schoolId: string, planId: Plan["id"], cycle: "monthly" | "yearly", method: PayMethod | undefined): PurchaseResult {
-  const school = schoolOf(schoolId);
-  if (!school) throw new Error("École introuvable.");
-  const plan = planById(planId);
-  const amount = priceFor(plan, cycle);
-  const paidAt = `${TODAY_ISO}T${new Date().toTimeString().slice(0, 5)}`;
-  const startsAt = TODAY_ISO;
-  const endsAt = addDaysIso(TODAY_ISO, cycle === "yearly" ? 365 : 30);
-  const previous = lastSubscription(schoolId);
-  const subscription: Subscription = previous
-    ? { ...previous, plan: plan.id, status: "ACTIF", startsAt, endsAt, studentLimit: plan.studentLimit, amountPaid: amount, paymentRef: paymentRef(method ?? "wave"), paidAt }
-    : { id: uid("sub"), schoolId, plan: plan.id, status: "ACTIF", startsAt, endsAt, studentLimit: plan.studentLimit, amountPaid: amount, paymentRef: paymentRef(method ?? "wave"), paidAt };
-  if (previous) db.subscriptions = db.subscriptions.map((s) => (s.id === subscription.id ? subscription : s));
-  else db.subscriptions.push(subscription);
-
-  // Le matricule n'existe qu'après un paiement réussi et ne change jamais ensuite.
-  const matriculeCreated = !school.matricule;
-  if (matriculeCreated) school.matricule = generateMatricule(db.schools.map((s) => s.matricule).filter(Boolean));
-  persist();
-  return { subscription, plan, amount, matricule: school.matricule, matriculeCreated, schoolName: school.name, paidAt, paidAtIso: paidAt };
-}
+  (async () => {
+    if (schoolOf(input.schoolId)?.id !== actorSchoolId) throw new Error("Vous ne pouvez acheter un abonnement que pour votre propre école.");
+    if (!isValidSnPhone(input.phone)) throw new Error("Numéro invalide. Format attendu : 77 123 45 67.");
+    const tx = await startSubscriptionTx(input);
+    let confirm: ConfirmTx = {};
+    try {
+      confirm = await confirmSubscription(tx.reference, tx.method);
+    } catch (e) {
+      // Transaction créée mais confirmation échouée : l'inscription reste
+      // en attente côté serveur ; l'école peut retenter depuis la page.
+      throw e;
+    }
+    await Promise.all([hydrate("subscriptions"), hydrate("schools")]);
+    const school = schoolOf(actorSchoolId);
+    if (!school) throw new Error("École introuvable.");
+    const subscription = lastSubscription(actorSchoolId);
+    if (!subscription) throw new Error("Abonnement introuvable après paiement.");
+    const paidAt = subscription.paidAt;
+    return {
+      subscription,
+      plan: planById(subscription.plan),
+      amount: typeof confirm.amount === "number" ? confirm.amount : tx.amount,
+      matricule: confirm.matricule ?? school.matricule ?? "",
+      matriculeCreated: confirm.matriculeCreated ?? !school.matricule,
+      schoolName: school.name,
+      paidAt,
+      paidAtIso: paidAt,
+    };
+  })();

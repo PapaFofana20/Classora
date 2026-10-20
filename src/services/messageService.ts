@@ -1,7 +1,7 @@
 import type { Announcement, Conversation, Role, SessionUser } from "@/types";
-import { TODAY_ISO } from "@/data/school";
 import { ensure, visibleClassIds } from "./access";
-import { announcementsOf, assignmentsOf, classesOf, conversationsOf, db, parentsOf, persist, respond, studentsOf, subjectsOf, teachersOf, uid } from "./db";
+import { supabase } from "@/lib/supabase";
+import { assignmentsOf, announcementsOf, classesOf, conversationsOf, hydrate, parentsOf, respond, studentsOf, subjectsOf, teachersOf } from "./db";
 
 /** Notifie l'interface (badge de messages non lus) qu'une conversation a changé. */
 function emitChange(): void {
@@ -80,30 +80,36 @@ export function countUnread(actor: SessionUser): Promise<number> {
 }
 
 export function sendMessage(actor: SessionUser, conversationId: string, text: string): Promise<ConversationView> {
-  return respond(() => {
+  return (async () => {
     const id = actorIdOf(actor);
     const c = conversationsFor(actor).find((x) => x.id === conversationId);
     ensure(!!c && actor.role !== "directeur", "Conversation indisponible.");
-    if (!c) throw new Error("Conversation indisponible.");
-    const at = `${TODAY_ISO}T${new Date().toTimeString().slice(0, 5)}`;
-    c.messages.push({ id: uid("m"), senderId: id, text: text.trim(), at });
-    c.lastReadAt[id] = at;
-    persist();
-    emitChange();
-    return view(actor, c, id);
-  }, 200, 400);
+    const { error } = await supabase.rpc("send_message", {
+      p_conversation_id: conversationId,
+      p_text: text.trim(),
+    });
+    if (error) {
+      if (/indisponible/.test(error.message)) throw new Error("Conversation indisponible.");
+      if (/vide/.test(error.message)) throw new Error("Message vide.");
+      throw new Error(error.message);
+    }
+    await hydrate("conversations");
+    const fresh = conversationsFor(actor).find((x) => x.id === conversationId);
+    ensure(!!fresh, "Conversation indisponible.");
+    if (!fresh) throw new Error("Conversation indisponible.");
+    return view(actor, fresh, id);
+  })();
 }
 
 export function markRead(actor: SessionUser, conversationId: string): Promise<void> {
-  return respond(() => {
-    const id = actorIdOf(actor);
+  return (async () => {
     const c = conversationsFor(actor).find((x) => x.id === conversationId);
     if (c && actor.role !== "directeur") {
-      c.lastReadAt[id] = `${TODAY_ISO}T23:59`;
-      persist();
+      await supabase.rpc("mark_conversation_read", { p_conversation_id: conversationId });
+      await hydrate("conversations");
       emitChange();
     }
-  }, 30, 80);
+  })();
 }
 
 export interface Contact {
@@ -152,36 +158,54 @@ export function listContacts(actor: SessionUser): Promise<Contact[]> {
   });
 }
 
+/** Ouverture du fil : déjà ouverte, un message y est ajouté (RPC serveur). */
 export function startConversation(actor: SessionUser, contact: Contact, subject: string, text: string): Promise<ConversationView> {
-  return respond(() => {
+  return (async () => {
     const id = actorIdOf(actor);
-    let c = conversationsOf(actor.schoolId).find((x) => x.teacherId === contact.teacherId && x.parentId === contact.parentId && x.studentId === contact.studentId);
-    const at = `${TODAY_ISO}T${new Date().toTimeString().slice(0, 5)}`;
-    if (!c) {
-      c = { schoolId: actor.schoolId, id: uid("cv"), teacherId: contact.teacherId, parentId: contact.parentId, studentId: contact.studentId, subject: subject.trim(), messages: [], lastReadAt: {} };
-      db.conversations.push(c);
+    const { error } = await supabase.rpc("start_conversation", {
+      p_teacher_id: contact.teacherId,
+      p_parent_id: contact.parentId,
+      p_student_id: contact.studentId,
+      p_subject: subject.trim(),
+      p_text: text.trim(),
+    });
+    if (error) {
+      if (/indisponible/.test(error.message)) throw new Error("Conversation indisponible.");
+      if (/Message vide/.test(error.message)) throw new Error("Message vide.");
+      throw new Error(error.message);
     }
-    c.messages.push({ id: uid("m"), senderId: id, text: text.trim(), at });
-    c.lastReadAt[id] = at;
-    persist();
+    await hydrate("conversations");
+    const c = conversationsOf(actor.schoolId).find((x) => x.teacherId === contact.teacherId && x.parentId === contact.parentId && x.studentId === contact.studentId);
+    ensure(!!c, "Conversation indisponible.");
+    if (!c) throw new Error("Conversation indisponible.");
     return view(actor, c, id);
-  }, 250, 450);
+  })();
 }
 
 export function listAnnouncements(actor: SessionUser): Promise<Announcement[]> {
-  return respond(() =>
-    announcementsOf(actor.schoolId)
+  return (async () => {
+    await hydrate("announcements");
+    return announcementsOf(actor.schoolId)
       .filter((a) => a.audience === "all" || a.audience.includes(actor.role))
-      .sort((a, b) => b.at.localeCompare(a.at)),
-  );
+      .sort((a, b) => b.at.localeCompare(a.at));
+  })();
 }
 
 export function postAnnouncement(actor: SessionUser, input: { title: string; body: string; audience: Role[] | "all" }): Promise<Announcement> {
-  return respond(() => {
+  return (async () => {
     ensure(actor.role === "directeur" || actor.role === "econome", "Seule la direction peut publier une annonce.");
-    const a: Announcement = { schoolId: actor.schoolId, id: uid("an"), title: input.title.trim(), body: input.body.trim(), at: `${TODAY_ISO}T${new Date().toTimeString().slice(0, 5)}`, author: actor.role === "econome" ? "Économat" : "Direction", audience: input.audience };
-    db.announcements.unshift(a);
-    persist();
-    return a;
-  });
+    const { data, error } = await supabase.rpc("post_announcement", {
+      p_title: input.title.trim(),
+      p_body: input.body.trim(),
+      p_audience_all: input.audience === "all",
+      p_audience_roles: input.audience === "all" ? [] : input.audience,
+    });
+    if (error) {
+      if (/Seule la direction/.test(error.message)) throw new Error("Seule la direction peut publier une annonce.");
+      if (/Titre et contenu/.test(error.message)) throw new Error("Titre et contenu requis.");
+      throw new Error(error.message);
+    }
+    await hydrate("announcements");
+    return data as unknown as Announcement;
+  })();
 }

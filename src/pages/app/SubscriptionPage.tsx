@@ -16,7 +16,7 @@ import { useSchool } from "@/context/SchoolContext";
 import { useToast } from "@/context/ToastContext";
 import { useAsync } from "@/hooks/useAsync";
 import { getPlans } from "@/services/subscriptionService";
-import { renew, type PurchaseResult } from "@/services/subscriptionService";
+import type { PurchaseResult } from "@/services/subscriptionService";
 import { getSchoolOverview } from "@/services/schoolService";
 import type { Plan } from "@/types";
 import { cn } from "@/utils/cn";
@@ -38,7 +38,6 @@ export default function SubscriptionPage() {
   const [selected, setSelected] = useState<Plan["id"] | null>(null);
   const [checkout, setCheckout] = useState(false);
   const [receipt, setReceipt] = useState<PurchaseResult | null>(null);
-  const [renewing, setRenewing] = useState(false);
 
   const info = school.status;
   const currentPlanId = school.plan?.id;
@@ -56,18 +55,14 @@ export default function SubscriptionPage() {
     toast("Abonnement actif. Votre matricule d'école est disponible.");
   };
 
-  const doRenew = async () => {
-    setRenewing(true);
-    try {
-      const result = await renew(schoolId, "yearly");
-      setReceipt(result);
-      school.reload();
-      toast("Abonnement renouvelé pour un an.");
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Renouvellement impossible.", "error");
-    } finally {
-      setRenewing(false);
+  const doRenew = () => {
+    if (!school.plan?.id || !plans.data?.some((p) => p.id === school.plan?.id)) {
+      toast("Renouvellement impossible. Contactez le support.", "error");
+      return;
     }
+    setSelected(school.plan.id);
+    setCycle("yearly");
+    setCheckout(true);
   };
 
   return (
@@ -81,7 +76,7 @@ export default function SubscriptionPage() {
               Accéder à mon tableau de bord
             </LinkButton>
           ) : paid ? (
-            <Button icon="refresh" variant="dark" loading={renewing} onClick={() => void doRenew()}>
+            <Button icon="refresh" variant="dark" onClick={() => void doRenew()}>
               Renouveler pour 1 an
             </Button>
           ) : undefined

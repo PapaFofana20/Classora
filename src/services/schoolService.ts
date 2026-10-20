@@ -1,8 +1,7 @@
 import type { ClassRoom, ClassSubject, Cycle, Level, School, SchoolSettings, Subject } from "@/types";
 import { levels } from "@/data/school";
-import { generateMatricule, isValidMatricule, formatMatriculeInput } from "@/utils/matricule";
-import { classSubjectsOf, classesOf, db, persist, respond, schoolOf, settingsOf, subjectsOf, uid } from "./db";
-import { subscriptionInfoOf } from "./subscriptionService";
+import { supabase } from "@/lib/supabase";
+import { classSubjectsOf, classesOf, db, hydrate, respond, schoolOf, settingsOf, studentsOf } from "./db";
 
 export interface SchoolOverview {
   levels: Level[];
@@ -13,24 +12,59 @@ export interface SchoolOverview {
   school: School | null;
 }
 
-/** Matières de l'école courante + catalogue des niveaux. */
-function snapshot(schoolId: string): SchoolOverview {
-  return { levels, classes: classesOf(schoolId), subjects: subjectsOf(schoolId), classSubjects: classSubjectsOf(schoolId), settings: settingsOf(schoolId), school: schoolOf(schoolId) ?? null };
-}
+export const getSchoolOverview = (schoolId: string): Promise<SchoolOverview> =>
+  (async () => {
+    const settings = settingsOf(schoolId);
+    return { levels, classes: classesOf(schoolId), subjects: subjectsOfCached(schoolId), classSubjects: classSubjectsOf(schoolId), settings, school: schoolOf(schoolId) ?? null };
+  })();
 
-export const getSchoolOverview = (schoolId: string): Promise<SchoolOverview> => respond(() => snapshot(schoolId));
+function subjectsOfCached(schoolId: string): Subject[] {
+  return db.subjects.filter((s) => s.schoolId === schoolId);
+}
 
 export const listSchools = (): Promise<School[]> => respond(() => db.schools, 150, 300);
 
 export const getSchool = (schoolId: string): Promise<School | null> => respond(() => schoolOf(schoolId) ?? null, 150, 300);
 
 export function updateSettings(schoolId: string, patch: Partial<SchoolSettings>): Promise<SchoolSettings> {
-  return respond(() => {
-    const s = settingsOf(schoolId);
-    Object.assign(s, patch);
-    persist();
-    return s;
-  });
+  return (async () => {
+    const settingsPatch: Record<string, unknown> = {};
+    if (patch.schoolYear !== undefined) settingsPatch.school_year = patch.schoolYear;
+    if (patch.periodType !== undefined) settingsPatch.period_type = patch.periodType;
+    if (patch.currentPeriod !== undefined) settingsPatch.current_period = patch.currentPeriod;
+    if (patch.annexFees !== undefined) settingsPatch.annex_fees = patch.annexFees;
+    if (patch.siblingDiscount !== undefined) settingsPatch.sibling_discount = patch.siblingDiscount;
+    if (Object.keys(settingsPatch).length > 0) {
+      const { error } = await supabase.from("school_settings").update(settingsPatch).eq("school_id", schoolId);
+      if (error) throw new Error(/read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);
+    }
+    if (patch.fees !== undefined) {
+      const rows = Object.entries(patch.fees).map(([levelId, fee]) => ({
+        school_id: schoolId,
+        level_id: levelId,
+        inscription: Number(fee.inscription) || 0,
+        mensualite: Number(fee.mensualite) || 0,
+      }));
+      for (const fee of rows) {
+        const { error } = await supabase
+          .from("level_fees")
+          .upsert(fee, { onConflict: "school_id,level_id" });
+        if (error) throw new Error("Frais non modifiables : l'abonnement de votre école n'autorise plus les modifications.");
+      }
+    }
+    const schoolPatch: Record<string, unknown> = {};
+    if (patch.name !== undefined) schoolPatch.name = patch.name;
+    if (patch.address !== undefined) schoolPatch.address = patch.address;
+    if (patch.phone !== undefined) schoolPatch.phone = patch.phone;
+    if (patch.email !== undefined) schoolPatch.email = patch.email;
+    if (patch.cycles !== undefined) schoolPatch.cycles = patch.cycles;
+    if (Object.keys(schoolPatch).length > 0) {
+      const { error } = await supabase.from("schools").update(schoolPatch).eq("id", schoolId);
+      if (error) throw new Error(/row-level/i.test(error.message) ? "L'identité de l'école est modifiable par la direction uniquement." : error.message);
+    }
+    await hydrate("settings");
+    return settingsOf(schoolId);
+  })();
 }
 
 /* ------------------------------------------------------------------ */
@@ -45,74 +79,90 @@ export interface MatriculeCheck {
   message: string | null;
 }
 
-/**
- * Vérification du matricule saisie par un élève ou un parent.
- * Ordre des contrôles : format → école → inscriptions ouvertes → abonnement.
- */
-export async function verifyMatricule(raw: string): Promise<MatriculeCheck> {
-  const code = formatMatriculeInput(raw);
-  if (!isValidMatricule(code)) {
-    return { ok: false, reason: "format", message: "Le matricule comporte 5 caractères (lettres et chiffres, sans 0 ni O). Exemple : X7K9Q." };
-  }
-  return respond(() => {
-    const school = db.schools.find((s) => s.matricule === code);
-    if (!school) return { ok: false as const, reason: "introuvable" as const, message: "Matricule introuvable. Vérifiez auprès de votre école." };
-    const info = subscriptionInfoOf(school.id);
-    if (info.blocked) return { ok: false as const, school, reason: "abonnement_bloque" as const, message: `${school.name} n'accepte plus de nouvelles inscriptions. Contactez l'école pour plus d'informations.` };
-    if (info.status === "EXPIRE") return { ok: false as const, school, reason: "abonnement_expire" as const, message: `${school.name} n'accepte pas de nouvelles inscriptions pour le moment. Contactez l'école.` };
-    if (!school.registrationOpen) return { ok: false as const, school, reason: "inscriptions_fermees" as const, message: `Les inscriptions sont temporairement fermées à ${school.name}. Contactez l'école pour connaître la date de réouverture.` };
-    return { ok: true as const, school, reason: null, message: null };
-  }, 300, 600);
+interface MatriculeServerSchool {
+  id: string;
+  name: string;
+  city?: string;
+  logo_url?: string | null;
+  cycles?: Cycle[];
+  registration_open?: boolean;
+  auto_approve_students?: boolean;
 }
 
-/** Génère (ou régénère explicitement) le matricule d'une école. */
+/** Vérification côté serveur (formule publique : RPC appelable par anon). */
+export async function verifyMatricule(raw: string): Promise<MatriculeCheck> {
+  const code = raw.trim().toUpperCase().replace(/[\s-]/g, "").replace(/[01OI]/g, "");
+  const { data, error } = await supabase.rpc("verify_matricule", { p_matricule: code });
+  if (error) throw new Error("Vérification impossible, réessayez.");
+  const result = (data ?? {}) as { ok: boolean; reason: string | null; message: string | null; school?: MatriculeServerSchool };
+  if (result.school) {
+    const s = result.school;
+    const school: School = {
+      id: s.id,
+      name: s.name,
+      matricule: code,
+      city: s.city ?? "",
+      address: "",
+      phone: "",
+      email: "",
+      logoUrl: s.logo_url ?? undefined,
+      cycles: s.cycles ?? [],
+      registrationOpen: s.registration_open ?? false,
+      autoApproveStudents: s.auto_approve_students ?? false,
+      createdAt: "",
+    };
+    return { ok: result.ok, school, reason: (result.reason as MatriculeCheck["reason"]) ?? null, message: result.message };
+  }
+  return { ok: result.ok, reason: (result.reason as MatriculeCheck["reason"]) ?? null, message: result.message };
+}
+
+/** Matricule attribué au premier paiement confirmé (renvoie l'école à jour). */
 export function generateMatriculeFor(schoolId: string): Promise<School> {
-  return respond(() => {
+  return (async () => {
+    await hydrate("schools");
     const school = schoolOf(schoolId);
     if (!school) throw new Error("École introuvable.");
-    if (school.matricule) return school;
-    school.matricule = generateMatricule(db.schools.map((s) => s.matricule).filter(Boolean));
-    persist();
     return school;
-  });
+  })();
 }
 
 /** Interrupteur du directeur : ouvre ou ferme les inscriptions (le matricule ne change pas). */
 export function toggleRegistration(schoolId: string, open: boolean): Promise<School> {
-  return respond(() => {
+  return (async () => {
+    const { error } = await supabase.from("schools").update({ registration_open: open }).eq("id", schoolId);
+    if (error) throw new Error(/row-level/i.test(error.message) ? "Seule la direction modifie l'école." : error.message);
+    await hydrate("schools");
     const school = schoolOf(schoolId);
     if (!school) throw new Error("École introuvable.");
-    school.registrationOpen = open;
-    persist();
     return school;
-  });
+  })();
 }
 
 /** Option des paramètres : approbation automatique des élèves (désactivée par défaut). */
 export function setAutoApprove(schoolId: string, value: boolean): Promise<School> {
-  return respond(() => {
+  return (async () => {
+    const { error } = await supabase.from("schools").update({ auto_approve_students: value }).eq("id", schoolId);
+    if (error) throw new Error(/row-level/i.test(error.message) ? "Seule la direction modifie l'école." : error.message);
+    await hydrate("schools");
     const school = schoolOf(schoolId);
     if (!school) throw new Error("École introuvable.");
-    school.autoApproveStudents = value;
-    persist();
     return school;
-  });
+  })();
 }
 
 export function updateSchool(schoolId: string, patch: Partial<Pick<School, "name" | "city" | "address" | "phone" | "email" | "cycles">>): Promise<School> {
-  return respond(() => {
+  return (async () => {
+    const body: Record<string, unknown> = {};
+    for (const k of ["name", "city", "address", "phone", "email", "cycles"] as const) {
+      if (patch[k] !== undefined) body[k] = patch[k];
+    }
+    const { error } = await supabase.from("schools").update(body).eq("id", schoolId);
+    if (error) throw new Error(/row-level/i.test(error.message) ? "L'identité de l'école est modifiable par la direction uniquement." : error.message);
+    await Promise.all([hydrate("schools"), hydrate("settings")]);
     const school = schoolOf(schoolId);
     if (!school) throw new Error("École introuvable.");
-    Object.assign(school, patch);
-    const s = settingsOf(schoolId);
-    if (patch.name) s.name = patch.name;
-    if (patch.address) s.address = patch.address;
-    if (patch.phone) s.phone = patch.phone;
-    if (patch.email) s.email = patch.email;
-    if (patch.cycles) s.cycles = patch.cycles;
-    persist();
     return school;
-  });
+  })();
 }
 
 /* ------------------------------------------------------------------ */
@@ -120,43 +170,65 @@ export function updateSchool(schoolId: string, patch: Partial<Pick<School, "name
 /* ------------------------------------------------------------------ */
 
 export function setClassSubject(schoolId: string, classId: string, subjectId: string, coefficient: number | null): Promise<ClassSubject[]> {
-  return respond(() => {
+  return (async () => {
     const cls = classesOf(schoolId).find((c) => c.id === classId);
     if (!cls) throw new Error("Classe introuvable.");
-    const idx = db.classSubjects.findIndex((x) => x.classId === classId && x.subjectId === subjectId);
     if (coefficient === null) {
-      if (idx >= 0) db.classSubjects.splice(idx, 1);
-      db.assignments = db.assignments.filter((a) => !(a.schoolId === schoolId && a.classId === classId && a.subjectId === subjectId));
-    } else if (idx >= 0) {
-      db.classSubjects[idx].coefficient = coefficient;
+      const { error } = await supabase
+        .from("class_subjects")
+        .delete()
+        .eq("school_id", schoolId)
+        .eq("class_id", classId)
+        .eq("subject_id", subjectId);
+      if (error) throw new Error(/read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);
     } else {
-      db.classSubjects.push({ schoolId, classId, subjectId, coefficient });
-      // Règle élémentaire : le titulaire reçoit automatiquement la nouvelle matière
-      if (cls.cycle === "elementaire" && cls.headTeacherId) {
-        db.assignments.push({ schoolId, teacherId: cls.headTeacherId, classId, subjectId });
+      const existing = classSubjectsOf(schoolId).find((x) => x.classId === classId && x.subjectId === subjectId);
+      const { error } = existing
+        ? await supabase
+            .from("class_subjects")
+            .update({ coefficient })
+            .eq("school_id", schoolId)
+            .eq("class_id", classId)
+            .eq("subject_id", subjectId)
+        : await supabase
+            .from("class_subjects")
+            .insert({ school_id: schoolId, class_id: classId, subject_id: subjectId, coefficient });
+      if (error) throw new Error(/read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);
+      // Règle élémentaire : le titulaire reçoit automatiquement la nouvelle matière.
+      if (!existing && cls.cycle === "elementaire" && cls.headTeacherId) {
+        await supabase.from("teaching_assignments").insert({
+          school_id: schoolId,
+          teacher_id: cls.headTeacherId,
+          class_id: classId,
+          subject_id: subjectId,
+        });
       }
     }
-    persist();
-    return db.classSubjects.filter((x) => x.schoolId === schoolId && x.classId === classId);
-  });
+    await Promise.all([hydrate("classSubjects"), hydrate("assignments")]);
+    return classSubjectsOf(schoolId).filter((x) => x.classId === classId);
+  })();
 }
 
 export function addSubject(schoolId: string, name: string, cycles: Cycle[]): Promise<Subject> {
-  return respond(() => {
-    const mine = subjectsOf(schoolId);
-    if (mine.some((s) => s.name.toLowerCase() === name.trim().toLowerCase())) throw new Error("Cette matière existe déjà.");
-    const id = name
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "_")
-      .slice(0, 12);
-    const subject: Subject = { schoolId, id: db.subjects.some((s) => s.id === id) ? `${id}_${uid("").slice(-3)}` : id, name: name.trim(), cycles };
-    db.subjects.push(subject);
-    persist();
+  return (async () => {
+    if (subjectsOfCached(schoolId).some((s) => s.name.toLowerCase() === name.trim().toLowerCase())) throw new Error("Cette matière existe déjà.");
+    const { error } = await supabase
+      .from("subjects")
+      .insert({
+        school_id: schoolId,
+        name: name.trim(),
+        cycles,
+      });
+    if (error) {
+      if (/read-only|row-level/i.test(error.message)) throw new Error("Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
+      if (/duplicate|unique/i.test(error.message)) throw new Error("Cette matière existe déjà.");
+      throw new Error(error.message);
+    }
+    await hydrate("subjects");
+    const subject = subjectsOfCached(schoolId).find((s) => s.name.toLowerCase() === name.trim().toLowerCase());
+    if (!subject) throw new Error("Matière introuvable après création.");
     return subject;
-  });
+  })();
 }
 
 export interface NewClassInput {
@@ -167,50 +239,64 @@ export interface NewClassInput {
 }
 
 export function createClass(schoolId: string, input: NewClassInput): Promise<ClassRoom> {
-  return respond(() => {
+  return (async () => {
     const level = levels.find((l) => l.id === input.levelId);
     if (!level) throw new Error("Niveau introuvable.");
     const name = `${level.label === "Terminale" ? "Tle" : level.label}${input.series ? " " + input.series : " " + input.section.toUpperCase()}`;
-    const mine = classesOf(schoolId);
-    if (mine.some((c) => c.name.toLowerCase() === name.toLowerCase())) throw new Error(`La classe « ${name} » existe déjà.`);
-    const cls: ClassRoom = {
-      schoolId,
-      id: uid("c"),
-      name,
-      levelId: level.id,
-      cycle: level.cycle,
-      ...(input.series ? { series: input.series } : {}),
-      headTeacherId: null,
-      capacity: input.capacity,
-    };
-    db.classes.push(cls);
-    const template = mine.find((c) => c.levelId === level.id && c.series === cls.series) ?? mine.find((c) => c.cycle === level.cycle);
-    if (template) {
-      classSubjectsOf(schoolId)
-        .filter((x) => x.classId === template.id)
-        .forEach((x) => db.classSubjects.push({ ...x, classId: cls.id }));
+    if (classesOf(schoolId).some((c) => c.name.toLowerCase() === name.toLowerCase())) throw new Error(`La classe « ${name} » existe déjà.`);
+    const { error } = await supabase
+      .from("class_rooms")
+      .insert({
+        school_id: schoolId,
+        level_id: level.id,
+        name,
+        cycle: level.cycle,
+        ...(input.series ? { series: input.series } : {}),
+        capacity: input.capacity,
+        section: input.section,
+      });
+    if (error) {
+      if (/read-only|row-level/i.test(error.message)) throw new Error("Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
+      if (/duplicate|unique/i.test(error.message)) throw new Error(`La classe « ${name} » existe déjà.`);
+      throw new Error(error.message);
     }
-    persist();
+    await hydrate("classes");
+    const cls = classesOf(schoolId).find((c) => c.name === name);
+    if (!cls) throw new Error("Classe introuvable après création.");
+    // Copie des coefficients d'une classe référente (comportement du front).
+    const template =
+      classesOf(schoolId).find((c) => c.levelId === level.id && c.series === cls.series) ??
+      classesOf(schoolId).find((c) => c.cycle === level.cycle);
+    if (template && cls.id !== template.id) {
+      for (const cs of classSubjectsOf(schoolId).filter((x) => x.classId === template.id)) {
+        await supabase.from("class_subjects").upsert(
+          { school_id: schoolId, class_id: cls.id, subject_id: cs.subjectId, coefficient: cs.coefficient },
+          { onConflict: "school_id,class_id,subject_id" },
+        );
+      }
+      await hydrate("classSubjects");
+    }
     return cls;
-  });
+  })();
 }
 
 export function deleteClass(schoolId: string, classId: string): Promise<void> {
-  return respond(() => {
-    if (db.students.some((s) => s.schoolId === schoolId && s.classId === classId)) throw new Error("Impossible de supprimer une classe qui contient des élèves.");
-    db.classes = db.classes.filter((c) => !(c.schoolId === schoolId && c.id === classId));
-    db.classSubjects = db.classSubjects.filter((x) => !(x.schoolId === schoolId && x.classId === classId));
-    db.assignments = db.assignments.filter((a) => !(a.schoolId === schoolId && a.classId === classId));
-    persist();
-  });
+  return (async () => {
+    if (studentsOf(schoolId).some((s) => s.classId === classId)) throw new Error("Impossible de supprimer une classe qui contient des élèves.");
+    await supabase.from("teaching_assignments").delete().eq("school_id", schoolId).eq("class_id", classId);
+    await supabase.from("class_subjects").delete().eq("school_id", schoolId).eq("class_id", classId);
+    const { error } = await supabase.from("class_rooms").delete().eq("id", classId).eq("school_id", schoolId);
+    if (error) throw new Error(/guard|élèves/.test(error.message) ? "Impossible de supprimer une classe qui contient des élèves." : /read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);
+    await Promise.all([hydrate("classes"), hydrate("classSubjects"), hydrate("assignments")]);
+  })();
 }
 
 export function updateClassCapacity(schoolId: string, classId: string, capacity: number): Promise<void> {
-  return respond(() => {
-    const c = classesOf(schoolId).find((x) => x.id === classId);
-    if (c) c.capacity = capacity;
-    persist();
-  });
+  return (async () => {
+    const { error } = await supabase.from("class_rooms").update({ capacity }).eq("id", classId).eq("school_id", schoolId);
+    if (error) throw new Error(/Capacité|capacity|déjà/i.test(error.message) ? `La classe contient déjà ${studentsOf(schoolId).filter((s) => s.classId === classId).length} élèves.` : /read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);
+    await hydrate("classes");
+  })();
 }
 
 /* ------------------------------------------------------------------ */
@@ -226,17 +312,13 @@ export interface OpenClass {
   filled: number;
 }
 
+/** Classes ouvertes pour le formulaire public (RPC appelable par anon). */
 export const openClassesFor = (schoolId: string): Promise<OpenClass[]> =>
-  respond(() =>
-    classesOf(schoolId)
-      .map((c) => ({
-        id: c.id,
-        name: c.name,
-        cycle: c.cycle,
-        levelLabel: levels.find((l) => l.id === c.levelId)?.label ?? "",
-        capacity: c.capacity,
-        filled: db.students.filter((s) => s.schoolId === schoolId && s.classId === c.id).length,
-      }))
-      .filter((c) => c.filled < c.capacity)
-      .sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true })),
-  );
+  (async () => {
+    const { data, error } = await supabase.rpc("open_classes", { p_school_id: schoolId });
+    if (error) return [];
+    const rows = (data ?? []) as { class_id: string; name: string; cycle: Cycle; level_label: string; capacity: number; filled: number }[];
+    return rows
+      .map((r) => ({ id: r.class_id, name: r.name, cycle: r.cycle, levelLabel: r.level_label, capacity: r.capacity, filled: r.filled }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+  })();

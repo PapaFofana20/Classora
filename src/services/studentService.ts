@@ -1,11 +1,10 @@
 import type { ClassRoom, Parent, Payment, ReportCardData, SessionUser, Student, StudentOptions, StudentPayStatus } from "@/types";
 import { TODAY_ISO, levels } from "@/data/school";
 import { studentPayStatus } from "@/utils/payments";
-import { generateChildCode } from "@/utils/matricule";
-import { ensure, ensureWritable, visibleStudents } from "./access";
-import { classesOf, db, parentsOf, paymentsOf, persist, respond, studentsOf, uid } from "./db";
-import { buildPaymentPlan } from "./paymentService";
+import { ensure, visibleStudents } from "./access";
+import { classesOf, db, hydrate, parentsOf, paymentsOf, respond, studentsOf } from "./db";
 import { cardsForClass } from "./reportService";
+import { supabase } from "@/lib/supabase";
 
 export interface StudentRow extends Student {
   className: string;
@@ -79,41 +78,37 @@ export interface EnrollInput {
   parent: ParentInput;
 }
 
-/** Inscription faite par la direction depuis /app/inscription-eleve. */
+/** Inscription faite par la direction depuis /app/inscription-eleve (RPC serveur). */
 export function enrollStudent(actor: SessionUser, input: EnrollInput): Promise<StudentRow> {
-  return respond(() => {
-    ensureWritable(actor);
+  return (async () => {
     const cls = classesOf(actor.schoolId).find((c) => c.id === input.classId);
     if (!cls) throw new Error("Classe introuvable.");
-    if (studentsOf(actor.schoolId).filter((s) => s.classId === cls.id).length >= cls.capacity) throw new Error(`La classe ${cls.name} est complète (${cls.capacity} places).`);
-    let parentId: string;
-    if (input.parent.mode === "existing") {
-      parentId = input.parent.parentId;
-      ensure(parentsOf(actor.schoolId).some((p) => p.id === parentId), "Parent introuvable dans votre école.");
-    } else {
-      parentId = uid("p");
-      db.parents.push({ schoolId: actor.schoolId, id: parentId, firstName: input.parent.firstName, lastName: input.parent.lastName, phone: input.parent.phone, email: input.parent.email, address: input.parent.address });
+    const { error } = await supabase.rpc("enroll_student", {
+      p_class_id: input.classId,
+      p_first_name: input.firstName.trim(),
+      p_last_name: input.lastName.trim(),
+      p_gender: input.gender,
+      p_birth_date: input.birthDate || null,
+      p_options: input.options,
+      p_parent_id: input.parent.mode === "existing" ? input.parent.parentId : null,
+      p_parent_first: input.parent.mode === "new" ? input.parent.firstName.trim() : null,
+      p_parent_last: input.parent.mode === "new" ? input.parent.lastName.trim() : null,
+      p_parent_phone: input.parent.mode === "new" ? input.parent.phone.trim() : null,
+      p_parent_email: input.parent.mode === "new" ? input.parent.email.trim() : null,
+      p_parent_address: input.parent.mode === "new" ? input.parent.address.trim() : "",
+    });
+    if (error) {
+      if (/complète/.test(error.message)) throw new Error(error.message);
+      if (/limite/.test(error.message)) throw new Error(error.message);
+      throw new Error(error.message);
     }
-    const n = studentsOf(actor.schoolId).length + 1;
-    const student: Student = {
-      schoolId: actor.schoolId,
-      id: uid("s"),
-      matricule: `EC26${String(n).padStart(4, "0")}`,
-      childCode: generateChildCode(db.students.map((s) => s.childCode)),
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      gender: input.gender,
-      birthDate: input.birthDate,
-      classId: cls.id,
-      parentId,
-      options: input.options,
-      enrolledAt: TODAY_ISO,
-    };
-    db.students.push(student);
-    db.payments.push(...buildPaymentPlan(student));
-    persist();
-    return toRow(student);
-  });
+    await Promise.all([hydrate("students"), hydrate("parents"), hydrate("payments")]);
+    const created = studentsOf(actor.schoolId)
+      .filter((s) => s.classId === cls.id)
+      .sort((a, b) => b.enrolledAt.localeCompare(a.enrolledAt))[0];
+    if (!created) throw new Error("Inscription impossible. Vérifiez la classe et réessayez.");
+    return toRow(created);
+  })();
 }
 
 export const listParents = (actor: SessionUser): Promise<Parent[]> => respond(() => parentsOf(actor.schoolId));

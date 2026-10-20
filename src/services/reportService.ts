@@ -2,8 +2,9 @@ import type { ClassRoom, Period, ReportCardData, ReportMeta, SessionUser } from 
 import { getPeriods } from "@/data/school";
 import { buildClassReportCards } from "@/utils/reportCard";
 import { isHeadTeacher } from "@/utils/permissions";
+import { supabase } from "@/lib/supabase";
 import { ensure, ensureWritable, teacherOf } from "./access";
-import { assignmentsOf, classesOf, classSubjectsOf, db, gradesOf, parentsOf, persist, reportMetasOf, respond, settingsOf, studentsOf, subjectsOf, teachersOf } from "./db";
+import { assignmentsOf, classesOf, classSubjectsOf, db, gradesOf, hydrate, parentsOf, reportMetasOf, respond, settingsOf, studentsOf, subjectsOf, teachersOf } from "./db";
 
 export function currentPeriods(schoolId: string): Period[] {
   return getPeriods(settingsOf(schoolId).periodType);
@@ -55,20 +56,25 @@ export function getClassReportCards(actor: SessionUser, classId: string, periodI
 }
 
 export function updateReportMeta(actor: SessionUser, studentId: string, periodId: string, patch: Partial<Pick<ReportMeta, "conduct" | "comment" | "absences">>): Promise<ReportMeta> {
-  return respond(() => {
+  return (async () => {
     ensureWritable(actor);
     const student = studentsOf(actor.schoolId).find((s) => s.id === studentId);
     const classRoom = student ? classesOf(actor.schoolId).find((c) => c.id === student.classId) : undefined;
     ensure(!!classRoom && actor.role !== "parent" && classAllowed(actor, classRoom), "Modification non autorisée.");
-    let meta = reportMetasOf(actor.schoolId).find((m) => m.studentId === studentId && m.period === periodId);
-    if (!meta) {
-      meta = { schoolId: actor.schoolId, studentId, period: periodId, conduct: "Bonne", absences: 0, comment: "" };
-      db.reportMetas.push(meta);
-    }
-    Object.assign(meta, patch);
-    persist();
-    return meta;
-  });
+    const { error } = await supabase.rpc("update_report_meta", {
+      p_student_id: studentId,
+      p_period: periodId,
+      p_conduct: patch.conduct ?? null,
+      p_absences: patch.absences ?? null,
+      p_comment: patch.comment ?? null,
+    });
+    if (error) throw new Error(/Modification non/.test(error.message) ? "Modification non autorisée." : error.message);
+    await hydrate("reportMetas");
+    const meta = reportMetasOf(actor.schoolId).find((m) => m.studentId === studentId && m.period === periodId);
+    return (
+      meta ?? { schoolId: actor.schoolId, studentId, period: periodId, conduct: "Bonne", absences: 0, comment: "" }
+    );
+  })();
 }
 
 /** Périodes configurées (semestres ou trimestres) et période en cours de l'école. */

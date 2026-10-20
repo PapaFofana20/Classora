@@ -1,10 +1,13 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { SessionUser } from "@/types";
 import * as authService from "@/services/authService";
+import { resetDatabase } from "@/services/db";
 import type { DirectorInput, ParentSignupInput, StaffAccountInput, StaffCredentials, StudentSignupInput } from "@/services/authService";
 
 interface AuthContextValue {
   user: SessionUser | null;
+  /** Vrai tant que la session n'a pas été restaurée depuis Supabase. */
+  loadingSession: boolean;
   /** École de la session : toutes les lectures de données passent par cet identifiant. */
   schoolId: string;
   /** Vrai juste après une déconnexion : on retourne alors sur la landing page. */
@@ -22,8 +25,26 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(() => authService.getStoredSession());
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [loadingSession, setLoadingSession] = useState(true);
   const [justLoggedOut, setJustLoggedOut] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const session = await authService.currentSession();
+        if (!cancelled) setUser(session);
+      } catch {
+        if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setLoadingSession(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const u = await authService.login(email, password);
@@ -57,7 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (current: string, next: string) => {
       if (!user) throw new Error("Aucun utilisateur connecté.");
       await authService.changePassword(user, current, next);
-      setUser(authService.getStoredSession());
+      const fresh = await authService.currentSession();
+      if (fresh) setUser(fresh);
     },
     [user],
   );
@@ -71,20 +93,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   /** Recharge la session (après un changement de mot de passe ou une décision de la direction). */
-  const refresh = useCallback(() => {
-    const stored = authService.getStoredSession();
+  const refresh = useCallback(async () => {
+    const stored = await authService.currentSession();
     if (stored) setUser(stored);
   }, []);
 
   const logout = useCallback(() => {
     authService.logout();
+    void resetDatabase();
     setJustLoggedOut(true);
     setUser(null);
   }, []);
 
   const value = useMemo(
-    () => ({ user, schoolId: user?.schoolId ?? "", justLoggedOut, login, registerDirector, registerStudent, registerParent, changePassword, createStaffAccount, refresh, logout }),
-    [user, justLoggedOut, login, registerDirector, registerStudent, registerParent, changePassword, createStaffAccount, refresh, logout],
+    () => ({ user, loadingSession, schoolId: user?.schoolId ?? "", justLoggedOut, login, registerDirector, registerStudent, registerParent, changePassword, createStaffAccount, refresh, logout }),
+    [user, loadingSession, justLoggedOut, login, registerDirector, registerStudent, registerParent, changePassword, createStaffAccount, refresh, logout],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

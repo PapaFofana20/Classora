@@ -1,6 +1,7 @@
 import type { SessionUser, Teacher } from "@/types";
 import { ensureWritable } from "./access";
-import { assignmentsOf, classesOf, db, persist, respond, subjectsOf, teachersOf, uid } from "./db";
+import { supabase } from "@/lib/supabase";
+import { assignmentsOf, classesOf, db, hydrate, subjectsOf, teachersOf } from "./db";
 
 export interface TeacherRow extends Teacher {
   classNames: string[];
@@ -14,7 +15,8 @@ export interface TeacherRow extends Teacher {
 }
 
 export function listTeacherRows(schoolId: string): Promise<TeacherRow[]> {
-  return respond(() => {
+  return (async () => {
+    await Promise.all([hydrate("teachers"), hydrate("assignments"), hydrate("classes"), hydrate("users")]);
     const classes = classesOf(schoolId);
     const subjects = subjectsOf(schoolId);
     const assignments = assignmentsOf(schoolId);
@@ -31,7 +33,7 @@ export function listTeacherRows(schoolId: string): Promise<TeacherRow[]> {
         ...(account ? { userId: account.id, accountStatus: account.status, mustChangePassword: account.mustChangePassword } : {}),
       };
     });
-  });
+  })();
 }
 
 export interface NewTeacherInput {
@@ -44,24 +46,49 @@ export interface NewTeacherInput {
 }
 
 export function createTeacher(actor: SessionUser, input: NewTeacherInput): Promise<Teacher> {
-  return respond(() => {
+  return (async () => {
     ensureWritable(actor);
-    if (teachersOf(actor.schoolId).some((t) => t.email.toLowerCase() === input.email.toLowerCase())) throw new Error("Un enseignant avec cet e-mail existe déjà dans votre école.");
-    const teacher: Teacher = { schoolId: actor.schoolId, id: uid("t"), ...input };
-    db.teachers.push(teacher);
-    persist();
+    if (teachersOf(actor.schoolId).some((t) => t.email.toLowerCase() === input.email.toLowerCase())) {
+      throw new Error("Un enseignant avec cet e-mail existe déjà dans votre école.");
+    }
+    const { data, error } = await supabase
+      .from("teachers")
+      .insert({
+        school_id: actor.schoolId,
+        kind: input.kind,
+        first_name: input.firstName.trim(),
+        last_name: input.lastName.trim(),
+        email: input.email.trim(),
+        phone: input.phone.trim(),
+        specialties: input.specialties,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      if (/row-level security/.test(error.message) || /règle/i.test(error.message)) {
+        throw new Error("Seule la direction peut créer un enseignant.");
+      }
+      if (/exists|duplicate|unique/i.test(error.message)) {
+        throw new Error("Un enseignant avec cet e-mail existe déjà dans votre école.");
+      }
+      throw new Error(error.message);
+    }
+    await hydrate("teachers");
+    const teacher = teachersOf(actor.schoolId).find((t) => t.id === (data as { id: string }).id);
+    if (!teacher) throw new Error("Enseignant introuvable après création.");
     return teacher;
-  });
+  })();
 }
 
 export function deleteTeacher(actor: SessionUser, id: string): Promise<void> {
-  return respond(() => {
+  return (async () => {
     ensureWritable(actor);
-    db.teachers = db.teachers.filter((t) => !(t.schoolId === actor.schoolId && t.id === id));
-    db.assignments = db.assignments.filter((a) => !(a.schoolId === actor.schoolId && a.teacherId === id));
-    classesOf(actor.schoolId).forEach((c) => {
-      if (c.headTeacherId === id) c.headTeacherId = null;
-    });
-    persist();
-  });
+    const { error } = await supabase.from("teachers").delete().eq("id", id).eq("school_id", actor.schoolId);
+    if (error) {
+      throw new Error(/in use/i.test(error.message)
+        ? "Cet enseignant a des affectations ou bulletins associés. Déplacez-les d'abord."
+        : error.message);
+    }
+    await Promise.all([hydrate("teachers"), hydrate("assignments"), hydrate("classes")]);
+  })();
 }

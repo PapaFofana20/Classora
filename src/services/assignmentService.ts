@@ -1,7 +1,8 @@
 import type { ClassRoom, ClassSubject, Conflict, SessionUser, Subject, Teacher, TeachingAssignment } from "@/types";
 import { detectConflicts } from "@/utils/assignments";
+import { supabase } from "@/lib/supabase";
 import { ensureWritable } from "./access";
-import { assignmentsOf, classSubjectsOf, classesOf, db, persist, respond, subjectsOf, teachersOf } from "./db";
+import { assignmentsOf, classSubjectsOf, classesOf, hydrate, respond, subjectsOf, teachersOf } from "./db";
 
 export interface AssignmentBoard {
   classes: ClassRoom[];
@@ -29,65 +30,81 @@ export function getTeacherAssignments(schoolId: string, teacherId: string): Prom
   return respond(() => assignmentsOf(schoolId).filter((a) => a.teacherId === teacherId));
 }
 
+async function replaceCell(actor: SessionUser, classId: string, subjectId: string, teacherIds: string[]): Promise<void> {
+  ensureWritable(actor);
+  const { error } = await supabase.rpc("replace_cell_teachers", {
+    p_class_id: classId,
+    p_subject_id: subjectId,
+    p_teacher_ids: teacherIds,
+  });
+  if (error) {
+    throw new Error(/limit|plafond|10/i.test(error.message) ? "Un enseignant est limité à 10 affectations." : error.message);
+  }
+  await hydrate("assignments");
+}
+
 /** Remplace tous les enseignants d'une cellule (classe × matière). */
 export function setCellTeacher(actor: SessionUser, classId: string, subjectId: string, teacherId: string | null): Promise<AssignmentBoard> {
-  return respond(() => {
-    ensureWritable(actor);
-    db.assignments = db.assignments.filter((a) => !(a.schoolId === actor.schoolId && a.classId === classId && a.subjectId === subjectId));
-    if (teacherId) db.assignments.push({ schoolId: actor.schoolId, teacherId, classId, subjectId });
-    persist();
+  return (async () => {
+    await replaceCell(actor, classId, subjectId, teacherId ? [teacherId] : []);
     return board(actor.schoolId);
-  }, 150, 300);
+  })();
 }
 
 export function addCellTeacher(actor: SessionUser, classId: string, subjectId: string, teacherId: string): Promise<AssignmentBoard> {
-  return respond(() => {
-    ensureWritable(actor);
-    if (!assignmentsOf(actor.schoolId).some((a) => a.classId === classId && a.subjectId === subjectId && a.teacherId === teacherId)) {
-      db.assignments.push({ schoolId: actor.schoolId, teacherId, classId, subjectId });
-    }
-    persist();
+  return (async () => {
+    const current = assignmentsOf(actor.schoolId).filter((a) => a.classId === classId && a.subjectId === subjectId).map((a) => a.teacherId);
+    await replaceCell(actor, classId, subjectId, current.includes(teacherId) ? current : [...current, teacherId]);
     return board(actor.schoolId);
-  }, 150, 300);
+  })();
 }
 
 export function removeCellTeacher(actor: SessionUser, classId: string, subjectId: string, teacherId: string): Promise<AssignmentBoard> {
-  return respond(() => {
-    ensureWritable(actor);
-    db.assignments = db.assignments.filter((a) => !(a.schoolId === actor.schoolId && a.classId === classId && a.subjectId === subjectId && a.teacherId === teacherId));
-    persist();
+  return (async () => {
+    const current = assignmentsOf(actor.schoolId).filter((a) => a.classId === classId && a.subjectId === subjectId).map((a) => a.teacherId);
+    await replaceCell(actor, classId, subjectId, current.filter((id) => id !== teacherId));
     return board(actor.schoolId);
-  }, 150, 300);
+  })();
 }
 
 /**
  * Élémentaire : nommer un instituteur titulaire lui attribue automatiquement
- * toutes les matières de la classe.
+ * toutes les matières de la classe (faire côté serveur).
  */
 export function setTitular(actor: SessionUser, classId: string, teacherId: string | null): Promise<AssignmentBoard> {
-  return respond(() => {
+  return (async () => {
     ensureWritable(actor);
     const cls = classesOf(actor.schoolId).find((c) => c.id === classId);
     if (!cls || cls.cycle !== "elementaire") throw new Error("Cette classe n'est pas une classe élémentaire.");
-    db.assignments = db.assignments.filter((a) => !(a.schoolId === actor.schoolId && a.classId === classId));
-    cls.headTeacherId = teacherId;
-    if (teacherId) {
-      classSubjectsOf(actor.schoolId)
-        .filter((cs) => cs.classId === classId)
-        .forEach((cs) => db.assignments.push({ schoolId: actor.schoolId, teacherId, classId, subjectId: cs.subjectId }));
+    const { error } = await supabase.rpc("set_class_head_teacher", {
+      p_class_id: classId,
+      p_teacher_id: teacherId,
+      p_mode: "titulaire",
+    });
+    if (error) {
+      if (/cycle/i.test(error.message)) throw new Error("Cette classe n'est pas une classe élémentaire.");
+      throw new Error(error.message);
     }
-    persist();
+    await Promise.all([hydrate("classes"), hydrate("assignments")]);
     return board(actor.schoolId);
-  }, 150, 300);
+  })();
 }
 
 export function setHeadTeacher(actor: SessionUser, classId: string, teacherId: string | null): Promise<AssignmentBoard> {
-  return respond(() => {
+  return (async () => {
     ensureWritable(actor);
     const cls = classesOf(actor.schoolId).find((c) => c.id === classId);
     if (!cls || cls.cycle === "elementaire") throw new Error("Le professeur principal concerne le moyen et le secondaire.");
-    cls.headTeacherId = teacherId;
-    persist();
+    const { error } = await supabase.rpc("set_class_head_teacher", {
+      p_class_id: classId,
+      p_teacher_id: teacherId,
+      p_mode: "principal",
+    });
+    if (error) {
+      if (/cycle/i.test(error.message)) throw new Error("Le professeur principal concerne le moyen et le secondaire.");
+      throw new Error(error.message);
+    }
+    await Promise.all([hydrate("classes"), hydrate("assignments")]);
     return board(actor.schoolId);
-  }, 150, 300);
+  })();
 }
