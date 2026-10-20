@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CONTACT, footerColumns } from "@/data/landing";
+import { footerColumns } from "@/data/landing";
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Brand";
 import { Container } from "./Container";
@@ -12,20 +12,6 @@ export function Footer() {
           <div className="grid gap-10 lg:grid-cols-[1.4fr_2fr]">
           <div>
             <Logo dark className="h-10" />
-            <ul className="mt-6 space-y-3 text-sm text-white/85">
-              <li className="flex items-center gap-3">
-                <Icon name="call" className="text-lime" />
-                {CONTACT.phone}
-              </li>
-              <li className="flex items-center gap-3">
-                <Icon name="mail" className="text-lime" />
-                {CONTACT.email}
-              </li>
-              <li className="flex items-center gap-3">
-                <Icon name="location_on" className="text-lime" />
-                {CONTACT.address}
-              </li>
-            </ul>
           </div>
           <div className="grid gap-8 sm:grid-cols-3">
             {footerColumns.map((col) => (
