@@ -26,6 +26,10 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
   const [school, setSchool] = useState<School | null>(null);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
+  // Séquence des vérifications : seule la DERNIÈRE requête lancée peut
+  // modifier l'état (sans elle, une réponse lente d'un premier code
+  // écrasait le résultat d'un code saisi ensuite).
+  const checkSeq = useRef(0);
 
   const check = async (raw: string) => {
     const code = formatMatriculeInput(raw);
@@ -34,9 +38,11 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
       setError(code ? `Il manque ${MATRICULE_LENGTH - code.length} caractère(s).` : null);
       return;
     }
+    const seq = ++checkSeq.current;
     setState("checking");
     setError(null);
     const result = await verifyMatricule(code);
+    if (seq !== checkSeq.current) return; // une saisie plus récente a pris le relais
     if (result.ok && result.school) {
       setSchool(result.school);
       setState("found");

@@ -76,7 +76,7 @@ export function countUnread(actor: SessionUser): Promise<number> {
   return respond(() => {
     const id = actorIdOf(actor);
     return conversationsFor(actor).reduce((a, c) => a + unreadIn(c, id), 0);
-  }, 50, 120);
+  });
 }
 
 export function sendMessage(actor: SessionUser, conversationId: string, text: string): Promise<ConversationView> {

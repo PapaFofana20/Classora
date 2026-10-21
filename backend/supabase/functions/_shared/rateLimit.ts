@@ -1,17 +1,26 @@
 /**
- * Rate limiting par IP, appuyé sur la table public.rate_limits.
- * Fenêtre fixe : le compteur repart à zéro à l'expiration de la fenêtre.
- * Le service_role seul écrit ; les clients anon/authenticated n'y ont pas accès.
+ * Rate limiting adossé à la table public.rate_limits via la RPC atomique
+ * sys_rate_limit (migration 15) : l'ancienne lecture-contrôle-écriture
+ * souffrait de deux défauts — un compteur non atomique (accès concurrents
+ * perdus) et une clé d'origine client (X-Forwarded-For, réinscriptible par
+ * l'attaquant, avec un seau global partagé en repli).
  */
 
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-export function clientIp(req: Request): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip")?.trim() ??
-    "0.0.0.0"
-  );
+/**
+ * Adresse client : le DERNIER maillon de X-Forwarded-For (celui ajouté par le
+ * proxy de la plateforme, non falsifiable par le client) ; X-Real-IP en
+ * repli ; null si aucun (appel direct en développement local).
+ */
+export function clientIp(req: Request): string | null {
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",").map((v) => v.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  const real = req.headers.get("x-real-ip")?.trim();
+  return real || null;
 }
 
 /** Lève une erreur métier si la limite est atteinte pour (key) sur la fenêtre. */
@@ -21,34 +30,16 @@ export async function enforceRateLimit(
   max: number,
   windowSeconds: number,
 ): Promise<void> {
-  const nowIso = new Date().toISOString();
-  const { data } = await svc
-    .from("rate_limits")
-    .select("key, count, window_start")
-    .eq("key", key)
-    .maybeSingle();
-
-  if (!data) {
-    await svc.from("rate_limits").insert({ key, count: 1, window_start: nowIso });
-    return;
+  const { data, error } = await svc.rpc("sys_rate_limit", {
+    p_key: key,
+    p_max: max,
+    p_window_secs: windowSeconds,
+  });
+  if (error) {
+    // Ne JAMAIS laisser un dysfonctionnement du limiter ouvrir le service.
+    throw new Error("Service momentanément indisponible. Réessayez dans un instant.");
   }
-
-  const started = new Date(data.window_start);
-  const elapsed = (Date.now() - started.getTime()) / 1000;
-  if (elapsed >= windowSeconds) {
-    await svc
-      .from("rate_limits")
-      .update({ count: 1, window_start: nowIso, updated_at: nowIso })
-      .eq("key", key);
-    return;
-  }
-
-  if (data.count >= max) {
+  if (data === false) {
     throw new Error("Trop de tentatives. Réessayez dans quelques minutes.");
   }
-
-  await svc
-    .from("rate_limits")
-    .update({ count: data.count + 1, updated_at: nowIso })
-    .eq("key", key);
 }

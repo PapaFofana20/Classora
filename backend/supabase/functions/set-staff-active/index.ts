@@ -1,13 +1,17 @@
 /**
  * Activation / désactivation d'un accès du personnel (direction).
- * Impossible sur son propre compte. À la désactivation :
- *   - statut = DESACTIVE (les politiques RLS fondées sur is_active_user()
- *     ferment tout accès aux données immédiatement) ;
- *   - les sessions Auth du compte sont révoquées.
+ * Impossible sur son propre compte. À la désactivation : statut = DESACTIVE,
+ * les politiques RLS fondées sur is_active_user() ferment tout accès aux
+ * données immédiatement. Aucune révocation de session n'est invoquée :
+ * l'API admin n'offre pas cette opération par utilisateur ; le JWT émis
+ * reste techniquement valable, mais currentSession() côté application
+ * (statut DESACTIVE) et les politiques RLS ferment l'accès réel.
+ * Limité en débit par compte appelant.
  */
 
 import { audit, requireDirecteur, serviceClient } from "../_shared/auth.ts";
 import { badRequest, handleOptions, methodNotAllowed, notFound, ok, serverError } from "../_shared/http.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
 import { expectObject, requireString, ValidationError } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
@@ -19,6 +23,7 @@ Deno.serve(async (req) => {
     const authResult = await requireDirecteur(svc, req);
     if (authResult instanceof Response) return authResult;
     const { caller } = authResult;
+    await enforceRateLimit(svc, `staff-mgmt:${caller.id}`, 30, 300);
 
     const body = expectObject(await req.json());
     const userId = requireString(body, "userId", "Le compte", { max: 64 });
@@ -52,13 +57,6 @@ Deno.serve(async (req) => {
       .eq("id", userId);
     if (statusError) return serverError();
 
-    if (!active) {
-      const { error: signOutError } = await svc.auth.admin.signOut(userId);
-      if (signOutError) {
-        // Non bloquant : la RLS ferme déjà l'accès aux données.
-      }
-    }
-
     await audit(svc, {
       schoolId: caller.schoolId,
       actorId: caller.id,
@@ -71,6 +69,7 @@ Deno.serve(async (req) => {
     return ok({ userId, status: active ? "ACTIF" : "DESACTIVE" });
   } catch (e) {
     if (e instanceof ValidationError) return badRequest(e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
     return serverError();
   }
 });

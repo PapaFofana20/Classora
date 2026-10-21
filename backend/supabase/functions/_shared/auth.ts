@@ -48,9 +48,6 @@ export interface Caller {
 export async function getCallerProfile(svc: SupabaseClient, req: Request): Promise<Caller | null> {
   const user = await getAuthenticatedUser(svc, req);
   if (!user) return null;
-  if (user.app_metadata.role) {
-    // Le claim du JWT fait foi ; le profil est rechargé pour son état courant.
-  }
   const { data: profile, error } = await svc
     .from("profiles")
     .select("id, school_id, role, status, must_change_password, teacher_id, parent_id, student_id, email")
@@ -71,13 +68,21 @@ export async function getCallerProfile(svc: SupabaseClient, req: Request): Promi
   };
 }
 
-/** Exige un directeur actif de sa propre école (school_id vient du profil). */
+/**
+ * Exige un directeur ACTIF de sa propre école (school_id vient du profil).
+ * Le statut est contrôlé ici : un compte désactivé ne doit plus gérer le
+ * personnel (maj, réinitialisation, activation) même avec un JWT encore
+ * valide — les RLS ferment déjà l'accès aux données, pas ces endpoints.
+ */
 export async function requireDirecteur(
   svc: SupabaseClient,
   req: Request,
 ): Promise<{ caller: Caller } | Response> {
   const caller = await getCallerProfile(svc, req);
   if (!caller) return unauthorized();
+  if (caller.status !== "ACTIF") {
+    return forbidden("Ce compte n'est plus actif. Contactez la direction de votre école.");
+  }
   if (caller.role !== "directeur" || caller.schoolId === null) {
     return forbidden("Seule la direction peut effectuer cette action.");
   }

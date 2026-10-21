@@ -320,9 +320,9 @@ function mapAnnouncement(r: any): Announcement {
 
 async function hydrateConversations(): Promise<void> {
   const [convRes, msgRes, readsRes] = await Promise.all([
-    supabase.from("conversations").select("*"),
-    supabase.from("messages").select("*"),
-    supabase.from("conversation_reads").select("*"),
+    supabase.from("conversations").select("*").limit(500),
+    supabase.from("messages").select("*").order("created_at", { ascending: false }).limit(2000),
+    supabase.from("conversation_reads").select("*").limit(2000),
   ]);
   const convs = (convRes.data ?? []) as any[];
   const msgs = (msgRes.data ?? []) as any[];
@@ -360,13 +360,22 @@ function assign(tableName: keyof Database, request: { then: (onFulfilled?: (res:
     .then(() => request)
     .then((res) => {
       if (res.error) {
-        // RLS/périmètre du rôle : l'entité reste vide plutôt qu'en erreur.
+        // Périmètre RLS / indisponibilité : l'entité reste vide, mais on garde
+        // une trace technique (l'absence totale de log rendait ces échecs
+        // indécelables et déguisait des bugs RPC en « écrans vides »).
+        console.error(`[db] hydratation ${tableName} refusée :`, res.error.message);
         return;
       }
-      replace(tableName, (res.data ?? []).map(MAPPERS[tableName]));
+      const data = (res.data ?? []) as any[];
+      if (data.length === 2000) {
+        // Le select() est appelé avec .limit(2000) : atteindre exactement la
+        // borne suggère une troncature silencieuse (école volumineuse).
+        console.warn(`[db] ${tableName} : limite de 2000 lignes atteinte — hydratation peut-être tronquée.`);
+      }
+      replace(tableName, data.map(MAPPERS[tableName]));
     })
-    .catch(() => {
-      /* l'entité reste vide pour ce rôle */
+    .catch((e) => {
+      console.error(`[db] hydratation ${tableName} échouée :`, e);
     });
 }
 
@@ -447,7 +456,9 @@ export function hydrate(entity: keyof Database): Promise<void> {
   if (entity === "settings") return hydrateSettings().catch(() => undefined);
   const table = TABLES[entity];
   if (!table) return Promise.resolve();
-  return assign(entity, supabase.from(table).select("*"));
+  // Limite haute défensive : les tables volumineuses (grades, students…) ne
+  // doivent pas charger des millions de lignes dans le cache frontal.
+  return assign(entity, supabase.from(table).select("*").limit(2000));
 }
 
 /** Hydrate tout le cache avec ce que le rôle courant peut lire. */
@@ -497,17 +508,14 @@ export function uid(prefix: string): string {
   return `${prefix}-${suffix}`;
 }
 
-/** Latence réseau simulée (300 à 600 ms) puis copie défensive du résultat. */
-export function respond<T>(fn: () => T, min = 300, max = 600): Promise<T> {
-  const ms = min + Math.random() * (max - min);
+/** Copie défensive du résultat (la persistance est désormais côté serveur). */
+export function respond<T>(fn: () => T): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        resolve(structuredClone(fn()));
-      } catch (e) {
-        reject(e instanceof Error ? e : new Error("Erreur inattendue."));
-      }
-    }, ms);
+    try {
+      resolve(structuredClone(fn()));
+    } catch (e) {
+      reject(e instanceof Error ? e : new Error("Erreur inattendue."));
+    }
   });
 }
 

@@ -14,5 +14,5 @@ export function sendContactMessage(msg: ContactMessage): Promise<boolean> {
   return respond(() => {
     void msg;
     return true;
-  }, 500, 900);
+  });
 }

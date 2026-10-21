@@ -2,10 +2,12 @@
  * Réinitialisation du mot de passe d'un accès du personnel (direction) :
  * nouveau mot de passe temporaire, affiché UNE SEULE FOIS, le compte repasse
  * en « changement de mot de passe obligatoire » à sa prochaine connexion.
+ * Limité en débit par compte appelant.
  */
 
 import { audit, generateTempPassword, requireDirecteur, serviceClient } from "../_shared/auth.ts";
 import { badRequest, handleOptions, methodNotAllowed, notFound, ok, serverError } from "../_shared/http.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
 import { expectObject, requireString, ValidationError } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
@@ -17,6 +19,7 @@ Deno.serve(async (req) => {
     const authResult = await requireDirecteur(svc, req);
     if (authResult instanceof Response) return authResult;
     const { caller } = authResult;
+    await enforceRateLimit(svc, `staff-mgmt:${caller.id}`, 30, 300);
 
     const body = expectObject(await req.json());
     const userId = requireString(body, "userId", "Le compte", { max: 64 });
@@ -64,6 +67,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     if (e instanceof ValidationError) return badRequest(e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
     return serverError();
   }
 });

@@ -96,6 +96,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     if (e instanceof ValidationError) return badRequest(e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return ok({ error: e.message }, 429);
     return serverError();
   }
 });

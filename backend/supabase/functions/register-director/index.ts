@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   }
   const svc = serviceClient();
   try {
-    await enforceRateLimit(svc, `register-director:${clientIp(req)}`, 5, 300);
+    await enforceRateLimit(svc, `register-director:${clientIp(req) ?? "sans-adresse"}`, 5, 300);
 
     const body = expectObject(await req.json());
     const firstName = requireString(body, "firstName", "Le prénom", { min: 1, max: 60 });

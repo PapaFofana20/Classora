@@ -12,6 +12,7 @@ import { Table, type Column } from "@/components/ui/Table";
 import { Tabs } from "@/components/ui/Tabs";
 import { useCurrentUser } from "@/context/AuthContext";
 import { useChild } from "@/context/ChildContext";
+import { TODAY_ISO } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { listParentPayments } from "@/services/paymentService";
 import type { PaymentRow } from "@/services/paymentRows";
@@ -33,7 +34,7 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
   const [receipt, setReceipt] = useState<PaymentRow | null>(null);
 
   const mine = useMemo(() => (state.data ?? []).filter((p) => p.studentId === childId).sort((a, b) => a.dueDate.localeCompare(b.dueDate)), [state.data, childId]);
-  const overdue = mine.filter((p) => p.status === "en_retard" || (p.status === "partiel" && p.dueDate <= "2026-12-15"));
+  const overdue = mine.filter((p) => p.status === "en_retard" || (p.status === "partiel" && p.dueDate <= TODAY_ISO));
   const unpaid = mine.filter((p) => remaining(p) > 0);
   const chosen = mine.filter((p) => selected.includes(p.id));
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));

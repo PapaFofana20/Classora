@@ -11,7 +11,9 @@
 //   node scripts/confirm-sandbox-payment.mjs wave WV-1234-5678 succeeded
 //
 // En production, c'est le prestataire (Wave / Orange Money / Free Money) qui
-// appelle le webhook avec la même signature.
+// appelle le webhook avec la même signature. Cible : l'API Render
+// (VITE_API_URL) ; le repli historique 127.0.0.1:54321 correspond aux Edge
+// Functions Supabase locales.
 // ============================================================================
 import { createHmac } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
@@ -35,20 +37,22 @@ function readSecret() {
 }
 
 const secret = readSecret();
-const url = process.env.VITE_SUPABASE_URL || "http://127.0.0.1:54321";
-const key = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+const apiBase = (process.env.VITE_API_URL || "").replace(/\/+$/, "");
+const url = apiBase || (process.env.VITE_SUPABASE_URL || "http://127.0.0.1:54321").replace(/\/+$/, "");
+if (!process.env.VITE_API_URL) {
+  console.error("VITE_API_URL non définie : le webhook local des Edge Functions est utilisé en repli.");
+}
 
 // Le corps est construit UNE SEULE FOIS : la signature porte sur les octets
 // exacts envoyés.
 const body = JSON.stringify({ provider, reference, status, payload: { confirmed_by: "sandbox-cli" } });
 const signature = createHmac("sha256", secret).update(body, "utf8").digest("hex");
 
-const res = await fetch(`${url}/functions/v1/payment-webhook`, {
+const res = await fetch(`${url}/payment-webhook`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
     "x-scolia-signature": signature,
-    ...(key ? { apikey: key } : {}),
   },
   body,
 });

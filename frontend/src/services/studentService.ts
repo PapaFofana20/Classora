@@ -115,4 +115,4 @@ export const listParents = (actor: SessionUser): Promise<Parent[]> => respond(()
 
 /** Code élève d'un inscrit : communiqué aux familles par la direction. */
 export const childCodeOf = (actor: SessionUser, studentId: string): Promise<string | null> =>
-  respond(() => studentsOf(actor.schoolId).find((s) => s.id === studentId)?.childCode ?? null, 100, 200);
+  respond(() => studentsOf(actor.schoolId).find((s) => s.id === studentId)?.childCode ?? null);

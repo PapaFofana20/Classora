@@ -1,0 +1,111 @@
+/**
+ * Création d'un accès du personnel (professeur, instituteur, econome,
+ * surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
+ * school_id vient du profil (JWT vérifié), jamais du corps de la requête.
+ * Le mot de passe temporaire est renvoyé UNE SEULE FOIS et jamais stocké.
+ * Limité en débit par compte appelant.
+ */
+
+import { audit, generateTempPassword, passwordError, requireDirecteur, serviceClient } from "../lib/auth.js";
+import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { enforceRateLimit } from "../lib/rateLimit.js";
+import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../lib/validate.js";
+
+export default route(async (req, res) => {
+  if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
+  const svc = serviceClient();
+  try {
+    const dir = await requireDirecteur(svc, req, res);
+    if (!dir) return;
+    const { caller } = dir;
+    const schoolId = caller.schoolId;
+
+    await enforceRateLimit(svc, `staff-mgmt:${caller.id}`, 30, 300);
+
+    const body = expectObject(req.body);
+    const role = requireString(body, "role", "Le rôle", { max: 20 });
+    if (!["professeur", "instituteur", "econome", "surveillant"].includes(role)) {
+      return badRequest(res, "Rôle invalide.");
+    }
+    const firstName = requireString(body, "firstName", "Le prénom", { min: 1, max: 60 });
+    const lastName = requireString(body, "lastName", "Le nom", { min: 1, max: 60 });
+    const email = requireEmail(body);
+    const phone = requireSnPhone(body, "phone", "Le téléphone");
+    const specialties = requireStringArray(body, "specialties", "Les spécialités");
+    const providedTemp = optionalPassword(body);
+
+    const tempPassword = providedTemp ?? generateTempPassword();
+    const pwError = passwordError(tempPassword);
+    if (pwError) return badRequest(res, pwError);
+
+    // L'école doit être en écriture (abonnement valide / non expiré).
+    const { data: writable } = await svc.rpc("school_is_writable", { p_school_id: schoolId });
+    if (writable !== true) {
+      return forbidden(res, "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
+    }
+
+    const { data: created, error: createError } = await svc.auth.admin.createUser({
+      email,
+      password: tempPassword,
+      email_confirm: true,
+      app_metadata: { role, school_id: schoolId },
+    });
+    if (createError || !created?.user) {
+      const duplicate = /already|duplicate|registered/i.test(createError?.message ?? "");
+      return badRequest(
+        res,
+        duplicate ? "Un compte existe déjà avec cet e-mail." : "Impossible de créer l'accès. Réessayez.",
+      );
+    }
+
+    try {
+      const { error } = await svc.rpc("finish_staff_registration", {
+        p_user_id: created.user.id,
+        p_school_id: schoolId,
+        p_role: role,
+        p_first_name: firstName,
+        p_last_name: lastName,
+        p_phone: phone,
+        p_email: email,
+        p_specialties: role === "professeur" ? specialties : [],
+      });
+      if (error) throw new Error(error.message);
+
+      await audit(svc, {
+        schoolId,
+        actorId: caller.id,
+        actorRole: caller.role,
+        action: "staff_account_created",
+        entity: "profiles",
+        entityId: created.user.id,
+        payload: { role },
+      });
+      return ok(res, {
+        userId: created.user.id,
+        email,
+        tempPassword,
+        firstName,
+        lastName,
+        role,
+      });
+    } catch (sqlError) {
+      await svc.auth.admin.deleteUser(created.user.id);
+      const message = sqlError instanceof Error ? sqlError.message : undefined;
+      if (message && /un compte existe déjà|rôle invalide/i.test(message)) return badRequest(res, message);
+      console.error("[create-staff-account] rpc", sqlError);
+      return serverError(res);
+    }
+  } catch (e) {
+    if (e?.name === "ValidationError") return badRequest(res, e.message);
+    if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
+    console.error("[create-staff-account]", e);
+    return serverError(res);
+  }
+});
+
+function optionalPassword(body) {
+  const raw = body["tempPassword"];
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw !== "string") throw new ValidationError("Le mot de passe temporaire est invalide.");
+  return raw.trim();
+}

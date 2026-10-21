@@ -21,7 +21,7 @@ export function statusOf(schoolId: string): SubscriptionStatus {
   return subscriptionInfoOf(schoolId).status;
 }
 
-export const getPlans = (): Promise<Plan[]> => respond(() => plans, 200, 400);
+export const getPlans = (): Promise<Plan[]> => respond(() => plans);
 
 export const getStatus = (schoolId: string, todayIso: string = TODAY_ISO): Promise<SubscriptionInfo> => respond(() => subscriptionInfoOf(schoolId, todayIso));
 

@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   }
   const svc = serviceClient();
   try {
-    await enforceRateLimit(svc, `register-parent:${clientIp(req)}`, 10, 300);
+    await enforceRateLimit(svc, `register-parent:${clientIp(req) ?? "sans-adresse"}`, 10, 300);
 
     const body = expectObject(await req.json());
     const schoolId = optionalUuid(body, "schoolId", "L'école");
@@ -39,7 +39,9 @@ Deno.serve(async (req) => {
       const { data } = await svc.from("schools").select("id").eq("id", schoolId).maybeSingle();
       resolvedSchool = data?.id ?? null;
     } else if (matricule) {
-      const { data: sch } = await svc.from("schools").select("id").ilike("matricule", matricule).maybeSingle();
+      // eq() : le matricule/code sont normalisés en majuscules côté client ;
+      // ilike() laisserait % et _ agir comme jokers (balayage d'écoles/codes).
+      const { data: sch } = await svc.from("schools").select("id").eq("matricule", matricule).maybeSingle();
       resolvedSchool = sch?.id ?? null;
       if (resolvedSchool) {
         // Pré-validation d'un code élève de l'école (message identique au front).
@@ -47,7 +49,7 @@ Deno.serve(async (req) => {
           .from("students")
           .select("id")
           .eq("school_id", resolvedSchool)
-          .ilike("child_code", childCode)
+          .eq("child_code", childCode)
           .maybeSingle();
         if (!child) {
           return badRequest("Code élève introuvable dans cette école. Vérifiez le code reçu auprès de l'école.");

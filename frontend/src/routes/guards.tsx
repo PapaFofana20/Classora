@@ -13,6 +13,14 @@ export function ProtectedRoute() {
   const { user, justLoggedOut } = useAuth();
   const location = useLocation();
   if (!user) return <Navigate to={justLoggedOut ? "/" : "/connexion"} replace state={{ from: location.pathname }} />;
+  if (user.status === "DESACTIVE") {
+    // Ceinture et bretelles : currentSession() fermant déjà la session d'un
+    // compte désactivé, ce cas ne devrait plus se présenter — on évince
+    // néanmoins tout user muet qui resterait en mémoire plutôt que servir
+    // l'application à un compte désactivé. (EN_ATTENTE est géré par la
+    // demande d'inscription côté écran d'accueil, pas par une redirection.)
+    return <Navigate to="/" replace />;
+  }
   return <Outlet />;
 }
 

@@ -22,7 +22,7 @@ function board(schoolId: string): AssignmentBoard {
   return { classes, subjects, classSubjects, assignments, teachers, conflicts: detectConflicts(classes, classSubjects, assignments, teachers, subjects) };
 }
 
-export const getAssignmentBoard = (schoolId: string): Promise<AssignmentBoard> => respond(() => board(schoolId), 200, 400);
+export const getAssignmentBoard = (schoolId: string): Promise<AssignmentBoard> => respond(() => board(schoolId));
 
 export const listAssignments = (schoolId: string): Promise<TeachingAssignment[]> => respond(() => assignmentsOf(schoolId));
 

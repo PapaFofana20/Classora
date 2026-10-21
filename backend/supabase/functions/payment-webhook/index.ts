@@ -30,12 +30,18 @@ Deno.serve(async (req) => {
     // Sans elle, un simple jeton d'utilisateur (n'importe quel élève ou
     // parent inscrit) suffirait à confirmer un paiement jamais payé.
     if (!signature) {
-      return badRequest("Signature de webhook absente.");
+      // Message identique à une signature invalide : l'absence d'en-tête ne
+      // doit pas être distinguable d'un HMAC erroné (reconnaissance de la
+      // configuration du serveur par un attaquant).
+      return badRequest("Signature de webhook invalide.");
     }
     try {
       await verifyWebhookSignature(raw, signature);
     } catch (e) {
-      return badRequest(e instanceof Error ? e.message : "Signature de webhook invalide.");
+      // Message unique pour l'appelant (absente/invalide/secret non configuré
+      // restent indiscernables) : le détail est journalisé côté serveur.
+      console.error("Signature de webhook refusée.", e);
+      return badRequest("Signature de webhook invalide.");
     }
 
     const provider = requireString(body, "provider", "Le prestataire", { max: 32 });

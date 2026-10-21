@@ -58,21 +58,20 @@ export async function currentSession(): Promise<SessionUser | null> {
   await hydrateAll();
   const profile = db.users.find((u) => u.id === session.user.id);
   if (!profile) {
-    // Compte Auth sans profil exploitable (ou école fermée) : rien à faire ici,
-    // les RLS fermeront tout à l'instant ; on renvoie une session minimale.
-    return toSession({
-      id: session.user.id,
-      schoolId: (session.user.app_metadata.school_id as string) ?? "",
-      email: session.user.email ?? "",
-      passwordHash: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-      role: (session.user.app_metadata.role as Role) ?? "eleve",
-      status: "ACTIF",
-      mustChangePassword: false,
-      createdAt: new Date().toISOString(),
-    });
+    // Compte Auth sans profil exploitable : on ne s'invente pas une session
+    // (l'état forcé ACTIF d'avant permettait à un compte en attente/désactivé
+    // de franchir les gardes). On referme la session auth.
+    await supabase.auth.signOut();
+    await clearCache();
+    return null;
+  }
+  if (profile.status !== "ACTIF") {
+    // DESACTIVE ou EN_ATTENTE : la session Auth (encore émise par Supabase)
+    // n'est pas exploitable ; les politiques RLS le ferment côté données,
+    // on le reflète côté application en refermant la session.
+    await supabase.auth.signOut();
+    await clearCache();
+    return null;
   }
   return toSession(profile);
 }
@@ -99,18 +98,32 @@ export async function login(email: string, password: string): Promise<SessionUse
   const id = (await supabase.auth.getUser()).data.user?.id;
   const jwt = (await supabase.auth.getSession()).data.session?.access_token;
   if (!id || !jwt) throw new Error("E-mail ou mot de passe incorrect.");
-  const guard = await callFunction<{
-    status?: string;
-    error?: string;
-    schoolId?: string;
-    role?: string;
-    mustChangePassword?: boolean;
-  }>("login-guard");
+  let guard: { status?: string; error?: string; schoolId?: string; role?: string; mustChangePassword?: boolean };
+  try {
+    guard = await callFunction<{
+      status?: string;
+      error?: string;
+      schoolId?: string;
+      role?: string;
+      mustChangePassword?: boolean;
+    }>("login-guard");
+  } catch (e) {
+    // Garde injoignable (limite de débit incluse) : on NE CONSERVE PAS la
+    // session Auth (l'ancien code la laissait ouverte sur échec du garde)...
+    await supabase.auth.signOut();
+    await clearCache();
+    throw e instanceof Error ? e : new Error("Connexion impossible. Réessayez.");
+  }
   const envelope = (guard ?? {}) as Record<string, unknown>;
   if ((envelope.error as string | undefined) && envelope.status !== "ACTIF") {
     await supabase.auth.signOut();
     await clearCache();
     throw new Error(envelope.error as string);
+  }
+  if ((envelope.status as string | undefined) !== "ACTIF") {
+    await supabase.auth.signOut();
+    await clearCache();
+    throw new Error("Connexion impossible. Réessayez.");
   }
   await hydrateAll();
   return (await currentSession()) || (() => {

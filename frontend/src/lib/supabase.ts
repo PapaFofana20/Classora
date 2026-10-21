@@ -18,6 +18,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    // PKCE : le code d'autorisation transite par l'URL (jamais le token en
+    // fragment, que les historiques de navigateur et référents conservent).
+    flowType: "pkce",
   },
 });
 

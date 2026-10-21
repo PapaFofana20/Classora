@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   }
   const svc = serviceClient();
   try {
-    await enforceRateLimit(svc, `register-student:${clientIp(req)}`, 10, 300);
+    await enforceRateLimit(svc, `register-student:${clientIp(req) ?? "sans-adresse"}`, 10, 300);
 
     const body = expectObject(await req.json());
     const schoolId = optionalUuid(body, "schoolId", "L'école");
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       const { data } = await svc.from("schools").select("id").eq("id", schoolId).maybeSingle();
       resolvedSchool = data?.id ?? null;
     } else if (matricule) {
-      const { data } = await svc.from("schools").select("id").ilike("matricule", matricule).maybeSingle();
+      const { data } = await svc.from("schools").select("id").eq("matricule", matricule).maybeSingle();
       resolvedSchool = data?.id ?? null;
     }
     if (!resolvedSchool) return badRequest("École introuvable.");

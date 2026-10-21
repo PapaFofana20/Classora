@@ -22,9 +22,9 @@ function subjectsOfCached(schoolId: string): Subject[] {
   return db.subjects.filter((s) => s.schoolId === schoolId);
 }
 
-export const listSchools = (): Promise<School[]> => respond(() => db.schools, 150, 300);
+export const listSchools = (): Promise<School[]> => respond(() => db.schools);
 
-export const getSchool = (schoolId: string): Promise<School | null> => respond(() => schoolOf(schoolId) ?? null, 150, 300);
+export const getSchool = (schoolId: string): Promise<School | null> => respond(() => schoolOf(schoolId) ?? null);
 
 export function updateSettings(schoolId: string, patch: Partial<SchoolSettings>): Promise<SchoolSettings> {
   return (async () => {

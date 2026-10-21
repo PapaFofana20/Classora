@@ -87,13 +87,18 @@ export function requireSnPhone(obj: Record<string, unknown>, field: string, labe
   return raw;
 }
 
-/** Date ISO (AAAA-MM-JJ) optionnelle (élève : naissance). */
+/** Date ISO (AAAA-MM-JJ) optionnelle (élève : naissance) — jour calendaire réel. */
 export function optionalIsoDate(obj: Record<string, unknown>, field: string, label: string): string | undefined {
   const raw = optionalString(obj, field, label, 10);
   if (raw === undefined || raw === "") return undefined;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) throw new ValidationError(`${label} est invalide.`);
-  const d = new Date(`${raw}T00:00:00Z`);
-  if (Number.isNaN(d.getTime())) throw new ValidationError(`${label} est invalide.`);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (!m) throw new ValidationError(`${label} est invalide.`);
+  // Contrôle strict du calendrier : `new Date("2026-02-31")` ne renvoie pas NaN.
+  const [, y, mo, d] = m;
+  const dt = new Date(Date.UTC(Number(y), Number(mo) - 1, Number(d)));
+  if (dt.getUTCFullYear() !== Number(y) || dt.getUTCMonth() !== Number(mo) - 1 || dt.getUTCDate() !== Number(d)) {
+    throw new ValidationError(`${label} est invalide.`);
+  }
   return raw;
 }
 

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { SessionUser } from "@/types";
 import * as authService from "@/services/authService";
-import { resetDatabase } from "@/services/db";
+import { clearCache } from "@/services/db";
 import type { DirectorInput, ParentSignupInput, StaffAccountInput, StaffCredentials, StudentSignupInput } from "@/services/authService";
 
 interface AuthContextValue {
@@ -100,7 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     authService.logout();
-    void resetDatabase();
+    // On vide le cache sans re-télécharger : resetDatabase() relançait une
+    // hydratation complète JUSTE après la déconnexion (appels RLS refusés) ;
+    // le prochain currentSession() rechargera ce qui est nécessaire.
+    void clearCache();
     setJustLoggedOut(true);
     setUser(null);
   }, []);

@@ -3,10 +3,12 @@
  * surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
  * school_id vient du token (profils), jamais du corps de la requête.
  * Le mot de passe temporaire est renvoyé UNE SEULE FOIS et jamais stocké.
+ * Limité en débit par compte appelant, sans garder la requête.
  */
 
 import { audit, generateTempPassword, passwordError, requireDirecteur, serviceClient } from "../_shared/auth.ts";
 import { badRequest, forbidden, handleOptions, methodNotAllowed, ok, serverError } from "../_shared/http.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../_shared/validate.ts";
 
 type StaffRole = "professeur" | "instituteur" | "econome" | "surveillant";
@@ -21,6 +23,7 @@ Deno.serve(async (req) => {
     if (authResult instanceof Response) return authResult;
     const { caller } = authResult;
     const schoolId = caller.schoolId as string;
+    await enforceRateLimit(svc, `staff-mgmt:${caller.id}`, 30, 300);
 
     const body = expectObject(await req.json());
     const role = requireString(body, "role", "Le rôle", { max: 20 }) as StaffRole;
