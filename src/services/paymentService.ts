@@ -24,13 +24,39 @@ export function listStudentPayments(schoolId: string, studentId: string): Promis
   return respond(() => paymentsOf(schoolId).filter((p) => p.studentId === studentId));
 }
 
+/** Résultat d'une demande de paiement mobile money. */
+export interface InstallmentPaymentResult {
+  /** Échéances concernées, relues depuis le serveur. */
+  rows: PaymentRow[];
+  /** `succeeded` (bac à sable) ou `pending` : la confirmation vient du prestataire. */
+  status: "succeeded" | "pending" | "rien_a_payer";
+  /** Références des transactions ouvertes chez le prestataire. */
+  references: string[];
+  /** Message à afficher à la famille. */
+  message: string;
+}
+
 /** Paiement mobile money par un parent ou un élève (via Edge Function). */
-export function payInstallments(actor: SessionUser, paymentIds: string[], method: PayMethod, phone: string): Promise<PaymentRow[]> {
+export function payInstallments(
+  actor: SessionUser,
+  paymentIds: string[],
+  method: PayMethod,
+  phone: string,
+): Promise<InstallmentPaymentResult> {
   return (async () => {
     ensure(method !== "especes", "Moyen de paiement invalide.");
-    await callFunction("pay-installment", { paymentIds, method, phone });
+    const res = await callFunction<{ status?: string; references?: string[]; message?: string }>("pay-installment", {
+      paymentIds,
+      method,
+      phone,
+    });
     await hydrate("payments");
-    return paymentsOf(actor.schoolId).filter((p) => paymentIds.includes(p.id)).map(toRow);
+    return {
+      rows: paymentsOf(actor.schoolId).filter((p) => paymentIds.includes(p.id)).map(toRow),
+      status: (res?.status as InstallmentPaymentResult["status"]) ?? "pending",
+      references: res?.references ?? [],
+      message: res?.message ?? "",
+    };
   })();
 }
 

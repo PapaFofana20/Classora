@@ -19,7 +19,7 @@ const METHODS: { id: Exclude<PayMethod, "especes">; color: string; short: string
   { id: "free_money", color: "bg-red-600", short: "F", hint: "Validez avec votre code Free Money" },
 ];
 
-type Step = "method" | "phone" | "waiting" | "done";
+type Step = "method" | "phone" | "waiting" | "pending" | "done";
 
 interface Props {
   open: boolean;
@@ -29,7 +29,7 @@ interface Props {
   onPaid: () => void;
 }
 
-/** Parcours simulé de paiement Wave / Orange Money / Free Money. */
+/** Parcours de paiement Wave / Orange Money / Free Money. */
 export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
   const user = useCurrentUser();
   const { toast } = useToast();
@@ -38,6 +38,7 @@ export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<PaymentRow[]>([]);
+  const [pendingMessage, setPendingMessage] = useState("");
   const total = items.reduce((a, p) => a + remaining(p), 0);
   const phoneErr = phone && !isValidSnPhone(phone) ? "Numéro invalide. Format attendu : 77 123 45 67." : null;
 
@@ -49,6 +50,7 @@ export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
     setPhone("");
     setError(null);
     setReceipt([]);
+    setPendingMessage("");
     onClose();
   };
 
@@ -57,10 +59,17 @@ export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
     setStep("waiting");
     setError(null);
     try {
-      const rows = await payInstallments(user, items.map((i) => i.id), method, phone.replace(/\s/g, ""));
-      setReceipt(rows);
-      setStep("done");
-      toast(`Paiement de ${formatCurrency(total)} réussi.`);
+      const result = await payInstallments(user, items.map((i) => i.id), method, phone.replace(/\s/g, ""));
+      setReceipt(result.rows);
+      if (result.status === "succeeded") {
+        setStep("done");
+        toast(`Paiement de ${formatCurrency(total)} réussi.`);
+      } else {
+        // La confirmation appartient au prestataire : les échéances restent
+        // « en attente » jusqu'à réception du webhook signé.
+        setPendingMessage(result.message);
+        setStep("pending");
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Le paiement a échoué.");
       setStep("phone");
@@ -71,7 +80,7 @@ export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
     <Modal
       open={open}
       onClose={close}
-      title={step === "done" ? "Paiement confirmé" : "Payer par mobile money"}
+      title={step === "done" ? "Paiement confirmé" : step === "pending" ? "Paiement demandé" : "Payer par mobile money"}
       footer={
         step === "method" ? (
           <><Button variant="outline" onClick={close}>Annuler</Button><Button variant="dark" disabled={!method} onClick={() => setStep("phone")}>Continuer</Button></>
@@ -79,6 +88,8 @@ export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
           <><Button variant="outline" onClick={() => setStep("method")}>Retour</Button><Button variant="primary" disabled={!isValidSnPhone(phone)} onClick={() => void pay()}>Payer {formatCurrency(total)}</Button></>
         ) : step === "done" ? (
           <><Button variant="outline" icon="print" onClick={() => window.print()}>Imprimer le reçu</Button><Button variant="dark" onClick={close}>Terminer</Button></>
+        ) : step === "pending" ? (
+          <Button variant="dark" onClick={close}>Fermer</Button>
         ) : undefined
       }
     >
@@ -108,6 +119,13 @@ export function PayFlow({ open, items, schoolName, onClose, onPaid }: Props) {
           <span className="mx-auto grid size-20 animate-pulse place-items-center rounded-full bg-lime text-forest"><Icon name="smartphone" fill className="text-[40px]" /></span>
           <p className="mt-5 font-bold">En attente de validation sur votre téléphone…</p>
           <p className="mt-1 text-sm text-neutral-500">Confirmez le paiement avec votre code secret {method ? PAY_METHOD_LABELS[method] : ""}.</p>
+        </div>
+      )}
+      {step === "pending" && (
+        <div role="status" className="py-8 text-center">
+          <span className="mx-auto grid size-20 place-items-center rounded-full bg-lime-soft text-forest"><Icon name="clock" fill className="text-[40px]" /></span>
+          <p className="mt-5 font-bold">Paiement demandé, en attente de confirmation.</p>
+          <p className="mt-1 text-sm text-neutral-500">{pendingMessage || "Confirmez la transaction sur votre téléphone. Vos échéances seront réglées dès réception du paiement."}</p>
         </div>
       )}
       {step === "done" && <Receipt payments={receipt} schoolName={schoolName} />}

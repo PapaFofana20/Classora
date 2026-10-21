@@ -56,15 +56,21 @@ Deno.serve(async (req) => {
     const pending = started as { reference: string; amount: number }[];
     const refs = pending.map((x) => x.reference);
 
-    // 2. Sandbox : confirmation immédiate et idempotente des références.
-    for (const ref of refs) {
-      const { error: confirmError } = await svc.rpc("apply_paid_installment", {
-        p_provider: method,
-        p_provider_ref: ref,
-        p_status: "succeeded",
-        p_payload: { confirmed_by: "sandbox" },
-      });
-      if (confirmError) return serverError();
+    // 2. Confirmation : elle appartient au PRESTATAIRE (webhook signé).
+    //    L'auto-confirmation n'existe qu'en bac à sable explicite : en
+    //    production, solder une échéance sans transfert d'argent vole la
+    //    recette de l'école.
+    const sandbox = (Deno.env.get("APP_ENV") ?? "").toLowerCase() === "sandbox";
+    if (sandbox) {
+      for (const ref of refs) {
+        const { error: confirmError } = await svc.rpc("apply_paid_installment", {
+          p_provider: method,
+          p_provider_ref: ref,
+          p_status: "succeeded",
+          p_payload: { confirmed_by: "sandbox" },
+        });
+        if (confirmError) return serverError();
+      }
     }
 
     await audit(svc, {
@@ -72,10 +78,22 @@ Deno.serve(async (req) => {
       actorRole: caller.role,
       action: "installments_paid_family",
       entity: "payment_transactions",
-      payload: { method, count: refs.length },
+      payload: { method, count: refs.length, confirmedBy: sandbox ? "sandbox" : "provider_pending" },
     });
 
     const limit = pending.reduce((s, x) => s + (x.amount ?? 0), 0);
+    if (!sandbox) {
+      return ok({
+        references: refs,
+        method,
+        phone,
+        amount: limit,
+        status: refs.length ? "pending" : "rien_a_payer",
+        message: refs.length
+          ? "Paiement demandé. Confirmez la transaction sur votre téléphone : vos échéances seront réglées dès réception du paiement."
+          : "Ces échéances sont déjà soldées.",
+      });
+    }
     return ok({
       references: refs,
       method,

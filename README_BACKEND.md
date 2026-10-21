@@ -138,6 +138,16 @@ node scripts/confirm-sandbox-payment.mjs wave WV-1234-5678 succeeded
 En production, l'étape 2 est faite par le prestataire (Wave / Orange Money /
 Free Money) avec la même signature HMAC.
 
+Variables d'environnement des Edge Functions :
+
+| Variable | Rôle |
+|---|---|
+| `SCOLIA_WEBHOOK_SECRET` | secret HMAC du webhook (≥ 16 caractères, **jamais** `scolia-dev-secret`) |
+| `APP_ENV` | `sandbox` active l'auto-confirmation des échéances de famille (bac à sable local uniquement) |
+
+En production, `APP_ENV` n'est **pas** défini : `pay-installment` ouvre les
+transactions chez le prestataire et laisse la confirmation au webhook signé.
+
 ## 9. Points ouverts
 
 - Exécution des tests pgTAP et `npm run types:db` (Docker requis).
