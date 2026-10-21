@@ -20,8 +20,6 @@ const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
 const SignupSentPage = lazy(() => import("@/pages/auth/SignupSentPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
 const ChangePasswordPage = lazy(() => import("@/pages/auth/ChangePasswordPage"));
-const DirectorSubscriptionPage = lazy(() => import("@/pages/auth/DirectorSubscriptionPage"));
-const DirectorSubscriptionSimulationPage = lazy(() => import("@/pages/auth/DirectorSubscriptionSimulationPage"));
 const DashboardPage = lazy(() => import("@/pages/app/DashboardPage"));
 const StudentsPage = lazy(() => import("@/pages/app/StudentsPage"));
 const StudentDetailPage = lazy(() => import("@/pages/app/StudentDetailPage"));
@@ -79,8 +77,6 @@ export default function App() {
               <Route element={<ProtectedRoute />}>
                 <Route element={<MustChangePasswordGuard />}>
                   <Route path="app/mot-de-passe-temporaire" element={<ChangePasswordPage />} />
-                  <Route path="inscription/simulation" element={guard("onboarding", <DirectorSubscriptionSimulationPage />)} />
-                  <Route path="inscription/abonnement" element={guard("onboarding", <DirectorSubscriptionPage />)} />
                   <Route element={<SubscriptionGuard />}>
                     <Route path="app" element={<DashboardLayout />}>
                       <Route index element={<DashboardPage />} />

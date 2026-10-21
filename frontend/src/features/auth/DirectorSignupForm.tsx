@@ -15,7 +15,7 @@ import { passwordError } from "@/utils/password";
 
 const CITIES = ["Dakar", "Thiès", "Mbour", "Saint-Louis", "Kaolack", "Ziguinchor", "Tambacounda", "Louga", "Kolda", "Kaffrine"];
 
-/** Inscription du directeur : école + compte, puis vérification des informations. */
+/** Inscription du directeur : école + compte + matricule, puis accès direct au tableau de bord. */
 export function DirectorSignupForm() {
   const { registerDirector } = useAuth();
   const { toast } = useToast();
@@ -47,11 +47,11 @@ export function DirectorSignupForm() {
     if (!valid) return;
     setBusy(true);
     setError(null);
-try {
-        await registerDirector({ ...form, cycles });
-        toast("Compte créé. Choisissez votre abonnement pour activer votre école.");
-        navigate("/inscription/simulation", { replace: true });
-      } catch (err) {
+    try {
+      await registerDirector({ ...form, cycles });
+      toast("Compte créé. Bienvenue sur Classora !");
+      navigate("/app", { replace: true });
+    } catch (err) {
       setError(err instanceof Error ? err.message : "Création du compte impossible.");
       setBusy(false);
     }
@@ -99,12 +99,12 @@ try {
       </div>
       <Card className="!bg-lime-soft text-sm">
         <p className="flex items-start gap-2 font-medium text-forest">
-          <Icon name="workspace_premium" className="text-[20px]" />
-          Étape suivante : choisissez votre formule, simulez le paiement et obtenez immédiatement votre matricule d'école.
+          <Icon name="verified_user" className="text-[20px]" />
+          Votre école sera créée avec son matricule. Vous accéderez directement au tableau de bord.
         </p>
       </Card>
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
-        Créer mon école
+        Créer mon école et accéder au tableau de bord
       </Button>
     </form>
   );
