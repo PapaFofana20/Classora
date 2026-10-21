@@ -5,12 +5,15 @@
  *   sur Render. Supabase reste les données (PostgreSQL + RLS) et l'Auth
  *   (mots de passe de connexion) : cette API n'accède aux données qu'avec
  *   le service_role, pour la logique privilégiée (inscriptions, gestion du
- *   personnel, paiements) ;
+ *   personnel) ;
  *
  *   - routes publiques : verify-matricule, register-* (rate limité par IP) ;
- *   - routes authentifiées : login-guard, staff-*, start-subscription,
- *     pay-installment (JWT vérifié auprès de Supabase Auth) ;
- *   - webhook machine-à-machine : payment-webhook (HMAC du corps brut).
+ *   - routes authentifiées : login-guard, staff-* (JWT vérifié auprès de
+ *     Supabase Auth).
+ *
+ *   NB : les routes de paiement mobile money (start-subscription,
+ *   pay-installment, payment-webhook) sont retirées pour l'instant —
+ *   elles seront réintroduites plus tard.
  */
 
 import express from "express";
@@ -26,9 +29,6 @@ import createStaffAccount from "./routes/createStaffAccount.js";
 import updateStaff from "./routes/updateStaff.js";
 import resetStaffPassword from "./routes/resetStaffPassword.js";
 import setStaffActive from "./routes/setStaffActive.js";
-import startSubscription from "./routes/startSubscription.js";
-import payInstallment from "./routes/payInstallment.js";
-import paymentWebhook from "./routes/paymentWebhook.js";
 
 const app = express();
 
@@ -36,16 +36,8 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", true); // passerelle Render : X-Forwarded-For fiable
 
-// Corps JSON limité ; le Buffer brut est conservé pour le webhook (HMAC sur
-// les octets exacts reçus, pas sur le JSON relu).
-app.use(
-  express.json({
-    limit: "64kb",
-    verify(req, _res, buf) {
-      req.rawBody = buf;
-    },
-  }),
-);
+// Corps JSON limité.
+app.use(express.json({ limit: "64kb" }));
 
 // Parseur JSON défaillant ou corps absent → même enveloppe 400 que le front.
 app.use((err, _req, res, next) => {
@@ -75,9 +67,6 @@ app.all("/create-staff-account", createStaffAccount);
 app.all("/update-staff", updateStaff);
 app.all("/reset-staff-password", resetStaffPassword);
 app.all("/set-staff-active", setStaffActive);
-app.all("/start-subscription", startSubscription);
-app.all("/pay-installment", payInstallment);
-app.all("/payment-webhook", paymentWebhook);
 
 // Dernière barrière : enveloppe { error } même sur une exception imprévue.
 app.use((err, _req, res, _next) => {

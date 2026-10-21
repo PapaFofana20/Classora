@@ -17,9 +17,9 @@ export default function PaymentsPage() {
         title="Paiements"
         subtitle={
           isStudent
-            ? "Votre échéancier · paiement Wave, Orange Money ou Free Money"
+            ? "Votre échéancier de scolarité"
             : isParent
-              ? `Échéancier de ${activeChild ? activeChild.firstName : "vos enfants"} · Wave, Orange Money, Free Money`
+              ? `Échéancier de ${activeChild ? activeChild.firstName : "vos enfants"}`
               : "Échéanciers, encaissements, relances et reçus · 2026-2027"
         }
       />

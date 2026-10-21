@@ -100,7 +100,7 @@ export function DirectorSignupForm() {
       <Card className="!bg-lime-soft text-sm">
         <p className="flex items-start gap-2 font-medium text-forest">
           <Icon name="workspace_premium" className="text-[20px]" />
-          Étape suivante : choisissez une formule et payez (Wave, Orange Money ou Free Money). Votre matricule d'école est généré à la confirmation du paiement.
+          Étape suivante : votre abonnement s'active page Abonnement. En cas de besoin, contactez le support Classora : votre matricule d'école est généré à l'activation.
         </p>
       </Card>
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>

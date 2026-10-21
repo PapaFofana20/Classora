@@ -7,9 +7,7 @@
   "scripts": {
     "db:push:remote": "node scripts/db-push.mjs",
     "test:rls:remote": "node scripts/run-rls-tests.mjs",
-    "types:db:remote": "node scripts/gen-types.mjs",
-    "audit": "node scripts/audit-webhook-signature.mjs",
-    "pay:confirm:sandbox": "node scripts/confirm-sandbox-payment.mjs"
+    "types:db:remote": "node scripts/gen-types.mjs"
   },
   "devDependencies": {
     "pg": "^8.23.1",

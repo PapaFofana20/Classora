@@ -18,7 +18,6 @@ import { listParentPayments } from "@/services/paymentService";
 import type { PaymentRow } from "@/services/paymentRows";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { PAY_METHOD_LABELS, PAY_STATUS_LABELS, remaining, sum } from "@/utils/payments";
-import { PayFlow } from "./PayFlow";
 import { Receipt } from "./Receipt";
 
 export const PAY_TONE = { paye: "success", partiel: "warning", en_retard: "danger", a_venir: "neutral" } as const;
@@ -29,21 +28,16 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
   const childId = self ? user.studentId : activeChild?.id;
   const state = useAsync(() => listParentPayments(user), [user.id]);
   const [tab, setTab] = useState("echeancier");
-  const [selected, setSelected] = useState<string[]>([]);
-  const [paying, setPaying] = useState(false);
   const [receipt, setReceipt] = useState<PaymentRow | null>(null);
 
   const mine = useMemo(() => (state.data ?? []).filter((p) => p.studentId === childId).sort((a, b) => a.dueDate.localeCompare(b.dueDate)), [state.data, childId]);
   const overdue = mine.filter((p) => p.status === "en_retard" || (p.status === "partiel" && p.dueDate <= TODAY_ISO));
   const unpaid = mine.filter((p) => remaining(p) > 0);
-  const chosen = mine.filter((p) => selected.includes(p.id));
-  const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const next = unpaid.find((p) => p.status === "a_venir");
 
   if (!loading && !self && children.length === 0) return <EmptyState icon="child_care" title="Aucun enfant rattaché" />;
 
   const cols: Column<PaymentRow>[] = [
-    { key: "sel", header: <span className="sr-only">Sélection</span>, render: (p) => (remaining(p) > 0 ? <label className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-mist"><input type="checkbox" className="size-5 accent-forest" checked={selected.includes(p.id)} onChange={() => toggle(p.id)} aria-label={`Sélectionner ${p.label}`} /></label> : <Icon name="check_circle" fill className="text-leaf" />) },
     { key: "l", header: "Échéance", render: (p) => <span className="font-semibold">{p.label}</span> },
     { key: "d", header: "Date limite", render: (p) => formatDate(p.dueDate) },
     { key: "a", header: "Montant", align: "right", render: (p) => formatCurrency(p.amount) },
@@ -71,10 +65,7 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
           <Tabs label="Paiements" value={tab} onChange={setTab} items={[{ id: "echeancier", label: "Échéancier", icon: "calendar_month" }, { id: "historique", label: "Historique et reçus", icon: "receipt_long" }]} />
           {tab === "echeancier" ? (
             <>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button variant="outline" icon="priority_high" disabled={overdue.length === 0} onClick={() => setSelected(overdue.map((p) => p.id))}>Sélectionner les retards</Button>
-                <Button icon="payments" disabled={chosen.length === 0} onClick={() => setPaying(true)}>Payer la sélection ({chosen.length}) · {formatCurrency(sum(chosen.map(remaining)))}</Button>
-              </div>
+              {overdue.length > 0 && <p className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger"><Icon name="priority_high" className="text-[20px]" />{overdue.length} échéance{overdue.length > 1 ? "s" : ""} en retard : réglez auprès de l'économe de l'école.</p>}
               <Card padded={false} className="p-2"><Table caption="Échéancier" columns={cols} rows={mine} rowKey={(p) => p.id} /></Card>
             </>
           ) : mine.some((p) => p.paidAmount > 0) ? (
@@ -82,7 +73,6 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
           ) : (
             <EmptyState icon="receipt_long" title="Aucun paiement enregistré" />
           )}
-          <PayFlow open={paying} items={chosen} schoolName={schoolName} onClose={() => setPaying(false)} onPaid={() => { setSelected([]); state.reload(); }} />
           <Modal open={!!receipt} onClose={() => setReceipt(null)} title="Reçu de paiement" footer={<><Button variant="outline" icon="print" onClick={() => window.print()}>Imprimer</Button><Button variant="dark" onClick={() => setReceipt(null)}>Fermer</Button></>}>
             {receipt && <Receipt payments={[receipt]} schoolName={schoolName} />}
           </Modal>

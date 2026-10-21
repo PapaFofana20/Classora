@@ -4,7 +4,7 @@ import { steps } from "@/data/landing";
 import { cn } from "@/utils/cn";
 
 const tones = ["bg-lime-soft text-forest", "bg-mist text-forest", "bg-lime text-forest"];
-const methods = ["Wave", "Orange Money", "Free Money"];
+const features = ["Bulletins", "Échéancier", "Messagerie"];
 
 /** Grille bento « Comment ça marche » : la dernière carte, large, est en vert foncé. */
 export function StepsBento() {
@@ -34,8 +34,8 @@ export function StepsBento() {
                   <p className={cn("mt-3 text-sm leading-relaxed", last ? "text-white/80" : "text-neutral-700")}>{s.text}</p>
                 </div>
                 {last && (
-                  <div className="mt-8 flex flex-wrap gap-3 md:mt-0 md:flex-col" aria-label="Moyens de paiement">
-                    {methods.map((m) => (
+                  <div className="mt-8 flex flex-wrap gap-3 md:mt-0 md:flex-col" aria-label="Inclus dans Classora">
+                    {features.map((m) => (
                       <span key={m} className="inline-flex items-center gap-2 text-sm font-semibold text-white/85">
                         <Icon name="check_circle" fill className="text-lime" />
                         {m}

@@ -46,7 +46,7 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText 
                 </>
               )}
             </h2>
-            <p className="mt-4 max-w-md text-white/80">{visualText ?? "Inscriptions, bulletins, paiements Wave / Orange Money / Free Money et messagerie parents-enseignants, dans un seul espace."}</p>
+            <p className="mt-4 max-w-md text-white/80">{visualText ?? "Inscriptions, bulletins, échéanciers de scolarité et messagerie parents-enseignants, dans un seul espace."}</p>
           </div>
         </div>
       </aside>

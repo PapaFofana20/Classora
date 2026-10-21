@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { formatCurrency } from "@/utils/format";
 import { planLimitLabel } from "@/data/plans";
@@ -9,21 +8,17 @@ import { cn } from "@/utils/cn";
 interface Props {
   plan: Plan;
   cycle: "monthly" | "yearly";
-  selected: boolean;
   current?: boolean;
-  disabled?: boolean;
-  onSelect: () => void;
 }
 
 /** Carte de formule (mensuel / annuel) — utilisée sur /app/abonnement. */
-export function PlanCard({ plan, cycle, selected, current, disabled, onSelect }: Props) {
+export function PlanCard({ plan, cycle, current }: Props) {
   const price = cycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
   return (
     <article
       className={cn(
         "relative flex h-full flex-col rounded-3xl border-2 p-6 transition-all",
         plan.highlight ? "border-forest bg-forest text-white shadow-soft" : "border-neutral-200 bg-white",
-        selected && "ring-4 ring-lime",
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -47,9 +42,7 @@ export function PlanCard({ plan, cycle, selected, current, disabled, onSelect }:
           </li>
         ))}
       </ul>
-      <Button variant={plan.highlight ? "primary" : "dark"} size="lg" disabled={disabled || current} onClick={onSelect}>
-        {current ? "Formule en cours" : `Choisir ${plan.name}`}
-      </Button>
+      <p className={cn("text-xs font-medium", plan.highlight ? "text-white/70" : "text-neutral-500")}>Paiement par mobile bientôt disponible : contactez le support pour activer cette formule.</p>
     </article>
   );
 }

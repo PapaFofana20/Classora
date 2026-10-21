@@ -1,26 +1,30 @@
 # API SCOLIA sur Render
 
-Backend Node/Express 20 (sans Docker) qui **remplace les 12 Edge Functions
+Backend Node/Express 20 (sans Docker) qui **remplace les Edge Functions
 Deno**. Le reste de l'architecture est inchangé :
 
 - **Supabase = Auth + base de données** : comptes et mots de passe de
   connexion (Supabase Auth), écoles, élèves, parents, notes, paiements…
   (PostgreSQL + politiques RLS) ;
 - **front = React** : il s'adresse à Supabase (lectures RLS, session) ET à
-  cette API (inscriptions, gestion du personnel, paiements) ;
-- **cette API = logique privilégiée** : elle seule détient le service_role
-  et le secret HMAC des webhooks.
+  cette API (inscriptions, gestion du personnel) ;
+- **cette API = logique privilégiée** : elle seule détient le service_role.
 
 > Déployer via le dashboard Render en créant un **Web Service** (voir plus
 > bas) — pas selon le Blueprint `render.yaml`, qui ne décrit que le site
 > statique du front.
+>
+> **Paiement mobile money (Wave / Orange Money / Free)** : retiré pour
+> l'instant (`start-subscription`, `pay-installment`, `payment-webhook`
+> supprimés, abonnement activé manuellement côté support). Les échéances de
+> scolarité restent suivies (soldes + encaissement espèces par l'économe).
 
 ## Démarrage local
 
 ```bash
 cd backend/api
 npm install
-cp .env.example .env.local       # renseigner SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SCOLIA_WEBHOOK_SECRET
+cp .env.example .env.local       # renseigner SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 npm run dev                      # http://localhost:3000/healthz
 ```
 
@@ -40,13 +44,9 @@ VITE_API_URL=http://localhost:3000
    - **Health Check Path** : `/healthz`
 2. Variables d'environnement (Render > Web Service > Environment, voir
    `.env.example` du dossier) :
-   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SCOLIA_WEBHOOK_SECRET`,
-   `FRONTEND_ORIGIN` (origine du front en production, obligatoire pour le
-   CORS), `APP_ENV=production` (jamais `sandbox`).
+   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `FRONTEND_ORIGIN` (origine
+   du front en production, obligatoire pour le CORS).
 3. Front : définir `VITE_API_URL=https://<service>.onrender.com`.
-4. Le dashboard du prestataire de paiement doit poster ses confirmations sur
-   `https://<service>.onrender.com/payment-webhook` (en-tête
-   `x-scolia-signature` = hex SHA-256 du corps brut).
 
 ## Routes (contrat identique aux Edge Functions)
 
@@ -56,9 +56,6 @@ VITE_API_URL=http://localhost:3000
 | `GET/POST /verify-matricule` | public | vérifier un matricule d'école |
 | `POST /register-director` \| `/register-student` \| `/register-parent` | public | inscriptions |
 | `POST /create-staff-account` \| `/update-staff` \| `/reset-staff-password` \| `/set-staff-active` | directeur | gestion du personnel |
-| `POST /start-subscription` | directeur | ouvrir un paiement d'abonnement |
-| `POST /pay-installment` | famille | ouvrir un paiement d'échéances |
-| `POST /payment-webhook` | HMAC | confirmation des paiements (idempotent) |
 
 ## Ce qui ne change pas
 

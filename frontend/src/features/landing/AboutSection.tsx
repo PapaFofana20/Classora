@@ -16,7 +16,7 @@ export function AboutSection() {
             </div>
             <div>
               <p className="text-base leading-relaxed text-white/85 sm:text-lg">
-                Classora est né du constat de directeurs d'écoles privées sénégalaises : trop de cahiers, de reçus papier et de bulletins refaits à la main. Nous avons construit un outil qui respecte vos réalités : un instituteur titulaire à l'élémentaire, plusieurs professeurs au moyen et secondaire, des coefficients par série et des paiements par mobile money.
+                Classora est né du constat de directeurs d'écoles privées sénégalaises : trop de cahiers, de reçus papier et de bulletins refaits à la main. Nous avons construit un outil qui respecte vos réalités : un instituteur titulaire à l'élémentaire, plusieurs professeurs au moyen et secondaire, des coefficients par série et des échéances de scolarité suivies en temps réel.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <ArrowButton to="/a-propos">Lire notre histoire</ArrowButton>

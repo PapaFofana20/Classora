@@ -81,13 +81,6 @@ allowed_cidrs = ["0.0.0.0/0"]
 # Defaults to allow all IPv6 connections. Set empty array to block all IPs.
 allowed_cidrs_v6 = ["::/0"]
 
-[functions.payment-webhook]
-# Le webhook est appelé par le PRESTATAIRE de paiement : il ne peut pas
-# présenter un JWT d'utilisateur. L'authentification repose sur la signature
-# HMAC « x-scolia-signature » (vérifiée dans _shared/payments.ts), jamais sur
-# le JWT. Sans ce réglage, le gateway renvoie 401 avant d'atteindre la fonction.
-verify_jwt = false
-
 # Uncomment to reject non-secure connections to the database.
 # [db.ssl_enforcement]
 # enabled = true
