@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { AuthProvider } from "@/context/AuthContext";
 import { SchoolProvider } from "@/context/SchoolContext";
 import { ToastProvider } from "@/context/ToastContext";
-import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop, SubscriptionGuard } from "@/routes/guards";
+import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop } from "@/routes/guards";
 import { ROUTE_ROLES } from "@/routes/navigation";
 import HomePage from "@/pages/public/HomePage";
 
@@ -77,8 +77,7 @@ export default function App() {
               <Route element={<ProtectedRoute />}>
                 <Route element={<MustChangePasswordGuard />}>
                   <Route path="app/mot-de-passe-temporaire" element={<ChangePasswordPage />} />
-                  <Route element={<SubscriptionGuard />}>
-                    <Route path="app" element={<DashboardLayout />}>
+                  <Route path="app" element={<DashboardLayout />}>
                       <Route index element={<DashboardPage />} />
                       <Route path="eleves" element={guard("eleves", <StudentsPage />)} />
                       <Route path="eleves/demandes" element={guard("demandes", <PendingStudentsPage />)} />
@@ -96,7 +95,6 @@ export default function App() {
                       <Route path="*" element={<Navigate to="/app" replace />} />
                     </Route>
                   </Route>
-                </Route>
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
