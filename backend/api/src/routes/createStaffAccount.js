@@ -6,7 +6,7 @@
  * Limité en débit par compte appelant.
  */
 
-import { audit, generateTempPassword, passwordError, requireDirecteur, serviceClient } from "../lib/auth.js";
+import { audit, generateTempPassword, isStaffRole, passwordError, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../lib/validate.js";
@@ -24,7 +24,7 @@ export default route(async (req, res) => {
 
     const body = expectObject(req.body);
     const role = requireString(body, "role", "Le rôle", { max: 20 });
-    if (!["professeur", "instituteur", "econome", "surveillant"].includes(role)) {
+    if (!isStaffRole(role)) {
       return badRequest(res, "Rôle invalide.");
     }
     const firstName = requireString(body, "firstName", "Le prénom", { min: 1, max: 60 });
@@ -38,9 +38,7 @@ export default route(async (req, res) => {
     const pwError = passwordError(tempPassword);
     if (pwError) return badRequest(res, pwError);
 
-    // L'école doit être en écriture (abonnement valide / non expiré).
-    const { data: writable } = await svc.rpc("school_is_writable", { p_school_id: schoolId });
-    if (writable !== true) {
+    if (!(await schoolIsWritable(svc, schoolId))) {
       return forbidden(res, "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
     }
 

@@ -9,8 +9,8 @@
  * Limité en débit par compte appelant.
  */
 
-import { audit, requireDirecteur, serviceClient } from "../lib/auth.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { audit, isStaffRole, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
+import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireString } from "../lib/validate.js";
 
@@ -31,6 +31,9 @@ export default route(async (req, res) => {
       return badRequest(res, "Requête invalide : active doit être un booléen.");
     }
     const active = rawActive;
+    if (!(await schoolIsWritable(svc, caller.schoolId))) {
+      return forbidden(res, "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
+    }
 
     const { data: target, error } = await svc
       .from("profiles")
@@ -42,6 +45,9 @@ export default route(async (req, res) => {
     }
     if (target.role === "directeur") {
       return badRequest(res, "Le compte directeur ne peut pas être désactivé depuis l'application.");
+    }
+    if (!isStaffRole(target.role)) {
+      return badRequest(res, "Seuls les comptes du personnel peuvent être activés ou désactivés ici.");
     }
     if (userId === caller.id) {
       return badRequest(res, "Vous ne pouvez pas désactiver votre propre compte.");

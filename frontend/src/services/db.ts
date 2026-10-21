@@ -319,64 +319,68 @@ function mapAnnouncement(r: any): Announcement {
 }
 
 async function hydrateConversations(): Promise<void> {
-  const [convRes, msgRes, readsRes] = await Promise.all([
-    supabase.from("conversations").select("*").limit(500),
-    supabase.from("messages").select("*").order("created_at", { ascending: false }).limit(2000),
-    supabase.from("conversation_reads").select("*").limit(2000),
-  ]);
-  const convs = (convRes.data ?? []) as any[];
-  const msgs = (msgRes.data ?? []) as any[];
-  const reads = (readsRes.data ?? []) as any[];
-  replace(
-    "conversations",
-    convs.map((c) => {
-      const chatMessages: ChatMessage[] = msgs
-        .filter((m) => m.conversation_id === c.id)
-        .sort((a, m) => String(a.created_at).localeCompare(String(m.created_at)))
-        .map((m) => ({ id: m.id, senderId: m.sender_id, text: m.text, at: iso(m.created_at).slice(0, 16) }));
-      const lastReadAt: Record<string, string> = {};
-      reads
-        .filter((x) => x.conversation_id === c.id)
-        .forEach((x) => {
-          lastReadAt[x.actor_id] = iso(x.last_read_at).slice(0, 16);
-        });
-      const conversation: Conversation = {
-        schoolId: c.school_id,
-        id: c.id,
-        teacherId: c.teacher_id,
-        parentId: c.parent_id,
-        studentId: c.student_id,
-        subject: c.subject ?? "",
-        messages: chatMessages,
-        lastReadAt,
-      };
-      return conversation;
-    }),
-  );
+  const { data, error } = await supabase.rpc("list_conversations");
+  if (error) {
+    console.error("[db] hydratation conversations refusée :", error.message);
+    return;
+  }
+  const rows = (data ?? []) as any[];
+  const conversations: Conversation[] = rows.map((c) => {
+    const messages: ChatMessage[] = ((c.messages ?? []) as any[]).map((m) => ({
+      id: m.id,
+      senderId: m.senderId,
+      text: m.text,
+      at: iso(m.at).slice(0, 16),
+    }));
+    const lastReadAt: Record<string, string> = {};
+    Object.entries((c.lastReadAt ?? {}) as Record<string, string>).forEach(([actorId, at]) => {
+      lastReadAt[actorId] = iso(at).slice(0, 16);
+    });
+    return {
+      schoolId: c.schoolId,
+      id: c.id,
+      teacherId: c.teacherId,
+      parentId: c.parentId,
+      studentId: c.studentId,
+      subject: c.subject ?? "",
+      messages,
+      lastReadAt,
+    };
+  });
+  replace("conversations", conversations);
 }
 
-function assign(tableName: keyof Database, request: { then: (onFulfilled?: (res: any) => void) => PromiseLike<any> }): Promise<void> {
-  return Promise.resolve()
-    .then(() => request)
-    .then((res) => {
-      if (res.error) {
-        // Périmètre RLS / indisponibilité : l'entité reste vide, mais on garde
-        // une trace technique (l'absence totale de log rendait ces échecs
-        // indécelables et déguisait des bugs RPC en « écrans vides »).
-        console.error(`[db] hydratation ${tableName} refusée :`, res.error.message);
-        return;
-      }
-      const data = (res.data ?? []) as any[];
-      if (data.length === 2000) {
-        // Le select() est appelé avec .limit(2000) : atteindre exactement la
-        // borne suggère une troncature silencieuse (école volumineuse).
-        console.warn(`[db] ${tableName} : limite de 2000 lignes atteinte — hydratation peut-être tronquée.`);
-      }
-      replace(tableName, data.map(MAPPERS[tableName]));
-    })
-    .catch((e) => {
-      console.error(`[db] hydratation ${tableName} échouée :`, e);
-    });
+const HYDRATION_PAGE_SIZE = 500;
+const HYDRATION_MAX_ROWS = 100_000;
+
+async function fetchAllRows(table: string): Promise<any[]> {
+  const rows: any[] = [];
+  for (let from = 0; ; from += HYDRATION_PAGE_SIZE) {
+    const to = from + HYDRATION_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .order("id", { ascending: true })
+      .range(from, to);
+    if (error) throw new Error(error.message);
+    const page = (data ?? []) as any[];
+    rows.push(...page);
+    if (page.length < HYDRATION_PAGE_SIZE) return rows;
+    if (rows.length >= HYDRATION_MAX_ROWS) {
+      throw new Error(`Plus de ${HYDRATION_MAX_ROWS} lignes à hydrater pour ${table}.`);
+    }
+  }
+}
+
+async function assign(tableName: keyof Database): Promise<void> {
+  const table = TABLES[tableName];
+  if (!table) return;
+  try {
+    const data = await fetchAllRows(table);
+    replace(tableName, data.map(MAPPERS[tableName]));
+  } catch (e) {
+    console.error(`[db] hydratation ${tableName} échouée :`, e);
+  }
 }
 
 const MAPPERS: Record<keyof Database, (r: any) => any> = {
@@ -427,7 +431,10 @@ async function hydrateSettings(): Promise<void> {
     supabase.from("level_fees").select("*"),
     supabase.from("schools").select("*"),
   ]);
-  if (settingsRes.error) return; // périmètre RLS : entité laissée vide
+  if (settingsRes.error) {
+    console.error("[db] hydratation settings refusée :", settingsRes.error.message);
+    return;
+  }
   const schools = (schoolsRes.data ?? []) as any[];
   const fees = (feesRes.data ?? []) as any[];
   replace(
@@ -454,11 +461,7 @@ async function hydrateSettings(): Promise<void> {
 export function hydrate(entity: keyof Database): Promise<void> {
   if (entity === "conversations") return hydrateConversations().catch(() => undefined);
   if (entity === "settings") return hydrateSettings().catch(() => undefined);
-  const table = TABLES[entity];
-  if (!table) return Promise.resolve();
-  // Limite haute défensive : les tables volumineuses (grades, students…) ne
-  // doivent pas charger des millions de lignes dans le cache frontal.
-  return assign(entity, supabase.from(table).select("*").limit(2000));
+  return assign(entity);
 }
 
 /** Hydrate tout le cache avec ce que le rôle courant peut lire. */

@@ -106,28 +106,40 @@ const { data, error } = await admin.auth.admin.createUser({
 
 ---
 
-## 4. Paiement et génération du matricule
+## 4. Activation de l'abonnement et génération du matricule
 
-Ordre obligatoire : **paiement confirmé par le webhook → puis matricule**.
+Le mobile money et le webhook de paiement ont été retirés (migration `00016`).
+L'activation est désormais **manuelle par le support**, avec la clé `service_role`.
 
-1. `/app/abonnement` appelle l'Edge Function `start-subscription` :
-   elle calcule le montant **côté serveur** (`plans` en table), crée la commande
-   (`status = 'pending'`) et renvoie les instructions de paiement.
-2. Le prestataire (Wave / Orange Money / Free Money) appelle le **webhook** `payment-webhook`
-   avec la référence de la commande et le statut `success`.
-3. La fonction webhook, **uniquement**, dans une transaction :
-   * marque l'abonnement `ACTIF` (`starts_at`, `ends_at`, `student_limit = plans.student_limit`) ;
+1. Le directeur crée son école. Le matricule est `NULL` ; il doit être attribué à
+   l'activation pour que les familles puissent retrouver l'école avec ce code.
+2. Le support encaisse le paiement, puis appelle la RPC :
+
+   ```sql
+   select public.activate_school_subscription(
+     p_school_id  => '<uuid école>',
+     p_plan_id    => 'pro',
+     p_cycle      => 'yearly',
+     p_amount_paid => 300000,
+     p_payment_ref => 'RECU-2026-0001',
+     p_method     => 'especes'
+   );
+   ```
+
+3. La RPC, dans une transaction et sous verrou :
+   * valide la formule (`plans`) et le cycle (`monthly`/`yearly`) ;
+   * crée ou prolonge l'abonnement (`starts_at`, `ends_at`, `student_limit = plans.student_limit`) ;
    * si `schools.matricule IS NULL`, génère le code et l'écrit
-     (5 caractères, alphabet `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`, `crypto.randomInt`, unicité vérifiée) ;
-   * journalise `subscription_events`.
+     (5 caractères, alphabet `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`, unicité vérifiée) ;
+   * journalise `subscription_events` et `audit_log`.
 4. Le directeur récupère son matricule par lecture seule de `schools` — il ne peut pas l'écrire.
 
 Conséquences :
 
-* Le matricule **n'existe pas** avant le paiement (invariant : `NULL` ⇒ école non activée).
+* Le matricule **n'existe pas** avant l'activation (invariant : `NULL` ⇒ école non activée).
 * Le matricule **ne change pas** au renouvellement (`only insert if NULL`).
-* Le client ne peut pas fabriquer un abonnement : RLS refuse l'insertion, et le statut
-  `ACTIF` est écrit par le webhook (service role), pas par le directeur.
+* Le client ne peut pas fabriquer un abonnement : la RPC est révoquée pour
+  `anon`/`authenticated` et réservée à `service_role`.
 * La limite d'élèves est appliquée **avant** l'approbation d'une demande
   (`count(students) < subscription.student_limit`) ; sinon 403 « changez de formule ».
 

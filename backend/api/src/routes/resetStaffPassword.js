@@ -5,8 +5,8 @@
  * Limité en débit par compte appelant.
  */
 
-import { audit, generateTempPassword, requireDirecteur, serviceClient } from "../lib/auth.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { audit, generateTempPassword, isStaffRole, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
+import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireString } from "../lib/validate.js";
 
@@ -19,6 +19,9 @@ export default route(async (req, res) => {
     const { caller } = dir;
 
     await enforceRateLimit(svc, `staff-mgmt:${caller.id}`, 30, 300);
+    if (!(await schoolIsWritable(svc, caller.schoolId))) {
+      return forbidden(res, "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
+    }
 
     const body = expectObject(req.body);
     const userId = requireString(body, "userId", "Le compte", { max: 64 });
@@ -33,6 +36,9 @@ export default route(async (req, res) => {
     }
     if (target.role === "directeur") {
       return badRequest(res, "Le compte directeur sera réinitialisé via le service support.");
+    }
+    if (!isStaffRole(target.role)) {
+      return badRequest(res, "Seuls les comptes du personnel peuvent être réinitialisés ici.");
     }
 
     const tempPassword = generateTempPassword();

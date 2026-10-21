@@ -73,6 +73,20 @@ export async function requireDirecteur(svc, req, res) {
   return { caller };
 }
 
+/** Rôles gérables depuis l'espace direction (jamais parent/élève/directeur). */
+export const STAFF_ROLES = Object.freeze(["professeur", "instituteur", "econome", "surveillant"]);
+
+export function isStaffRole(role) {
+  return STAFF_ROLES.includes(role);
+}
+
+/** Vérifie l'abonnement côté serveur, sans faire confiance au client. */
+export async function schoolIsWritable(svc, schoolId) {
+  const { data, error } = await svc.rpc("school_is_writable", { p_school_id: schoolId });
+  if (error) throw new Error("Impossible de vérifier l'état de l'abonnement.");
+  return data === true;
+}
+
 /* ------------------------------------------------------------------ */
 /* Journal d'audit (aucune donnée personnelle d'élève dans le payload)  */
 /* ------------------------------------------------------------------ */

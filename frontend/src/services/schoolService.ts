@@ -253,7 +253,6 @@ export function createClass(schoolId: string, input: NewClassInput): Promise<Cla
         cycle: level.cycle,
         ...(input.series ? { series: input.series } : {}),
         capacity: input.capacity,
-        section: input.section,
       });
     if (error) {
       if (/read-only|row-level/i.test(error.message)) throw new Error("Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
