@@ -1,40 +1,16 @@
 {
-  "name": "react-vite-tailwind",
+  "name": "scolia",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "workspaces": ["frontend", "backend"],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "types:db": "supabase gen types typescript --local --schema public > src/types/database.generated.ts",
-    "db:start": "supabase start",
-    "db:reset": "supabase db reset",
-    "db:diff": "supabase db diff",
-    "test:rls": "supabase test db"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.118.0",
-    "clsx": "2.1.1",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-router-dom": "^7.18.4",
-    "recharts": "^3.10.1",
-    "tailwind-merge": "3.4.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "4.1.17",
-    "@types/node": "22.19.17",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "5.1.1",
-    "pixelmatch": "^8.0.0",
-    "playwright": "^1.64.1",
-    "pngjs": "^7.0.0",
-    "supabase": "^2.121.0",
-    "tailwindcss": "4.1.17",
-    "typescript": "5.9.3",
-    "vite": "7.3.2",
-    "vite-plugin-singlefile": "2.3.0"
+    "dev": "npm run dev -w frontend",
+    "build": "npm run build -w frontend",
+    "preview": "npm run preview -w frontend",
+    "audit:front": "npm run audit -w frontend",
+    "audit:webhook": "npm run audit -w backend",
+    "pay:confirm:sandbox": "npm run pay:confirm:sandbox -w backend",
+    "types:db:remote": "npm run types:db:remote -w backend",
+    "db:push:remote": "npm run db:push:remote -w backend",
+    "test:rls:remote": "npm run test:rls:remote -w backend"
   }
 }

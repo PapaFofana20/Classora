@@ -20,8 +20,8 @@ build/
 Thumbs.db
 
 # Supabase (branche temporaire local / artifacts)
-supabase/.temp/
-supabase/.branches/
+**/supabase/.temp/
+**/supabase/.branches/
 
 # Logs
 *.log

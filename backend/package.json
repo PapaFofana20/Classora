@@ -1,0 +1,18 @@
+{
+  "name": "scolia-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Backend SCOLIA : migrations Supabase, Edge Functions (Deno), tests RLS. Base de données : instance Supabase hébergée uniquement (pas de stack Docker locale).",
+  "scripts": {
+    "db:push:remote": "node scripts/db-push.mjs",
+    "test:rls:remote": "node scripts/run-rls-tests.mjs",
+    "types:db:remote": "node scripts/gen-types.mjs",
+    "audit": "node scripts/audit-webhook-signature.mjs",
+    "pay:confirm:sandbox": "node scripts/confirm-sandbox-payment.mjs"
+  },
+  "devDependencies": {
+    "pg": "^8.23.1",
+    "supabase": "^2.121.0"
+  }
+}

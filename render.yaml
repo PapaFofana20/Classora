@@ -1,0 +1,32 @@
+# Déploiement Render (static site).
+#
+# À utiliser soit via « New > Blueprint » (Render lit ce fichier), soit en
+# réglant manuellement les mêmes valeurs dans le dashboard Render :
+#
+#   Build Command     : npm ci && npm run build -w frontend
+#   Publish Path      : frontend/dist
+#   Rewrite           : /*  →  /index.html  (200)   ← INDISPENSABLE (routes client)
+#   Environment       : VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+#
+# Le front est une SPA (vite-plugin-singlefile) : sans la règle de réécriture,
+# toute URL profonde (/connexion, /inscription, /app…) renvoie un 404.
+#
+# Les variables VITE_* sont INLINÉES dans le bundle au moment du build :
+# sans elles, src/lib/supabase.ts lève « Supabase n'est pas configuré » au
+# chargement et la page reste blanche.
+
+services:
+  - type: web
+    name: scolia
+    runtime: static
+    buildCommand: npm ci && npm run build -w frontend
+    staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
