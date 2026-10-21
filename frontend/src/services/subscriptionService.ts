@@ -1,8 +1,9 @@
-import type { Plan, Subscription, SubscriptionStatus } from "@/types";
+import type { Plan, PlanId, Subscription, SubscriptionStatus } from "@/types";
 import { plans } from "@/data/plans";
 import { TODAY_ISO } from "@/data/school";
+import { supabase } from "@/lib/supabase";
 import { computeSubscriptionInfo, type SubscriptionInfo } from "@/utils/subscription";
-import { db, respond, schoolOf, studentsOf } from "./db";
+import { db, hydrate, respond, schoolOf, studentsOf } from "./db";
 
 /** Dernière subscription connue d'une école (la plus récente). */
 export function lastSubscription(schoolId: string): Subscription | null {
@@ -25,6 +26,72 @@ export const getStatus = (schoolId: string, todayIso: string = TODAY_ISO): Promi
 
 export const listSubscriptions = (schoolId: string): Promise<Subscription[]> =>
   respond(() => db.subscriptions.filter((s) => s.schoolId === schoolId).sort((a, b) => b.paidAt.localeCompare(a.paidAt)));
+
+export type BillingCycle = "monthly" | "yearly";
+export type SubscriptionRequestStatus = "EN_ATTENTE" | "ACTIVEE" | "ANNULEE";
+
+export interface SubscriptionRequest {
+  id: string;
+  schoolId: string;
+  planId: PlanId;
+  cycle: BillingCycle;
+  studentCount: number;
+  amount: number;
+  status: SubscriptionRequestStatus;
+  createdAt: string;
+  decidedAt: string | null;
+}
+
+function mapSubscriptionRequest(r: any): SubscriptionRequest {
+  return {
+    id: r.id,
+    schoolId: r.school_id,
+    planId: r.plan_id,
+    cycle: r.cycle,
+    studentCount: r.student_count,
+    amount: r.amount,
+    status: r.status,
+    createdAt: r.created_at,
+    decidedAt: r.decided_at ?? null,
+  };
+}
+
+/** Cree ou remplace la demande d'activation en attente du directeur connecte. */
+export async function requestSubscriptionActivation(input: {
+  planId: PlanId;
+  cycle: BillingCycle;
+  studentCount: number;
+}): Promise<SubscriptionRequest> {
+  const { data, error } = await supabase.rpc("request_subscription_activation", {
+    p_plan_id: input.planId,
+    p_cycle: input.cycle,
+    p_student_count: input.studentCount,
+  });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Demande d'activation non enregistrée.");
+  return mapSubscriptionRequest(data);
+}
+
+/** Derniere demande d'activation de l'ecole (lecture RLS directeur). */
+export async function latestSubscriptionRequest(schoolId: string): Promise<SubscriptionRequest | null> {
+  const { data, error } = await supabase
+    .from("subscription_requests")
+    .select("id, school_id, plan_id, cycle, student_count, amount, status, created_at, decided_at")
+    .eq("school_id", schoolId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? mapSubscriptionRequest(data) : null;
+}
+
+/**
+ * Recharge le cache ecole/abonnements pour detecter une activation faite par
+ * le support, puis laisse SchoolProvider recalculer son etat.
+ */
+export async function refreshSchoolSubscription(): Promise<void> {
+  await Promise.all([hydrate("schools"), hydrate("subscriptions")]);
+}
 
 /**
  * L'achat en ligne (mobile money) est retiré pour l'instant : l'activation
