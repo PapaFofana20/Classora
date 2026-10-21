@@ -17,7 +17,7 @@ Wave / Orange Money / Free Money). Ce dépôt contient :
 ```bash
 # Prérequis : Docker + Supabase CLI
 npx supabase start          # API : http://127.0.0.1:54321
-npx supabase db reset       # applique les 10 migrations
+npx supabase db reset       # applique les 11 migrations
 npx supabase functions serve --env-file supabase/.env   # (facultatif, local)
 npx supabase test db        # 7 suites pgTAP
 npm run types:db            # régénère src/types/database.generated.ts
@@ -63,6 +63,7 @@ Secrets Edge Functions (Dashboard > Edge Functions > Secrets, ou
 | `00008_grades` | `save_grade`, `update_report_meta`, `class_report_cards` |
 | `00009_family_payments` | `record_cash_payment`, `start_installment_payments`, `apply_paid_installment`, `send_reminders` |
 | `00010_messagerie_absences` | conversations/annonces (`list_conversations`, `start_conversation`, `send_message`, `mark_conversation_read`, `post_announcement`), absences (surveillant), `admin_dashboard` |
+| `00011_function_execute_durcissement` | droits d'exécution des fonctions `security definer` : aucune n'est accessible à `anon` en dehors des surfaces publiques (`verify_matricule`, `open_classes`) |
 
 ## 4. Edge Functions (Deno)
 
