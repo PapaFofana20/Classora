@@ -250,7 +250,9 @@ language plpgsql volatile security definer set search_path = public as $$
 declare
   v_school uuid := current_school_id();
   v_role text := public.current_role();
-  v_requests record;
+  -- Nombre de demandes traitées : un entier, pas un record (le record rendait
+  -- la comparaison 'v_requests = 0' invalide : record = integer).
+  v_requests int;
   v_req record;
   v_students int;
   v_limit int;
