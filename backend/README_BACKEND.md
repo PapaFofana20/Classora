@@ -99,6 +99,8 @@ Secrets Edge Functions (Dashboard > Edge Functions > Secrets) : `PAYMENT_WEBHOOK
 | `00009_family_payments` | `record_cash_payment`, `start_installment_payments`, `apply_paid_installment`, `send_reminders` |
 | `00010_messagerie_absences` | conversations/annonces (`list_conversations`, `start_conversation`, `send_message`, `mark_conversation_read`, `post_announcement`), absences (surveillant), `admin_dashboard` |
 | `00011_function_execute_durcissement` | droits d'exécution des fonctions `security definer` : aucune n'est accessible à `anon` en dehors des surfaces publiques (`verify_matricule`, `open_classes`) |
+| `00012_fix_student_matricule` | correctif matricule élève |
+| `00013_referentiels_globaux` | insertions idempotentes des référentiels `levels` et `plans` (données de production ; sorties du seed) |
 
 ## 4. Edge Functions (Deno)
 
