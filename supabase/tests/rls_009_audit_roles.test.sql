@@ -365,7 +365,9 @@ select is(
 
 select pg_temp.temp_statu('faa11111-0000-0000-0000-0000000000a2'); -- directeur de B
 select is(
-  (select pg_temp.temp_count($$select (select (jsonb_array_elements(public.class_report_cards('bbbbbb22-0000-0000-0000-0000000000ca', 'S1')))->>'generalAverage')::numeric from generate_series(1,1) $$)),
+  (select pg_temp.temp_count($$select count(*) from jsonb_array_elements(
+       public.class_report_cards('bbbbbb22-0000-0000-0000-0000000000ca', 'S1')) j
+     where (j->>'generalAverage') is not null$$)),
   0::bigint, 'étape 3 : le bulletin de B ne contient AUCUNE moyenne injectée par A (0 = pas de note forgée)'
 ) as b28;
 

@@ -133,8 +133,9 @@ begin
   if v_value is not null and (v_value < 0 or v_value > 20) then
     raise exception 'La note doit être comprise entre 0 et 20.';
   end if;
-  if not exists (select 1 from public.students s where s.id = p_student_id and s.school_id = v_school) then
-    raise exception 'Élève introuvable dans votre école.';
+  if not exists (select 1 from public.students s
+                  where s.id = p_student_id and s.school_id = v_school and s.class_id = p_class_id) then
+    raise exception 'Élève introuvable dans cette classe de votre école.';
   end if;
   if not exists (select 1 from public.teaching_assignments a
                  where a.school_id = v_school and a.teacher_id = v_teacher
@@ -311,6 +312,10 @@ begin
     left join public.grades g
       on g.student_id = st.id and g.subject_id = c.subject_id
      and g.class_id = p_class_id and g.period = p_period
+     -- La fonction est SECURITY DEFINER : elle contourne la RLS de `grades`.
+     -- Le filtre d'école est donc explicite, sinon une noteinjectée par
+     -- une autre école apparaîtrait dans le bulletin.
+     and g.school_id = v_school
   ),
   ranked_lines as (
     select l.*,
@@ -428,6 +433,11 @@ create policy "grades_insert_enseignant_affecte" on public.grades
     and exists (select 1 from public.teaching_assignments a
                 where a.school_id = school_id and a.teacher_id = current_teacher_id()
                   and a.class_id = class_id and a.subject_id = subject_id)
+    -- L'élève noté doit être de cette classe et de cette école : sans ce
+    -- contrôle, un enseignant pouvait créer une note sur un élève d'une
+    -- autre école (ou d'une autre classe) en reusing une affectation.
+    and exists (select 1 from public.students s
+                where s.id = student_id and s.school_id = school_id and s.class_id = class_id)
   );
 
 create policy "grades_update_enseignant_affecte" on public.grades
@@ -447,6 +457,8 @@ create policy "grades_update_enseignant_affecte" on public.grades
     and exists (select 1 from public.teaching_assignments a
                 where a.school_id = school_id and a.teacher_id = current_teacher_id()
                   and a.class_id = class_id and a.subject_id = subject_id)
+    and exists (select 1 from public.students s
+                where s.id = student_id and s.school_id = school_id and s.class_id = class_id)
   );
 
 -- Aucune politique de suppression : on remet une note à null (jamais deleted).

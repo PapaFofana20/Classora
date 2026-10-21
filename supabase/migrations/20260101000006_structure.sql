@@ -384,6 +384,16 @@ begin
     raise exception 'Mode lecture seule : l''abonnement de votre école est expiré. Les modifications sont désactivées.';
   end if;
 
+  -- La classe ET la matière doivent appartenir à l'école de l'appelant :
+  -- sans ce contrôle, un directeur pouvait affecter son enseignant à la
+  -- classe d'une autre école (jointure croisée, forge de bulletins).
+  if not exists (select 1 from public.class_rooms where id = p_class_id and school_id = v_school) then
+    raise exception 'Classe introuvable dans votre école.';
+  end if;
+  if not exists (select 1 from public.subjects where id = p_subject_id and school_id = v_school) then
+    raise exception 'Matière introuvable dans votre école.';
+  end if;
+
   delete from public.teaching_assignments
   where school_id = v_school and class_id = p_class_id and subject_id = p_subject_id;
 
@@ -647,14 +657,26 @@ create policy "class_subjects_select_ecole" on public.class_subjects
   for select to authenticated
   using (user_can_query_data() and school_id = current_school_id());
 
+-- La classe et la matière doivent être celles de l'école de la ligne : sinon
+-- une ligne de A référencerait une classe de B (jointure croisée).
 create policy "class_subjects_insert_direction" on public.class_subjects
   for insert to authenticated
-  with check (direction_can_write() and school_id = current_school_id());
+  with check (
+    direction_can_write()
+    and school_id = current_school_id()
+    and exists (select 1 from public.class_rooms c where c.id = class_id and c.school_id = school_id)
+    and exists (select 1 from public.subjects s where s.id = subject_id and s.school_id = school_id)
+  );
 
 create policy "class_subjects_update_direction" on public.class_subjects
   for update to authenticated
   using (direction_can_write() and school_id = current_school_id())
-  with check (direction_can_write() and school_id = current_school_id());
+  with check (
+    direction_can_write()
+    and school_id = current_school_id()
+    and exists (select 1 from public.class_rooms c where c.id = class_id and c.school_id = school_id)
+    and exists (select 1 from public.subjects s where s.id = subject_id and s.school_id = school_id)
+  );
 
 create policy "class_subjects_delete_direction" on public.class_subjects
   for delete to authenticated
@@ -670,7 +692,13 @@ create policy "assignments_select_ecole" on public.teaching_assignments
 
 create policy "assignments_insert_direction" on public.teaching_assignments
   for insert to authenticated
-  with check (direction_can_write() and school_id = current_school_id());
+  with check (
+    direction_can_write()
+    and school_id = current_school_id()
+    and exists (select 1 from public.teachers t where t.id = teacher_id and t.school_id = school_id)
+    and exists (select 1 from public.class_rooms c where c.id = class_id and c.school_id = school_id)
+    and exists (select 1 from public.subjects s where s.id = subject_id and s.school_id = school_id)
+  );
 
 create policy "assignments_delete_direction" on public.teaching_assignments
   for delete to authenticated
