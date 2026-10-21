@@ -87,9 +87,11 @@ export function logout(): void {
 /**
  * Connexion unique pour tous les rôles. Contrôles, dans l'ordre :
  * identifiants → compte désactivé → compte en attente d'approbation →
- * mot de passe temporaire (redirigé par MustChangePasswordGuard).
+ * matricule d'école (si fourni : le compte doit appartenir à l'école
+ * correspondante) → mot de passe temporaire (redirigé par
+ * MustChangePasswordGuard).
  */
-export async function login(email: string, password: string): Promise<SessionUser> {
+export async function login(email: string, password: string, matricule?: string): Promise<SessionUser> {
   const cred = lower(email);
   const { error } = await supabase.auth.signInWithPassword({ email: cred, password });
   if (error) {
@@ -126,6 +128,18 @@ export async function login(email: string, password: string): Promise<SessionUse
     throw new Error("Connexion impossible. Réessayez.");
   }
   await hydrateAll();
+  if (matricule !== undefined) {
+    const profile = db.users.find((u) => u.id === id);
+    const school = profile ? db.schools.find((s) => s.id === profile.schoolId) : undefined;
+    const expected = (school?.matricule ?? "").trim().toUpperCase();
+    // Une école pas encore activée n'a pas de matricule : la vérification ne
+    // s'applique qu'aux écoles déjà équipées d'un code.
+    if (expected && matricule.trim().toUpperCase() !== expected) {
+      await supabase.auth.signOut();
+      await clearCache();
+      throw new Error("Le matricule saisi ne correspond pas à votre école. Vérifiez-le auprès de la direction.");
+    }
+  }
   return (await currentSession()) || (() => {
     throw new Error("E-mail ou mot de passe incorrect.");
   })();

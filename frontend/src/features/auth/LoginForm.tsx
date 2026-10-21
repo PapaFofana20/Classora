@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { useForm } from "@/hooks/useForm";
 import { isValidEmail } from "@/utils/format";
+import { formatMatriculeInput, isValidMatricule, MATRICULE_LENGTH } from "@/utils/matricule";
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -15,16 +16,17 @@ export function LoginForm() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const form = useForm({ email: "", password: "" }, (v) => ({
+  const form = useForm({ matricule: "", email: "", password: "" }, (v) => ({
+    ...(!isValidMatricule(v.matricule) ? { matricule: `Saisissez le matricule à ${MATRICULE_LENGTH} caractères de votre école.` } : {}),
     ...(!isValidEmail(v.email) ? { email: "Saisissez une adresse e-mail valide." } : {}),
     ...(v.password.length < 1 ? { password: "Saisissez votre mot de passe." } : {}),
   }));
 
-  const doLogin = async (email: string, password: string) => {
+  const doLogin = async (matricule: string, email: string, password: string) => {
     setBusy(email);
     setError(null);
     try {
-      const u = await login(email, password);
+      const u = await login(email, password, matricule);
       toast(`Bienvenue, ${u.firstName} !`);
       navigate("/app", { replace: true });
     } catch (e) {
@@ -36,7 +38,7 @@ export function LoginForm() {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     form.touchAll();
-    if (form.isValid) void doLogin(form.values.email, form.values.password);
+    if (form.isValid) void doLogin(form.values.matricule, form.values.email, form.values.password);
   };
 
   return (
@@ -48,6 +50,19 @@ export function LoginForm() {
             {error}
           </div>
         )}
+        <Input
+          label="Matricule de l'école"
+          required
+          icon="key"
+          inputMode="text"
+          autoCapitalize="characters"
+          spellCheck={false}
+          autoComplete="off"
+          placeholder="X7K9Q"
+          maxLength={MATRICULE_LENGTH + 3}
+          {...form.field("matricule")}
+          onChange={(e) => form.set("matricule", formatMatriculeInput(e.target.value))}
+        />
         <Input label="Adresse e-mail" type="email" icon="mail" autoComplete="email" placeholder="vous@ecole.sn" required {...form.field("email")} />
         <div className="relative">
           <Input label="Mot de passe" type={show ? "text" : "password"} icon="lock" autoComplete="current-password" placeholder="••••••••" required {...form.field("password")} />

@@ -12,7 +12,7 @@ interface AuthContextValue {
   schoolId: string;
   /** Vrai juste après une déconnexion : on retourne alors sur la landing page. */
   justLoggedOut: boolean;
-  login: (email: string, password: string) => Promise<SessionUser>;
+  login: (email: string, password: string, matricule?: string) => Promise<SessionUser>;
   registerDirector: (input: DirectorInput) => Promise<SessionUser>;
   registerStudent: (input: StudentSignupInput) => Promise<SessionUser>;
   registerParent: (input: ParentSignupInput) => Promise<{ user: SessionUser; childName: string }>;
@@ -46,8 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const u = await authService.login(email, password);
+  const login = useCallback(async (email: string, password: string, matricule?: string) => {
+    const u = await authService.login(email, password, matricule);
     setUser(u);
     setJustLoggedOut(false);
     return u;
