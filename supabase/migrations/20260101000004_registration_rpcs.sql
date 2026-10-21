@@ -169,6 +169,10 @@ begin
       p_class_id, null, current_date
     ) returning id into v_student_id;
 
+    -- Échéancier de l'élève (frais d'inscription + 10 mensualités) : sans
+    -- cette étape, l'élève approuvée automatiquement n'était jamais facturable.
+    perform public.build_payment_plan(v_student_id);
+
     update public.profiles set status = 'ACTIF', student_id = v_student_id where id = p_user_id;
 
     update public.registration_requests
