@@ -47,11 +47,11 @@ export function DirectorSignupForm() {
     if (!valid) return;
     setBusy(true);
     setError(null);
-    try {
-      await registerDirector({ ...form, cycles });
-      toast("Compte créé. Vérifiez les informations de votre école.");
-      navigate("/inscription/verification-informations", { replace: true });
-    } catch (err) {
+try {
+        await registerDirector({ ...form, cycles });
+        toast("Compte créé. Choisissez votre abonnement pour activer votre école.");
+        navigate("/inscription/simulation", { replace: true });
+      } catch (err) {
       setError(err instanceof Error ? err.message : "Création du compte impossible.");
       setBusy(false);
     }
@@ -100,7 +100,7 @@ export function DirectorSignupForm() {
       <Card className="!bg-lime-soft text-sm">
         <p className="flex items-start gap-2 font-medium text-forest">
           <Icon name="workspace_premium" className="text-[20px]" />
-          Étape suivante : vérifiez les informations de votre école, puis activez votre abonnement. Votre matricule d'école est généré à l'activation.
+          Étape suivante : choisissez votre formule, simulez le paiement et obtenez immédiatement votre matricule d'école.
         </p>
       </Card>
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
