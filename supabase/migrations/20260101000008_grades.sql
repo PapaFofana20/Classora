@@ -258,9 +258,14 @@ begin
   if v_role in ('directeur','econome','surveillant') then
     v_scope := 'staff';
   elsif v_teacher is not null and exists (
-    select 1 from public.teaching_assignments a
-    where a.school_id = v_school and a.teacher_id = v_teacher and a.class_id = p_class_id
+    select 1 from public.class_rooms c
+    where c.id = p_class_id and c.school_id = v_school and c.head_teacher_id = v_teacher
   ) then
+    -- Titulaire (élémentaire) ou professeur principal (moyen / secondaire) :
+    -- seule la règle de référence (utils/permissions.ts, canReadWholeClass)
+    -- autorise la lecture de la CLASSE ENTIÈRE. Un enseignant simplement
+    -- affecté à une matière reste limité à sa matière (voir la politique
+    -- grades_select_scoped).
     v_scope := 'staff';
   elsif v_parent is not null and exists (
     select 1 from public.students s
