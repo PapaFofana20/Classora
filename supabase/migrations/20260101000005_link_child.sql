@@ -32,8 +32,8 @@ begin
 
   update public.students set parent_id = v_profil.parent_id where id = v_child.id;
 
-  insert into public.audit_log (school_id, actor_id, actor_role, action, entity, entity_id, payload)
-  values (v_profil.school_id, v_uid, v_profil.role, 'link_child', 'students', v_child.id, null);
+  insert into public.audit_log (school_id, actor_id, actor_role, action, entity, entity_id)
+  values (v_profil.school_id, v_uid, v_profil.role, 'link_child', 'students', v_child.id);
 
   return v_child.id;
 end;

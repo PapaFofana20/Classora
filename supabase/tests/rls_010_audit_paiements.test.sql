@@ -284,22 +284,22 @@ select is(
   (select count(*) from public.payments p
     join public.students s on s.id = p.student_id
    where s.first_name = 'Nouvel'),
-  12::bigint, 'l''échéancier de l''élève inscrit est généré (inscription + 10 mensualités + tenue)'
+  11::bigint, 'l''échéancier de l''élève inscrit est généré (frais d''inscription + 10 mensualités)'
 ) as c29;
 
 -- ===========================================================================
--- 7. Approbation automatique : l''échéancier doit être créé aussi
+-- 7. Approbation automatique : l'échéancier doit être créé aussi
 -- ===========================================================================
 select pg_temp.temp_role('postgres');
 update public.schools set auto_approve_students = true where id = 'aaaaaa11-0000-0000-0000-0000000000a1';
 insert into auth.users (id, email, encrypted_password, email_confirmed_at, raw_app_meta_data)
-  values ('faa11111-0000-0000-0000-0000000000b1', 'nouvel.eleve@a.sn', crypt('x', gen_salt('bf')), now(),
+  values ('faa11111-0000-0000-0000-0000000000b1', 'auto.eleve@a.sn', crypt('x', gen_salt('bf')), now(),
           '{"role":"eleve","school_id":"aaaaaa11-0000-0000-0000-0000000000a1"}');
 select pg_temp.temp_role('service_role');
 select is(
   (select pg_temp.temp_err($$select public.finish_student_registration(
      'faa11111-0000-0000-0000-0000000000b1', 'aaaaaa11-0000-0000-0000-0000000000a1',
-     'Nouvel', 'Eleve', '7012345678', 'nouvel.eleve@a.sn', 'M', '2015-05-05'::date,
+     'Auto', 'Eleve', '7012345678', 'auto.eleve@a.sn', 'M', '2015-05-05'::date,
      'aaaaaa11-0000-0000-0000-0000000000cb')$$)),
   'ok'::text, 'l''inscription avec approbation automatique aboutit'
 ) as c30;
@@ -307,8 +307,8 @@ select pg_temp.temp_role('postgres');
 select is(
   (select count(*) from public.payments p
     join public.students s on s.id = p.student_id
-   where s.first_name = 'Nouvel' and s.last_name = 'Eleve'),
-  12::bigint, 'l''élève approuvée automatiquement a bien son échéancier'
+   where s.first_name = 'Auto' and s.last_name = 'Eleve'),
+  11::bigint, 'l''élève approuvée automatiquement a bien son échéancier (inscription + 10 mensualités)'
 ) as c31;
 
 -- ===========================================================================
@@ -330,7 +330,7 @@ select is(
 select pg_temp.temp_role('postgres');
 select is(
   (select count(*) from public.students where school_id = 'aaaaaa11-0000-0000-0000-0000000000a1'),
-  2::bigint, 'la limite d''élèves de la formule est respectée (1) : aucun élève au-delà'
+  3::bigint, 'la limite d''élèves de la formule est respectée (1) : aucun élève au-delà'
 ) as c33;
 
 -- ===========================================================================

@@ -224,8 +224,8 @@ begin
 
   perform public.build_payment_plan(v_student_id);
 
-  insert into public.audit_log (school_id, actor_id, actor_role, action, entity, entity_id, payload)
-  values (v_school, auth.uid(), v_role, 'enroll_student', 'students', v_student_id, null);
+  insert into public.audit_log (school_id, actor_id, actor_role, action, entity, entity_id)
+  values (v_school, auth.uid(), v_role, 'enroll_student', 'students', v_student_id);
 
   return jsonb_build_object(
     'student_id', v_student_id,
