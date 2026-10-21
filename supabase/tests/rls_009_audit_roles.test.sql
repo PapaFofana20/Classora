@@ -423,10 +423,13 @@ select is(
 ) as b32;
 
 -- ===========================================================================
--- 11. Limite de la formule : l'approbation en lot ne doit PAS dépasser la limite
+-- 11. Limite de la formule : le lot ne doit PAS dépasser les places restantes
+--     (la limite est re-vérifiée en tenant compte du nombre d'élèves à créer)
 -- ===========================================================================
 select pg_temp.temp_role('postgres');
-update public.subscriptions set student_limit = 2 where school_id = 'aaaaaa11-0000-0000-0000-0000000000a1';
+-- 2 élèves déjà inscrits, formule à 3 élèves : il reste 1 place, le lot en
+-- demande 3 → refus intégral.
+update public.subscriptions set student_limit = 3 where school_id = 'aaaaaa11-0000-0000-0000-0000000000a1';
 insert into public.registration_requests (school_id, user_id, role, first_name, last_name, email, class_id, status)
   select 'aaaaaa11-0000-0000-0000-0000000000a1', 'faa11111-0000-0000-0000-0000000000a1',
          'eleve', 'Nouv', 'E' || g::text, 'nouv' || g::text || '@a.sn',
@@ -443,7 +446,7 @@ select is(
 select pg_temp.temp_role('postgres');
 select is(
   (select count(*) from public.students where school_id = 'aaaaaa11-0000-0000-0000-0000000000a1'),
-  2::bigint, 'aucun élève au-delà de la limite de la formule (2)'
+  2::bigint, 'aucun élève créé au-delà de la limite de la formule (le lot est rejeté en bloc)'
 ) as b34;
 
 -- ===========================================================================

@@ -255,6 +255,7 @@ declare
   v_requests int;
   v_req record;
   v_students int;
+  v_to_create int;
   v_limit int;
   v_plan text;
   v_parent_id uuid;
@@ -284,7 +285,13 @@ begin
       select si.plan_name into v_plan from public.subscription_info(v_school) si;
       select si.student_limit into v_limit from public.subscription_info(v_school) si;
       select count(*) into v_students from public.students where school_id = v_school;
-      if v_limit is not null and v_students >= v_limit then
+      -- Le lot est refusé SI LE NOMBRE D'ÉLÈVES À CRÉER dépasse la formule
+      -- payée. Contrôler seulement le nombre d'élèves déjà présents permetait
+      -- d'approuver un lot arbitrairement grand en une seule fois et de
+      -- dépasser la limite (contournement de la facturation).
+      select count(*) into v_to_create from tmp_requests
+      where role = 'eleve' and class_id is not null;
+      if v_limit is not null and v_students + v_to_create > v_limit then
         raise exception 'Votre formule % est limitée à % élèves. Changez de formule pour approuver une nouvelle inscription.', v_plan, v_limit;
       end if;
     end if;
