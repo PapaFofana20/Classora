@@ -47,7 +47,7 @@ language plpgsql volatile security definer set search_path = public as $$
 declare
   v_school uuid := public.current_school_id();
   v_role text := public.current_role();
-  v_p record;
+  v_p public.payments%rowtype;
   v_added int;
   v_ref text;
 begin
@@ -79,11 +79,11 @@ begin
   values (v_school, auth.uid(), v_role, 'payment_recorded_cash', 'payments', p_payment_id,
           jsonb_build_object('amount', v_added, 'reference', v_ref));
 
-  select to_jsonb(p) into v_p from public.payments p where p.id = p_payment_id;
+  select * into v_p from public.payments where id = p_payment_id;
   return jsonb_build_object(
     'payment_id', p_payment_id,
-    'paid_amount', v_p->>'paid_amount',
-    'status', v_p->>'status',
+    'paid_amount', v_p.paid_amount,
+    'status', v_p.status,
     'reference', v_ref
   );
 end;
@@ -199,7 +199,7 @@ returns jsonb
 language plpgsql volatile security definer set search_path = public as $$
 declare
   v_tx record;
-  v_p record;
+  v_p public.payments%rowtype;
 begin
   select * into v_tx from public.payment_transactions
   where provider = p_provider and provider_ref = p_provider_ref and tx_kind = 'installment';
@@ -208,9 +208,9 @@ begin
   end if;
 
   if v_tx.status = 'succeeded' then
-    select to_jsonb(p) into v_p from public.payments p where p.id = v_tx.payment_id;
+    select * into v_p from public.payments where id = v_tx.payment_id;
     return jsonb_build_object('idempotent', true, 'payment_id', v_tx.payment_id,
-                              'paid_amount', v_p->>'paid_amount', 'status', v_p->>'status');
+                              'paid_amount', v_p.paid_amount, 'status', v_p.status);
   end if;
 
   if p_status <> 'succeeded' then
@@ -233,10 +233,10 @@ begin
   values (v_tx.school_id, null, 'service_role', 'installment_paid', 'payment_transactions', v_tx.id,
           jsonb_build_object('provider', p_provider, 'amount', v_tx.amount));
 
-  select to_jsonb(p) into v_p from public.payments p where p.id = v_tx.payment_id;
+  select * into v_p from public.payments where id = v_tx.payment_id;
   return jsonb_build_object('idempotent', false, 'payment_id', v_tx.payment_id,
-                            'paid_amount', v_p->>'paid_amount',
-                            'status', v_p->>'status',
+                            'paid_amount', v_p.paid_amount,
+                            'status', v_p.status,
                             'reference', p_provider_ref);
 end;
 $$;
