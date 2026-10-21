@@ -9,30 +9,31 @@ Functions, front). Les seuls ajouts sont les **tests d'audit** (`supabase/tests/
 
 ## 1. Synthèse
 
-**Verdict global : NON PRÊT.** Le produit n'est ni déployable ni exploitable en l'état :
-le schéma SQL ne s'installe pas, et les parcours qui rapportent de l'argent (encaissement
-espèces, paiement mobile money, inscription d'élève, approbation d'inscription) échouent
-tous par des erreurs d'exécution déterministes.
+**Verdict global : NON PRÊT (lot 1 en cours de correction).** Le **Lot 1 (les 11 constats
+Critiques)** a été corrigé et vérifié : le schéma s'applique, les encaissements fonctionnent,
+les tunnels d'inscription et de paiement sont ré开通, et la forge inter-écoles de bulletins
+est fermée. Restent **9 constats Élevés**, **12 Moyens**, **6 Faibles** et 2 Info, et donc
+le produit n'est pas encore « prêt à produire ».
 
-* **11 constats Critiques**, **9 Élevés**, **12 Moyens**, **6 Faibles**, 2 Info (40 constats).
-* **3 risques majeurs**
-  1. **Fraude au paiement** — le webhook accepte une confirmation de transaction **sans
-     signature** dès qu'un jeton valide est présent, et le secret partagé est embarqué dans
-     le bundle JavaScript du navigateur ⇒ n'importe qui peut solder les échéances d'une
-     famille sans payer.
-  2. **Fuite / falsification inter-écoles** — plusieurs fonctions `security definer`
-     acceptent des identifiants d'une autre école : un directeur de l'école A peut affecter
-     son enseignant à la classe de l'école B, injecter une note sur un élève de B, et la
-     moyenne **affecte le bulletin de B**. En parallèle, le rôle `anon` peut écrire
-     (écheliers, matricules) dans les données d'une autre école.
-  3. **Perte d'argent et blocage opérationnel** — aucun encaissement (espèces ou mobile
-     money) ne peut être enregistré, aucun élève ne peut être inscrit, aucune demande
-     d'inscription ne peut être approuvée, et les élèves approuvés automatiquement ne
-     génèrent **aucun échéancier** (donc ne sont jamais facturés).
+* **0 Critique ouvert** (11 corrigés) · **9 Élevés** · **12 Moyens** · **6 Faibles** · 2 Info.
+* **3 risques majeurs** — *statut au 2026-10-21* :
+  1. **Fraude au paiement** — *partiellement corrigé* : le webhook exige désormais la
+     signature HMAC (AUD-002), le secret n'est plus dans le bundle (AUD-003) et
+     `pay-installment` ne s'auto-confirme plus qu'en bac à sable (AUD-004). **Reste ouvert** :
+     l'idempotence non atomique des webhooks concurrents (AUD-013).
+  2. **Fuite / falsification inter-écoles** — *corrigé* : la chaîne de forge de bulletin
+     est fermée (AUD-006) et le rôle `anon` ne peut plus écrire dans une autre école
+     (AUD-007). **Reste ouvert** : la limite d'élèves de la formule n'est pas re-vérifiée
+     dans la boucle d'approbation (AUD-012).
+  3. **Perte d'argent et blocage opérationnel** — *corrigé* : encaissement espèces et
+     mobile money opérationnels (AUD-005), approbation d'inscription fonctionnelle (AUD-008),
+     inscription d'élève fonctionnelle (AUD-011), échéancier des élèves approuvés
+     automatiquement (AUD-009), matricule d'école attribué (AUD-010).
 
-Preuves exécutées : **30 assertions en échec** sur 4 nouvelles suites pgTAP (170 assertions),
-**3 échecs** sur 37 assertions front, sur un PostgreSQL 18 localisé (Docker absent sur la
-machine — voir §2).
+Preuves exécutées (après lot 1) : **8 assertions en échec** sur 211 assertions SQL + front
+(30 → 8), sur un PostgreSQL 18 localisé (Docker absent sur la machine — voir §2).
+`supabase/tests/rls_008` (isolation multi-écoles) et `rls_010` (paiements) sont désormais
+**entièrement verts**.
 
 ---
 
@@ -209,17 +210,17 @@ objet. **Aucune vue ne contourne la RLS**, mais les **fonctions `security define
 
 | ID | Gravité | Axe | Titre | Fichier:ligne | Statut |
 |---|---|---|---|---|---|
-| AUD-001 | Critique | F | Les 10 migrations ne s'appliquent pas : 4 erreurs de syntaxe PostgreSQL | `supabase/migrations/20260101000001_foundation.sql:79` (+ `00003:53`, `00006:124`, `00010:397`) | Confirmé |
-| AUD-002 | Critique | C | Le webhook accepte une confirmation de paiement **sans signature** | `supabase/functions/payment-webhook/index.ts:28-41` | Probable |
-| AUD-003 | Critique | C | Le secret du webhook est embarqué dans le bundle du navigateur | `src/services/subscriptionService.ts:68`, `.env.example:7` | Confirmé |
-| AUD-004 | Critique | C | `pay-installment` solde les échéances sans transfert (mode sandbox livré) | `supabase/functions/pay-installment/index.ts:60-68` | Probable |
-| AUD-005 | Critique | C | Encaissement espèces et paiement mobile money : erreur de type fatale | `supabase/migrations/20260101000009_family_payments.sql:82-86, 211-213, 236-239` | Confirmé |
-| AUD-006 | Critique | A | Forge inter-écoles d'un bulletin (3 maillons) | `00006_structure.sql:385-401`, `00008_grades.sql:311-313, 422-431` | Confirmé |
-| AUD-007 | Critique | A | Le rôle `anon` écrit dans les données d'une autre école | `00006_structure.sql:47-133`, `00002_rls_helpers.sql:186-201` | Confirmé |
-| AUD-008 | Critique | C | `decide_registration_requests` échoue : aucune approbation possible | `00006_structure.sql:253, 275-276` | Confirmé |
-| AUD-009 | Critique | C | Élève approuvé automatiquement : **aucun échéancier** (revenu non facturé) | `00004_registration_rpcs.sql:159-180` | Confirmé |
-| AUD-010 | Critique | C | `pgcrypto` inaccessible depuis les fonctions `security definer` | `00002_rls_helpers.sql:148-183`, `00007_subscriptions.sql:15-29` | Confirmé |
-| AUD-011 | Critique | C | `enroll_student` / `link_child` échouent (`audit_log.payload` NOT NULL) | `00006_structure.sql:227-228`, `00005_link_child.sql:35-36` | Confirmé |
+| AUD-001 | Critique | F | Les 10 migrations ne s'appliquent pas : 4 erreurs de syntaxe PostgreSQL | `supabase/migrations/20260101000001_foundation.sql:79` (+ `00003:53`, `00006:124`, `00010:397`) | Corrigé |
+| AUD-002 | Critique | C | Le webhook accepte une confirmation de paiement **sans signature** | `supabase/functions/payment-webhook/index.ts:28-41` | Corrigé |
+| AUD-003 | Critique | C | Le secret du webhook est embarqué dans le bundle du navigateur | `src/services/subscriptionService.ts:68`, `.env.example:7` | Corrigé |
+| AUD-004 | Critique | C | `pay-installment` solde les échéances sans transfert (mode sandbox livré) | `supabase/functions/pay-installment/index.ts:60-68` | Corrigé |
+| AUD-005 | Critique | C | Encaissement espèces et paiement mobile money : erreur de type fatale | `supabase/migrations/20260101000009_family_payments.sql:82-86, 211-213, 236-239` | Corrigé |
+| AUD-006 | Critique | A | Forge inter-écoles d'un bulletin (3 maillons) | `00006_structure.sql:385-401`, `00008_grades.sql:311-313, 422-431` | Corrigé |
+| AUD-007 | Critique | A | Le rôle `anon` écrit dans les données d'une autre école | `00006_structure.sql:47-133`, `00002_rls_helpers.sql:186-201` | Corrigé |
+| AUD-008 | Critique | C | `decide_registration_requests` échoue : aucune approbation possible | `00006_structure.sql:253, 275-276` | Corrigé |
+| AUD-009 | Critique | C | Élève approuvé automatiquement : **aucun échéancier** (revenu non facturé) | `00004_registration_rpcs.sql:159-180` | Corrigé |
+| AUD-010 | Critique | C | `pgcrypto` inaccessible depuis les fonctions `security definer` | `00002_rls_helpers.sql:148-183`, `00007_subscriptions.sql:15-29` | Corrigé |
+| AUD-011 | Critique | C | `enroll_student` / `link_child` échouent (`audit_log.payload` NOT NULL) | `00006_structure.sql:227-228`, `00005_link_child.sql:35-36` | Corrigé |
 | AUD-012 | Élevé | C | La limite d'élèves n'est pas re-vérifiée dans la boucle d'approbation | `00006_structure.sql:280-289, 291-325` | Probable |
 | AUD-013 | Élevé | C | Idempotence non atomique : double extension d'abonnement en concurrence | `00007_subscriptions.sql:60-81, 120-160` | Probable |
 | AUD-014 | Élevé | G | CORS `*` sur les 13 Edge Functions | `supabase/functions/_shared/http.ts:5-10` | Confirmé |
@@ -1646,12 +1647,13 @@ différents ⇒ deux parents distincts.
 
 | Fichier | Assertions | En échec | Ce qui est couvert |
 |---|---|---|---|
-| `supabase/tests/rls_008_audit_isolation.test.sql` | 57 | **7** | RLS activée partout ; isolation lecture **table par table** (22 tables) ; isolation écriture (déplacement de `school_id`, insertion croisée) ; rôle `anon` ; fonctions `security definer` non restreintes ; jointures croisées ; escalade de privilèges sur `profiles` ; unicité par école / globale |
-| `supabase/tests/rls_009_audit_roles.test.sql` | 40 | **5** | Enseignant (périmètre de saisie, bornes des notes, lecture de classe) ; parent (périmètre, rattachement) ; élève ; directeur (écritures) ; économe/surveillant ; comptes `DESACTIVE`/`EN_ATTENTE`/mot de passe temporaire ; IDOR sur les RPC ; **chaîne de forge inter-écoles** ; conversations ; approbation inter-écoles ; limite de formule ; création de personnel ; suppression protégée |
-| `supabase/tests/rls_010_audit_paiements.test.sql` | 34 | **14** | Écritures client interdites sur les tables d'argent ; encaissement espèces ; paiement mobile money + idempotence + statut `failed` ; montant d'abonnement falsifié ; matricule d'école attribué et stable ; code enfant ; inscription directe ; approbation automatique + échéancier ; limite d'élèves ; mode lecture seule à J+7 |
-| `supabase/tests/rls_011_audit_calculs.test.sql` | 39 | **4** | Parité `grades.ts` (moyenne par matière, pondérée, seuils d'appréciation, ex æquo, bornes 0/20) ; parité `payments.ts` (statuts aux frontières) ; parité `subscription.ts` (J-7/J-8/J0/J+1) ; séquence de matricules ; matricule d'année |
-| `scripts/audit-parite.mjs` | 37 | **3** | Parité front ⇄ serveur (moyennes, appréciations, rangs, saisie, remise fratrie, matricule) + cohérence des dates |
-| **Total** | **207** | **33** | |
+| `supabase/tests/rls_008_audit_isolation.test.sql` | 57 | **0** ✅ | RLS activée partout ; isolation lecture **table par table** (22 tables) ; isolation écriture (déplacement de `school_id`, insertion croisée) ; rôle `anon` ; fonctions `security definer` non restreintes ; jointures croisées ; escalade de privilèges sur `profiles` ; unicité par école / globale |
+| `supabase/tests/rls_009_audit_roles.test.sql` | 43 | **1** (AUD-018) | Enseignant (périmètre de saisie, bornes des notes, lecture de classe) ; parent (périmètre, rattachement) ; élève ; directeur (écritures) ; économe/surveillant ; comptes `DESACTIVE`/`EN_ATTENTE`/mot de passe temporaire ; IDOR sur les RPC ; **chaîne de forge inter-écoles** ; conversations ; approbation inter-écoles ; limite de formule ; création de personnel ; suppression protégée |
+| `supabase/tests/rls_010_audit_paiements.test.sql` | 34 | **0** ✅ | Écritures client interdites sur les tables d'argent ; encaissement espèces ; paiement mobile money + idempotence + statut `failed` ; montant d'abonnement falsifié ; matricule d'école attribué et stable ; code enfant ; inscription directe ; approbation automatique + échéancier ; limite d'élèves ; mode lecture seule à J+7 |
+| `supabase/tests/rls_011_audit_calculs.test.sql` | 39 | **4** (AUD-033) | Parité `grades.ts` (moyenne par matière, pondérée, seuils d'appréciation, ex æquo, bornes 0/20) ; parité `payments.ts` (statuts aux frontières) ; parité `subscription.ts` (J-7/J-8/J0/J+1) ; séquence de matricules ; matricule d'année |
+| `scripts/audit-parite.mjs` | 37 | **3** (AUD-021) | Parité front ⇄ serveur (moyennes, appréciations, rangs, saisie, remise fratrie, matricule) + cohérence des dates |
+| `scripts/audit-webhook-signature.mjs` | 7 | **0** ✅ | Signature HMAC du webhook : valide / invalide / absente / corps modifié ; secret non configuré ; refus de la valeur par défaut historique |
+| **Total** | **217** | **8** | |
 
 ### 7.2 Tables sans test RLS
 
@@ -1788,23 +1790,33 @@ bon modèle, à condition que ces RPC soient correctes (cf. AUD-006/008/012).
 
 ## 11. Passage de relais
 
-Aucun correctif n'a été appliqué. Les tests d'audit livrés sont ** rouges** sur le code
-actuel : c'est l'état attendu d'un audit de phase 1, et la base de la vérification
-« le test qui échouait doit passer ».
+**Lot 1 (les 11 constats Critiques) : CORRIGÉ ET VÉRIFIÉ.**
 
-**Prochaine étape proposée :** validation du **Lot 1** (11 constats Critiques). Je corrigerai
-un constat à la fois, dans cet ordre :
+| Commit | Constat | Preuve |
+|---|---|---|
+| `654bc80` | AUD-001 | les 10 migrations s'appliquent (`supabase db reset` OK) |
+| `0f43901` | AUD-005 | encaissement espèces et mobile money opérationnels (10 assertions) |
+| `9d2b2c6` | AUD-008 | l'approbation en lot aboutit (3 assertions) |
+| `3fe2354` | AUD-011 | l'inscription d'élève et le rattachement d'un 2ᵉ enfant fonctionnent |
+| `e1b993c` | AUD-009 | l'élève approuvé automatiquement a son échéancier (rls_010 vert) |
+| `4576855` | AUD-010 | `generate_school_code` / `generate_school_matricule` fonctionnent sans contournement |
+| `0b45f3f` | AUD-007 | `anon` ne peut plus écrire ni divulguer (migration 00011 + garde-fou) |
+| `eaaed93` | AUD-003 | plus aucun secret dans le bundle (0 occurrence) |
+| `ad3d42b` | AUD-002 | signature HMAC obligatoire (7 assertions) |
+| `ddf531b` | AUD-004 | plus d'auto-confirmation hors bac à sable |
+| `179e10c` | AUD-006 | rls_008 entièrement vert + chaîne de forge neutralisée |
 
-1. AUD-001 (les migrations s'appliquent) — prerequisite de tout ;
-2. AUD-005 / AUD-008 / AUD-011 / AUD-009 / AUD-010 (blocages fonctionnels) ;
-3. AUD-007 / AUD-002 / AUD-003 / AUD-004 (sécurité et fraude) ;
-4. AUD-006 (isolation inter-écoles).
+**État des suites** : `rls_008` ✅ 0 échec · `rls_010` ✅ 0 échec ·
+`audit-webhook-signature.mjs` ✅ 0 échec · `rls_009` 1 échec (AUD-018) ·
+`rls_011` 4 échecs (AUD-033) · `audit-parite.mjs` 3 échecs (AUD-021).
 
-Après chaque constat : un commit unique (`fix(AUD-XXX): …`), la suite complète relancée, et
-le statut mis à jour dans ce rapport (Corrigé / Accepté / Reporté). Un audit ciblé sera
-relancé sur les zones touchées (un correctif RLS peut en casser un autre), puis un second
-audit d'ensemble allégé pour confirmer qu'aucun Critique ni Élevé ne subsiste.
+**Prochaine étape : Lot 2 (les 9 constats Élevés)**, dans cet ordre :
+AUD-012 (limite de la formule, maintenant **Confirmé** par exécution : limite 1, école vide,
+approbation de 3 demandes ⇒ 3 élèves créés) → AUD-018 (périmètre enseignant) → AUD-020
+(suite pgTAP du projet inexécutable) → AUD-014 (CORS) → AUD-015 (statut de compte) →
+AUD-016 (mot de passe temporaire) → AUD-017 (comptes démo) → AUD-019 (signature JWT) →
+AUD-013 (idempotence atomique des webhooks).
 
 **Critère de sortie (rappel) :** zéro constat Critique ou Élevé ouvert, suites
-`supabase test db` + `scripts/audit-parite.mjs` vertes, aucun secret dans le bundle, et
-procédure de restauration de sauvegarde testée et documentée.
+`supabase test db` + `scripts/audit-*.mjs` vertes, aucun secret dans le bundle, et
+procédure de restauration de sauvegarde testée et documentée (AUD-030, à vérifier).
