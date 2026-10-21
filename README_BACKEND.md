@@ -114,10 +114,31 @@ Toutes répondent en JSON `{...}` ou `{error: "<message FR>"}` avec code HTTP.
 
 `supabase/tests/rls_001…007` (plans 14/10/30/25/23/24/33) : deux écoles,
 personas de tous rôles, vérification de l'isolation et des écritures.
+`supabase/tests/rls_008…011` : suites d'audit (isolation multi-écoles,
+contrôle d'accès par rôle, encaissements/abonnements, parité des calculs) ;
+elles décrivent le comportement attendu et doivent être vertes.
+`scripts/audit-parite.mjs` : parité front ⇄ serveur (calculs, seuils, dates).
 Exécution : `npx supabase test db` (nécessite Docker).
 
-## 8. Points ouverts
+## 8. Paiement de bout en bout (bac à sable local)
+
+Le secret de signature du webhook **n'est jamais connu du navigateur** : il vit
+dans l'environnement du poste de développement. Le front crée la transaction
+(`start-subscription`), puis **attend** la confirmation du prestataire.
+
+```bash
+# 1. le directeur lance l'achat depuis /app/abonnement
+#    → référence WV-1234-5678 affichée par l'Edge Function
+# 2. le poste de développement joue le rôle du prestataire :
+$env:SCOLIA_WEBHOOK_SECRET = "scolia-dev-secret"   # secret côté serveur
+node scripts/confirm-sandbox-payment.mjs wave WV-1234-5678 succeeded
+# 3. le front détecte l'abonnement actif et affiche le matricule d'école
+```
+
+En production, l'étape 2 est faite par le prestataire (Wave / Orange Money /
+Free Money) avec la même signature HMAC.
+
+## 9. Points ouverts
 
 - Exécution des tests pgTAP et `npm run types:db` (Docker requis).
-- En production : brancher le vrai agrégateur (`PAYMENT_PROVIDER_API_KEY`) et
-  retirer la confirmation sandbox du front (achat réel via le prestataire).
+- En production : brancher le vrai agrégateur (`PAYMENT_PROVIDER_API_KEY`).
