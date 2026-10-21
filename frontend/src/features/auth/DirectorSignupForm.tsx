@@ -15,7 +15,7 @@ import { passwordError } from "@/utils/password";
 
 const CITIES = ["Dakar", "Thiès", "Mbour", "Saint-Louis", "Kaolack", "Ziguinchor", "Tambacounda", "Louga", "Kolda", "Kaffrine"];
 
-/** Inscription du directeur : école + compte. Moins de 3 minutes jusqu'au matricule. */
+/** Inscription du directeur : école + compte, puis vérification des informations. */
 export function DirectorSignupForm() {
   const { registerDirector } = useAuth();
   const { toast } = useToast();
@@ -49,8 +49,8 @@ export function DirectorSignupForm() {
     setError(null);
     try {
       await registerDirector({ ...form, cycles });
-      toast("Compte créé. Choisissez votre formule pour obtenir votre matricule.");
-      navigate("/app/abonnement", { replace: true });
+      toast("Compte créé. Vérifiez les informations de votre école.");
+      navigate("/inscription/verification-informations", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Création du compte impossible.");
       setBusy(false);
@@ -100,7 +100,7 @@ export function DirectorSignupForm() {
       <Card className="!bg-lime-soft text-sm">
         <p className="flex items-start gap-2 font-medium text-forest">
           <Icon name="workspace_premium" className="text-[20px]" />
-          Étape suivante : votre abonnement s'active page Abonnement. En cas de besoin, contactez le support Classora : votre matricule d'école est généré à l'activation.
+          Étape suivante : vérifiez les informations de votre école, puis activez votre abonnement. Votre matricule d'école est généré à l'activation.
         </p>
       </Card>
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>

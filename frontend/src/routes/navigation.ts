@@ -94,6 +94,7 @@ export const ROUTE_ROLES = {
   enseignants: ["directeur"] as Role[],
   demandes: ["directeur"] as Role[],
   abonnement: ["directeur"] as Role[],
+  verification: ["directeur"] as Role[],
   affectations: ["directeur"] as Role[],
   notes: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],
   bulletins: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],

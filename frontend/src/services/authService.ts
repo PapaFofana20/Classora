@@ -151,7 +151,7 @@ export async function login(email: string, password: string, matricule?: string)
 
 /**
  * Inscription d'un directeur : il crée son école (sans abonnement ni matricule).
- * Session ouverte automatiquement, l'écran suivant est /app/abonnement.
+ * Session ouverte automatiquement, l'écran suivant est la vérification des informations.
  */
 export async function registerDirector(input: DirectorInput): Promise<SessionUser> {
   await callFunction("register-director", input);
