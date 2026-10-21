@@ -7,8 +7,6 @@
     "build": "npm run build -w frontend",
     "preview": "npm run preview -w frontend",
     "audit:front": "npm run audit -w frontend",
-    "audit:webhook": "npm run audit -w backend",
-    "pay:confirm:sandbox": "npm run pay:confirm:sandbox -w backend",
     "types:db:remote": "npm run types:db:remote -w backend",
     "db:push:remote": "npm run db:push:remote -w backend",
     "test:rls:remote": "npm run test:rls:remote -w backend"

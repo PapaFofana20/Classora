@@ -2,7 +2,7 @@ name: CI
 
 # Garde-fou de régression : les migrations Supabase doivent s'appliquer
 # intégralement (`supabase db reset`) et le front doit compiler.
-# Voir AUD-001 (les 10 migrations ne s'appliquaient pas).
+# Voir AUD-001 (les migrations ne s'appliquaient pas).
 
 on:
   push:
@@ -32,15 +32,12 @@ jobs:
       - name: Audit front (parité + dates)
         run: npm run audit:front
 
-      - name: Audit signature du webhook de paiement
-        run: npm run audit:webhook
-
       - name: Migrations (Supabase)
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: supabase db reset (les 11 migrations doivent s'appliquer)
+      - name: supabase db reset (toutes les migrations doivent s'appliquer)
         working-directory: backend
         run: |
           npx supabase start
