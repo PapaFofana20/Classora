@@ -6,7 +6,7 @@
  * (apply_paid_subscription) ou échéance scolaire (apply_paid_installment).
  */
 
-import { audit, getAuthenticatedUser, serviceClient } from "../_shared/auth.ts";
+import { audit, serviceClient } from "../_shared/auth.ts";
 import { badRequest, handleOptions, notFound, ok, serverError } from "../_shared/http.ts";
 import { verifyWebhookSignature } from "../_shared/payments.ts";
 import { expectObject, requireString, ValidationError } from "../_shared/validate.ts";
@@ -24,20 +24,17 @@ Deno.serve(async (req) => {
       return badRequest("Corps du webhook invalide.");
     }
 
-    const isService = await getAuthenticatedUser(svc, req);
     const signature = req.headers.get("x-scolia-signature");
-    if (signature) {
-      try {
-        await verifyWebhookSignature(raw, signature);
-      } catch (e) {
-        return badRequest(e instanceof Error ? e.message : "Signature de webhook invalide.");
-      }
-    } else if (isService === null) {
-      // En local / sandbox, le secret partagé peut être envoyé en clair.
-      const shared = body["secret"];
-      if (typeof shared !== "string" || shared !== (Deno.env.get("SCOLIA_WEBHOOK_SECRET") ?? "scolia-dev-secret")) {
-        return badRequest("Signature de webhook absente.");
-      }
+    // La signature HMAC est OBLIGATOIRE, quelle que soit l'origine de l'appel.
+    // Sans elle, un simple jeton d'utilisateur (n'importe quel élève ou
+    // parent inscrit) suffirait à confirmer un paiement jamais payé.
+    if (!signature) {
+      return badRequest("Signature de webhook absente.");
+    }
+    try {
+      await verifyWebhookSignature(raw, signature);
+    } catch (e) {
+      return badRequest(e instanceof Error ? e.message : "Signature de webhook invalide.");
     }
 
     const provider = requireString(body, "provider", "Le prestataire", { max: 32 });

@@ -32,6 +32,9 @@ jobs:
       - name: Audit front (parité + dates)
         run: node scripts/audit-parite.mjs
 
+      - name: Audit signature du webhook de paiement
+        run: node scripts/audit-webhook-signature.mjs
+
       - name: Migrations (Supabase)
         uses: supabase/setup-cli@v1
         with:

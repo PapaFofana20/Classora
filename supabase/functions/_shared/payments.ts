@@ -29,7 +29,21 @@ export function generateProviderRef(method: PayMethod): string {
 /* Signature HMAC des webhooks (x-scolia-signature, hex SHA-256 du brut) */
 /* ------------------------------------------------------------------ */
 
-export const WEBHOOK_SECRET = Deno.env.get("SCOLIA_WEBHOOK_SECRET") ?? "scolia-dev-secret";
+/**
+ * Secret HMAC du webhook. AUCUNE valeur par défaut : un secret non configuré
+ * doit faire échouer la fonction bruyamment, jamais ouvrir le webhook (un
+ * secret deviné, type « scolia-dev-secret », suffirait à confirmer des
+ * paiements).
+ */
+function webhookSecret(): string {
+  const secret = Deno.env.get("SCOLIA_WEBHOOK_SECRET");
+  // La valeur historique « scolia-dev-secret » a été lue dans des bundles
+  // navigateur : elle est refusée explicitement.
+  if (!secret || secret.trim().length < 16 || secret.trim() === "scolia-dev-secret") {
+    throw new Error("SCOLIA_WEBHOOK_SECRET n'est pas configuré (16 caractères minimum, et jamais la valeur par défaut).");
+  }
+  return secret;
+}
 
 async function hmacHex(payload: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -59,7 +73,7 @@ export async function verifyWebhookSignature(rawBody: string, signatureHeader: s
   if (!signatureHeader) {
     throw new Error("Signature de webhook absente.");
   }
-  const expected = await hmacHex(rawBody, WEBHOOK_SECRET);
+  const expected = await hmacHex(rawBody, webhookSecret());
   if (!timingSafeEqualHex(signatureHeader.toLowerCase(), expected)) {
     throw new Error("Signature de webhook invalide.");
   }
