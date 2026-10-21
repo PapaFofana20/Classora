@@ -146,7 +146,12 @@ $$;
 -- ----------------------------------------------------------------------------
 
 create or replace function public.app_random_code(p_length int) returns text
-language sql volatile parallel unsafe as $$
+language sql volatile parallel unsafe
+-- pgcrypto (gen_random_bytes) est installé dans le schéma `extensions` : sans
+-- cette clause, l'appel depuis une fonction SECURITY DEFINER dont le
+-- search_path est `public` échouait ('function gen_random_bytes(integer)
+-- does not exist'), et donc toute génération de code ou de matricule.
+set search_path = public, extensions as $$
   -- Alphabet de 32 caractères : 23456789 + ABCDEFGH + JKLMN + PQRSTUVWXYZ.
   select string_agg(
     substr('23456789ABCDEFGHJKLMNPQRSTUVWXYZ', 1 + (get_byte(gen_random_bytes(1), 0) % 32)::int, 1), ''
