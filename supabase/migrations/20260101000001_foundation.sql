@@ -74,13 +74,17 @@ create table public.schools (
   phone                text not null default '',
   email                text not null default '',
   logo_url             text,
-  cycles               app_cycle[] not null default '{}'
-                       constraint schools_cycles_required
-                       check (app_valid_cycles(cycles)) not valid, -- validé après backfill
+  cycles               app_cycle[] not null default '{}',
   registration_open    boolean not null default true,
   auto_approve_students boolean not null default false,
   created_at           timestamptz not null default now()
 );
+
+-- NOT VALID n'est accepté que dans ALTER TABLE ... ADD CONSTRAINT (pas dans
+-- CREATE TABLE) : la contrainte est créée non validée, puis validée après le
+-- backfill des écoles existantes.
+alter table public.schools
+  add constraint schools_cycles_required check (app_valid_cycles(cycles)) not valid;
 
 create table public.school_settings (
   school_id        uuid primary key references public.schools (id) on delete cascade,
@@ -228,10 +232,14 @@ create table public.subjects (
   id         uuid primary key default gen_random_uuid(),
   school_id  uuid not null references public.schools (id) on delete cascade,
   name       text not null,
-  cycles     app_cycle[] not null default '{}' constraint subjects_cycles_valid check (app_valid_cycles(cycles)) not valid,
+  cycles     app_cycle[] not null default '{}',
   created_at timestamptz not null default now(),
   unique (school_id, name)
 );
+
+-- Idem schools_cycles_required : NOT VALID uniquement via ALTER TABLE.
+alter table public.subjects
+  add constraint subjects_cycles_valid check (app_valid_cycles(cycles)) not valid;
 
 create table public.class_subjects (
   id          uuid primary key default gen_random_uuid(),

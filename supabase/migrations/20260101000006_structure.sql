@@ -121,7 +121,7 @@ begin
       v_month := m - 3;          -- jan=1 … juil=7
     end if;
     v_label := 'Mensualité de ' || (
-      array['octobre','novembre','décembre','janvier','février','mars','avril','mai','juin','juillet'][m]
+      (array['octobre','novembre','décembre','janvier','février','mars','avril','mai','juin','juillet'])[m]
     ) || ' ' || v_year::text;
     insert into public.payments (school_id, student_id, kind, label, due_date, amount)
     values (v_student.school_id, p_student_id, 'mensualite', v_label, make_date(v_year, v_month, 5), v_mens + v_extra);
@@ -157,7 +157,7 @@ returns jsonb
 language plpgsql volatile security definer set search_path = public as $$
 declare
   v_school uuid := current_school_id();
-  v_role text := current_role();
+  v_role text := public.current_role();
   v_class record;
   v_class_pays int;
   v_students int;
@@ -249,7 +249,7 @@ returns int
 language plpgsql volatile security definer set search_path = public as $$
 declare
   v_school uuid := current_school_id();
-  v_role text := current_role();
+  v_role text := public.current_role();
   v_requests record;
   v_req record;
   v_students int;
@@ -371,7 +371,7 @@ returns void
 language plpgsql volatile security definer set search_path = public as $$
 declare
   v_school uuid := current_school_id();
-  v_role text := current_role();
+  v_role text := public.current_role();
   v_teacher uuid;
   v_count int;
 begin
@@ -415,7 +415,7 @@ returns void
 language plpgsql volatile security definer set search_path = public as $$
 declare
   v_school uuid := current_school_id();
-  v_role text := current_role();
+  v_role text := public.current_role();
   v_class record;
 begin
   if v_role <> 'directeur' then
@@ -593,7 +593,7 @@ grant execute on function public.assignment_conflicts() to authenticated;
 -- selected helper : tête de la condition d'écriture direction
 create or replace function public.direction_can_write() returns boolean
 language sql stable security definer set search_path = public as $$
-  select current_role() = 'directeur'
+  select public.current_role() = 'directeur'
     and user_can_query_data()
     and school_is_writable(current_school_id())
 $$;

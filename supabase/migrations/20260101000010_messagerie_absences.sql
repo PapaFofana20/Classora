@@ -394,7 +394,7 @@ begin
   -- Mois scolaires : octobre → juillet de l'année scolaire.
   v_year := v_y1;
   v_month := 10;
-  drop temp table if exists dash_months;
+  drop table if exists dash_months;
   create temp table dash_months (ordering int, label text, y int, m int) on commit drop;
   for v_m in 1..10 loop
     insert into dash_months values (v_m-3, v_labels[v_m], v_year, v_month);

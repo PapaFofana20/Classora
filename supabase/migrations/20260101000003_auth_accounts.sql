@@ -50,7 +50,7 @@ create policy "profiles_select_self_ou_direction" on public.profiles
     id = auth.uid()
     or (user_can_query_data()
         and school_id = current_school_id()
-        and current_role() in ('directeur', 'econome', 'surveillant'))
+        and public.current_role() in ('directeur', 'econome', 'surveillant'))
   );
 
 -- L'utilisateur ne modifie QUE sa propre ligne, et uniquement des colonnes
@@ -83,11 +83,11 @@ create policy "students_select_ecole" on public.students
     user_can_query_data()
     and school_id = current_school_id()
     and (
-      current_role() in ('directeur', 'econome', 'surveillant')
-      or (current_role() = 'eleve' and id = current_student_id())
-      or (current_role() = 'parent' and parent_id = current_parent_id())
+      public.current_role() in ('directeur', 'econome', 'surveillant')
+      or (public.current_role() = 'eleve' and id = current_student_id())
+      or (public.current_role() = 'parent' and parent_id = current_parent_id())
       or (
-        current_role() in ('instituteur', 'professeur')
+        public.current_role() in ('instituteur', 'professeur')
         and (
           class_id in (
             select ta.class_id from public.teaching_assignments ta
@@ -113,7 +113,7 @@ create policy "registration_requests_select" on public.registration_requests
   using (
     user_id = auth.uid()
     or (user_can_query_data()
-        and current_role() = 'directeur'
+        and public.current_role() = 'directeur'
         and school_id = current_school_id())
   );
 
@@ -152,7 +152,7 @@ begin
   end if;
   update public.profiles set must_change_password = false where id = v_uid;
   insert into public.audit_log (school_id, actor_id, actor_role, action, entity, entity_id)
-  values (current_school_id(), v_uid, current_role(), 'password_change', 'profiles', v_uid);
+  values (current_school_id(), v_uid, public.current_role(), 'password_change', 'profiles', v_uid);
 end;
 $$;
 

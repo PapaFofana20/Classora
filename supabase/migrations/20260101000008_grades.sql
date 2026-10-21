@@ -119,7 +119,7 @@ declare
   v_field   text;
   v_value   numeric;
 begin
-  if current_role() not in ('instituteur','professeur') or v_teacher is null then
+  if public.current_role() not in ('instituteur','professeur') or v_teacher is null then
     raise exception 'Action non autorisée : cette classe ou cette matière ne vous est pas affectée.';
   end if;
   if not public.school_is_writable(v_school) then
@@ -185,7 +185,7 @@ declare
   v_teacher uuid := public.current_teacher_id();
   v_student record;
 begin
-  if current_role() not in ('directeur','econome','surveillant') and v_teacher is null then
+  if public.current_role() not in ('directeur','econome','surveillant') and v_teacher is null then
     raise exception 'Modification non autorisée.';
   end if;
   if not public.school_is_writable(v_school) then
@@ -402,7 +402,7 @@ create policy "grades_select_scoped" on public.grades
       (
         current_teacher_id() is null
         and (
-          current_role() in ('directeur','econome','surveillant')
+          public.current_role() in ('directeur','econome','surveillant')
           or (current_parent_id() is not null and exists (
             select 1 from public.students s
             where s.school_id = school_id and s.id = student_id and s.parent_id = current_parent_id()))
@@ -460,7 +460,7 @@ create policy "report_metas_select_scoped" on public.report_metas
       (
         current_teacher_id() is null
         and (
-          current_role() in ('directeur','econome','surveillant')
+          public.current_role() in ('directeur','econome','surveillant')
           or (current_parent_id() is not null and exists (
             select 1 from public.students mps
             where mps.school_id = school_id and mps.id = student_id and mps.parent_id = current_parent_id()))
@@ -478,7 +478,7 @@ create policy "report_metas_insert_responsables" on public.report_metas
   with check (
     school_is_writable(school_id)
     and school_id = current_school_id()
-    and (current_role() in ('directeur','econome','surveillant')
+    and (public.current_role() in ('directeur','econome','surveillant')
       or (current_teacher_id() is not null and exists (
         select 1 from public.students s join public.class_rooms c on c.id = s.class_id
         where s.id = student_id and c.head_teacher_id = current_teacher_id())))
@@ -489,7 +489,7 @@ create policy "report_metas_update_role_resume" on public.report_metas
   using (
     school_is_writable(school_id)
     and school_id = current_school_id()
-    and (current_role() in ('directeur','econome','surveillant')
+    and (public.current_role() in ('directeur','econome','surveillant')
       or current_teacher_id() is not null and exists (
         select 1 from public.students s join public.class_rooms c on c.id = s.class_id
         where s.id = student_id and c.head_teacher_id = current_teacher_id()))
@@ -497,7 +497,7 @@ create policy "report_metas_update_role_resume" on public.report_metas
   with check (
     school_is_writable(school_id)
     and school_id = current_school_id()
-    and (current_role() in ('directeur','econome','surveillant')
+    and (public.current_role() in ('directeur','econome','surveillant')
       or current_teacher_id() is not null and exists (
         select 1 from public.students s join public.class_rooms c on c.id = s.class_id
         where s.id = student_id and c.head_teacher_id = current_teacher_id()))

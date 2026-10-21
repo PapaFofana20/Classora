@@ -303,7 +303,7 @@ create policy "payments_select_scoped" on public.payments
     user_can_query_data()
     and school_id = current_school_id()
     and (
-      current_role() in ('directeur','econome','surveillant')
+      public.current_role() in ('directeur','econome','surveillant')
       or (current_parent_id() is not null and exists (
         select 1 from public.students s
         where s.id = student_id and s.school_id = school_id and s.parent_id = current_parent_id()))
