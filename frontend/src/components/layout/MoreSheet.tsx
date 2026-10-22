@@ -66,7 +66,7 @@ export function MoreSheet({ open, onClose, user }: Props) {
         aria-modal="true"
         aria-labelledby="more-sheet-title"
         tabIndex={-1}
-        className="absolute inset-x-0 bottom-0 flex max-h-[88svh] flex-col overflow-hidden rounded-t-3xl bg-white shadow-soft focus:outline-none"
+        className="absolute inset-x-0 bottom-0 flex max-h-[88svh] flex-col overflow-hidden rounded-t-3xl bg-white shadow-soft focus:outline-none drawer-enter"
       >
         <div className="flex justify-center pt-2">
           <span aria-hidden="true" className="h-1.5 w-10 rounded-full bg-neutral-300" />

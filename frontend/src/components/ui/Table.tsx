@@ -7,14 +7,21 @@ export interface Column<T> {
   render: (row: T) => ReactNode;
   className?: string;
   align?: "left" | "right" | "center";
+  /** Prevent text overflow — adds min-width: 0 + overflow-wrap: anywhere */
+  noTruncate?: boolean;
+  /** Format as number with locale (uses Intl.NumberFormat) */
+  numeric?: boolean | Intl.NumberFormatOptions;
+  /** Shrink factor for flex items (avatar, badge, action) */
+  shrink?: number;
 }
 
-interface TableProps<T> {
+export interface TableProps<T> {
   columns: Column<T>[];
   rows: T[];
   rowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
   caption: string;
+  stagger?: boolean;
 }
 
 const aligns = { left: "text-left", right: "text-right", center: "text-center" };
@@ -24,14 +31,15 @@ function headerLabel<T>(column: Column<T>): string | null {
   return null;
 }
 
-function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption }: TableProps<T>) {
+function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption, stagger }: TableProps<T>) {
   const contentColumns = columns.filter((column) => column.key !== "go");
   const leadKey = contentColumns.find((column) => column.key !== "sel" && column.key !== "actions" && headerLabel(column))?.key;
 
   return (
     <div className="space-y-2 md:hidden" role="group" aria-label={caption}>
-      {rows.map((row) => {
+      {rows.map((row, index) => {
         const interactive = Boolean(onRowClick);
+        const delay = stagger ? index * 50 : 0;
         return (
           <div
             key={rowKey(row)}
@@ -49,9 +57,10 @@ function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption }: TablePro
                 : undefined
             }
             className={cn(
-              "rounded-2xl border border-neutral-100 bg-white p-4 text-sm shadow-card transition",
+              "rounded-2xl border border-neutral-100 bg-white p-4 text-sm shadow-card transition stagger-item",
               interactive && "cursor-pointer hover:border-lime hover:bg-lime-pale/40 focus-visible:border-lime focus-visible:outline-none",
             )}
+            style={stagger ? { animationDelay: `${delay}ms` } as React.CSSProperties : undefined}
           >
             <div className="space-y-2.5">
               {contentColumns.map((column) => {
@@ -89,7 +98,7 @@ function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption }: TablePro
                 return (
                   <div key={column.key} className="flex items-start justify-between gap-4">
                     <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-neutral-500">{label}</span>
-                    <div className="min-w-0 text-right">{content}</div>
+                    <div className={cn("min-w-0 text-right", column.noTruncate && "min-w-0 overflow-wrap-anywhere", column.numeric && "tabular-nums", column.shrink !== undefined && `flex-shrink-${column.shrink}`)}>{content}</div>
                   </div>
                 );
               })}
@@ -101,7 +110,7 @@ function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption }: TablePro
   );
 }
 
-export function Table<T>({ columns, rows, rowKey, onRowClick, caption }: TableProps<T>) {
+export function Table<T>({ columns, rows, rowKey, onRowClick, caption, stagger }: TableProps<T>) {
   return (
     <>
       <div className="hidden overflow-x-auto md:block">
@@ -117,25 +126,25 @@ export function Table<T>({ columns, rows, rowKey, onRowClick, caption }: TablePr
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {rows.map((row, index) => (
               <tr
                 key={rowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 onKeyDown={onRowClick ? (e) => (e.key === "Enter" ? onRowClick(row) : undefined) : undefined}
                 tabIndex={onRowClick ? 0 : undefined}
-                className={cn("group transition-colors", onRowClick && "cursor-pointer hover:bg-lime-pale focus-visible:bg-lime-pale")}
+                className={cn("group transition-colors stagger-item", onRowClick && "cursor-pointer hover:bg-lime-pale focus-visible:bg-lime-pale")}
+                style={stagger ? { animationDelay: `${index * 50}ms` } as React.CSSProperties : undefined}
               >
-                {columns.map((c) => (
-                  <td key={c.key} className={cn("border-b border-neutral-100 px-4 py-3 align-middle", aligns[c.align ?? "left"], c.className)}>
-                    {c.render(row)}
-                  </td>
-                ))}
+                {columns.map((c) => {
+                  const tdClass = cn("border-b border-neutral-100 px-4 py-3 align-middle", aligns[c.align ?? "left"], c.className, c.noTruncate && "min-w-0 overflow-wrap-anywhere", c.numeric && "tabular-nums", c.shrink !== undefined && `flex-shrink-${c.shrink}`);
+                  return <td key={c.key} className={tdClass}>{c.render(row)}</td>;
+                })}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <MobileCards columns={columns} rows={rows} rowKey={rowKey} onRowClick={onRowClick} caption={caption} />
+      <MobileCards columns={columns} rows={rows} rowKey={rowKey} onRowClick={onRowClick} caption={caption} stagger={stagger} />
     </>
   );
 }

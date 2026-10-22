@@ -120,20 +120,20 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
     </div>
   );
   const cols: Column<PaymentRow>[] = [
-    { key: "s", header: "Élève", render: (p) => <span><strong>{p.studentName}</strong><span className="block text-xs text-neutral-500">{p.className}</span></span> },
+    { key: "s", header: "Élève", render: (p) => <span><strong>{p.studentName}</strong><span className="block text-xs text-neutral-500">{p.className}</span></span>, noTruncate: true },
     { key: "l", header: "Échéance", render: (p) => p.label },
     { key: "d", header: "Date limite", render: (p) => formatDate(p.dueDate) },
-    { key: "a", header: "Montant", align: "right", render: (p) => formatCurrency(p.amount) },
-    { key: "p", header: "Payé", align: "right", render: (p) => formatCurrency(p.paidAmount) },
+    { key: "a", header: "Montant", align: "right", render: (p) => formatCurrency(p.amount), numeric: true },
+    { key: "p", header: "Payé", align: "right", render: (p) => formatCurrency(p.paidAmount), numeric: true },
     { key: "st", header: "Statut", render: (p) => <Badge tone={PAY_TONE[p.status]}>{PAY_STATUS_LABELS[p.status]}</Badge> },
-    { key: "ac", header: <span className="sr-only">Actions</span>, align: "right", render: actions },
+    { key: "ac", header: <span className="sr-only">Actions</span>, align: "right", render: actions, shrink: 0 },
   ];
   const debtorCols: Column<Debtor>[] = [
-    { key: "c", header: <span className="sr-only">Sélection</span>, render: (d) => <label className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-mist"><input type="checkbox" className="size-5 accent-forest" aria-label={`Sélectionner ${d.studentName}`} checked={picked.includes(d.studentId)} onChange={() => setPicked((p) => (p.includes(d.studentId) ? p.filter((x) => x !== d.studentId) : [...p, d.studentId]))} /></label> },
-    { key: "s", header: "Élève", render: (d) => <span><strong>{d.studentName}</strong><span className="block text-xs text-neutral-500">{d.className}</span></span> },
-    { key: "p", header: "Parent", render: (d) => <span>{d.parentName}<span className="block text-xs text-neutral-500">{d.parentPhone}</span></span> },
-    { key: "n", header: "Échéances", align: "center", render: (d) => d.count },
-    { key: "t", header: "Total dû", align: "right", render: (d) => <strong className="text-danger">{formatCurrency(d.total)}</strong> },
+    { key: "c", header: <span className="sr-only">Sélection</span>, render: (d) => <label className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-mist"><input type="checkbox" className="size-5 accent-forest" aria-label={`Sélectionner ${d.studentName}`} checked={picked.includes(d.studentId)} onChange={() => setPicked((p) => (p.includes(d.studentId) ? p.filter((x) => x !== d.studentId) : [...p, d.studentId]))} /></label>, shrink: 0 },
+    { key: "s", header: "Élève", render: (d) => <span><strong>{d.studentName}</strong><span className="block text-xs text-neutral-500">{d.className}</span></span>, noTruncate: true },
+    { key: "p", header: "Parent", render: (d) => <span>{d.parentName}<span className="block text-xs text-neutral-500">{d.parentPhone}</span></span>, noTruncate: true },
+    { key: "n", header: "Échéances", align: "center", render: (d) => d.count, numeric: true },
+    { key: "t", header: "Total dû", align: "right", render: (d) => <strong className="text-danger">{formatCurrency(d.total)}</strong>, numeric: true },
   ];
   const receiptRows = filtered.filter((p) => p.paidAmount > 0 && p.paidAt).sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""));
   const receiptCols: Column<PaymentRow>[] = [
@@ -196,13 +196,13 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
                 <Button variant="outline" onClick={() => setPicked(picked.length === debtors.length ? [] : debtors.map((d) => d.studentId))}>{picked.length === debtors.length && debtors.length ? "Tout désélectionner" : "Tout sélectionner"}</Button>
                 {canAct && <Button icon="send" disabled={picked.length === 0} loading={busy} onClick={() => void remind()}>Envoyer une relance ({picked.length})</Button>}
               </div>
-              {debtors.length === 0 ? <EmptyState icon="verified" title="Aucun impayé" text="Toutes les échéances échues sont réglées." /> : <Card padded={false} className="p-2"><Table caption="Élèves avec échéances impayées" columns={debtorCols} rows={debtors} rowKey={(d) => d.studentId} /></Card>}
+              {debtors.length === 0 ? <EmptyState icon="verified" title="Aucun impayé" text="Toutes les échéances échues sont réglées." /> : <Card padded={false} className="p-2"><Table caption="Élèves avec échéances impayées" columns={debtorCols} rows={debtors} rowKey={(d) => d.studentId} stagger /></Card>}
             </>
           ) : list.length === 0 ? (
             <EmptyState icon="search_off" title="Aucun résultat" text="Modifiez vos filtres." />
           ) : (
             <Card padded={false} className="p-2">
-              <Table caption="Paiements" columns={tab === "recus" ? receiptCols : cols} rows={list.slice((page - 1) * PAGE, page * PAGE)} rowKey={(p) => p.id} />
+              <Table caption="Paiements" columns={tab === "recus" ? receiptCols : cols} rows={list.slice((page - 1) * PAGE, page * PAGE)} rowKey={(p) => p.id} stagger />
               <div className="px-4 pb-4"><Pagination page={page} pageSize={PAGE} total={list.length} onChange={setPage} /></div>
             </Card>
           )}

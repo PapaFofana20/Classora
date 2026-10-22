@@ -42,7 +42,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`relative flex max-h-[92vh] w-full ${widths[size]} animate-page flex-col rounded-t-3xl bg-white shadow-soft focus:outline-none sm:rounded-3xl`}
+        className={`relative flex max-h-[92vh] w-full ${widths[size]} modal-enter flex-col rounded-t-3xl bg-white shadow-soft focus:outline-none sm:rounded-3xl`}
       >
         <div className="flex items-center justify-between gap-4 border-b border-neutral-100 px-6 py-4">
           <h2 className="text-lg font-bold text-forest">{title}</h2>

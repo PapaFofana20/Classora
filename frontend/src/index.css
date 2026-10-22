@@ -58,6 +58,10 @@
     from { background-position: -200% 0; }
     to { background-position: 200% 0; }
   }
+  @keyframes stagger-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 /* ==========================================================================
@@ -142,7 +146,6 @@ body {
 input, textarea, select { font-size: 16px; }
 button, a, [role="button"] { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
-/* Hover styles only on devices that support true hover */
 @media (hover: hover) and (pointer: fine) {
   .hover\:scale-\[1\.02\]:hover { transform: scale(1.02); }
   .hover\:-translate-y-1:hover { transform: translateY(-4px); }
@@ -155,6 +158,36 @@ button, a, [role="button"] { touch-action: manipulation; user-select: none; -web
   .hover\:text-white:hover { color: #fff; }
   .hover\:shadow-soft:hover { box-shadow: var(--shadow-soft); }
   .hover\:shadow-card:hover { box-shadow: var(--shadow-card); }
+}
+
+/* Asymmetric timing: press slow (deliberate), release fast (responsive) */
+button, a, [role="button"] {
+  transition: transform 100ms var(--ease-out), background 100ms var(--ease-out), border-color 100ms var(--ease-out), box-shadow 100ms var(--ease-out);
+}
+button:active, a:active, [role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 50ms var(--ease-out), background 50ms var(--ease-out), border-color 50ms var(--ease-out), box-shadow 50ms var(--ease-out);
+}
+
+/* @starting-style for modal/toast/drawer entries */
+@starting-style {
+  .modal-enter, .toast-enter, .drawer-enter, .sheet-enter, .popover-enter {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+.modal-enter, .toast-enter, .drawer-enter, .sheet-enter, .popover-enter {
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+
+/* Transform-origin for popovers/dropdowns/tooltips */
+.popover, .dropdown, .tooltip {
+  transform-origin: var(--transform-origin, center);
+}
+
+/* Modal: keep center origin */
+.modal, [role="dialog"] {
+  transform-origin: center;
 }
 
 :focus-visible { outline: 3px solid var(--color-leaf); outline-offset: 2px; }
@@ -193,8 +226,23 @@ button, a, [role="button"] { touch-action: manipulation; user-select: none; -web
   animation: var(--animate-shimmer);
 }
 
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease-in-out), transform 0.7s var(--ease-in-out); }
 .reveal.in { opacity: 1; transform: none; }
+
+/* Stagger animation for list items (30-80ms delay between items) */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: stagger-fade-in 300ms var(--ease-out) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -216,6 +264,13 @@ button, a, [role="button"] { touch-action: manipulation; user-select: none; -web
   .reveal { opacity: 1; transform: none; }
   .sidebar-col { transition: none !important; }
 }
+
+/* Break UI utilities */
+.overflow-wrap-anywhere { overflow-wrap: anywhere; }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+.flex-shrink-0 { flex-shrink: 0; }
+.flex-shrink-1 { flex-shrink: 1; }
+.flex-shrink-2 { flex-shrink: 2; }
 
 /* Impression des bulletins */
 @media print {

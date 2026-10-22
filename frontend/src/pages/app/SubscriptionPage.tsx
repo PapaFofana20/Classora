@@ -37,11 +37,11 @@ export default function SubscriptionPage() {
         title="Abonnement Classora"
         subtitle="Visible uniquement par le directeur de l'école."
         actions={
-          active && overview.data?.school ? undefined : (
-            <LinkButton to="/app" icon="dashboard" variant="dark">
-              Accéder à mon tableau de bord
+          !active ? (
+            <LinkButton to="/inscription/abonnement" icon="workspace_premium" variant="dark">
+              Choisir une formule
             </LinkButton>
-          )
+          ) : undefined
         }
       />
 

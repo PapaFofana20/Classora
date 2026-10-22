@@ -19,7 +19,7 @@ import { CYCLES, CYCLE_LABELS } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { useDebounce } from "@/hooks/useDebounce";
 import { listStudentRows, type StudentRow } from "@/services/studentService";
-import { formatCurrency, formatDate } from "@/utils/format";
+import { formatCurrency, formatDate, pluralize } from "@/utils/format";
 import { STUDENT_STATUS_LABELS } from "@/utils/payments";
 
 const PAGE_SIZE = 10;
@@ -103,7 +103,7 @@ export default function StudentsPage() {
     <>
       <PageHeader
         title={isTeacher ? "Mes élèves" : "Élèves"}
-        subtitle={`${rows.length} élève${rows.length > 1 ? "s" : ""} · année scolaire 2026-2027`}
+        subtitle={`${rows.length} ${pluralize(rows.length, "élève", "élèves")} · année scolaire 2026-2027`}
         actions={user.role === "directeur" && <LinkButton to="/app/inscription-eleve" icon="person_add">Inscrire un élève</LinkButton>}
       />
       <Card className="mb-4">
@@ -137,7 +137,7 @@ export default function StudentsPage() {
             <EmptyState icon="search_off" title="Aucun élève trouvé" text="Modifiez votre recherche ou vos filtres." />
           ) : (
             <Card padded={false} className="p-2">
-              <Table caption="Liste des élèves" columns={columns} rows={pageRows} rowKey={(r) => r.id} onRowClick={(r) => navigate(`/app/eleves/${r.id}`)} />
+              <Table caption="Liste des élèves" columns={columns} rows={pageRows} rowKey={(r) => r.id} onRowClick={(r) => navigate(`/app/eleves/${r.id}`)} stagger />
               <div className="px-4 pb-4">
                 <Pagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onChange={setPage} />
               </div>

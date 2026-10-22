@@ -30,7 +30,7 @@ export function FilterSheet({ open, onClose, title = "Filtres", children, footer
   return createPortal(
     <div className="no-print fixed inset-0 z-modal md:hidden" role="presentation">
       <div className="absolute inset-0 bg-forest/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} className="absolute inset-x-0 bottom-0 flex max-h-[85svh] flex-col overflow-hidden rounded-t-3xl bg-white shadow-soft focus:outline-none">
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} className="absolute inset-x-0 bottom-0 flex max-h-[85svh] flex-col overflow-hidden rounded-t-3xl bg-white shadow-soft focus:outline-none drawer-enter">
         <div className="flex justify-center pt-2">
           <span aria-hidden="true" className="h-1.5 w-10 rounded-full bg-neutral-300" />
         </div>

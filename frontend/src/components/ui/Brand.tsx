@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
+import { initialsGrapheme } from "@/utils/format";
 
 export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?: string; to?: string }) {
   return (
@@ -16,12 +17,8 @@ export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?
 }
 
 export function Avatar({ name, size = 40, className }: { name: string; size?: number; className?: string }) {
-  const letters = name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p.charAt(0).toUpperCase())
-    .join("");
+  const [first, last] = name.trim().split(" ").filter(Boolean);
+  const letters = initialsGrapheme(first ?? "", last ?? "");
   return (
     <span aria-hidden="true" style={{ width: size, height: size, fontSize: size * 0.36 }} className={cn("inline-grid shrink-0 place-items-center rounded-full bg-lime font-bold text-forest", className)}>
       {letters}

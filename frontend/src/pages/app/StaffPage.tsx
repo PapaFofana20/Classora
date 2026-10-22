@@ -188,14 +188,14 @@ export default function StaffPage() {
               <EmptyState icon="badge" title="Aucun accès" text="Créez un accès enseignant, économe ou surveillant pour votre école." action={<Button icon="person_add" onClick={() => setOpen(true)}>Créer un accès</Button>} />
             ) : (
               <Card padded={false} className="p-2">
-                <Table caption="Comptes d'accès du personnel" columns={staffCols} rows={filteredStaff} rowKey={(s) => s.userId} />
+                <Table caption="Comptes d'accès du personnel" columns={staffCols} rows={filteredStaff} rowKey={(s) => s.userId} stagger />
               </Card>
             )
           ) : filteredTeachers.length === 0 ? (
             <EmptyState icon="person_search" title="Aucun enseignant" text="Modifiez votre recherche." />
           ) : (
             <Card padded={false} className="p-2">
-              <Table caption="Liste des enseignants" columns={teacherCols} rows={filteredTeachers} rowKey={(t) => t.id} />
+              <Table caption="Liste des enseignants" columns={teacherCols} rows={filteredTeachers} rowKey={(t) => t.id} stagger />
             </Card>
           )
         }

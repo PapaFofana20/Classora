@@ -66,3 +66,23 @@ export function isValidEmail(v: string): boolean {
 export function isValidSnPhone(v: string): boolean {
   return /^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/.test(v.trim());
 }
+
+/** Pluralisation FR : "1 élève", "2 élèves" — utilise Intl.PluralRules */
+export function pluralize(count: number, singular: string, plural: string): string {
+  const rule = new Intl.PluralRules("fr-FR").select(count);
+  return rule === "one" ? singular : plural;
+}
+
+/** Initiales à partir de graphèmes (supporte emoji, noms composés) */
+export function initialsGrapheme(first: string, last: string): string {
+  // @ts-ignore - Intl.Segmenter not in TS lib yet but exists at runtime
+  if (typeof Intl !== "undefined" && (Intl as any).Segmenter) {
+    // @ts-ignore
+    const segmenter = new Intl.Segmenter("fr", { granularity: "grapheme" });
+    const firstSeg = [...segmenter.segment(first.trim())].find((s) => s.isWordLike)?.segment ?? first.charAt(0);
+    const lastSeg = [...segmenter.segment(last.trim())].find((s) => s.isWordLike)?.segment ?? last.charAt(0);
+    return `${firstSeg}${lastSeg}`.toUpperCase();
+  }
+  // Fallback for older environments
+  return `${first.trim().charAt(0)}${last.trim().charAt(0)}`.toUpperCase();
+}

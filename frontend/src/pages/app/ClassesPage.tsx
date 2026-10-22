@@ -86,11 +86,11 @@ export default function ClassesPage() {
                     <p className="rounded-2xl bg-white p-6 text-sm text-neutral-500 shadow-card">Aucune classe dans ce cycle.</p>
                   ) : (
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {list.map((c) => {
+                      {list.map((c, index) => {
                         const count = students.filter((s) => s.classId === c.id).length;
                         const head = teachers.find((t) => t.id === c.headTeacherId);
                         return (
-                          <Card key={c.id} hover>
+                          <Card key={c.id} hover className="stagger-item" style={{ animationDelay: `${index * 50}ms` }}>
                             <div className="flex items-start justify-between">
                               <div>
                                 <p className="text-2xl font-extrabold text-forest">{c.name}</p>

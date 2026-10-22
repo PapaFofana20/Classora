@@ -228,7 +228,7 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
             aria-modal="true"
             aria-label="Menu"
             tabIndex={-1}
-            className="absolute inset-y-0 left-0 w-[19rem] max-w-[88vw] overflow-hidden rounded-r-3xl bg-forest pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-soft focus:outline-none"
+            className="absolute inset-y-0 left-0 w-[19rem] max-w-[88vw] overflow-hidden rounded-r-3xl bg-forest pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-soft focus:outline-none drawer-enter"
           >
             <button type="button" onClick={onClose} aria-label="Fermer le menu" className="absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-10 grid size-11 place-items-center rounded-full bg-white/10 text-white">
               <Icon name="close" />
