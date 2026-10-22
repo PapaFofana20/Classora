@@ -8,7 +8,7 @@ import type { Plan } from "@/types";
 export const plans: Plan[] = [
   {
     id: "essentiel",
-    name: "Essentiel",
+    name: "Plan découverte",
     tagline: "Pour démarrer une école",
     studentLimit: 100,
     monthlyPrice: 15000,
