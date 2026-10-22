@@ -1,12 +1,9 @@
 -- ============================================================================
--- Migration : Génération du matricule d'école + abonnement essai 30 jours
--- lors de l'inscription du directeur.
--- Phase test : abonnement "Pro" 30 jours gratuit pour permettre l'accès complet.
--- Production : le support activera l'abonnement réel après paiement.
+-- Migration : Génération du matricule d'école lors de l'inscription du directeur
+-- Phase test : pas d'abonnement, matricule généré immédiatement
 -- ============================================================================
 
 -- Mise à jour de finish_director_registration pour générer le matricule
--- et créer un abonnement essai 30 jours (plan Pro, 300 élèves)
 create or replace function public.finish_director_registration(
   p_user_id uuid,
   p_first_name text,
@@ -23,7 +20,6 @@ declare
   v_school_id uuid;
   v_cycles_text text[];
   v_matricule text;
-  v_ends_at date := current_date + 30; -- essai 30 jours
 begin
   if p_user_id is null then
     raise exception 'Compte introuvable.';
@@ -86,13 +82,6 @@ begin
 
   insert into public.profiles (id, school_id, role, status, first_name, last_name, phone, email)
   values (p_user_id, v_school_id, 'directeur', 'ACTIF', trim(p_first_name), trim(p_last_name), trim(p_phone), trim(p_email));
-
-  -- Abonnement essai 30 jours (plan Pro) pour phase test
-  insert into public.subscriptions (school_id, plan_id, starts_at, ends_at, student_limit, amount_paid, payment_ref, method)
-  values (v_school_id, 'pro', current_date, v_ends_at, 300, 0, 'ESSAI_30J', 'test');
-
-  insert into public.subscription_events (school_id, event_type, plan_id, amount_paid, payment_ref, method, starts_at, ends_at, payload)
-  values (v_school_id, 'purchase', 'pro', 0, 'ESSAI_30J', 'test', current_date, v_ends_at, jsonb_build_object('trial', true));
 
   insert into public.audit_log (school_id, actor_id, actor_role, action, entity, entity_id)
   values (v_school_id, p_user_id, 'directeur', 'register_director', 'schools', v_school_id);
