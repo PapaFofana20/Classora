@@ -15,6 +15,7 @@ import { Logo, SchoolMark, schoolInitials } from "@/components/ui/Brand";
 import { Icon } from "@/components/ui/Icon";
 import { useAsync } from "@/hooks/useAsync";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
+import { ConfirmDialog } from "@/components/ui/Modal";
 
 /** Délai avant affichage de l'info-bulle au survol (au focus clavier : immédiate). */
 const TOOLTIP_DELAY = 300;
@@ -95,10 +96,10 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
   const school = useSchool();
   const items = navFor(user.role, { isHead: headClasses.length > 0, locked: school.missing, badges: pending > 0 ? { "/app/eleves/demandes": pending } : {} });
   const sections = Array.from(new Set(items.map((i) => i.section)));
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   const handleLogout = () => {
-    navigate("/", { replace: true });
-    logout();
+    setConfirmLogout(true);
   };
 
   return (
@@ -159,6 +160,18 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={confirmLogout}
+        onCancel={() => setConfirmLogout(false)}
+        title="Se déconnecter"
+        message="Voulez-vous vraiment vous déconnecter ?"
+        confirmLabel="Oui"
+        onConfirm={() => {
+          setConfirmLogout(false);
+          navigate("/", { replace: true });
+          logout();
+        }}
+      />
     </div>
   );
 }

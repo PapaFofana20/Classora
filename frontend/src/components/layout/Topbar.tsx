@@ -12,6 +12,7 @@ import { ROLE_LABELS } from "@/utils/permissions";
 import { Avatar, SchoolMark } from "@/components/ui/Brand";
 import { ContextSwitcher } from "@/components/ui/ContextSwitcher";
 import { Icon } from "@/components/ui/Icon";
+import { ConfirmDialog } from "@/components/ui/Modal";
 import { ChildSwitcher } from "./ChildSwitcher";
 
 export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void }) {
@@ -22,6 +23,7 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
   const school = useSchool();
   const unread = useAsync(() => countUnread(user), [user.id, pathname]);
   const [menu, setMenu] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const count = unread.data ?? 0;
 
@@ -40,12 +42,12 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
   }, []);
 
   const handleLogout = () => {
-    navigate("/", { replace: true });
-    logout();
+    setConfirmLogout(true);
   };
   const fullName = `${user.firstName} ${user.lastName}`;
 
   return (
+    <>
     <header className="no-print sticky top-0 z-30 -mx-4 mb-4 border-b border-neutral-200/60 bg-mist/90 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur md:-mx-8 md:mb-6 md:px-8 md:pb-3 md:pt-[calc(0.75rem+env(safe-area-inset-top))] lg:py-3">
       <div className="flex items-center gap-2 sm:gap-3">
         <button type="button" onClick={onMenu} aria-label="Ouvrir le menu" className="grid size-11 shrink-0 place-items-center rounded-full bg-white shadow-card lg:hidden">
@@ -92,5 +94,18 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
         </div>
       )}
     </header>
+    <ConfirmDialog
+      open={confirmLogout}
+      onCancel={() => setConfirmLogout(false)}
+      title="Se déconnecter"
+      message="Voulez-vous vraiment vous déconnecter ?"
+      confirmLabel="Oui"
+      onConfirm={() => {
+        setConfirmLogout(false);
+        navigate("/", { replace: true });
+        logout();
+      }}
+    />
+    </>
   );
 }

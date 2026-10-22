@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -11,6 +11,7 @@ import { countPendingFor } from "@/services/registrationService";
 import type { SessionUser } from "@/types";
 import { cn } from "@/utils/cn";
 import { Icon } from "@/components/ui/Icon";
+import { ConfirmDialog } from "@/components/ui/Modal";
 
 interface Props {
   open: boolean;
@@ -24,6 +25,7 @@ export function MoreSheet({ open, onClose, user }: Props) {
   const school = useSchool();
   const { headClasses } = useTeaching();
   const panelRef = useRef<HTMLDivElement>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const pending = useAsync(
     () => (open && user.role === "directeur" ? countPendingFor(user.schoolId) : Promise.resolve(0)),
     [open, user.id, user.role, user.schoolId],
@@ -51,9 +53,7 @@ export function MoreSheet({ open, onClose, user }: Props) {
   if (!open) return null;
 
   const handleLogout = () => {
-    onClose();
-    navigate("/", { replace: true });
-    logout();
+    setConfirmLogout(true);
   };
 
   return createPortal(
@@ -125,6 +125,19 @@ export function MoreSheet({ open, onClose, user }: Props) {
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmLogout}
+        onCancel={() => setConfirmLogout(false)}
+        title="Se déconnecter"
+        message="Voulez-vous vraiment vous déconnecter ?"
+        confirmLabel="Oui"
+        onConfirm={() => {
+          setConfirmLogout(false);
+          onClose();
+          navigate("/", { replace: true });
+          logout();
+        }}
+      />
     </div>,
     document.body,
   );
