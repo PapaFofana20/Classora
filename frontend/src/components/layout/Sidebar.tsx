@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
-import { SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
+import { SIDEBAR_COLLAPSED, SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
 import { useTeaching } from "@/context/TeachingContext";
 import { SCHOOL_YEAR } from "@/data/school";
 import { countPendingFor } from "@/services/registrationService";
@@ -15,9 +15,6 @@ import { Logo, SchoolMark, schoolInitials } from "@/components/ui/Brand";
 import { Icon } from "@/components/ui/Icon";
 import { useAsync } from "@/hooks/useAsync";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
-
-/** Zone de tolérance (px) : le pointeur qui sort à moins de 8 px du bord ne déclenche pas le repli. */
-const EDGE_TOLERANCE = 8;
 
 /** Délai avant affichage de l'info-bulle au survol (au focus clavier : immédiate). */
 const TOOLTIP_DELAY = 300;
@@ -178,7 +175,6 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
   const active = current ?? user;
   const sidebar = useSidebar();
   const pending = useAsync(() => (active.role === "directeur" ? countPendingFor(active.schoolId) : Promise.resolve(0)), [active.id, pathname]);
-  const columnRef = useRef<HTMLDivElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   // Le tiroir mobile force l'ouverture sans toucher à l'épinglage mémorisé.
   const expanded = sidebar.expanded || drawerOpen;
@@ -186,35 +182,18 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
   useEffect(onClose, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   useModalBehavior(drawerOpen, onClose, drawerRef);
 
-  const handlers = sidebar.hoverEnabled ? sidebar.handlers : {};
-
-  /**
-   * Tolérance de bord : si le pointeur sort vers la droite à moins de 8 px, on ignore la sortie.
-   * Évite le repli accidentel quand le contenu se décale sous le curseur.
-   */
-  const onPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
-    const rect = columnRef.current?.getBoundingClientRect();
-    const next = event.relatedTarget as Element | null;
-    if (rect && next && typeof next.getBoundingClientRect === "function") {
-      const target = next.getBoundingClientRect();
-      if (target.left - rect.right <= EDGE_TOLERANCE && target.left >= rect.left) return;
-    }
-    sidebar.handlers.onPointerLeave();
-  };
-
-  const sidebarTransform = expanded ? "translateX(0)" : `translateX(-${SIDEBAR_EXPANDED})`;
-
   return (
     <>
       {/* Colonne 1 du flux : elle pousse le contenu (pas de superposition). */}
       <div
-        ref={columnRef}
-        {...handlers}
-        onPointerLeave={sidebar.hoverEnabled ? onPointerLeave : undefined}
-        style={{ transform: sidebarTransform }}
+        onPointerEnter={sidebar.hoverEnabled ? sidebar.handlers.onPointerEnter : undefined}
+        onPointerLeave={sidebar.hoverEnabled ? sidebar.handlers.onPointerLeave : undefined}
+        onFocusCapture={sidebar.handlers.onFocusCapture}
+        onBlurCapture={sidebar.handlers.onBlurCapture}
+        style={{ width: expanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED }}
         className={cn(
           "sidebar-col no-print sticky top-3 hidden h-[calc(100svh-24px)] shrink-0 self-start overflow-hidden rounded-3xl bg-forest shadow-card lg:m-3 lg:block",
-          sidebar.animating && "will-change-transform",
+          sidebar.animating && "will-change-width",
         )}
       >
         <SidebarContent user={active} pending={pending.data ?? 0} expanded={expanded} onLogoClick={sidebar.togglePinned} />

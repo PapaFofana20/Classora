@@ -251,13 +251,13 @@ button:active, a:active, [role="button"]:active {
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* Colonne latérale rétractable du dashboard : transform au lieu de width (pas de reflow). */
+/* Colonne latérale rétractable du dashboard : une seule propriété animée (width). */
 .sidebar-col {
-  transition: transform 250ms var(--ease-out);
+  transition: width 250ms var(--ease-out);
 }
 
-/* will-change sur transform (pas width) — évite le shift 1px au démarrage/fin. */
-.will-change-transform { will-change: transform; }
+/* Pendant la transition uniquement (la classe est posée/retirée par SidebarContext). */
+.will-change-width { will-change: width; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

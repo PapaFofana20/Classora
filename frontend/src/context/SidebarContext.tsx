@@ -32,7 +32,7 @@ export interface SidebarContextValue {
   pinned: boolean;
   setPinned: (pinned: boolean) => void;
   togglePinned: () => void;
-  /** false sur les écrans où le survol rendrait le contenu illisible (1024–1279 px). */
+  /** false quand déployer la sidebar réduirait le contenu sous 720 px. */
   hoverEnabled: boolean;
   /** Largeur mesurée de la colonne de contenu. */
   contentWidth: number;
@@ -70,7 +70,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const togglePinned = useCallback(() => setPinned(!pinned), [pinned, setPinned]);
   const keepExpanded = useCallback((open: boolean) => setOverlays((n) => Math.max(0, n + (open ? 1 : -1))), []);
 
-  // Largeur réelle de la colonne de contenu : (contentWidth - 188 px) doit rester ≥ 720 px.
+  // Largeur utile de la colonne de contenu (hors padding), mesurée en continu.
   const observer = useRef<ResizeObserver | null>(null);
   const registerContent = useCallback((element: HTMLDivElement | null) => {
     observer.current?.disconnect();
@@ -83,7 +83,20 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => () => observer.current?.disconnect(), []);
 
-  const hoverEnabled = contentWidth === 0 || contentWidth - SIDEBAR_DELTA >= MIN_CONTENT_WIDTH;
+  const expanded = hover.expanded || pinned || overlays > 0;
+
+  // La largeur mesurée change avec l'état de la sidebar : on la ramène toujours
+  // à la largeur repliée avant de décider si le survol tient dans l'écran.
+  // Sans cette compensation, l'ouverture réduisait la mesure, désactivait le
+  // survol et retirait onPointerLeave alors que le pointeur était encore dedans.
+  const collapsedContentWidth = expanded ? contentWidth + SIDEBAR_DELTA : contentWidth;
+  const hoverEnabled = contentWidth === 0 || collapsedContentWidth - SIDEBAR_DELTA >= MIN_CONTENT_WIDTH;
+
+  // Si la fenêtre rétrécit pendant une ouverture au survol, le repli ne peut
+  // plus être déclenché par onPointerLeave (handlers retirés) : on le force.
+  useEffect(() => {
+    if (!hoverEnabled) hover.collapse();
+  }, [hoverEnabled, hover.collapse]);
 
   // Raccourci clavier « [ » : épingle / replie la sidebar (ignoré dans les champs de saisie).
   useEffect(() => {
@@ -98,19 +111,19 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   }, [setPinned, pinned]);
 
   // will-change posé au début de la transition, retiré juste après.
-  const previous = useRef(hover.expanded);
+  const previous = useRef(expanded);
   useEffect(() => {
-    if (previous.current === hover.expanded) return;
-    previous.current = hover.expanded;
+    if (previous.current === expanded) return;
+    previous.current = expanded;
     setAnimating(true);
     const id = window.setTimeout(() => setAnimating(false), 300);
     return () => window.clearTimeout(id);
-  }, [hover.expanded]);
+  }, [expanded]);
 
   const value = useMemo<SidebarContextValue>(
     () => ({
       ...hover,
-      expanded: hover.expanded || pinned || overlays > 0,
+      expanded,
       pinned,
       setPinned,
       togglePinned,
@@ -120,7 +133,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       animating,
       keepExpanded,
     }),
-    [hover, pinned, setPinned, togglePinned, hoverEnabled, contentWidth, registerContent, animating, keepExpanded],
+    [hover, expanded, pinned, setPinned, togglePinned, hoverEnabled, contentWidth, registerContent, animating, keepExpanded],
   );
 
   return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
