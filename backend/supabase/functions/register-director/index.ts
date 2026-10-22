@@ -16,6 +16,7 @@ import {
   requireEmail,
   requireSnPhone,
   requireString,
+  optionalString,
   ValidationError,
 } from "../_shared/validate.ts";
 
@@ -35,6 +36,7 @@ Deno.serve(async (req) => {
     const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
     const schoolName = requireString(body, "schoolName", "Le nom de l'école", { min: 2, max: 120 });
     const city = requireString(body, "city", "La ville", { min: 1, max: 80 });
+    const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
 
     const pwError = passwordError(password);
@@ -64,6 +66,7 @@ Deno.serve(async (req) => {
         p_email: email,
         p_school_name: schoolName,
         p_city: city,
+        p_address: address,
         p_cycles: cycles,
       });
       if (error || !data) {

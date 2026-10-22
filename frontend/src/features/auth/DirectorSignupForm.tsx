@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { PasswordField } from "@/features/auth/PasswordField";
+import { Select } from "@/components/ui/Select";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { CYCLES, CYCLE_LABELS } from "@/data/school";
@@ -13,7 +14,19 @@ import { cn } from "@/utils/cn";
 import { isValidEmail, isValidSnPhone } from "@/utils/format";
 import { passwordError } from "@/utils/password";
 
-const CITIES = ["Dakar", "Thiès", "Mbour", "Saint-Louis", "Kaolack", "Ziguinchor", "Tambacounda", "Louga", "Kolda", "Kaffrine"];
+const SENEGAL_CITIES = [
+  "Dakar", "Pikine", "Guédiawaye", "Rufisque", "Bargny", "Sébikhotane", "Diamniadio", "Lac Rose",
+  "Thiès", "Tivaouane", "Mbour", "Joal-Fadiouth", "Saly", "Sindia", "Popenguine", "Ngaparou",
+  "Saint-Louis", "Richard-Toll", "Rosso", "Dagana", "Podor", "Matam", "Kanel", "Ourossogui",
+  "Kaolack", "Kaffrine", "Kahone", "Ndoffane", "Guenie", "Malem Hodar", "Koungheul",
+  "Ziguinchor", "Bignona", "Oussouye", "Cap Skirring", "Goudomp", "Sedhiou", "Marsassoum",
+  "Tambacounda", "Kedougou", "Kolda", "Velinguara", "Medina Yoro Foulah", "Dabo",
+  "Louga", "Linguere", "Kebemer", "Dara",
+  "Fatick", "Foundiougne", "Gossas", "Dioffior",
+  "Diourbel", "Bambey", "Mbacke", "Touba",
+  "Kedougou", "Salemata", "Bandafassi", "Nindefa",
+  "Sedhiou", "Goudomp", "Marsassoum",
+];
 
 /** Inscription du directeur : école + compte + matricule, puis accès direct au tableau de bord. */
 export function DirectorSignupForm() {
@@ -21,7 +34,7 @@ export function DirectorSignupForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [cycles, setCycles] = useState<Cycle[]>(["elementaire", "moyen"]);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", password: "", confirm: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "" });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +46,7 @@ export function DirectorSignupForm() {
     phone: !isValidSnPhone(form.phone) ? "Format attendu : 77 123 45 67." : null,
     schoolName: form.schoolName.trim().length < 3 ? "Indiquez le nom de votre école." : null,
     city: form.city.trim().length < 2 ? "Indiquez la ville." : null,
+    address: form.address.trim().length < 3 ? "Indiquez l'adresse de l'école." : null,
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
     cycles: cycles.length === 0 ? "Choisissez au moins un cycle." : null,
@@ -69,12 +83,8 @@ export function DirectorSignupForm() {
         <Input label="Prénom" required autoComplete="given-name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
         <Input label="Nom" required autoComplete="family-name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
         <Input className="sm:col-span-2" label="Nom de l'école" required icon="school" placeholder="Ex. Groupe Scolaire Les Baobabs" value={form.schoolName} onChange={(e) => setForm({ ...form, schoolName: e.target.value })} onBlur={() => touch("schoolName")} error={show("schoolName")} />
-        <Input label="Ville" required icon="location_on" list="villes" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} onBlur={() => touch("city")} error={show("city")} />
-        <datalist id="villes">
-          {CITIES.map((c) => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
+        <Select label="Ville" required options={SENEGAL_CITIES.map((c) => ({ value: c, label: c }))} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} onBlur={() => touch("city")} error={show("city")} />
+        <Input className="sm:col-span-2" label="Adresse de l'école" required icon="location_on" placeholder="Ex. Quartier, rue, numéro" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} onBlur={() => touch("address")} error={show("address")} />
         <Input label="Adresse e-mail" type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
         <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
       </div>
