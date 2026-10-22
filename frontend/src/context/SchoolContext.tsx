@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
 import type { Plan, School, SchoolSettings, SubscriptionStatus } from "@/types";
 import { useAsync } from "@/hooks/useAsync";
 import { getSchoolOverview } from "@/services/schoolService";
@@ -66,6 +66,13 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
   }, [schoolId]);
 
   const reload = useCallback(() => state.reload(), [state.reload]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Écouter l'événement de rechargement après inscription directeur
+  useEffect(() => {
+    const handleReload = () => reload();
+    window.addEventListener("school:reload", handleReload);
+    return () => window.removeEventListener("school:reload", handleReload);
+  }, [reload]);
 
   const value = useMemo<SchoolContextValue>(() => {
     if (!user || !state.data) return { ...EMPTY, schoolId, schoolName: "", loading: state.loading, reload };

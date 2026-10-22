@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Switch } from "@/components/ui/Switch";
 import { useToast } from "@/context/ToastContext";
 import { toggleRegistration } from "@/services/schoolService";
+import { useSchool } from "@/context/SchoolContext";
 import type { School } from "@/types";
 import { MATRICULE_ALPHABET, MATRICULE_LENGTH } from "@/utils/matricule";
 
@@ -40,7 +41,9 @@ interface Props {
  */
 export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
   const { toast } = useToast();
+  const { reload } = useSchool();
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(!school.matricule);
 
   const copy = async (value: string, message: string) => {
     try {
@@ -78,6 +81,36 @@ export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
     }
   };
 
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      await reload();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Si pas de matricule encore, afficher un état d'attente
+  if (loading || !school.matricule) {
+    return (
+      <Card>
+        <CardHeader
+          title="Matricule de votre école"
+          subtitle="Génération en cours..."
+        />
+        <div className="flex items-center justify-center py-8">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-10 w-10 border-3 border-forest border-t-transparent" />
+            <p className="text-sm text-neutral-600">Génération du matricule sécurisé…</p>
+            <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+              Actualiser
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader
@@ -95,6 +128,9 @@ export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
           </Button>
           <Button icon="share" variant="dark" onClick={() => void share()}>
             Partager
+          </Button>
+          <Button variant="outline" size="sm" onClick={refresh} disabled={loading} aria-label="Recharger le matricule">
+            <Icon name="refresh" className={loading ? "animate-spin" : ""} />
           </Button>
         </div>
       </div>

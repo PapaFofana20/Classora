@@ -57,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const u = await authService.registerDirector(input);
     setUser(u);
     setJustLoggedOut(false);
+    // Notifier le SchoolProvider de recharger l'école pour récupérer le matricule fraîchement généré
+    window.dispatchEvent(new CustomEvent("school:reload"));
     return u;
   }, []);
 
