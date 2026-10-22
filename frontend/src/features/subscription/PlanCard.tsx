@@ -17,7 +17,7 @@ export function PlanCard({ plan, cycle, current }: Props) {
   return (
     <article
       className={cn(
-        "relative flex h-full flex-col rounded-3xl border-2 p-6 transition-all",
+        "relative flex h-full flex-col rounded-3xl border-2 p-6 transition-transform",
         plan.highlight ? "border-forest bg-forest text-white shadow-soft" : "border-neutral-200 bg-white",
       )}
     >

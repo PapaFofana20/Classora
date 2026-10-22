@@ -14,7 +14,7 @@ export function Card({ hover, dark, padded = true, className, children, ...rest 
         "rounded-2xl shadow-card",
         dark ? "bg-forest text-white" : "bg-white",
         padded && "p-5 sm:p-6",
-        hover && "transition-all duration-300 hover:-translate-y-1 hover:shadow-soft",
+        hover && "transition-transform duration-300 hover:-translate-y-1 hover:shadow-soft",
         className,
       )}
       {...rest}

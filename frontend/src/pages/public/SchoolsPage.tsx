@@ -15,7 +15,7 @@ export default function SchoolsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
             <Reveal key={s.id} delay={i * 60}>
-              <article className="h-full rounded-3xl bg-mist p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-lime-soft">
+              <article className="h-full rounded-3xl bg-mist p-6 transition-transform duration-300 hover:-translate-y-1 hover:bg-lime-soft">
                 <div className="flex items-center gap-4">
                   <span className="grid size-14 place-items-center rounded-2xl bg-forest text-lg font-extrabold text-lime">{initials(s.name.split(" ")[0], s.name.split(" ").slice(-1)[0])}</span>
                   <div>

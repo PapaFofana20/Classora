@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
-import { SIDEBAR_COLLAPSED, SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
+import { SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
 import { useTeaching } from "@/context/TeachingContext";
 import { SCHOOL_YEAR } from "@/data/school";
 import { countPendingFor } from "@/services/registrationService";
@@ -202,6 +202,8 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
     sidebar.handlers.onPointerLeave();
   };
 
+  const sidebarTransform = expanded ? "translateX(0)" : `translateX(-${SIDEBAR_EXPANDED})`;
+
   return (
     <>
       {/* Colonne 1 du flux : elle pousse le contenu (pas de superposition). */}
@@ -209,10 +211,10 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
         ref={columnRef}
         {...handlers}
         onPointerLeave={sidebar.hoverEnabled ? onPointerLeave : undefined}
-        style={{ width: expanded ? SIDEBAR_EXPANDED : SIDEBAR_COLLAPSED }}
+        style={{ transform: sidebarTransform }}
         className={cn(
           "sidebar-col no-print sticky top-3 hidden h-[calc(100svh-24px)] shrink-0 self-start overflow-hidden rounded-3xl bg-forest shadow-card lg:m-3 lg:block",
-          sidebar.animating && "will-change-width",
+          sidebar.animating && "will-change-transform",
         )}
       >
         <SidebarContent user={active} pending={pending.data ?? 0} expanded={expanded} onLogoClick={sidebar.togglePinned} />

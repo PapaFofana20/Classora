@@ -48,7 +48,7 @@ export default function FeaturesPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {roleHighlights.map((r, i) => (
             <Reveal key={r.role} delay={i * 60}>
-              <div className="h-full rounded-3xl bg-mist p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-lime-soft">
+              <div className="h-full rounded-3xl bg-mist p-6 transition-transform duration-300 hover:-translate-y-1 hover:bg-lime-soft">
                 <h3 className="text-lg font-bold">{r.role}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-600">{r.text}</p>
               </div>

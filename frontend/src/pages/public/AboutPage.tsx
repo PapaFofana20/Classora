@@ -27,7 +27,7 @@ export default function AboutPage() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {aboutValues.map((v, i) => (
             <Reveal key={v.title} delay={i * 80}>
-              <div className="h-full rounded-3xl bg-mist p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-lime-soft">
+              <div className="h-full rounded-3xl bg-mist p-6 transition-transform duration-300 hover:-translate-y-1 hover:bg-lime-soft">
                 <h3 className="text-lg font-bold">{v.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-600">{v.text}</p>
               </div>

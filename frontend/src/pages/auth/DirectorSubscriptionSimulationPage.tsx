@@ -68,7 +68,7 @@ function PriceChoice({ label, price, hint, selected, onClick }: { label: string;
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "rounded-2xl border-2 p-4 text-left transition-all",
+        "rounded-2xl border-2 p-4 text-left transition-colors",
         selected ? "border-forest bg-lime-soft" : "border-neutral-200 bg-white hover:border-forest/40",
       )}
     >
@@ -679,7 +679,7 @@ export default function DirectorSubscriptionSimulationPage() {
                   <div
                     key={plan.id}
                     className={cn(
-                      "relative h-full rounded-3xl transition-all",
+                      "relative h-full rounded-3xl transition-transform",
                       compatible ? "hover:-translate-y-0.5" : "opacity-60",
                       selected && "ring-4 ring-lime ring-offset-2",
                     )}

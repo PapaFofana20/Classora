@@ -32,7 +32,7 @@ export function Switch({ checked, onChange, label, description, disabled, id = "
           checked ? "bg-leaf" : "bg-neutral-300",
         )}
       >
-        <span className={cn("absolute top-0.5 size-6 rounded-full bg-white shadow transition-all", checked ? "left-[22px]" : "left-0.5")} />
+        <span className={cn("absolute top-0.5 size-6 rounded-full bg-white shadow transition-transform", checked ? "left-[22px]" : "left-0.5")} />
       </button>
     </div>
   );

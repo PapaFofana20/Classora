@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <!--
       CSP de défense en profondeur. Le bundle est inliné (vite-plugin-singlefile)
       d'où script-src 'self' 'unsafe-inline' — sans le single-file, restreindre
@@ -14,7 +14,9 @@
       content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.onrender.com http://localhost:* ws://localhost:*; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     />
     <meta name="description" content="Classora : la plateforme de gestion des écoles privées au Sénégal. Inscriptions, bulletins automatiques, paiements Wave / Orange Money / Free Money et messagerie parents-enseignants." />
-    <meta name="theme-color" content="#0F3D1E" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
+    <meta name="color-scheme" content="light dark" />
     <title>Classora</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

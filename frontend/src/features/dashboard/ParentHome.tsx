@@ -71,7 +71,7 @@ export function ParentHome() {
         {children.map((c) => {
           const active = c.id === activeChild?.id;
           return (
-            <button key={c.id} type="button" onClick={() => setActiveChildId(c.id)} aria-pressed={active} className={`flex items-center gap-4 rounded-2xl p-5 text-left shadow-card transition-all hover:-translate-y-1 ${active ? "bg-forest text-white" : "bg-white"}`}>
+            <button key={c.id} type="button" onClick={() => setActiveChildId(c.id)} aria-pressed={active} className={`flex items-center gap-4 rounded-2xl p-5 text-left shadow-card transition-transform hover:-translate-y-1 ${active ? "bg-forest text-white" : "bg-white"}`}>
               <Avatar name={`${c.firstName} ${c.lastName}`} size={56} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-extrabold">

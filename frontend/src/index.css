@@ -20,14 +20,18 @@
   --shadow-card: 0 2px 14px -4px rgba(15, 61, 30, 0.1);
   --shadow-pop: 6px 8px 0 0 #0f3d1e;
 
-  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-page: page-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-toast: toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Easing tokens — strong custom curves (Emil Kowalski) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-fade-up: fade-up 0.7s var(--ease-in-out) both;
+  --animate-toast: toast-in 0.35s var(--ease-out) both;
   --animate-marquee: marquee 32s linear infinite;
   --animate-float: float 5s ease-in-out infinite;
   --animate-shimmer: shimmer 1.4s infinite;
   /* Fondu d'apparition du texte des heroes de pages secondaires (300 ms). */
-  --animate-hero-fade: hero-fade 300ms ease-out both;
+  --animate-hero-fade: hero-fade 300ms var(--ease-out) both;
 
 @keyframes fade-up {
     from { opacity: 0; transform: translateY(24px); }
@@ -37,10 +41,6 @@
   @keyframes hero-fade {
     from { opacity: 0; }
     to { opacity: 1; }
-  }
-  @keyframes page-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: none; }
   }
   @keyframes toast-in {
     from { opacity: 0; transform: translateY(16px) scale(0.96); }
@@ -88,6 +88,11 @@
   --z-overlay: 70;
   --z-modal: 80;
   --z-toast: 100;
+
+  /* Easing tokens pour usage dans les composants (pas dans @theme inline) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @media (min-width: 40rem) {
@@ -120,14 +125,38 @@
 /* Liens d'ancre : le titre ciblé ne doit jamais se retrouver sous la navbar. */
 [id] { scroll-margin-top: var(--nav-clearance); }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
 body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background: var(--color-mist);
   -webkit-font-smoothing: antialiased;
 }
-button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+
+/* Mobile baseline — tactile feedback & zoom prevention */
+input, textarea, select { font-size: 16px; }
+button, a, [role="button"] { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+
+/* Hover styles only on devices that support true hover */
+@media (hover: hover) and (pointer: fine) {
+  .hover\:scale-\[1\.02\]:hover { transform: scale(1.02); }
+  .hover\:-translate-y-1:hover { transform: translateY(-4px); }
+  .hover\:-translate-y-0\.5:hover { transform: translateY(-2px); }
+  .hover\:bg-lime-soft:hover { background-color: var(--color-lime-soft); }
+  .hover\:bg-mist:hover { background-color: var(--color-mist); }
+  .hover\:bg-white\/10:hover { background-color: rgba(255,255,255,0.1); }
+  .hover\:border-forest\/40:hover { border-color: rgba(15,61,30,0.4); }
+  .hover\:text-lime:hover { color: var(--color-lime); }
+  .hover\:text-white:hover { color: #fff; }
+  .hover\:shadow-soft:hover { box-shadow: var(--shadow-soft); }
+  .hover\:shadow-card:hover { box-shadow: var(--shadow-card); }
+}
+
 :focus-visible { outline: 3px solid var(--color-leaf); outline-offset: 2px; }
 
 .material-symbols-rounded {
@@ -170,21 +199,22 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* Colonne latérale rétractable du dashboard : UNE SEULE propriété animée (width). */
+/* Colonne latérale rétractable du dashboard : transform au lieu de width (pas de reflow). */
 .sidebar-col {
-  transition: width 250ms ease-out;
+  transition: transform 250ms var(--ease-out);
 }
 
-/* Pendant la transition uniquement (la classe est posée/retirée par SidebarContext). */
-.will-change-width { will-change: width; }
+/* will-change sur transform (pas width) — évite le shift 1px au démarrage/fin. */
+.will-change-transform { will-change: transform; }
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar-col { transition: none !important; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
   .reveal { opacity: 1; transform: none; }
+  .sidebar-col { transition: none !important; }
 }
 
 /* Impression des bulletins */
