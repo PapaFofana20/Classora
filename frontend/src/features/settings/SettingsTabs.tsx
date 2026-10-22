@@ -80,7 +80,7 @@ export function RegistrationTab({ school, onSaved }: { school: School; onSaved: 
         <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-mist p-4">
           <Icon name="key" className="text-[22px] text-forest" />
           <p className="text-sm text-neutral-700">
-            Matricule de l'école : <strong className="tracking-[0.3em] text-forest">{school.matricule || "— (généré après paiement)"}</strong>
+            Matricule de l'école : <strong className="tracking-[0.3em] text-forest">{school.matricule || "—"}</strong>
           </p>
         </div>
         <Switch

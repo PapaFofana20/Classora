@@ -250,7 +250,7 @@ export default function DirectorSubscriptionPage() {
             ) : (
               <Card className="text-center">
                 <Icon name="key" className="text-[32px] text-forest" />
-                <p className="mt-2 text-sm text-neutral-600">Le matricule est en cours de génération. Cliquez sur actualiser dans quelques instants.</p>
+                <p className="mt-2 text-sm text-neutral-600">Le matricule sera généré automatiquement. Cliquez sur actualiser pour recharger.</p>
               </Card>
             )}
 
