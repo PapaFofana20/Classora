@@ -138,9 +138,11 @@ html {
 body {
   font-family: var(--font-sans);
   color: var(--color-ink);
-  background: var(--color-mist);
+  background: #ffffff;
   margin: 0;
+  min-width: 100vw;
   min-height: 100svh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
