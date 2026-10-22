@@ -90,12 +90,12 @@ export function StudentSignupForm({ school, onBack }: Props) {
         </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Prénom" required autoComplete="given-name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
-        <Input label="Nom" required autoComplete="family-name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
+        <Input label="Prénom" required autoComplete="given-name" placeholder="Ex. Aminata" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
+        <Input label="Nom" required autoComplete="family-name" placeholder="Ex. Diop" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
       </div>
       <div className="grid gap-4">
         <Select label="Genre" options={[{ value: "F", label: "Fille" }, { value: "M", label: "Garçon" }]} value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} />
-        <Input label="Date de naissance" required type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} onBlur={() => touch("birthDate")} error={show("birthDate")} />
+        <Input label="Date de naissance" required type="date" hint="Sélectionnez la date de naissance de l'élève." value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} onBlur={() => touch("birthDate")} error={show("birthDate")} />
         <Select
           label="Classe demandée"
           required
@@ -106,10 +106,10 @@ export function StudentSignupForm({ school, onBack }: Props) {
           error={show("classId")}
           options={(classes.data ?? []).map((c) => ({ value: c.id, label: `${c.name} · ${c.filled}/${c.capacity} places` }))}
         />
-        <Input label="Adresse e-mail" type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
-        <Input label="Téléphone (facultatif)" type="tel" placeholder="77 123 45 67" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
+        <Input label="Adresse e-mail" type="email" required autoComplete="email" placeholder="vous@exemple.sn" hint="Cette adresse servira à vous connecter." value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
+        <Input label="Téléphone (facultatif)" type="tel" placeholder="77 123 45 67" hint="Numéro sénégalais à 9 chiffres." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
         <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
-        <PasswordField label="Confirmer" showStrength={false} value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
+        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>
       <p className="flex items-start gap-2 rounded-2xl bg-mist p-4 text-xs text-neutral-600">
         <Icon name="info" className="text-[18px]" />

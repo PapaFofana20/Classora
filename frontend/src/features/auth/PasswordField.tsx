@@ -12,10 +12,11 @@ interface Props {
   showStrength?: boolean;
   autoComplete?: string;
   id?: string;
+  hint?: string;
 }
 
 /** Champ mot de passe : règles lisibles, force, afficher/masquer, copier. */
-export function PasswordField({ label = "Mot de passe", value, onChange, error, showStrength = true, autoComplete = "new-password", id }: Props) {
+export function PasswordField({ label = "Mot de passe", value, onChange, error, showStrength = true, autoComplete = "new-password", id, hint }: Props) {
   const [show, setShow] = useState(false);
   const strength = passwordStrength(value);
 
@@ -32,19 +33,22 @@ export function PasswordField({ label = "Mot de passe", value, onChange, error, 
           value={value}
           onChange={(e) => onChange(e.target.value)}
           error={error}
+          hint={hint}
         />
         <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"} className="absolute right-1 top-[29px] grid size-11 place-items-center rounded-full text-forest/70 hover:bg-mist">
           <Icon name={show ? "visibility_off" : "visibility"} className="text-[20px]" />
         </button>
       </div>
-      {showStrength && value.length > 0 && (
-        <div className="mt-2">
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
-              <div className={cn("h-full rounded-full transition-all duration-300", strength.strength === "faible" ? "bg-danger" : strength.strength === "moyen" ? "bg-amber-500" : "bg-leaf")} style={{ width: `${(strength.score / PASSWORD_RULES.length) * 100}%` }} />
+      {showStrength && (
+        <div className={cn(value.length > 0 ? "mt-2" : "mt-1.5")}>
+          {value.length > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
+                <div className={cn("h-full rounded-full transition-all duration-300", strength.strength === "faible" ? "bg-danger" : strength.strength === "moyen" ? "bg-amber-500" : "bg-leaf")} style={{ width: `${(strength.score / PASSWORD_RULES.length) * 100}%` }} />
+              </div>
+              <span className="text-xs font-semibold text-neutral-500">{strength.label}</span>
             </div>
-            <span className="text-xs font-semibold text-neutral-500">{strength.label}</span>
-          </div>
+          )}
           <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
             {PASSWORD_RULES.map((r) => {
               const ok = strength.satisfied.includes(r.id);

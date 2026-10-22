@@ -125,10 +125,10 @@ export function EnrollmentWizard({ overview, parents, childrenByParent }: Props)
         )}
         {step === 0 && (
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input label="Prénom" required {...form.field("firstName")} />
-            <Input label="Nom" required {...form.field("lastName")} />
+            <Input label="Prénom" required placeholder="Ex. Aminata" {...form.field("firstName")} />
+            <Input label="Nom" required placeholder="Ex. Diop" {...form.field("lastName")} />
             <Select label="Genre" options={[{ value: "F", label: "Fille" }, { value: "M", label: "Garçon" }]} {...form.field("gender")} />
-            <Input label="Date de naissance" required placeholder="JJ/MM/AAAA" inputMode="numeric" {...form.field("birthDate")} />
+            <Input label="Date de naissance" required placeholder="JJ/MM/AAAA" inputMode="numeric" hint="Format attendu : JJ/MM/AAAA." {...form.field("birthDate")} />
           </div>
         )}
         {step === 1 && (
@@ -142,11 +142,11 @@ export function EnrollmentWizard({ overview, parents, childrenByParent }: Props)
             </div>
             {mode === "new" ? (
               <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="Prénom du parent" required {...form.field("pFirst")} />
-                <Input label="Nom du parent" required {...form.field("pLast")} />
-                <Input label="Téléphone" required placeholder="77 123 45 67" {...form.field("pPhone")} />
-                <Input label="E-mail" type="email" required {...form.field("pEmail")} />
-                <Input className="sm:col-span-2" label="Adresse" {...form.field("pAddress")} />
+                <Input label="Prénom du parent" required placeholder="Ex. Aminata" {...form.field("pFirst")} />
+                <Input label="Nom du parent" required placeholder="Ex. Diop" {...form.field("pLast")} />
+                <Input label="Téléphone" required placeholder="77 123 45 67" hint="Numéro sénégalais à 9 chiffres." {...form.field("pPhone")} />
+                <Input label="E-mail" type="email" required placeholder="vous@exemple.sn" hint="Cette adresse servira à créer le compte parent." {...form.field("pEmail")} />
+                <Input className="sm:col-span-2" label="Adresse" icon="location_on" placeholder="Ex. Quartier, rue, numéro" hint="Adresse du domicile des parents." {...form.field("pAddress")} />
               </div>
             ) : (
               <div className="space-y-3">
