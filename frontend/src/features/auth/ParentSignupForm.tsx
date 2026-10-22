@@ -73,11 +73,11 @@ export function ParentSignupForm({ school, onBack }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Input label="Prénom" required autoComplete="given-name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
         <Input label="Nom" required autoComplete="family-name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
+      </div>
+      <div className="grid gap-4">
         <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
         <Input label="Adresse e-mail" type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
-        <div className="sm:col-span-2">
-          <ChildCodeInput value={form.childCode} onChange={(v) => setForm({ ...form, childCode: v })} error={form.childCode ? show("childCode") : null} />
-        </div>
+        <ChildCodeInput value={form.childCode} onChange={(v) => setForm({ ...form, childCode: v })} error={form.childCode ? show("childCode") : null} />
         <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
         <PasswordField label="Confirmer" showStrength={false} value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>

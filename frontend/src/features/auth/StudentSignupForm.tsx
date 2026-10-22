@@ -92,10 +92,11 @@ export function StudentSignupForm({ school, onBack }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Input label="Prénom" required autoComplete="given-name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
         <Input label="Nom" required autoComplete="family-name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
+      </div>
+      <div className="grid gap-4">
         <Select label="Genre" options={[{ value: "F", label: "Fille" }, { value: "M", label: "Garçon" }]} value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} />
         <Input label="Date de naissance" required type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} onBlur={() => touch("birthDate")} error={show("birthDate")} />
         <Select
-          className="sm:col-span-2"
           label="Classe demandée"
           required
           placeholder={classes.loading ? "Chargement des classes…" : "Choisir une classe"}

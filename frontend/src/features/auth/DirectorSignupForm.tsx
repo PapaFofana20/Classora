@@ -82,9 +82,11 @@ export function DirectorSignupForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Input label="Prénom" required autoComplete="given-name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
         <Input label="Nom" required autoComplete="family-name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
-        <Input className="sm:col-span-2" label="Nom de l'école" required icon="school" placeholder="Ex. Groupe Scolaire Les Baobabs" value={form.schoolName} onChange={(e) => setForm({ ...form, schoolName: e.target.value })} onBlur={() => touch("schoolName")} error={show("schoolName")} />
+      </div>
+      <div className="grid gap-4">
+        <Input label="Nom de l'école" required icon="school" placeholder="Ex. Groupe Scolaire Les Baobabs" value={form.schoolName} onChange={(e) => setForm({ ...form, schoolName: e.target.value })} onBlur={() => touch("schoolName")} error={show("schoolName")} />
         <Select label="Ville" required options={SENEGAL_CITIES.map((c) => ({ value: c, label: c }))} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} onBlur={() => touch("city")} error={show("city")} />
-        <Input className="sm:col-span-2" label="Adresse de l'école" required icon="location_on" placeholder="Ex. Quartier, rue, numéro" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} onBlur={() => touch("address")} error={show("address")} />
+        <Input label="Adresse de l'école" required icon="location_on" placeholder="Ex. Quartier, rue, numéro" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} onBlur={() => touch("address")} error={show("address")} />
         <Input label="Adresse e-mail" type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
         <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
       </div>
@@ -103,7 +105,7 @@ export function DirectorSignupForm() {
         </div>
         {cycles.length === 0 && <p className="mt-2 text-xs font-medium text-danger">Choisissez au moins un cycle.</p>}
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4">
         <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
         <PasswordField label="Confirmer" showStrength={false} value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>
