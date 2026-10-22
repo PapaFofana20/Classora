@@ -50,7 +50,7 @@ export function SubscriptionRequiredScreen({ schoolName }: { schoolName: string 
         title="Choisissez une formule pour ouvrir votre école"
         action={
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <LinkButton to="/app/abonnement" size="lg" icon="workspace_premium">
+            <LinkButton to="/inscription/abonnement" size="lg" icon="workspace_premium">
               Choisir une formule
             </LinkButton>
             <LinkButton to="/app/parametres" size="lg" variant="outline" icon="settings">
@@ -82,7 +82,7 @@ export function RenewScreen({ schoolName, isDirector }: { schoolName: string; st
       action={
         isDirector ? (
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <LinkButton to="/app/abonnement" size="lg" icon="workspace_premium">
+            <LinkButton to="/inscription/abonnement" size="lg" icon="workspace_premium">
               Renouveler maintenant
             </LinkButton>
             <LinkButton to="/app/parametres" size="lg" variant="outline" icon="settings">
