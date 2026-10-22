@@ -115,7 +115,7 @@ export const plans: Plan[] = [
     id: "essentiel",
     name: "Plan découverte",
     price: "Gratuit",
-    unit: "par élève",
+    unit: "",
     description: "Pour les petites écoles qui débutent leur digitalisation.",
     items: ["Jusqu'à 150 élèves", "Un cycle au choix", "Inscriptions et dossiers élèves", "Notes et bulletins automatiques", "Support par e-mail"],
   },
