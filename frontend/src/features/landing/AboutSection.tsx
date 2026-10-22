@@ -33,7 +33,7 @@ export function AboutSection() {
             <div className="relative rounded-3xl bg-lime p-2 shadow-pop">
               <img src={images.about} alt="Équipe pédagogique d'une école partenaire" className="aspect-[16/10] w-full rounded-[1.25rem] object-cover" loading="lazy" />
             </div>
-            <div className="grid grid-cols-3 gap-3 rounded-3xl bg-lime p-2 lg:grid-cols-1">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 rounded-3xl bg-lime p-2">
               {aboutStats.map((s) => (
                 <div key={s.label} className="grid place-items-center rounded-2xl bg-white px-2 py-6 text-center text-forest">
                   <p className="text-3xl font-extrabold tracking-tight sm:text-4xl">{s.value}</p>

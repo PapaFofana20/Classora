@@ -76,7 +76,7 @@ export function Navbar() {
             {/* La ligne complète (logo + 6 liens + téléphone + 2 boutons) ne tient
                 qu'à partir de 1280 px : gouttière 40 px + inset 20 px de chaque côté
                 du Container de 1280 px max. En dessous, barre compacte + menu. */}
-            <div className="hidden items-center gap-1 xl:flex">
+            <div className="hidden items-center gap-1 lg:flex">
               {navLinks.map((l) => (
                 <NavLink key={l.to} to={l.to} end={l.to === "/"} className={link}>
                   {l.label}

@@ -50,7 +50,7 @@ export default function AboutPage() {
               </li>
             ))}
           </ol>
-          <div className="mt-10 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-10 grid sm:grid-cols-1 md:grid-cols-2 gap-3 text-center">
             {aboutStats.map((s) => (
               <div key={s.label} className="rounded-2xl bg-lime p-4 text-forest">
                 <p className="text-2xl font-extrabold sm:text-4xl">{s.value}</p>

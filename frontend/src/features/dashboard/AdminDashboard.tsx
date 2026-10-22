@@ -54,9 +54,9 @@ function Content({ s, finance }: { s: AdminStats; finance: boolean }) {
         </>
       )}
       {/* Grilles pilotées par le conteneur (@container) : le nombre de colonnes ne change pas pendant la transition de la sidebar. */}
-      <div className="grid gap-4 @4xl:grid-cols-3">
-        <div className="space-y-4 @4xl:col-span-2">
-          <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {finance ? (
               <>
                 <StatCard dark icon="account_balance_wallet" label="Encaissé à ce jour" value={formatCurrency(s.collected)} badge={{ text: `${s.recoveryRate}%`, tone: "up" }} note="sur les échéances échues" />
@@ -113,14 +113,14 @@ function Content({ s, finance }: { s: AdminStats; finance: boolean }) {
           </Card>
         </div>
       </div>
-      <div className="grid gap-4 @4xl:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {!finance && (
-          <Card className="@4xl:col-span-2">
+          <Card className="lg:col-span-2">
             <CardHeader title="Effectif par classe" subtitle="Élémentaire, moyen et secondaire" />
             <ClassBars data={s.studentsByClass} />
           </Card>
         )}
-        <Card className={finance ? "@4xl:col-span-3" : ""}>
+        <Card className={finance ? "lg:col-span-3" : ""}>
           <CardHeader title="Derniers paiements" action={<LinkButton to="/app/paiements" variant="ghost" size="sm">Tout voir</LinkButton>} />
           <LatestPayments rows={s.latestPayments} />
         </Card>

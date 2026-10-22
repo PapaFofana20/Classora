@@ -363,7 +363,7 @@ export default function DirectorSubscriptionSimulationPage() {
                   <div>
                     <Badge tone="success">Abonnement actif</Badge>
                     <h2 className="mt-2 text-2xl font-extrabold text-ink">Votre école est prête</h2>
-                    <p className="mt-1 max-w-xl text-sm text-neutral-600">
+                    <p className="mt-1 max-w-full sm:max-w-xl text-sm text-neutral-600">
                       Votre matricule est disponible ci-dessous. Il permet aux familles de retrouver votre école et de créer leur compte.
                     </p>
                   </div>
@@ -477,11 +477,11 @@ export default function DirectorSubscriptionSimulationPage() {
               </span>
               <Badge tone="warning" className="mt-4">En attente d'activation</Badge>
               <h2 className="mt-3 text-2xl font-extrabold text-ink">Votre demande a bien été envoyée</h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm text-neutral-600">
+              <p className="mx-auto mt-2 max-w-full sm:max-w-xl text-sm text-neutral-600">
                 Le support Classora confirme le paiement puis active votre abonnement. Vous n'avez rien d'autre à faire : cette page se met à jour automatiquement.
               </p>
 
-              <dl className="mx-auto mt-6 grid max-w-xl gap-3 text-left sm:grid-cols-2">
+              <dl className="mx-auto mt-6 grid max-w-full sm:max-w-xl gap-3 text-left sm:grid-cols-2">
                 <SummaryRow label="Formule" value={plans.find((plan) => plan.id === request.planId)?.name ?? request.planId} />
                 <SummaryRow label="Facturation" value={request.cycle === "yearly" ? "Annuelle" : "Mensuelle"} />
                 <SummaryRow label="Effectif déclaré" value={`${request.studentCount} élèves`} />

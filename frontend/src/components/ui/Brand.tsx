@@ -10,7 +10,7 @@ export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?
         alt="CLASSORA"
         width={240}
         height={46}
-        className={cn("w-auto", className ?? "h-8")}
+        className={cn("max-w-full w-auto h-auto", className ?? "h-8")}
       />
     </Link>
   );

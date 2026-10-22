@@ -82,7 +82,7 @@ function MenuItem({ item, expanded, onNavigate }: { item: NavItem; expanded: boo
         )}
       </NavLink>
       {tip && !expanded && createPortal(
-        <span role="tooltip" style={{ left: tip.x, top: tip.y }} className="pointer-events-none fixed z-[80] -translate-y-1/2 whitespace-nowrap rounded-xl bg-forest-600 px-3 py-2 text-xs font-semibold text-white shadow-soft">
+        <span role="tooltip" style={{ left: tip.x, top: tip.y }}         className="pointer-events-none fixed z-[80] -translate-y-1/2 whitespace-nowrap max-w-xs truncate rounded-xl bg-forest-600 px-3 py-2 text-xs font-semibold text-white shadow-soft">
           {item.label}
         </span>,
         document.body,

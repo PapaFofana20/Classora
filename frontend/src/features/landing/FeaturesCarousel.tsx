@@ -33,7 +33,7 @@ export function FeaturesCarousel() {
       </div>
       <div ref={track} className="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 sm:px-8 lg:px-[max(2rem,calc((100%-1280px)/2+2rem))]" tabIndex={0} aria-label="Liste des fonctionnalités">
         {features.map((f) => (
-          <Link key={f.id} to="/fonctionnalites" className="group relative aspect-[3/4] w-[280px] shrink-0 snap-start overflow-hidden rounded-3xl bg-forest sm:w-[320px]">
+          <Link key={f.id} to="/fonctionnalites" className="group relative aspect-[3/4] max-w-[280px] shrink-0 snap-start overflow-hidden rounded-3xl bg-forest sm:max-w-[320px]">
             <img src={f.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/50 to-transparent" aria-hidden="true" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-white">

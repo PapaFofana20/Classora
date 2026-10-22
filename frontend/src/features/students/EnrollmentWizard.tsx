@@ -109,7 +109,7 @@ export function EnrollmentWizard({ overview, parents, childrenByParent }: Props)
 
   return (
     <div className="mx-auto max-w-3xl">
-      <ol className="mb-6 grid grid-cols-3 gap-2" aria-label="Étapes de l'inscription">
+      <ol className="mb-6 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" aria-label="Étapes de l'inscription">
         {STEPS.map((s, i) => (
           <li key={s} aria-current={i === step ? "step" : undefined} className={cn("flex items-center gap-2 rounded-full px-3 py-2.5 text-xs font-bold sm:text-sm", i === step ? "bg-forest text-white" : i < step ? "bg-lime text-forest" : "bg-white text-neutral-500")}>
             <span className={cn("grid size-6 shrink-0 place-items-center rounded-full text-xs", i === step ? "bg-lime text-forest" : "bg-mist text-forest")}>{i < step ? <Icon name="check" className="text-[14px]" /> : i + 1}</span>

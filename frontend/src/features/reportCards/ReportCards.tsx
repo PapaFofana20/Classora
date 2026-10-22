@@ -31,7 +31,7 @@ function Header({ card, schoolName, title }: { card: ReportCardData; schoolName:
 function StudentBlock({ card, extra }: { card: ReportCardData; extra: ReactNode }) {
   const s = card.student;
   return (
-    <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 rounded-xl bg-mist p-4 text-sm print:bg-transparent print:p-0 sm:grid-cols-3">
+    <dl className="mt-4 grid sm:grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 rounded-xl bg-mist p-4 text-sm print:bg-transparent print:p-0 lg:grid-cols-3">
       <div><dt className="inline text-neutral-500">Élève : </dt><dd className="inline font-bold">{s.firstName} {s.lastName}</dd></div>
       <div><dt className="inline text-neutral-500">Matricule : </dt><dd className="inline font-semibold">{s.matricule}</dd></div>
       <div><dt className="inline text-neutral-500">Classe : </dt><dd className="inline font-bold">{card.classRoom.name}</dd></div>
@@ -44,7 +44,7 @@ function StudentBlock({ card, extra }: { card: ReportCardData; extra: ReactNode 
 
 function Signatures({ labels }: { labels: string[] }) {
   return (
-    <div className="mt-8 grid grid-cols-3 gap-4 text-center text-xs text-neutral-600">
+    <div className="mt-8 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-center text-xs text-neutral-600">
       {labels.map((l) => (
         <div key={l}>
           <p className="font-semibold">{l}</p>
