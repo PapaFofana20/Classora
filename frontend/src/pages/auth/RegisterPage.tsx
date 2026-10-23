@@ -30,6 +30,7 @@ export default function RegisterPage() {
       title={role ? (role === "directeur" ? "Créer votre école" : isParent ? "Espace parent" : "Espace élève") : "Créer votre compte"}
       subtitle="Directeur, élève ou parent : choisissez votre situation, l'inscription prend moins de 3 minutes."
       showVisual={false}
+      backgroundImage
     >
       <div className="space-y-5">
         <ol className="flex gap-2" aria-label="Étapes de l'inscription">
