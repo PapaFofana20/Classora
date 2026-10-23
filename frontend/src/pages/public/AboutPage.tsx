@@ -86,27 +86,23 @@ export default function AboutPage() {
             <div className="mt-12 lg:mt-16 grid gap-6 lg:grid-cols-3">
               {[
                 {
-                  number: "01",
                   title: "Simplifier",
                   text: "Moins de tâches répétitives, des informations mieux organisées et des outils conçus pour faciliter le travail quotidien des équipes éducatives.",
                   icon: "auto_fix_high"
                 },
                 {
-                  number: "02",
                   title: "Connecter",
                   text: "Une meilleure circulation de l'information entre les acteurs de l'école, grâce à des outils adaptés à leurs rôles et à leurs besoins.",
                   icon: "hub"
                 },
                 {
-                  number: "03",
                   title: "Faire évoluer",
                   text: "Une plateforme qui progresse avec les établissements, en tenant compte de leurs réalités et des besoins qui émergent sur le terrain.",
                   icon: "trending_up"
                 }
               ].map((pillar, i) => (
-                <Reveal key={pillar.number} delay={i * 80}>
-                  <article className="relative rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 hover:ring-white/20 transition-transform duration-300 hover:-translate-y-1 hover:bg-white/10">
-                    <span className="absolute -top-3 left-6 bg-forest px-2 text-xs font-bold text-lime">{pillar.number}</span>
+                <Reveal key={pillar.title} delay={i * 80}>
+                  <article className="rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 hover:ring-white/20 transition-transform duration-300 hover:-translate-y-1 hover:bg-white/10">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="grid size-10 place-items-center rounded-xl bg-white/5 ring-1 ring-white/10">
                         <Icon name={pillar.icon} className="text-lime text-[22px]" />
