@@ -29,7 +29,7 @@ export function RoleChoice({ value, onChange }: { value: Role | null; onChange: 
             role="radio"
             aria-checked={active}
             onClick={() => onChange(o.role)}
-            className={cn("flex items-start gap-4 rounded-2xl border-2 p-4 text-left transition", active ? "border-forest bg-lime-pale" : "border-neutral-200 hover:border-forest/40")}
+            className={cn("flex items-start gap-4 rounded-2xl border-2 p-4 text-left transition-all duration-200", active ? "border-forest bg-lime-pale" : "border-neutral-200 hover:bg-lime hover:border-lime hover:text-ink")}
           >
             <span className={cn("grid size-12 shrink-0 place-items-center rounded-2xl", active ? "bg-forest text-lime" : "bg-mist text-forest")}>
               <Icon name={o.icon} fill className="text-[24px]" />

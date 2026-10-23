@@ -49,7 +49,7 @@ export const pageHeroes: Record<"fonctionnalites" | "tarifs" | "ecoles" | "aprop
     image: { src: ecolesHeroImg, alt: "Enseignante souriante devant sa classe d'élèves en uniforme", objectPosition: "60% 30%", width: 2816, height: 1584 },
   },
   apropos: {
-    title: "Né au Sénégal, pensé pour les *écoles* d'ici",
+    title: "Pensé pour nos *écoles*. Conçu pour aller plus loin.",
     description: "Nous construisons un outil adapté au système éducatif sénégalais, de l'élémentaire à la terminale.",
     primaryCta: { label: "Nous contacter", to: "/contact" },
     image: { src: aproposHeroImg, alt: "Trois membres de l'équipe Classora dans une salle de classe", objectPosition: "50% 30%", width: 2816, height: 1584 },

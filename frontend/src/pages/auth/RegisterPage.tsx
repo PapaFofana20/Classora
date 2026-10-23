@@ -27,12 +27,7 @@ export default function RegisterPage() {
     <AuthLayout
       title={role ? (role === "directeur" ? "Créer votre école" : isParent ? "Espace parent" : "Espace élève") : "Créer votre compte"}
       subtitle="Directeur, élève ou parent : choisissez votre situation, l'inscription prend moins de 3 minutes."
-      visualTitle={
-        <>
-          Une école, <span className="font-serif font-semibold italic text-lime">un matricule</span>, zéro papier.
-        </>
-      }
-      visualText="Les élèves et les parents s'inscrivent avec le matricule de l'école. Les enseignants reçoivent leurs accès de la direction."
+      showVisual={false}
     >
       <div className="space-y-5">
         <ol className="flex gap-2" aria-label="Étapes de l'inscription">

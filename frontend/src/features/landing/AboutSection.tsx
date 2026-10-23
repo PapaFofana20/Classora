@@ -13,12 +13,12 @@ export function AboutSection() {
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
               <div>
                 <h2 id="about-title" className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-                  Né dans une école, pensé pour <span className="font-serif font-semibold italic text-lime">toutes</span> les écoles.
+                  Pensé pour nos <span className="font-serif font-semibold italic text-lime">écoles</span>. Conçu pour aller plus loin.
                 </h2>
               </div>
               <div>
                 <p className="text-base leading-relaxed text-white/85 sm:text-lg">
-                  Classora est né du constat de directeurs d'écoles privées sénégalaises : trop de cahiers, de reçus papier et de bulletins refaits à la main. Nous avons construit un outil qui respecte vos réalités : un instituteur titulaire à l'élémentaire, plusieurs professeurs au moyen et secondaire, des coefficients par série et des échéances de scolarité suivies en temps réel.
+                  Classora est né d'un <span className="text-lime">constat simple</span> : dans de nombreuses écoles privées sénégalaises, la gestion repose encore sur des cahiers, des reçus papier et des <span className="text-lime">tâches administratives chronophages</span>. De cette réalité est née une <span className="text-lime">ambition</span> : concevoir une <span className="text-lime">plateforme qui simplifie</span> la gestion scolaire tout en <span className="text-lime">respectant les spécificités</span> de nos établissements, de l'élémentaire au secondaire. Aujourd'hui, Classora poursuit une <span className="text-lime">mission claire</span> : mettre le <span className="text-lime">numérique au service des écoles</span> pour une gestion <span className="text-lime">plus simple, plus efficace et mieux organisée</span>.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <ArrowButton to="/a-propos">Lire notre histoire</ArrowButton>
