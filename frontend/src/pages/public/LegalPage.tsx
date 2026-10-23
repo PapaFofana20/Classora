@@ -1,9 +1,29 @@
 import { Link } from "react-router-dom";
 import { Container } from "@/components/layout/Container";
+import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import type { LegalDocument } from "@/data/legal";
+import cguHeroImg from "@/assets/images/hero-5.jpg";
+import privacyHeroImg from "@/assets/images/hero-3.jpg";
 
 const CONTACT_EMAIL = "contact@classora.sn";
+
+const HERO_IMAGES = {
+  cgu: {
+    src: cguHeroImg,
+    alt: "Équipe Classora échangeant avec un directeur d'école",
+    width: 1920,
+    height: 1080,
+    objectPosition: "50% 35%",
+  },
+  confidentialite: {
+    src: privacyHeroImg,
+    alt: "Équipe Classora dans un couloir d'école",
+    width: 1920,
+    height: 1080,
+    objectPosition: "50% 40%",
+  },
+};
 
 /** Gabarit commun aux pages CGU et Politique de confidentialité. */
 export function LegalPage({ doc }: { doc: LegalDocument }) {
@@ -14,16 +34,13 @@ export function LegalPage({ doc }: { doc: LegalDocument }) {
 
   return (
     <>
-      <section className="mt-hero-top">
-        <Container>
-          <div className="rounded-3xl bg-forest px-6 py-14 text-white sm:px-12 sm:py-20">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-lime">{doc.eyebrow}</p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl">{doc.title}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80">{doc.subtitle}</p>
-            <p className="mt-6 text-sm text-white/60">Dernière mise à jour : {doc.updatedAt}</p>
-          </div>
-        </Container>
-      </section>
+      <PageHero
+        eyebrow={doc.eyebrow}
+        title={doc.title}
+        description={doc.subtitle}
+        meta={`Dernière mise à jour : ${doc.updatedAt}`}
+        image={HERO_IMAGES[doc.slug]}
+      />
 
       <section className="py-14">
         <Container>

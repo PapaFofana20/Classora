@@ -13,7 +13,7 @@ export function Footer() {
           <div>
             <Logo dark className="h-10" />
           </div>
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
             {footerColumns.map((col) => (
               <div key={col.title}>
                 <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-lime">{col.title}</h3>
@@ -31,17 +31,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/15 pt-6 text-xs text-white/60 sm:flex-row sm:items-center">
-          <div className="space-y-2">
-            <p>© 2026 Classora - Année scolaire 2026-2027. Tous droits réservés.</p>
-            <nav aria-label="Informations légales" className="flex flex-wrap gap-x-4 gap-y-1">
-              <Link to="/cgu" className="transition-colors hover:text-lime">
-                Conditions Générales d'Utilisation
-              </Link>
-              <Link to="/confidentialite" className="transition-colors hover:text-lime">
-                Politique de confidentialité
-              </Link>
-            </nav>
-          </div>
+          <p>© 2026 Classora - Année scolaire 2026-2027. Tous droits réservés.</p>
           <p className="flex items-center gap-2">
             <Icon name="verified_user" className="text-[18px] text-lime" />
             Données hébergées de manière sécurisée

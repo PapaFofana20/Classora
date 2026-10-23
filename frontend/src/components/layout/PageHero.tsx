@@ -6,6 +6,8 @@ export interface PageHeroProps {
   /** Titre ; un mot encadré par des astérisques est rendu en Playfair italique lime. */
   title: string;
   description: string;
+  eyebrow?: string;
+  meta?: string;
   primaryCta?: { label: string; to: string };
   secondaryCta?: { label: string; to: string };
   image: { src: string; alt: string; objectPosition?: string; width?: number; height?: number };
@@ -31,7 +33,7 @@ function renderTitle(title: string) {
  * place n'est réservée pour la navbar, qui est fixe et le chevauche visuellement.
  * Le contenu du hero commence à `var(--nav-clearance)` pour ne jamais passer dessous.
  */
-export function PageHero({ title, description, primaryCta, secondaryCta, image }: PageHeroProps) {
+export function PageHero({ title, description, eyebrow, meta, primaryCta, secondaryCta, image }: PageHeroProps) {
   const height = "min-h-[720px] sm:min-h-[640px] lg:min-h-[540px]";
 
   return (
@@ -57,8 +59,10 @@ export function PageHero({ title, description, primaryCta, secondaryCta, image }
 
           <div className={cn("animate-hero-fade relative z-10 flex flex-col justify-end px-6 pb-6 pt-nav-clearance md:px-10 md:pb-10", height)}>
             <div className="max-w-2xl">
+              {eyebrow && <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-lime">{eyebrow}</p>}
               <h1 className="text-balance text-[clamp(2rem,_1.3rem+2.6vw,_3.25rem)] font-bold leading-[1.1] text-white">{renderTitle(title)}</h1>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-white/85 md:text-lg">{description}</p>
+              {meta && <p className="mt-3 text-sm text-white/65">{meta}</p>}
               {(primaryCta || secondaryCta) && (
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                   {primaryCta && (
