@@ -11,10 +11,12 @@ interface Props {
   visualTitle?: ReactNode;
   visualText?: string;
   showVisual?: boolean;
+  backgroundImage?: boolean;
 }
 
-/** Formulaire à gauche, visuel vert foncé à droite (si showVisual). */
-export function AuthLayout({ title, subtitle, children, visualTitle, visualText, showVisual = true }: Props) {
+/** Formulaire à gauche, visuel vert foncé à droite (si showVisual), ou image de fond (backgroundImage). */
+export function AuthLayout({ title, subtitle, children, visualTitle, visualText, showVisual = true, backgroundImage = false }: Props) {
+  const hasImageBackground = !showVisual && backgroundImage;
   const floatingDots = [...Array(8)].map((_, i) => (
     <div
       key={i}
@@ -29,9 +31,17 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
   ));
 
   return (
-    <div className={showVisual ? "grid min-h-screen bg-white lg:grid-cols-2" : "min-h-screen flex items-start justify-center pt-16 pb-16 relative overflow-hidden"}>
+    <div className={showVisual ? "grid min-h-screen bg-white lg:grid-cols-2" : "min-h-screen relative overflow-hidden"}>
+      {/* Image d'arrière-plan pour les pages d'authentification */}
+      {hasImageBackground && (
+        <div className="absolute inset-0" aria-hidden="true">
+          <img src={images.authBackground} alt="" className="size-full object-cover object-center" loading="eager" />
+          <div className="absolute inset-0 bg-white/10" />
+        </div>
+      )}
+
       {/* Décorations d'arrière-plan élégantes pour les formulaires sans visuel */}
-      {!showVisual && (
+      {!showVisual && !hasImageBackground && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
           {/* Motif de lignes diagonales subtiles */}
           <div className="absolute inset-0 opacity-5" style={{
@@ -73,8 +83,8 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
         </div>
       )}
 
-      <div className={showVisual ? "grid min-h-screen bg-white lg:grid-cols-2 relative z-10" : "min-h-screen relative z-10 flex items-start justify-center pt-16 pb-16"}>
-        <div className={showVisual ? "flex flex-col px-5 py-6 sm:px-10 lg:px-16" : "flex flex-col px-5 py-6 sm:px-10 lg:px-16 w-full max-w-3xl"}>
+      <div className={showVisual ? "grid min-h-screen bg-white lg:grid-cols-2 relative z-10" : hasImageBackground ? "min-h-screen relative z-10 flex justify-center px-3 py-4 sm:px-6 sm:py-8" : "min-h-screen relative z-10 flex justify-center"}>
+        <div className={showVisual ? "flex flex-col px-5 py-6 sm:px-10 lg:px-16" : hasImageBackground ? "flex w-full max-w-3xl flex-col self-start rounded-[28px] border border-forest/10 bg-white/95 px-5 py-6 shadow-soft backdrop-blur-sm sm:px-8 sm:py-8 lg:px-10" : "flex flex-col px-5 py-6 sm:px-10 lg:px-16 w-full max-w-3xl pt-10"}>
           <div className="flex items-center justify-between">
             <Logo />
             <Link to="/" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-forest hover:underline">
@@ -82,7 +92,7 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
               Retour
             </Link>
           </div>
-          <div className="flex w-full max-w-3xl flex-1 flex-col justify-center py-10">
+          <div className="w-full max-w-3xl">
             <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{title}</h1>
             <p className="mt-2 text-sm text-neutral-600">{subtitle}</p>
             <div className="mt-8">{children}</div>

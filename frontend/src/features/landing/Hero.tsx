@@ -51,7 +51,7 @@ export function Hero() {
                 Gérez votre école avec <Highlight dark>sérénité</Highlight>, du CI à la Terminale
               </h1>
               <div className="mt-8 flex flex-wrap gap-3">
-                <ArrowButton to="/fonctionnalites" tone="white">
+                <ArrowButton to="/fonctionnalites" tone="lime">
                   Voir les fonctionnalités
                 </ArrowButton>
               </div>

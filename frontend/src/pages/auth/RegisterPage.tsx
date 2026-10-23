@@ -28,6 +28,7 @@ export default function RegisterPage() {
       title={role ? (role === "directeur" ? "Créer votre école" : isParent ? "Espace parent" : "Espace élève") : "Créer votre compte"}
       subtitle="Directeur, élève ou parent : choisissez votre situation, l'inscription prend moins de 3 minutes."
       showVisual={false}
+      backgroundImage
     >
       <div className="space-y-5">
         <ol className="flex gap-2" aria-label="Étapes de l'inscription">
@@ -39,9 +40,9 @@ export default function RegisterPage() {
               <li
                 key={s}
                 aria-current={active && i === index ? "step" : undefined}
-                className={cn("flex flex-1 items-center gap-2 rounded-full px-3 py-2 text-xs font-bold", i === index && active ? "bg-forest text-white" : done ? "bg-lime text-forest" : "bg-mist text-neutral-500")}
+                className={cn("flex min-w-0 flex-1 items-center gap-1.5 rounded-full px-1.5 py-2 text-xs font-bold sm:gap-2 sm:px-3", i === index && active ? "bg-forest text-white" : done ? "bg-lime text-forest" : "bg-mist text-neutral-500")}
               >
-                <span className={cn("grid size-6 shrink-0 place-items-center rounded-full text-[11px]", i === index && active ? "bg-lime text-forest" : "bg-white")}>{i + 1}</span>
+                <span className={cn("hidden size-6 shrink-0 place-items-center rounded-full text-[11px] sm:grid", i === index && active ? "bg-lime text-forest" : "bg-white")}>{i + 1}</span>
                 <span className="truncate">{s}</span>
               </li>
             );
