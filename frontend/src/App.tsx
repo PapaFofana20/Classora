@@ -21,6 +21,7 @@ const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
 const SignupSentPage = lazy(() => import("@/pages/auth/SignupSentPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"));
 const ChangePasswordPage = lazy(() => import("@/pages/auth/ChangePasswordPage"));
 const DashboardPage = lazy(() => import("@/pages/app/DashboardPage"));
 const StudentsPage = lazy(() => import("@/pages/app/StudentsPage"));
@@ -76,6 +77,8 @@ export default function App() {
                 <Route path="inscription-envoyee" element={<SignupSentPage />} />
                 <Route path="mot-de-passe-oublie" element={<ForgotPasswordPage />} />
               </Route>
+
+              <Route path="reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
 
               {/* PARTIE 3 : tableau de bord protégé */}
               <Route element={<ProtectedRoute />}>

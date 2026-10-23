@@ -374,9 +374,18 @@ export function updateProfile(
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
-  const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+  const redirectTo = `${window.location.origin}/reinitialiser-mot-de-passe`;
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
   // Pour des raisons de sécurité, on ne révèle pas si l'e-mail existe.
   if (error) throw new Error("Impossible d'envoyer l'e-mail de réinitialisation. Réessayez.");
+}
+
+export async function resetPassword(nextPassword: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: nextPassword });
+  if (error) throw new Error("Impossible de réinitialiser le mot de passe. Le lien a peut-être expiré.");
+  const { error: flagError } = await supabase.rpc("complete_password_change");
+  void flagError;
+  await clearCache();
 }
 
 /** Liste des demandes en attente d'approbation (utilisé par ApprisonersGuard). */
