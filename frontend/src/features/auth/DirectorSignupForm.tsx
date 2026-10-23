@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { LegalConsent } from "@/features/auth/LegalConsent";
@@ -112,12 +111,6 @@ export function DirectorSignupForm() {
         <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
         <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>
-      <Card className="!bg-lime-soft text-sm">
-        <p className="flex items-start gap-2 font-medium text-forest">
-          <Icon name="verified_user" className="text-[20px]" />
-          Votre école sera créée avec son matricule. Vous accéderez directement au tableau de bord.
-        </p>
-      </Card>
       <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
         Créer mon école sur Classora

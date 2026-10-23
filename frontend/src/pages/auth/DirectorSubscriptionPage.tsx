@@ -197,7 +197,7 @@ export default function DirectorSubscriptionPage() {
           <Logo />
           <Link to="/" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-forest hover:underline">
             <Icon name="arrow_back" className="text-[18px]" />
-            Retour au site
+            Retour
           </Link>
         </div>
       </header>

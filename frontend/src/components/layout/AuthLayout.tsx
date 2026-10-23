@@ -21,7 +21,7 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText 
           <Logo />
           <Link to="/" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-forest hover:underline">
             <Icon name="arrow_back" className="text-[18px]" />
-            Retour au site
+            Retour
           </Link>
         </div>
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
