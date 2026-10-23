@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
+import { LegalConsent } from "@/features/auth/LegalConsent";
 import { PasswordField } from "@/features/auth/PasswordField";
 import { Select } from "@/components/ui/Select";
 import { useAuth } from "@/context/AuthContext";
@@ -35,6 +36,7 @@ export function DirectorSignupForm() {
   const navigate = useNavigate();
   const [cycles, setCycles] = useState<Cycle[]>(["elementaire", "moyen"]);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "" });
+  const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export function DirectorSignupForm() {
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
     cycles: cycles.length === 0 ? "Choisissez au moins un cycle." : null,
+    terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
   };
   const valid = Object.values(errors).every((e) => e === null);
   const show = (key: keyof typeof errors) => (touched[key] ? errors[key] : null);
@@ -115,8 +118,9 @@ export function DirectorSignupForm() {
           Votre école sera créée avec son matricule. Vous accéderez directement au tableau de bord.
         </p>
       </Card>
+      <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
-        Créer mon école et accéder au tableau de bord
+        Créer mon école sur Classora
       </Button>
     </form>
   );

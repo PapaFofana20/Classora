@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { SchoolMark } from "@/components/ui/Brand";
+import { LegalConsent } from "@/features/auth/LegalConsent";
 import { PasswordField } from "@/features/auth/PasswordField";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -26,6 +27,7 @@ export function StudentSignupForm({ school, onBack }: Props) {
   const navigate = useNavigate();
   const classes = useAsync(() => openClassesFor(school.id), [school.id]);
   const [form, setForm] = useState({ firstName: "", lastName: "", gender: "F", birthDate: "", classId: "", email: "", phone: "", password: "", confirm: "" });
+  const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,7 @@ export function StudentSignupForm({ school, onBack }: Props) {
     phone: form.phone && !isValidSnPhone(form.phone) ? "Format attendu : 77 123 45 67." : null,
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
+    terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
   };
   const valid = Object.values(errors).every((e) => e === null);
   const show = (key: keyof typeof errors) => (touched[key] ? errors[key] : null);
@@ -115,6 +118,7 @@ export function StudentSignupForm({ school, onBack }: Props) {
         <Icon name="info" className="text-[18px]" />
         Votre compte est créé immédiatement, mais l'accès à l'espace de l'école est ouvert après validation par la direction.
       </p>
+      <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <div className="flex gap-3">
         <Button type="button" variant="outline" size="lg" onClick={onBack} disabled={busy}>
           Retour

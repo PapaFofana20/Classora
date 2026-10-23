@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { SchoolMark } from "@/components/ui/Brand";
 import { ChildCodeInput } from "@/features/auth/MatriculeStep";
+import { LegalConsent } from "@/features/auth/LegalConsent";
 import { PasswordField } from "@/features/auth/PasswordField";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -24,6 +25,7 @@ export function ParentSignupForm({ school, onBack }: Props) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: "", lastName: "", phone: "", email: "", childCode: "", password: "", confirm: "" });
+  const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export function ParentSignupForm({ school, onBack }: Props) {
     childCode: form.childCode.length !== CHILD_CODE_LENGTH ? `Le code comporte ${CHILD_CODE_LENGTH} caractères.` : null,
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
+    terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
   };
   const valid = Object.values(errors).every((e) => e === null);
   const show = (key: keyof typeof errors) => (touched[key] ? errors[key] : null);
@@ -85,6 +88,7 @@ export function ParentSignupForm({ school, onBack }: Props) {
         <Icon name="family_restroom" className="text-[18px]" />
         Le code élève permet de rattacher votre compte à votre enfant dans cette école. Vous pourrez ajouter d'autres enfants depuis votre espace.
       </p>
+      <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <div className="flex gap-3">
         <Button type="button" variant="outline" size="lg" onClick={onBack} disabled={busy}>
           Retour

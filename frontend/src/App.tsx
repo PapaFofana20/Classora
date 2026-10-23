@@ -15,6 +15,8 @@ const PricingPage = lazy(() => import("@/pages/public/PricingPage"));
 const SchoolsPage = lazy(() => import("@/pages/public/SchoolsPage"));
 const AboutPage = lazy(() => import("@/pages/public/AboutPage"));
 const ContactPage = lazy(() => import("@/pages/public/ContactPage"));
+const TermsPage = lazy(() => import("@/pages/public/TermsPage"));
+const PrivacyPage = lazy(() => import("@/pages/public/PrivacyPage"));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
 const SignupSentPage = lazy(() => import("@/pages/auth/SignupSentPage"));
@@ -63,6 +65,8 @@ export default function App() {
                 <Route path="ecoles" element={<SchoolsPage />} />
                 <Route path="a-propos" element={<AboutPage />} />
                 <Route path="contact" element={<ContactPage />} />
+                <Route path="cgu" element={<TermsPage />} />
+                <Route path="confidentialite" element={<PrivacyPage />} />
               </Route>
 
               {/* PARTIE 2 : authentification */}

@@ -31,7 +31,17 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/15 pt-6 text-xs text-white/60 sm:flex-row sm:items-center">
-          <p>© 2026 Classora — Année scolaire 2026-2027. Tous droits réservés.</p>
+          <div className="space-y-2">
+            <p>© 2026 Classora - Année scolaire 2026-2027. Tous droits réservés.</p>
+            <nav aria-label="Informations légales" className="flex flex-wrap gap-x-4 gap-y-1">
+              <Link to="/cgu" className="transition-colors hover:text-lime">
+                Conditions Générales d'Utilisation
+              </Link>
+              <Link to="/confidentialite" className="transition-colors hover:text-lime">
+                Politique de confidentialité
+              </Link>
+            </nav>
+          </div>
           <p className="flex items-center gap-2">
             <Icon name="verified_user" className="text-[18px] text-lime" />
             Données hébergées de manière sécurisée
