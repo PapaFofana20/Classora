@@ -3,7 +3,7 @@ import { Container } from "@/components/layout/Container";
 import { cn } from "@/utils/cn";
 
 export interface PageHeroProps {
-  /** Titre ; un mot encadré par des astérisques est rendu en Playfair italique lime. */
+  /** Titre ; un mot encadré par des astérisques est rendu en Fraunces italique lime. */
   title: string;
   description: string;
   eyebrow?: string;
@@ -13,7 +13,7 @@ export interface PageHeroProps {
   image: { src: string; alt: string; objectPosition?: string; width?: number; height?: number };
 }
 
-/** Découpe le titre : `*mot*` → Playfair Display italique lime, sans cadre ni poignée. */
+/** Découpe le titre : `*mot*` → Fraunces italique lime, sans cadre ni poignée. */
 function renderTitle(title: string) {
   return title.split("*").map((part, i) =>
     i % 2 === 1 ? (

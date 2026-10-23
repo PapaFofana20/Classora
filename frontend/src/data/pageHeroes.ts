@@ -4,7 +4,7 @@ import ecolesHeroImg from "@/assets/images/ecoles-hero.jpg";
 import aproposHeroImg from "@/assets/images/apropos-hero.jpg";
 import contactHeroImg from "@/assets/images/contact-hero.jpg";
 
-/** Un mot encadré par des astérisques est rendu en Playfair italique lime. */
+/** Un mot encadré par des astérisques est rendu en Fraunces italique lime. */
 export interface PageHeroImage {
   src: string;
   alt: string;

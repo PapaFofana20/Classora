@@ -3,7 +3,7 @@
 /* Design system Classora (équivalent du tailwind.config en Tailwind v4) */
 @theme {
   --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
+  --font-serif: "Fraunces", Georgia, serif;
 
   --color-lime: #c6f068;
   --color-lime-soft: #eef9cf;

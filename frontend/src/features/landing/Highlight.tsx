@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
 
-/** Mot mis en valeur : italique Playfair, cadre de sélection avec poignées (style de la référence). */
+/** Mot mis en valeur : italique Fraunces, cadre de sélection avec poignées (style de la référence). */
 export function Highlight({ children, dark, className }: { children: ReactNode; dark?: boolean; className?: string }) {
   return (
     <span className={cn("relative mx-1 inline-block px-2 font-serif font-semibold italic", dark ? "bg-lime/20 text-lime" : "bg-lime/50 text-forest", className)}>
