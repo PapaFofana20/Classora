@@ -7,7 +7,7 @@ import hero5Img from "@/assets/images/hero-5.jpg";
 import hero6Img from "@/assets/images/hero-6.jpg";
 import aboutImg from "@/assets/images/about-home.jpg";
 import authImg from "@/assets/images/auth.jpg";
-import authBackgroundImg from "@/assets/images/auth-background.png";
+import authBackgroundImg from "@/assets/images/auth-background.jpg";
 import inscriptionsImg from "@/assets/images/feature-inscriptions.jpg";
 import bulletinsImg from "@/assets/images/feature-bulletins.jpg";
 import paiementsImg from "@/assets/images/feature-paiements.jpg";
