@@ -17,7 +17,7 @@ export function PublicLayout() {
     // `overflow-x-clip` : aucun défilement horizontal, sans conteneur de défilement.
     <div className="page-bg relative min-h-svh flow-root overflow-x-clip bg-white">
       <Navbar />
-      <main key={pathname} className="animate-page">
+      <main key={pathname}>
         <Outlet />
       </main>
       <Footer />

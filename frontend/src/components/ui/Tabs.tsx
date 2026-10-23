@@ -51,7 +51,7 @@ export function Tabs({ items, value, onChange, label, className }: TabsProps) {
                 event.currentTarget.scrollIntoView({ inline: "nearest", block: "nearest" });
               }}
               className={cn(
-                "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold transition-all",
+                "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold transition-[background-color,color,box-shadow]",
                 active ? "bg-forest text-white shadow-card" : "bg-white text-forest hover:bg-lime-soft",
               )}
             >

@@ -30,7 +30,7 @@ export function ProgressBar({ value, className, tone = "leaf" }: { value: number
   const colors = { leaf: "bg-leaf", warning: "bg-amber-500", danger: "bg-danger" };
   return (
     <div className={cn("h-2.5 w-full overflow-hidden rounded-full bg-neutral-200", className)} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
-      <div className={cn("h-full rounded-full transition-all duration-700", colors[tone])} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+      <div className={cn("h-full rounded-full transition-[width,background-color] duration-300", colors[tone])} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
     </div>
   );
 }

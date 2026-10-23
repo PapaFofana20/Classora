@@ -276,6 +276,9 @@ begin
 end;
 $$;
 
+revoke execute on function public.generate_school_matricule() from anon, public;
+grant execute on function public.generate_school_matricule() to authenticated;
+
 revoke execute on function public.verify_matricule(text) from public;
 -- anon est explicitement autorisé (fonction stable, lecture seule) : le
 -- formulaire d'inscription appelle cette vérification sans session. Le

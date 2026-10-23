@@ -94,7 +94,7 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
         </p>
       )}
       {state === "found" && school && (
-        <div className="animate-page rounded-2xl border-2 border-leaf bg-lime-pale p-5">
+        <div className="popover-enter rounded-2xl border-2 border-leaf bg-lime-pale p-5">
           <div className="flex items-center gap-4">
             <SchoolMark name={school.name} matricule={school.matricule} size={52} />
           </div>

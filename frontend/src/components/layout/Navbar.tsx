@@ -119,7 +119,7 @@ export function Navbar() {
           {open && (
             <>
               {/* Le panneau ne contient que des liens : tout clic dedans referme le menu. */}
-              <div id="menu-mobile" onClick={closeMenu} className="animate-page mx-nav-inset mt-2 rounded-3xl bg-white p-4 shadow-soft ring-1 ring-forest/5 xl:hidden">
+              <div id="menu-mobile" onClick={closeMenu} className="drawer-enter mx-nav-inset mt-2 rounded-3xl bg-white p-4 shadow-soft ring-1 ring-forest/5 xl:hidden">
                 <div className="grid gap-1">
                   {navLinks.map((l) => (
                     <NavLink key={l.to} to={l.to} end={l.to === "/"} className={({ isActive }) => cn("flex min-h-12 items-center rounded-2xl px-4 text-sm font-semibold", isActive ? "bg-lime text-forest" : "text-ink hover:bg-lime-soft")}>

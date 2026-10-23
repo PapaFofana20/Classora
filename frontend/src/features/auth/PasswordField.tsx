@@ -44,7 +44,7 @@ export function PasswordField({ label = "Mot de passe", value, onChange, error, 
           {value.length > 0 && (
             <div className="flex items-center gap-2">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
-                <div className={cn("h-full rounded-full transition-all duration-300", strength.strength === "faible" ? "bg-danger" : strength.strength === "moyen" ? "bg-amber-500" : "bg-leaf")} style={{ width: `${(strength.score / PASSWORD_RULES.length) * 100}%` }} />
+                <div className={cn("h-full rounded-full transition-[width,background-color] duration-300", strength.strength === "faible" ? "bg-danger" : strength.strength === "moyen" ? "bg-amber-500" : "bg-leaf")} style={{ width: `${(strength.score / PASSWORD_RULES.length) * 100}%` }} />
               </div>
               <span className="text-xs font-semibold text-neutral-500">{strength.label}</span>
             </div>

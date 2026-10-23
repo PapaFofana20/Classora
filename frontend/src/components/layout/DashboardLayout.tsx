@@ -24,7 +24,7 @@ function Shell() {
         <Sidebar user={user} drawerOpen={drawer} onClose={() => setDrawer(false)} />
         <div ref={registerContent} className="@container min-w-0 flex-1 overflow-x-clip px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10">
           <Topbar user={user} onMenu={() => setDrawer(true)} />
-          <main id="contenu" tabIndex={-1} key={pathname} className="min-w-0 animate-page focus:outline-none">
+          <main id="contenu" tabIndex={-1} key={pathname} className="min-w-0 focus:outline-none">
             <SubscriptionBanner />
             <Outlet />
           </main>

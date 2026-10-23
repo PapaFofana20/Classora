@@ -157,3 +157,8 @@ end;
 $$;
 
 grant execute on function public.complete_password_change() to authenticated;
+
+-- Formulaire de contact public : insertion anonyme autorisée, jamais lisible.
+create policy "contact_messages_insert_anon" on public.contact_messages
+  for insert to anon
+  with check (true);

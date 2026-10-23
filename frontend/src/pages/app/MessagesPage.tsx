@@ -74,10 +74,10 @@ export default function MessagesPage() {
             ) : (
               <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
                 <div className={cn("space-y-2", selected && "hidden lg:block")}>
-                  {list.map((c) => {
+                  {list.map((c, index) => {
                     const last = c.messages[c.messages.length - 1];
                     return (
-                      <button key={c.id} type="button" onClick={() => setSel(c.id)} aria-current={c.id === sel} className={cn("flex w-full items-center gap-3 rounded-2xl p-4 text-left shadow-card transition hover:-translate-y-0.5", c.id === sel ? "bg-lime" : "bg-white")}>
+                      <button key={c.id} type="button" onClick={() => setSel(c.id)} aria-current={c.id === sel} className={cn("flex w-full items-center gap-3 rounded-2xl p-4 text-left shadow-card transition stagger-item hover:-translate-y-0.5", c.id === sel ? "bg-lime" : "bg-white")} style={{ animationDelay: `${index * 50}ms` }}>
                         <Avatar name={counterpartName(c, user.role)} size={44} />
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center justify-between gap-2">

@@ -35,7 +35,7 @@ export function Hero() {
               loading={index === 0 ? "eager" : "lazy"}
               fetchPriority={index === 0 ? "high" : "low"}
               decoding="async"
-              className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ease-in-out ${
+              className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ease-out ${
                 index === active ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -67,7 +67,7 @@ export function Hero() {
                 aria-label={`Image ${index + 1} sur ${heroSlides.length}`}
                 aria-selected={index === active}
                 onClick={() => setActive(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
                   index === active ? "w-8 bg-lime" : "w-3 bg-white/50 hover:bg-white/80"
                 }`}
               />

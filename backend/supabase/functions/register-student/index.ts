@@ -7,7 +7,7 @@
  */
 
 import { serviceClient } from "../_shared/auth.ts";
-import { badRequest, CORS_HEADERS, ok, serverError } from "../_shared/http.ts";
+import { handleOptions, methodNotAllowed, badRequest, ok, serverError } from "../_shared/http.ts";
 import { clientIp, enforceRateLimit } from "../_shared/rateLimit.ts";
 import {
   expectObject,
@@ -21,9 +21,10 @@ import {
 } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: CORS_HEADERS });
-  }
+  const origin = req.headers.get("Origin");
+  const options = handleOptions(req);
+  if (options) return options;
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     await enforceRateLimit(svc, `register-student:${clientIp(req) ?? "sans-adresse"}`, 10, 300);
@@ -41,7 +42,7 @@ Deno.serve(async (req) => {
     const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
 
     if (gender === undefined && body["gender"] !== undefined && body["gender"] !== "") {
-      return badRequest("Le sexe est invalide.");
+      return badRequest(origin, "Le sexe est invalide.");
     }
 
     // Résolution de l'école : uuid fourni OU matricule public.
@@ -53,8 +54,8 @@ Deno.serve(async (req) => {
       const { data } = await svc.from("schools").select("id").eq("matricule", matricule).maybeSingle();
       resolvedSchool = data?.id ?? null;
     }
-    if (!resolvedSchool) return badRequest("École introuvable.");
-    if (!classId) return badRequest("Sélectionnez une classe.");
+    if (!resolvedSchool) return badRequest(origin, "École introuvable.");
+    if (!classId) return badRequest(origin, "Sélectionnez une classe.");
 
     const { data: created, error: createError } = await svc.auth.admin.createUser({
       email,
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     });
     if (createError || !created?.user) {
       const duplicate = /already|duplicate|registered/i.test(createError?.message ?? "");
-      return badRequest(
+      return badRequest(origin,
         duplicate ? "Un compte existe déjà avec cet e-mail." : "Impossible de créer le compte. Réessayez.",
       );
     }
@@ -83,7 +84,7 @@ Deno.serve(async (req) => {
       });
       if (error || !data) throw new Error(error?.message ?? "Inscription incomplète.");
       const result = data as { request_id: string; approved: boolean; student_id: string | null };
-      return ok({
+      return ok(origin, {
         user: { id: created.user.id, email, firstName, lastName, role: "eleve", status: result.approved ? "ACTIF" : "EN_ATTENTE" },
         requestId: result.request_id,
         approved: result.approved,
@@ -92,13 +93,13 @@ Deno.serve(async (req) => {
       await svc.auth.admin.deleteUser(created.user.id);
       const message = sqlError instanceof Error ? sqlError.message : undefined;
       if (message && /un compte existe déjà|classe|école|inscriptions/i.test(message)) {
-        return badRequest(message);
+        return badRequest(origin, message);
       }
-      return serverError();
+      return serverError(origin);
     }
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });

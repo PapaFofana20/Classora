@@ -27,7 +27,7 @@ interface Props extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className
 /** Bouton principal : pilule + cercle vert foncé avec flèche ↗. */
 export function ArrowButton({ tone = "lime", to, className, children, icon = "arrow_outward", type = "button", ...rest }: Props) {
   const classes = cn(
-    "group inline-flex min-h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-sm font-semibold shadow-card transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+    "group inline-flex min-h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-sm font-semibold shadow-card active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
     shell[tone],
     className,
   );

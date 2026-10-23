@@ -284,6 +284,9 @@ $$;
 revoke execute on function public.send_reminders(uuid[]) from anon, public;
 grant execute on function public.send_reminders(uuid[]) to authenticated;
 
+revoke execute on function public.new_payment_reference(text) from anon, public;
+grant execute on function public.new_payment_reference(text) to authenticated;
+
 -- ============================================================================
 -- Privilèges : l'échéancier est lisible par les clients (politique ci-dessus),
 -- mais JAMAIS écrit directement ; le registre des transactions mobiles est

@@ -74,7 +74,7 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
               <Icon name="expand_more" className="hidden text-[20px] sm:block" />
             </button>
             {menu && (
-              <div role="menu" className="absolute right-0 mt-2 w-56 animate-page rounded-2xl bg-white p-2 shadow-soft ring-1 ring-black/5">
+              <div role="menu" className="absolute right-0 mt-2 w-56 dropdown-enter rounded-2xl bg-white p-2 shadow-soft ring-1 ring-black/5">
                 <Link role="menuitem" to="/app/parametres" onClick={() => setMenu(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold hover:bg-lime-soft">
                   <Icon name="settings" className="text-[20px]" />
                   {user.role === "directeur" ? "Paramètres" : "Mon profil"}

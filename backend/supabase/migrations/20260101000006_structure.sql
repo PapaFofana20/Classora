@@ -607,6 +607,9 @@ grant execute on function public.set_class_head_teacher(uuid, uuid, text) to aut
 revoke execute on function public.assignment_conflicts() from anon;
 grant execute on function public.assignment_conflicts() to authenticated;
 
+revoke execute on function public.build_payment_plan(uuid) from anon, public;
+grant execute on function public.build_payment_plan(uuid) to authenticated;
+
 -- ============================================================================
 -- Politiques RLS — structure pédagogique
 -- Lecture : comptes actifs (et mot de passe changé) de SON école.

@@ -1,4 +1,4 @@
-import { respond } from "./db";
+import { supabase } from "@/lib/supabase";
 
 export interface ContactMessage {
   name: string;
@@ -9,10 +9,16 @@ export interface ContactMessage {
   message: string;
 }
 
-/** Envoi simulé du formulaire de contact (remplaçable par un appel API). */
-export function sendContactMessage(msg: ContactMessage): Promise<boolean> {
-  return respond(() => {
-    void msg;
-    return true;
+/** Envoi du formulaire de contact public via Supabase (insert-only, RLS). */
+export async function sendContactMessage(msg: ContactMessage): Promise<boolean> {
+  const { error } = await supabase.from("contact_messages").insert({
+    name: msg.name,
+    email: msg.email,
+    phone: msg.phone,
+    school: msg.school,
+    subject: msg.subject,
+    message: msg.message,
   });
+  if (error) throw new Error(error.message);
+  return true;
 }

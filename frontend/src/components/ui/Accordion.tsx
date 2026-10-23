@@ -30,8 +30,8 @@ export function Accordion({ items }: { items: Item[] }) {
                 </span>
               </button>
             </h3>
-            <div id={`${base}-${i}`} role="region" className={cn("grid transition-all duration-300", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
-              <div className="overflow-hidden">
+            <div id={`${base}-${i}`} role="region" className={cn("overflow-hidden transition-[max-height] duration-300 ease-out", isOpen ? "max-h-96" : "max-h-0")}>
+              <div>
                 <p className="px-5 pb-5 text-sm leading-relaxed text-neutral-600">{it.a}</p>
               </div>
             </div>

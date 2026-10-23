@@ -8,7 +8,7 @@
  */
 
 import { passwordError, serviceClient } from "../_shared/auth.ts";
-import { badRequest, CORS_HEADERS, ok, serverError } from "../_shared/http.ts";
+import { handleOptions, methodNotAllowed, badRequest, ok, serverError } from "../_shared/http.ts";
 import { clientIp, enforceRateLimit } from "../_shared/rateLimit.ts";
 import {
   expectObject,
@@ -21,9 +21,10 @@ import {
 } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: CORS_HEADERS });
-  }
+  const origin = req.headers.get("Origin");
+  const options = handleOptions(req);
+  if (options) return options;
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     await enforceRateLimit(svc, `register-director:${clientIp(req) ?? "sans-adresse"}`, 5, 300);
@@ -40,7 +41,7 @@ Deno.serve(async (req) => {
     const cycles = requireCycles(body);
 
     const pwError = passwordError(password);
-    if (pwError) return badRequest(pwError);
+    if (pwError) return badRequest(origin, pwError);
 
     // 1. Compte Auth (l'e-mail en double est renvoyé avec le message du front).
     const { data: created, error: createError } = await svc.auth.admin.createUser({
@@ -51,7 +52,7 @@ Deno.serve(async (req) => {
     });
     if (createError || !created?.user) {
       const duplicate = /already|duplicate|registered/i.test(createError?.message ?? "");
-      return badRequest(
+      return badRequest(origin,
         duplicate ? "Un compte existe déjà avec cet e-mail." : "Impossible de créer le compte. Réessayez.",
       );
     }
@@ -85,7 +86,7 @@ Deno.serve(async (req) => {
         console.warn("app_metadata non mis à jour :", metaError.message);
       }
 
-      return ok({
+      return ok(origin, {
         schoolId: data,
         email,
         message: "Compte créé. Connectez-vous pour ouvrir votre session.",
@@ -94,12 +95,12 @@ Deno.serve(async (req) => {
       // 4. Nettoyage : le compte Auth ne doit pas survivre sans école/profil.
       await svc.auth.admin.deleteUser(created.user.id);
       const message = sqlError instanceof Error ? sqlError.message : undefined;
-      if (message && /un compte existe déjà/i.test(message)) return badRequest(message);
-      return serverError();
+      if (message && /un compte existe déjà/i.test(message)) return badRequest(origin, message);
+      return serverError(origin);
     }
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });

@@ -11,18 +11,18 @@
  */
 
 import { getAuthenticatedUser, audit, serviceClient } from "../_shared/auth.ts";
-import { CORS_HEADERS, methodNotAllowed, ok, serverError, unauthorized } from "../_shared/http.ts";
+import { handleOptions, methodNotAllowed, ok, serverError, unauthorized } from "../_shared/http.ts";
 import { enforceRateLimit } from "../_shared/rateLimit.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: CORS_HEADERS });
-  }
-  if (req.method !== "POST") return methodNotAllowed();
+  const origin = req.headers.get("Origin");
+  const options = handleOptions(req);
+  if (options) return options;
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     const user = await getAuthenticatedUser(svc, req);
-    if (!user) return unauthorized();
+    if (!user) return unauthorized(origin);
 
     await enforceRateLimit(svc, `login-guard:${user.id}`, 20, 300);
 
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       .eq("id", user.id)
       .maybeSingle();
     if (error || !profile) {
-      return unauthorized("E-mail ou mot de passe incorrect.");
+      return unauthorized(origin, "E-mail ou mot de passe incorrect.");
     }
 
     if (profile.status === "DESACTIVE") {
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
         entity: "profiles",
         entityId: profile.id,
       });
-      return ok({
+      return ok(origin, {
         status: "DESACTIVE",
         error: "Ce compte a été désactivé par la direction de votre école. Contactez votre école.",
       });
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
         entity: "profiles",
         entityId: profile.id,
       });
-      return ok({
+      return ok(origin, {
         status: "EN_ATTENTE",
         error: "Votre demande d'inscription est en attente de validation par votre école.",
       });
@@ -73,14 +73,14 @@ Deno.serve(async (req) => {
       entityId: profile.id,
     });
 
-    return ok({
+    return ok(origin, {
       status: "ACTIF",
       schoolId: profile.school_id,
       role: profile.role,
       mustChangePassword: profile.must_change_password,
     });
   } catch (e) {
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return ok({ error: e.message }, 429);
-    return serverError();
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return ok(origin, { error: e.message }, 429);
+    return serverError(origin);
   }
 });

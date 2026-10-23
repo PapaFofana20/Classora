@@ -33,7 +33,7 @@ export default function ContactPage() {
             <div className="relative grid h-48 place-items-center overflow-hidden rounded-3xl bg-forest text-white" role="img" aria-label="Carte de localisation, Dakar">
               <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
               <div className="relative text-center">
-                <Icon name="location_on" fill className="animate-float text-[44px] text-lime" />
+                <Icon name="location_on" fill className="text-[44px] text-lime" />
                 <p className="font-bold">Dakar, Sénégal</p>
               </div>
             </div>

@@ -212,3 +212,18 @@ returns text
 language sql stable security definer set search_path = public as $$
   select p.school_year from public.school_settings p where p.school_id = public.current_school_id()
 $$;
+
+revoke execute on function public.next_student_matricule(uuid, text) from anon, public;
+grant execute on function public.next_student_matricule(uuid, text) to authenticated;
+
+revoke execute on function public.generate_school_code(uuid, int, text) from anon, public;
+grant execute on function public.generate_school_code(uuid, int, text) to authenticated;
+
+revoke execute on function public.subscription_info(uuid) from anon, public;
+grant execute on function public.subscription_info(uuid) to authenticated;
+
+revoke execute on function public.school_is_writable(uuid) from anon, public;
+grant execute on function public.school_is_writable(uuid) to authenticated;
+
+revoke execute on function public.school_is_readable(uuid) from anon, public;
+grant execute on function public.school_is_readable(uuid) to authenticated;
