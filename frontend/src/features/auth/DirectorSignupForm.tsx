@@ -29,12 +29,12 @@ const SENEGAL_CITIES = [
 ];
 
 /** Inscription du directeur : école + compte + matricule, puis accès direct au tableau de bord. */
-export function DirectorSignupForm() {
+export function DirectorSignupForm({ initialPlan }: { initialPlan?: "essentiel" | "premium" | null }) {
   const { registerDirector } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [cycles, setCycles] = useState<Cycle[]>(["elementaire", "moyen"]);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "", plan: (initialPlan ?? "essentiel") as "essentiel" | "premium" });
   const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
@@ -52,6 +52,7 @@ export function DirectorSignupForm() {
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
     cycles: cycles.length === 0 ? "Choisissez au moins un cycle." : null,
     terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
+    plan: null,
   };
   const valid = Object.values(errors).every((e) => e === null);
   const show = (key: keyof typeof errors) => (touched[key] ? errors[key] : null);
@@ -108,6 +109,10 @@ export function DirectorSignupForm() {
         {cycles.length === 0 && <p className="mt-2 text-xs font-medium text-danger">Choisissez au moins un cycle.</p>}
       </fieldset>
       <div className="grid gap-4">
+        <Select label="Plan d'abonnement" required options={[
+          { value: "essentiel", label: "Plan découverte — Gratuit" },
+          { value: "premium", label: "Premium — 500 FCFA/élève/mois" }
+        ]} value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as "essentiel" | "premium" })} error={show("plan")} />
         <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
         <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>

@@ -14,6 +14,7 @@ import { cn } from "@/utils/cn";
 /**
  * /inscription — trois parcours : directeur (direct), élève et parent (matricule d'abord).
  * Le lien partagé par l'école (?matricule=X7K9Q) pré-remplit le champ.
+ * Le paramètre ?plan=essentiel|premium pré-sélectionne le plan d'abonnement.
  */
 export default function RegisterPage() {
   const [params] = useSearchParams();
@@ -21,6 +22,7 @@ export default function RegisterPage() {
   const [school, setSchool] = useState<School | null>(null);
 
   const prefill = formatMatriculeInput(params.get("matricule") ?? "");
+  const plan = params.get("plan") as "essentiel" | "premium" | null;
   const isParent = role === "parent";
 
   return (
@@ -28,7 +30,6 @@ export default function RegisterPage() {
       title={role ? (role === "directeur" ? "Créer votre école" : isParent ? "Espace parent" : "Espace élève") : "Créer votre compte"}
       subtitle="Directeur, élève ou parent : choisissez votre situation, l'inscription prend moins de 3 minutes."
       showVisual={false}
-      backgroundImage
     >
       <div className="space-y-5">
         <ol className="flex gap-2" aria-label="Étapes de l'inscription">
@@ -51,7 +52,7 @@ export default function RegisterPage() {
 
         {!role && <RoleChoice value={role} onChange={setRole} />}
 
-        {role === "directeur" && <DirectorSignupForm />}
+        {role === "directeur" && <DirectorSignupForm initialPlan={plan} />}
 
         {(role === "eleve" || role === "parent") && !school && <MatriculeStep initial={prefill} onFound={setSchool} onBack={() => setRole(null)} />}
 

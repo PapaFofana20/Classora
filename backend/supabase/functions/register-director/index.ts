@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
     const city = requireString(body, "city", "La ville", { min: 1, max: 80 });
     const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
+    const plan = optionalString(body, "plan", "Le plan d'abonnement", 20) as "essentiel" | "premium" | undefined;
 
     const pwError = passwordError(password);
     if (pwError) return badRequest(origin, pwError);
@@ -84,6 +85,51 @@ Deno.serve(async (req) => {
       if (metaError) {
         // L'inscription reste valide : le repli sur public.profiles couvre ce cas.
         console.warn("app_metadata non mis à jour :", metaError.message);
+      }
+
+      // 4. Créer l'abonnement si un plan est sélectionné
+      if (plan && (plan === "essentiel" || plan === "premium")) {
+        try {
+          // Récupérer le plan pour obtenir les limites
+          const { data: planData, error: planError } = await svc
+            .from("plans")
+            .select("id, student_limit, monthly_price, yearly_price")
+            .eq("id", plan)
+            .single();
+          
+          if (!planError && planData) {
+            // Créer l'abonnement (gratuit pour essentiel, payant pour premium)
+            const now = new Date();
+            const endsAt = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+            
+            await svc.from("subscriptions").insert({
+              school_id: data,
+              plan_id: planData.id,
+              starts_at: now.toISOString().split("T")[0],
+              ends_at: endsAt.toISOString().split("T")[0],
+              student_limit: planData.student_limit,
+              amount_paid: plan === "premium" ? planData.monthly_price : 0,
+              payment_ref: plan === "premium" ? "manual_registration" : "free_registration",
+              method: "manual",
+              paid_at: plan === "premium" ? now.toISOString() : null,
+            });
+
+            // Créer l'événement d'abonnement
+            await svc.from("subscription_events").insert({
+              school_id: data,
+              event_type: "purchase",
+              plan_id: planData.id,
+              amount_paid: plan === "premium" ? planData.monthly_price : 0,
+              payment_ref: plan === "premium" ? "manual_registration" : "free_registration",
+              method: "manual",
+              starts_at: now.toISOString().split("T")[0],
+              ends_at: endsAt.toISOString().split("T")[0],
+            });
+          }
+        } catch (subError) {
+          console.warn("Erreur lors de la création de l'abonnement:", subError);
+          // On ne bloque pas l'inscription si l'abonnement échoue
+        }
       }
 
       return ok(origin, {

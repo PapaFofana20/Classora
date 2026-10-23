@@ -33,6 +33,7 @@ export interface DirectorInput {
   schoolName: string;
   city: string;
   cycles: Cycle[];
+  plan?: "essentiel" | "premium";
 }
 
 function toSession(u: User): SessionUser {
