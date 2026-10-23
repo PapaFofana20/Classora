@@ -6,7 +6,7 @@ import { cn } from "@/utils/cn";
 
 export function TestimonialsSection() {
   return (
-    <section className="mx-auto max-w-[1280px] px-5 py-16 sm:px-8" aria-labelledby="testi-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="testi-title">
       <Reveal>
         <div className="mb-12 text-center">
           <h2 id="testi-title" className="mx-auto max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">

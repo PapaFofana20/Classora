@@ -140,7 +140,6 @@ body {
   color: var(--color-ink);
   background: #ffffff;
   margin: 0;
-  min-width: 100vw;
   min-height: 100svh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;

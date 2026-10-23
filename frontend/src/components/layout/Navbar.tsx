@@ -142,9 +142,6 @@ export function Navbar() {
                       </LinkButton>
                     </>
                   )}
-                  <LinkButton to="/contact" variant="primary" icon="arrow_outward" className="sm:col-span-2">
-                    Demander une démo
-                  </LinkButton>
                 </div>
               </div>
             </>

@@ -13,7 +13,7 @@ export default function FeaturesPage() {
     <>
       <PageHero {...pageHeroes.fonctionnalites} />
 
-      <div className="mx-auto max-w-[1280px] space-y-16 px-5 py-10 sm:px-8">
+      <div className="mx-auto w-full max-w-[1280px] space-y-16 px-gutter py-10">
         {features.map((f, i) => (
           <Reveal key={f.id}>
             <article className={cn("grid items-center gap-8 lg:grid-cols-2 lg:gap-16", i % 2 === 1 && "lg:[&>div:first-child]:order-2")}>
@@ -37,7 +37,7 @@ export default function FeaturesPage() {
         ))}
       </div>
 
-      <section className="mx-auto max-w-[1280px] px-5 py-16 sm:px-8" aria-labelledby="roles-title">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="roles-title">
         <Reveal>
           <div className="mb-10 text-center">
             <h2 id="roles-title" className="text-3xl font-extrabold tracking-tight sm:text-5xl">

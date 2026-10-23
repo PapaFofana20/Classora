@@ -16,7 +16,7 @@ export default function ContactPage() {
   return (
     <>
       <PageHero {...pageHeroes.contact} />
-      <section className="mx-auto grid max-w-[1280px] gap-8 px-5 pb-20 sm:px-8 lg:grid-cols-[1.4fr_1fr]">
+      <section className="mx-auto grid w-full max-w-[1280px] gap-8 px-gutter pb-20 lg:grid-cols-[1.4fr_1fr]">
         <Reveal>
           <ContactForm />
         </Reveal>

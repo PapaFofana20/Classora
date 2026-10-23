@@ -4,7 +4,7 @@ import { faqs } from "@/data/landing";
 
 export function FaqSection() {
   return (
-    <section className="mx-auto max-w-[1280px] px-5 py-16 sm:px-8" aria-labelledby="faq-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="faq-title">
       <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
         <Reveal>
           <h2 id="faq-title" className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">

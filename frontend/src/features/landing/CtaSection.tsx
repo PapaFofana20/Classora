@@ -13,13 +13,10 @@ export function CtaSection() {
           <h2 id="cta-title" className="relative mx-auto max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-forest sm:text-5xl">
             Prêt à digitaliser votre <span className="font-serif font-semibold italic">école</span> pour 2026-2027 ?
           </h2>
-          <p className="relative mx-auto mt-4 max-w-xl text-forest/80">Créez votre compte en 2 minutes ou testez l'application avec un compte démo.</p>
+          <p className="relative mx-auto mt-4 max-w-xl text-forest/80">Créez votre compte en 2 minutes.</p>
           <div className="relative mt-8 flex flex-wrap justify-center gap-3">
             <ArrowButton to="/inscription" tone="forest">
               Créer un compte
-            </ArrowButton>
-            <ArrowButton to="/connexion" tone="white">
-              Essayer un compte démo
             </ArrowButton>
           </div>
           </div>

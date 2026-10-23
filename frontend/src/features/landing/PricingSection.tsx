@@ -6,7 +6,7 @@ import { cn } from "@/utils/cn";
 
 export function PricingSection({ withHeader = true }: { withHeader?: boolean }) {
   return (
-    <section className="mx-auto max-w-[1280px] px-5 py-16 sm:px-8" aria-labelledby="pricing-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="pricing-title">
       {withHeader && (
         <Reveal>
           <div className="mb-12 text-center">

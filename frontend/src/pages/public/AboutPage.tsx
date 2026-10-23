@@ -10,7 +10,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero {...pageHeroes.apropos} />
-      <section className="mx-auto max-w-[1280px] px-5 sm:px-8">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl bg-lime p-2 shadow-pop">
             <img src={aboutTeamImg} alt="L'équipe pédagogique d'une école partenaire" className="aspect-[16/8] w-full rounded-[1.25rem] object-cover" loading="lazy" />
@@ -18,7 +18,7 @@ export default function AboutPage() {
         </Reveal>
       </section>
 
-      <section className="mx-auto max-w-[1280px] px-5 py-20 sm:px-8" aria-labelledby="values-title">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter py-20" aria-labelledby="values-title">
         <Reveal>
           <h2 id="values-title" className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-5xl">
             Ce qui nous <span className="font-serif font-semibold italic text-forest-500">guide</span>
@@ -36,8 +36,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="px-3 sm:px-5" aria-labelledby="timeline-title">
-        <div className="mx-auto max-w-[1280px] rounded-3xl bg-forest p-8 text-white sm:p-14">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter" aria-labelledby="timeline-title">
+        <div className="rounded-3xl bg-forest p-8 text-white sm:p-14">
           <h2 id="timeline-title" className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             De l'idée à <span className="font-serif font-semibold italic text-lime">18 écoles</span>
           </h2>

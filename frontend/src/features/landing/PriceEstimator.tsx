@@ -8,7 +8,7 @@ import { formatCurrency } from "@/utils/format";
 export function PriceEstimator() {
   const [n, setN] = useState(estimator.defaultValue);
   return (
-    <section className="mx-auto max-w-4xl px-5 pb-16 sm:px-8" aria-labelledby="estimator-title">
+    <section className="mx-auto w-full max-w-4xl px-gutter pb-16" aria-labelledby="estimator-title">
       <Reveal>
         <Card className="!p-8 sm:!p-10">
           <h2 id="estimator-title" className="text-2xl font-extrabold">

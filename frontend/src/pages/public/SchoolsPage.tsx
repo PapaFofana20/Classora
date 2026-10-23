@@ -11,7 +11,7 @@ export default function SchoolsPage() {
   return (
     <>
       <PageHero {...pageHeroes.ecoles} />
-      <section className="mx-auto max-w-[1280px] px-5 pb-10 sm:px-8" aria-label="Liste des écoles partenaires">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-10" aria-label="Liste des écoles partenaires">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
             <Reveal key={s.id} delay={i * 60}>
@@ -35,8 +35,8 @@ export default function SchoolsPage() {
           ))}
         </div>
       </section>
-      <section className="px-3 sm:px-5" aria-label="Chiffres clés">
-        <div className="mx-auto grid max-w-[1280px] gap-4 rounded-3xl bg-forest p-8 text-center text-white sm:grid-cols-3 sm:p-12">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter" aria-label="Chiffres clés">
+        <div className="grid gap-4 rounded-3xl bg-forest p-8 text-center text-white sm:grid-cols-3 sm:p-12">
           {aboutStats.map((s) => (
             <div key={s.label}>
               <p className="text-5xl font-extrabold tracking-tight text-lime">{s.value}</p>
