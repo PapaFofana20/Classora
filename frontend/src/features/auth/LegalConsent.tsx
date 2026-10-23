@@ -18,8 +18,8 @@ export function LegalConsent({ checked, onChange, error }: Props) {
     <div>
       <label
         className={cn(
-          "flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-xs leading-relaxed text-neutral-700 transition-colors sm:text-sm",
-          error ? "border-danger bg-red-50" : "border-neutral-200 bg-white hover:border-forest/30",
+          "flex cursor-pointer items-start gap-3 rounded-2xl border bg-lime p-4 text-xs leading-relaxed text-forest transition-colors sm:text-sm",
+          error ? "border-danger" : "border-forest/15 hover:border-forest/35",
         )}
       >
         <input
@@ -28,8 +28,17 @@ export function LegalConsent({ checked, onChange, error }: Props) {
           onChange={(e) => onChange(e.target.checked)}
           aria-invalid={!!error || undefined}
           aria-describedby={error ? errorId : undefined}
-          className="mt-0.5 size-4 shrink-0 accent-forest"
+          className="peer sr-only"
         />
+        <span
+          aria-hidden="true"
+          className={cn(
+            "mt-0.5 grid size-5 shrink-0 place-items-center rounded-md border-2 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-forest peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-lime",
+            checked ? "border-forest bg-forest text-lime" : "border-forest/40 bg-white text-transparent",
+          )}
+        >
+          <Icon name="check" className="text-[15px]" />
+        </span>
         <span>
           J'ai lu et j'accepte les{" "}
           <Link to="/cgu" target="_blank" rel="noreferrer" className="font-semibold text-forest underline underline-offset-2">
