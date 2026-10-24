@@ -145,12 +145,14 @@ export interface Testimonial {
   name: string;
   role: string;
   school: string;
+  photo: string;
+  photoAlt: string;
 }
 
 export const testimonials: Testimonial[] = [
-  { id: "t1", quote: "Depuis Classora, nos bulletins sortent en une journée au lieu de deux semaines. Les parents paient par Wave sans se déplacer.", name: "Aïssatou Diallo", role: "Directrice", school: "Complexe Scolaire Les Almadies, Dakar" },
-  { id: "t2", quote: "La matrice des affectations nous a évité des erreurs d'emploi du temps. Chaque professeur voit uniquement ses classes.", name: "Dr Mbaye Seck", role: "Directeur des études", school: "Institut Horizon, Thiès" },
-  { id: "t3", quote: "Les impayés ont baissé de 35 % en un trimestre grâce aux relances et au paiement mobile money.", name: "Mame Diarra Gaye", role: "Économe", school: "Groupe Les Baobabs, Mbour" },
+  { id: "t1", quote: "Depuis Classora, nos bulletins sortent en une journée au lieu de deux semaines. Les parents paient par Wave sans se déplacer.", name: "Mme Aïssatou Diallo", role: "Directrice", school: "Complexe Scolaire Les Almadies, Dakar", photo: "/images/testimonials/aissatou-diallo.jpg", photoAlt: "Portrait de Mme Aïssatou Diallo, directrice du Complexe Scolaire Les Almadies" },
+  { id: "t2", quote: "La matrice des affectations nous a évité des erreurs d'emploi du temps. Chaque professeur voit uniquement ses classes.", name: "Dr Mbaye Seck", role: "Directeur des études", school: "Institut Horizon, Thiès", photo: "/images/testimonials/mbaye-seck.jpg", photoAlt: "Portrait du Dr Mbaye Seck, directeur des études à l'Institut Horizon" },
+  { id: "t3", quote: "Les impayés ont baissé de 35 % en un trimestre grâce aux relances et au paiement mobile money.", name: "Mme Mame Diarra Gaye", role: "Économe", school: "Groupe Les Baobabs, Mbour", photo: "/images/testimonials/mame-diarra-gaye.jpg", photoAlt: "Portrait de Mme Mame Diarra Gaye, économe du Groupe Les Baobabs" },
 ];
 
 export interface Faq {
