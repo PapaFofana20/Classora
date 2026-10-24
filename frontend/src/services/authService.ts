@@ -59,10 +59,10 @@ export async function currentSession(): Promise<SessionUser | null> {
   await hydrateAll();
   const profile = db.users.find((u) => u.id === session.user.id);
   if (!profile) {
-    // Compte Auth sans profil exploitable : on ne s'invente pas une session
-    // (l'état forcé ACTIF d'avant permettait à un compte en attente/désactivé
-    // de franchir les gardes). On referme la session auth.
-    await supabase.auth.signOut();
+    // Compte Auth sans profil scolaire exploitable (peut être un agent admin
+    // dont le profil vit dans admin_agents, pas dans profiles). On ne se
+    // déconnecte pas brutalement : on rend null et laisse le contexte
+    // appelant (AuthProvider ou AdminAuthProvider) décider.
     await clearCache();
     return null;
   }

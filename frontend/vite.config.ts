@@ -8,12 +8,19 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// https://vite.dev/config/
+// vite-plugin-singlefile est réservé au build de production.
+// En mode dev, il peut empêcher l'exécution correcte du JavaScript (écran blanc).
+const isDev = process.env.NODE_ENV === "development";
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), viteSingleFile()],
+  plugins: [react(), tailwindcss(), isDev ? [] : [viteSingleFile()]],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
+  },
+  server: {
+    port: 5173,
+    host: true,
   },
 });

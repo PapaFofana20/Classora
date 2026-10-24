@@ -248,6 +248,80 @@ export interface AbsenceRecord {
 }
 
 /* ------------------------------------------------------------------ */
+/* Agents administratifs Classora (interne, hors école)                 */
+/* ------------------------------------------------------------------ */
+
+export type AdminAgentRole = "superadmin" | "admin" | "agent_suivi";
+
+export interface AdminAgent {
+  id: string;
+  matricule: string; // CLA-ADM-000001
+  role: AdminAgentRole;
+  status: "ACTIF" | "EN_ATTENTE" | "DESACTIVE";
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/* ------------------------------------------------------------------ */
+/* Statistiques transversales (admin)                                   */
+/* ------------------------------------------------------------------ */
+
+export interface AdminOverviewStats {
+  generatedAt: string;
+  schools: {
+    total: number;
+    active: number;
+    suspended: number;
+  };
+  people: {
+    totalStudents: number;
+    totalClasses: number;
+    totalDirectors: number;
+    totalTeachers: number;
+    totalParents: number;
+  };
+  bySchool: Array<{
+    schoolId: string;
+    schoolName: string;
+    matricule: string;
+    studentCount: number;
+    classCount: number;
+    teacherCount: number;
+    status: "AUCUN" | "ACTIF" | "EXPIRE";
+  }>;
+  recentActivity: Array<{
+    action: string;
+    entity: string;
+    createdAt: string;
+    schoolId: string | null;
+    actorRole: string | null;
+  }>;
+}
+
+/* ------------------------------------------------------------------ */
+/* École vue admin (transversale)                                       */
+/* ------------------------------------------------------------------ */
+
+export interface AdminSchool {
+  id: string;
+  name: string;
+  matricule: string;
+  city: string;
+  address: string;
+  phone: string;
+  email: string;
+  logoUrl?: string;
+  cycles: string[];
+  registrationOpen: boolean;
+  autoApproveStudents: boolean;
+  createdAt: string;
+}
+
+/* ------------------------------------------------------------------ */
 /* Comptes                                                               */
 /* ------------------------------------------------------------------ */
 

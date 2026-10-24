@@ -29,6 +29,10 @@ import createStaffAccount from "./routes/createStaffAccount.js";
 import updateStaff from "./routes/updateStaff.js";
 import resetStaffPassword from "./routes/resetStaffPassword.js";
 import setStaffActive from "./routes/setStaffActive.js";
+import adminAuth from "./routes/adminAuth.js";
+import adminAgents from "./routes/adminAgents.js";
+import adminSchools from "./routes/adminSchools.js";
+import adminStats from "./routes/adminStats.js";
 
 const app = express();
 
@@ -67,6 +71,12 @@ app.all("/create-staff-account", createStaffAccount);
 app.all("/update-staff", updateStaff);
 app.all("/reset-staff-password", resetStaffPassword);
 app.all("/set-staff-active", setStaffActive);
+
+// Routes administratives Classora (protégées, service_role côté serveur).
+app.all("/admin/auth", adminAuth);
+app.all("/admin/agents", adminAgents);
+app.all("/admin/schools", adminSchools);
+app.all("/admin/stats", adminStats);
 
 // Dernière barrière : enveloppe { error } même sur une exception imprévue.
 app.use((err, _req, res, _next) => {

@@ -1,9 +1,11 @@
 import { lazy, Suspense, type ReactElement } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AuthProvider } from "@/context/AuthContext";
+import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { SchoolProvider } from "@/context/SchoolContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop } from "@/routes/guards";
@@ -23,6 +25,7 @@ const SignupSentPage = lazy(() => import("@/pages/auth/SignupSentPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"));
 const ChangePasswordPage = lazy(() => import("@/pages/auth/ChangePasswordPage"));
+const AdminLoginPage = lazy(() => import("@/pages/auth/AdminLoginPage"));
 const DashboardPage = lazy(() => import("@/pages/app/DashboardPage"));
 const StudentsPage = lazy(() => import("@/pages/app/StudentsPage"));
 const StudentDetailPage = lazy(() => import("@/pages/app/StudentDetailPage"));
@@ -37,6 +40,28 @@ const PaymentsPage = lazy(() => import("@/pages/app/PaymentsPage"));
 const MessagesPage = lazy(() => import("@/pages/app/MessagesPage"));
 const SettingsPage = lazy(() => import("@/pages/app/SettingsPage"));
 const SubscriptionPage = lazy(() => import("@/pages/app/SubscriptionPage"));
+const AdminDashboardPage = lazy(() => import("@/pages/app/AdminDashboardPage"));
+const AdminSchoolsPage = lazy(() => import("@/pages/app/AdminSchoolsPage"));
+const AdminSchoolDetailPage = lazy(() => import("@/pages/app/AdminSchoolDetailPage"));
+const AdminAgentsPage = lazy(() => import("@/pages/app/AdminAgentsPage"));
+
+/** Wrapper : authentification scolaire (SchoolProvider). Ne s'applique qu'à /app/*. */
+function SchoolAuthWrapper() {
+  return (
+    <SchoolProvider>
+      <Outlet />
+    </SchoolProvider>
+  );
+}
+
+/** Wrapper : authentification administrative (AdminAuthProvider). Ne s'applique qu'à /admin/*. */
+function AdminAuthWrapper() {
+  return (
+    <AdminAuthProvider>
+      <Outlet />
+    </AdminAuthProvider>
+  );
+}
 
 function Fallback() {
   return (
@@ -53,38 +78,52 @@ export default function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
+        {/* AuthProvider enveloppe TOUTES les routes (comme dans le code original),
+            afin que useAuth() fonctionne partout (PublicOnlyRoute, ProtectedRoute, etc.). */}
         <AuthProvider>
-          <SchoolProvider>
-            <ScrollToTop />
-            <Suspense fallback={<Fallback />}>
-              <Routes>
-              {/* PARTIE 1 : site public */}
-              <Route element={<PublicLayout />}>
-                <Route index element={<HomePage />} />
-                <Route path="fonctionnalites" element={<FeaturesPage />} />
-                <Route path="tarifs" element={<PricingPage />} />
-                <Route path="ecoles" element={<SchoolsPage />} />
-                <Route path="a-propos" element={<AboutPage />} />
-                <Route path="contact" element={<ContactPage />} />
-                <Route path="cgu" element={<TermsPage />} />
-                <Route path="confidentialite" element={<PrivacyPage />} />
+          <ScrollToTop />
+          <Suspense fallback={<Fallback />}>
+            <Routes>
+            {/* PARTIE 1 : site public */}
+            <Route element={<PublicLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="fonctionnalites" element={<FeaturesPage />} />
+              <Route path="tarifs" element={<PricingPage />} />
+              <Route path="ecoles" element={<SchoolsPage />} />
+              <Route path="a-propos" element={<AboutPage />} />
+              <Route path="contact" element={<ContactPage />} />
+              <Route path="cgu" element={<TermsPage />} />
+              <Route path="confidentialite" element={<PrivacyPage />} />
+            </Route>
+
+            {/* PARTIE 2 : authentification scolaire (pas de session requise)} */}
+            <Route element={<PublicOnlyRoute />}>
+              <Route path="connexion" element={<LoginPage />} />
+              <Route path="inscription" element={<RegisterPage />} />
+              <Route path="inscription-envoyee" element={<SignupSentPage />} />
+              <Route path="mot-de-passe-oublie" element={<ForgotPasswordPage />} />
+            </Route>
+
+            <Route path="reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
+
+            {/* PARTIE 3 : authentification administrative (isolée de l'auth scolaire) */}
+            <Route path="admin" element={<AdminAuthWrapper />}>
+              <Route path="connexion" element={<AdminLoginPage />} />
+              <Route path="" element={<AdminLayout />}>
+                <Route index element={<AdminDashboardPage />} />
+                <Route path="ecoles" element={<AdminSchoolsPage />} />
+                <Route path="ecoles/:id" element={<AdminSchoolDetailPage />} />
+                <Route path="agents" element={<AdminAgentsPage />} />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Route>
+            </Route>
 
-              {/* PARTIE 2 : authentification */}
-              <Route element={<PublicOnlyRoute />}>
-                <Route path="connexion" element={<LoginPage />} />
-                <Route path="inscription" element={<RegisterPage />} />
-                <Route path="inscription-envoyee" element={<SignupSentPage />} />
-                <Route path="mot-de-passe-oublie" element={<ForgotPasswordPage />} />
-              </Route>
-
-              <Route path="reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
-
-              {/* PARTIE 3 : tableau de bord protégé */}
+            {/* PARTIE 4 : tableau de bord scolaire protégé */}
+            <Route path="app" element={<SchoolAuthWrapper />}>
               <Route element={<ProtectedRoute />}>
                 <Route element={<MustChangePasswordGuard />}>
-                  <Route path="app/mot-de-passe-temporaire" element={<ChangePasswordPage />} />
-                  <Route path="app" element={<DashboardLayout />}>
+                  <Route path="mot-de-passe-temporaire" element={<ChangePasswordPage />} />
+                  <Route path="" element={<DashboardLayout />}>
                       <Route index element={<DashboardPage />} />
                       <Route path="eleves" element={guard("eleves", <StudentsPage />)} />
                       <Route path="eleves/demandes" element={guard("demandes", <PendingStudentsPage />)} />
@@ -102,11 +141,11 @@ export default function App() {
                       <Route path="*" element={<Navigate to="/app" replace />} />
                     </Route>
                   </Route>
-              </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             </Suspense>
-          </SchoolProvider>
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

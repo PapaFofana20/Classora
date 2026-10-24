@@ -1,9 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * Client Supabase orienté navigateur. Types régénérés côté base une fois les
- * migrations appliquées (npm run types:db) ; en attendant, un client sans
- * générique garde la souplesse de la phase de branchement.
+ * Client Supabase orienté navigateur.
  */
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;

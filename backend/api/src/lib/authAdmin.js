@@ -1,0 +1,131 @@
+/**
+ * Authentification et autorisation des agents administratifs Classora.
+ * L'identité vient du profil admin_agents (table séparée de profiles),
+ * jamais du client. Seul un agent ACTIF peut accéder aux routes admin.
+ */
+
+import { createClient } from "@supabase/supabase-js";
+import { SUPABASE_URL, SERVICE_KEY } from "../config.js";
+import { unauthorized, forbidden } from "./http.js";
+
+export function serviceClient(options = {}) {
+  if (!SERVICE_KEY) {
+    throw new Error("Configuration serveur incomplète (SUPABASE_SERVICE_ROLE_KEY).");
+  }
+  return createClient(SUPABASE_URL, SERVICE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    db: { schema: options.dbSchema ?? "public" },
+  });
+}
+
+export async function getAuthenticatedUser(svc, req) {
+  const jwt = (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+  if (!jwt) return null;
+  const { data, error } = await svc.auth.getUser(jwt);
+  if (error || !data?.user) return null;
+  return data.user;
+}
+
+/**
+ * Récupère le profil admin_agent de l'appelant.
+ * Renvoie { caller, agent } ou null si aucun profil admin.
+ */
+export async function getCallerAdminAgent(svc, req) {
+  const user = await getAuthenticatedUser(svc, req);
+  if (!user) return null;
+
+  const { data: agent, error } = await svc
+    .from("admin_agents")
+    .select("id, matricule, role, status, first_name, last_name, email, phone, auth_user_id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  if (error || !agent) return null;
+
+  return {
+    caller: {
+      id: agent.auth_user_id,
+      email: agent.email,
+      schoolId: null,
+      role: agent.role,
+      status: agent.status,
+      teacherId: null,
+      parentId: null,
+      studentId: null,
+      mustChangePassword: false,
+      appMetadata: { role: agent.role, school_id: null },
+    },
+    agent: {
+      id: agent.id,
+      matricule: agent.matricule,
+      role: agent.role,
+      status: agent.status,
+      firstName: agent.first_name,
+      lastName: agent.last_name,
+      email: agent.email,
+      phone: agent.phone,
+      authUserId: agent.auth_user_id,
+      createdAt: agent.created_at,
+    },
+  };
+}
+
+/**
+ * Exige un agent admin ACTIF. Renvoie { caller } ou une réponse d'erreur.
+ * Les rôles autorisés : superadmin, admin, agent_suivi.
+ */
+export async function requireAdminRole(svc, req, res) {
+  const result = await getCallerAdminAgent(svc, req);
+  if (!result) {
+    unauthorized(res, "Aucun profil administrateur associé à ce compte.");
+    return null;
+  }
+  const { caller, agent } = result;
+  if (agent.status !== "ACTIF") {
+    forbidden(res, `Ce compte administratif est ${agent.status === "DESACTIVE" ? "désactivé" : "en attente de validation"}.`);
+    return null;
+  }
+  return { caller, agent };
+}
+
+/**
+ * Exige le rôle superadmin.
+ */
+export async function requireSuperAdmin(svc, req, res) {
+  const result = await requireAdminRole(svc, req, res);
+  if (!result) return null;
+  const { caller, agent } = result;
+  if (agent.role !== "superadmin") {
+    forbidden(res, "Seul le superadministrateur peut effectuer cette action.");
+    return null;
+  }
+  return { caller, agent };
+}
+
+/**
+ * Génère une matricule administrative unique (CLA-ADM-000001) via RPC service_role.
+ */
+export async function generateAdminMatricule(svc) {
+  const { data, error } = await svc.rpc("generate_admin_matricule");
+  if (error || !data) throw new Error("Impossible de générer la matricule administrative.");
+  return data;
+}
+
+/**
+ * Journal d'audit pour les actions administratives (school_id = null).
+ */
+export async function auditAdmin(svc, entry) {
+  try {
+    await svc.from("audit_log").insert({
+      school_id: null,
+      actor_id: entry.actorId ?? null,
+      actor_role: entry.actorRole ?? null,
+      action: entry.action,
+      entity: entry.entity,
+      entity_id: entry.entityId ?? null,
+      payload: entry.payload ?? {},
+    });
+  } catch {
+    // L'audit ne doit jamais faire échouer l'opération métier.
+  }
+}
