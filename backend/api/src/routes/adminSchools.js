@@ -4,7 +4,7 @@
  * statuts (activation/suspension). L'identité et les permissions viennent
  * du profil admin_agents, jamais du client.
  */
-import { audit, getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
+import { auditAdmin, getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, ValidationError } from "../lib/validate.js";
@@ -108,7 +108,7 @@ export default route(async (req, res) => {
         return serverError(res);
       }
 
-      await audit(svc, {
+      await auditAdmin(svc, {
         schoolId,
         actorId: caller.id,
         actorRole: caller.role,
@@ -145,7 +145,7 @@ export default route(async (req, res) => {
         .eq("id", schoolId);
       if (updateError) return serverError(res);
 
-      await audit(svc, {
+      await auditAdmin(svc, {
         schoolId,
         actorId: caller.id,
         actorRole: caller.role,
