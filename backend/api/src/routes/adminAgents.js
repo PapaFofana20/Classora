@@ -4,7 +4,7 @@
  * modification de rôle, désactivation). L'identité et le rôle viennent du
  * profil admin_agents, jamais du client.
  */
-import { audit, generateAdminMatricule, getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
+import { auditAdmin, generateAdminMatricule, getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, ValidationError } from "../lib/validate.js";
@@ -102,7 +102,7 @@ export default route(async (req, res) => {
           });
         if (profileError) throw new Error(profileError.message);
 
-        await audit(svc, {
+        await auditAdmin(svc, {
           schoolId: null,
           actorId: caller.id,
           actorRole: caller.role,
@@ -183,7 +183,7 @@ export default route(async (req, res) => {
         return serverError(res);
       }
 
-      await audit(svc, {
+      await auditAdmin(svc, {
         schoolId: null,
         actorId: caller.id,
         actorRole: caller.role,
