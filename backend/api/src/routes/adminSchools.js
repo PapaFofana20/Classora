@@ -4,7 +4,7 @@
  * statuts (activation/suspension). L'identité et les permissions viennent
  * du profil admin_agents, jamais du client.
  */
-import { auditAdmin, getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
+import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, ValidationError } from "../lib/validate.js";
@@ -24,7 +24,8 @@ export default route(async (req, res) => {
       const pageSize = Math.min(100, Math.max(1, parseInt(req.query.pageSize ?? "20", 10)));
       const search = (req.query.search ?? "").toString().trim();
       const status = req.query.status ? String(req.query.status) : null; // ACTIF, SUSPENDUE, TOUTES
-      const sortBy = req.query.sortBy ?? "created_at";
+      const SORTABLE = new Set(["name", "matricule", "city", "created_at"]);
+      const sortBy = SORTABLE.has(String(req.query.sortBy)) ? String(req.query.sortBy) : "created_at";
       const sortDir = req.query.sortDir === "asc" ? "asc" : "desc";
 
       let query = svc
@@ -35,17 +36,14 @@ export default route(async (req, res) => {
         query = query.ilike("name", `%${search}%`);
       }
 
-      // Filtre par statut : on déduit du statut d'abonnement.
+      // Filtre par statut : `registration_open` est la valeur que l'action
+      // setStatus modifie et que le badge « Actif / Suspendu » du front lit.
+      // (L'ancien code passait un builder Supabase à `.in()`, ce qui produisait
+      // un filtre PostgREST invalide et cassait le filtre.)
       if (status === "ACTIF") {
-        query = query.in(
-          "id",
-          svc.from("subscriptions").select("school_id").gte("ends_at", new Date().toISOString().slice(0, 10)),
-        );
+        query = query.eq("registration_open", true);
       } else if (status === "SUSPENDUE") {
-        query = query.not(
-          "id",
-          svc.from("subscriptions").select("school_id").gte("ends_at", new Date().toISOString().slice(0, 10)),
-        );
+        query = query.eq("registration_open", false);
       }
 
       const { data: schools, error, count } = await query

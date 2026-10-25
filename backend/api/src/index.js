@@ -16,6 +16,8 @@
  *   elles seront réintroduites plus tard.
  */
 
+// Doit rester le premier import : charge .env.local / .env avant config.js.
+import "./env.js";
 import express from "express";
 
 import { PORT, SERVICE_KEY, SUPABASE_URL } from "./config.js";
@@ -33,6 +35,14 @@ import adminAuth from "./routes/adminAuth.js";
 import adminAgents from "./routes/adminAgents.js";
 import adminSchools from "./routes/adminSchools.js";
 import adminStats from "./routes/adminStats.js";
+
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.warn(
+    "[scolia-api] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents : " +
+      "les routes admin et privilégiées répondront 503. Renseignez .env.local (local) " +
+      "ou les variables du Web Service (Render).",
+  );
+}
 
 const app = express();
 
@@ -73,10 +83,22 @@ app.all("/reset-staff-password", resetStaffPassword);
 app.all("/set-staff-active", setStaffActive);
 
 // Routes administratives Classora (protégées, service_role côté serveur).
-app.all("/admin/auth", adminAuth);
-app.all("/admin/agents", adminAgents);
-app.all("/admin/schools", adminSchools);
-app.all("/admin/stats", adminStats);
+// Une configuration absente provoquerait un 500 opaque : on répond un 503
+// explicite, affiché tel quel par la page de connexion admin.
+const adminConfigGuard = (_req, res, next) => {
+  if (!SUPABASE_URL || !SERVICE_KEY) {
+    return res.status(503).json({
+      error:
+        "Service d'administration non configuré : SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont absents côté serveur.",
+    });
+  }
+  return next();
+};
+
+app.all("/admin/auth", adminConfigGuard, adminAuth);
+app.all("/admin/agents", adminConfigGuard, adminAgents);
+app.all("/admin/schools", adminConfigGuard, adminSchools);
+app.all("/admin/stats", adminConfigGuard, adminStats);
 
 // Dernière barrière : enveloppe { error } même sur une exception imprévue.
 app.use((err, _req, res, _next) => {

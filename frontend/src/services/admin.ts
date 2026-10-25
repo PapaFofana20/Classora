@@ -37,14 +37,14 @@ export interface CreateAdminAgentInput {
   lastName: string;
   email: string;
   phone?: string;
-  tempPassword?: string;
+  /** Mot de passe fixe choisi par le superadministrateur (aucun temporaire). */
+  password: string;
 }
 
 export async function createAdminAgent(input: CreateAdminAgentInput): Promise<{
   userId: string;
   matricule: string;
   email: string;
-  tempPassword: string;
   firstName: string;
   lastName: string;
   role: AdminAgentRole;
@@ -55,7 +55,7 @@ export async function createAdminAgent(input: CreateAdminAgentInput): Promise<{
     lastName: input.lastName,
     email: input.email,
     phone: input.phone,
-    tempPassword: input.tempPassword,
+    password: input.password,
   }, "POST");
 }
 
@@ -79,7 +79,7 @@ export async function updateAdminAgent(input: UpdateAdminAgentInput): Promise<{ 
     ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
     ...(input.email !== undefined ? { email: input.email } : {}),
     ...(input.phone !== undefined ? { phone: input.phone } : {}),
-  }, "PATCH" as "POST" | "GET");
+  }, "PATCH");
 }
 
 /* ------------------------------------------------------------------ */
@@ -143,7 +143,7 @@ export async function updateAdminSchool(input: UpdateSchoolInput): Promise<{
     ...(input.cycles !== undefined ? { cycles: input.cycles } : {}),
     ...(input.registrationOpen !== undefined ? { registrationOpen: input.registrationOpen } : {}),
     ...(input.autoApproveStudents !== undefined ? { autoApproveStudents: input.autoApproveStudents } : {}),
-  }, "PATCH" as "POST" | "GET");
+  }, "PATCH");
 }
 
 /** Active ou suspend une école (superadmin uniquement). */

@@ -30,3 +30,7 @@ services:
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
+      # API Express (backend/api) déployée séparément : sans elle, /admin et
+      # les inscriptions échouent avec « API non configurée ».
+      - key: VITE_API_URL
+        sync: false

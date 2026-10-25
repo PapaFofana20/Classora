@@ -28,7 +28,9 @@ export function corsMiddleware(req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", origin ?? "*");
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS);
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    // PATCH est utilisé par /admin/agents et /admin/schools : sans lui, le
+    // navigateur bloque la requête en préflight avant même de l'envoyer.
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS");
     res.setHeader("Access-Control-Max-Age", "600");
   }
   if (req.method === "OPTIONS") {

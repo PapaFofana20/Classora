@@ -10,7 +10,13 @@ export function AdminProtectedRoute() {
   const { agent, loading } = useAdminAuth();
   const location = useLocation();
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="grid min-h-screen place-items-center" role="status" aria-label="Vérification de l'accès administrateur">
+        <span className="text-sm text-neutral-500">Vérification de l'accès…</span>
+      </div>
+    );
+  }
 
   if (!agent) {
     return <Navigate to="/admin/connexion" replace state={{ from: location.pathname }} />;

@@ -4,10 +4,11 @@
  * modification de rôle, désactivation). L'identité et le rôle viennent du
  * profil admin_agents, jamais du client.
  */
-import { auditAdmin, generateAdminMatricule, getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { passwordError } from "../lib/auth.js";
+import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
+import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
-import { expectObject, requireEmail, requireSnPhone, requireString, ValidationError } from "../lib/validate.js";
+import { expectObject, requireEmail, requireString, ValidationError } from "../lib/validate.js";
 
 const ADMIN_ROLES = Object.freeze(["superadmin", "admin", "agent_suivi"]);
 
@@ -20,7 +21,11 @@ export default route(async (req, res) => {
     const { caller } = admin;
 
     if (req.method === "GET") {
-      // Liste des agents (tous, ou filtrés par rôle/status).
+      // Liste des agents : réservée au superadmin (elle expose les e-mails et
+      // téléphones de toute l'équipe, et la navigation la cache aux autres rôles).
+      if (caller.role !== "superadmin") {
+        return forbidden(res, "Seul le superadministrateur peut consulter la liste des agents.");
+      }
       await enforceRateLimit(svc, `admin-agents-list:${caller.id}`, 30, 300);
 
       const { data: agents, error } = await svc
@@ -62,7 +67,12 @@ export default route(async (req, res) => {
       const lastName = requireString(body, "lastName", "Le nom", { min: 1, max: 60 });
       const email = requireEmail(body);
       const phone = optionalPhone(body);
-      const tempPassword = optionalTempPassword(body);
+      // Mot de passe FIXE choisi par le superadministrateur : aucun mot de passe
+      // temporaire n'est généré ni affiché. L'agent se connecte avec ce mot de
+      // passe tant qu'il n'est pas remplacé.
+      const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 72, trim: false });
+      const pwdError = passwordError(password);
+      if (pwdError) throw new ValidationError(`Mot de passe invalide : ${pwdError}`);
 
       // Génère la matricule côté serveur.
       const { data: matriculeData, error: matriculeError } = await svc.rpc("generate_admin_matricule");
@@ -74,7 +84,7 @@ export default route(async (req, res) => {
       // Crée le compte Auth via service_role.
       const { data: created, error: createError } = await svc.auth.admin.createUser({
         email,
-        password: tempPassword,
+        password,
         email_confirm: true,
         app_metadata: { role, school_id: null },
       });
@@ -116,7 +126,6 @@ export default route(async (req, res) => {
           userId: created.user.id,
           matricule,
           email,
-          tempPassword,
           firstName,
           lastName,
           role,
@@ -177,6 +186,23 @@ export default route(async (req, res) => {
         return badRequest(res, "Aucune modification fournie.");
       }
 
+      // Un changement d'e-mail doit aussi modifier le compte Supabase Auth :
+      // sinon l'agent ne peut plus se connecter avec sa nouvelle adresse
+      // (l'e-mail affiché et celui du login divergeraient).
+      if (patch.email) {
+        const { error: authEmailError } = await svc.auth.admin.updateUserById(target.auth_user_id, {
+          email: patch.email,
+          email_confirm: true,
+        });
+        if (authEmailError) {
+          if (/already|exists|registered/i.test(authEmailError.message)) {
+            return badRequest(res, "Un compte existe déjà avec cet e-mail.");
+          }
+          console.error("[admin-agents] auth email update", authEmailError);
+          return serverError(res);
+        }
+      }
+
       const { error: updateError } = await svc.from("admin_agents").update(patch).eq("id", agentId);
       if (updateError) {
         if (/unique|duplicate/i.test(updateError.message)) return badRequest(res, "Cet e-mail ou matricule est déjà utilisé.");
@@ -211,13 +237,6 @@ function optionalPhone(body) {
   if (!/^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw.trim())) {
     throw new ValidationError("Le téléphone est invalide.");
   }
-  return raw.trim();
-}
-
-function optionalTempPassword(body) {
-  const raw = body["tempPassword"];
-  if (raw === undefined || raw === null || raw === "") return undefined;
-  if (typeof raw !== "string") throw new ValidationError("Le mot de passe temporaire est invalide.");
   return raw.trim();
 }
 

@@ -32,17 +32,19 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // 2. Vérifie le profil administrateur via l'API backend.
-      const ok = await verify();
-      if (ok) {
+      // 2. Vérifie le profil administrateur via l'API backend. On affiche le
+      // message exact (profil absent, compte désactivé, API indisponible) au
+      // lieu de le masquer derrière « aucun accès ».
+      const result = await verify();
+      if (result.ok) {
         navigate("/admin", { replace: true });
       } else {
         await logout();
-        setError("Aucun accès administratif associé à ce compte.");
+        setError(result.error ?? "Aucun accès administratif associé à ce compte.");
         setBusy(false);
       }
-    } catch {
-      setError("Connexion impossible. Réessayez.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Connexion impossible. Réessayez.");
       setBusy(false);
     }
   };

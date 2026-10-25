@@ -9,6 +9,7 @@ import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { SchoolProvider } from "@/context/SchoolContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop } from "@/routes/guards";
+import { AdminProtectedRoute } from "@/routes/adminGuards";
 import { ROUTE_ROLES } from "@/routes/navigation";
 import HomePage from "@/pages/public/HomePage";
 
@@ -109,12 +110,16 @@ export default function App() {
             {/* PARTIE 3 : authentification administrative (isolée de l'auth scolaire) */}
             <Route path="admin" element={<AdminAuthWrapper />}>
               <Route path="connexion" element={<AdminLoginPage />} />
-              <Route path="" element={<AdminLayout />}>
-                <Route index element={<AdminDashboardPage />} />
-                <Route path="ecoles" element={<AdminSchoolsPage />} />
-                <Route path="ecoles/:id" element={<AdminSchoolDetailPage />} />
-                <Route path="agents" element={<AdminAgentsPage />} />
-                <Route path="*" element={<Navigate to="/admin" replace />} />
+              {/* Garde réellement branchée : sans elle, /admin affichait une page vide
+                  au lieu de rediriger vers /admin/connexion. */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route element={<AdminLayout />}>
+                  <Route index element={<AdminDashboardPage />} />
+                  <Route path="ecoles" element={<AdminSchoolsPage />} />
+                  <Route path="ecoles/:id" element={<AdminSchoolDetailPage />} />
+                  <Route path="agents" element={<AdminAgentsPage />} />
+                  <Route path="*" element={<Navigate to="/admin" replace />} />
+                </Route>
               </Route>
             </Route>
 

@@ -7,14 +7,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { AdminAgent } from "@/types";
 import { verifyAdminSession } from "@/services/admin";
+import { supabase } from "@/lib/supabase";
+
+export interface AdminVerifyResult {
+  ok: boolean;
+  /** Message serveur à afficher (profil absent, compte désactivé, API injoignable…). */
+  error?: string;
+}
 
 interface AdminAuthContextValue {
   agent: AdminAgent | null;
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  verify: () => Promise<boolean>;
-  logout: () => void;
+  verify: () => Promise<AdminVerifyResult>;
+  logout: () => Promise<void>;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
@@ -40,20 +47,26 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const verify = useCallback(async (): Promise<boolean> => {
+  const verify = useCallback(async (): Promise<AdminVerifyResult> => {
     try {
       const { agent: a } = await verifyAdminSession();
       setAgent(a);
-      return true;
-    } catch {
+      return { ok: true };
+    } catch (e) {
       setAgent(null);
-      return false;
+      return { ok: false, error: e instanceof Error ? e.message : undefined };
     }
   }, []);
 
-  const logout = useCallback(() => {
+  /**
+   * Ferme la session Supabase elle-même (pas seulement l'état React) : sans
+   * cela, le JWT restait valide et un rechargement de /admin reconnectait
+   * l'agent immédiatement.
+   */
+  const logout = useCallback(async () => {
     setAgent(null);
     setLoading(false);
+    await supabase.auth.signOut();
   }, []);
 
   const value = useMemo(

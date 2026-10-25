@@ -28,6 +28,7 @@ export default function AdminAgentsPage() {
     lastName: "",
     email: "",
     phone: "",
+    password: "",
   });
   const [createError, setCreateError] = useState("");
   const [creating, setCreating] = useState(false);
@@ -41,10 +42,10 @@ export default function AdminAgentsPage() {
     setCreating(true);
     try {
       await createAdminAgent(form);
-      setStatusMsg({ type: "success", text: "Agent créé avec succès. Matricule généré automatiquement." });
+      setStatusMsg({ type: "success", text: "Agent créé avec succès. Communiquez-lui son mot de passe." });
       setShowCreate(false);
-      setForm({ role: "agent_suivi", firstName: "", lastName: "", email: "", phone: "" });
-      window.location.reload();
+      setForm({ role: "agent_suivi", firstName: "", lastName: "", email: "", phone: "", password: "" });
+      state.reload();
     } catch (e: any) {
       setCreateError(e.message || "Erreur lors de la création de l'agent.");
     } finally {
@@ -111,9 +112,19 @@ export default function AdminAgentsPage() {
             <Input label="Nom" required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
             <Input label="E-mail" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <Input label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input
+              label="Mot de passe"
+              type="password"
+              required
+              autoComplete="new-password"
+              className="sm:col-span-2"
+              hint="Mot de passe fixe de l'agent : il servira à chaque connexion. 8 caractères minimum, avec majuscule, minuscule et chiffre."
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
           </div>
           <p className="text-xs text-neutral-500">
-            Un matricule au format <code className="text-forest">CLA-ADM-000001</code> sera généré automatiquement. Un mot de passe temporaire sera affiché une seule fois après création.
+            Un matricule au format <code className="text-forest">CLA-ADM-000001</code> sera généré automatiquement.
           </p>
           <div className="flex justify-end gap-3" slot="footer">
             <Button variant="outline" onClick={() => setShowCreate(false)}>
@@ -125,6 +136,7 @@ export default function AdminAgentsPage() {
           </div>
         </form>
       </Modal>
+
     </>
   );
 }
