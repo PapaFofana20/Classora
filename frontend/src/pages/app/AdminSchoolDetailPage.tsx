@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -9,10 +9,20 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { LinkButton } from "@/components/ui/Button";
 import { useAsync } from "@/hooks/useAsync";
-import { listAdminSchools, updateAdminSchool, setAdminSchoolStatus } from "@/services/admin";
+import {
+  updateAdminSchool,
+  setAdminSchoolStatus,
+  deleteAdminSchool,
+  getAdminSchoolDetail,
+  type AdminSchoolDetail,
+  type SchoolClassRow,
+  type SchoolTeacherRow,
+} from "@/services/admin";
 import type { AdminSchool } from "@/types";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { Modal } from "@/components/ui/Modal";
+import { StatCard } from "@/components/ui/StatCard";
+import { Table } from "@/components/ui/Table";
 
 export default function AdminSchoolDetailPage() {
   const { schoolId } = useParams();
@@ -21,25 +31,27 @@ export default function AdminSchoolDetailPage() {
 
   if (!schoolId) return <div>École introuvable.</div>;
 
-  const state = useAsync(() => listAdminSchools({ page: 1, pageSize: 100, sortBy: "name", sortDir: "asc" }), []);
+  const state = useAsync(() => getAdminSchoolDetail(schoolId), [schoolId]);
 
   return (
     <>
       <AsyncView state={state}>
-        {(s) => {
-          const school = s.schools.find((x) => x.id === schoolId);
-          if (!school) return <div>École introuvable.</div>;
-          return <Content school={school} isSuperAdmin={isSuperAdmin} />;
-        }}
+        {(detail) => <Content detail={detail} isSuperAdmin={isSuperAdmin} />}
       </AsyncView>
     </>
   );
 }
 
-function Content({ school, isSuperAdmin }: { school: AdminSchool; isSuperAdmin: boolean }) {
+function Content({ detail, isSuperAdmin }: { detail: AdminSchoolDetail; isSuperAdmin: boolean }) {
+  const school: AdminSchool = detail.school;
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<"ACTIF" | "SUSPENDUE">("ACTIF");
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [form, setForm] = useState({
     name: school.name,
     city: school.city,
@@ -92,6 +104,24 @@ function Content({ school, isSuperAdmin }: { school: AdminSchool; isSuperAdmin: 
       window.location.reload();
     } catch (e: any) {
       setError(e.message || "Erreur lors du changement de statut.");
+    }
+  };
+
+  const openDeleteModal = () => {
+    setDeleteConfirm("");
+    setDeleteError("");
+    setDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    setDeleteError("");
+    setDeleting(true);
+    try {
+      await deleteAdminSchool({ schoolId: school.id, confirmation: deleteConfirm });
+      navigate("/admin/ecoles");
+    } catch (e: any) {
+      setDeleteError(e.message || "Erreur lors de la suppression.");
+      setDeleting(false);
     }
   };
 
@@ -249,7 +279,178 @@ function Content({ school, isSuperAdmin }: { school: AdminSchool; isSuperAdmin: 
               </div>
             </div>
           </Card>
+          <Card>
+            <CardHeader title="Direction" />
+            {detail.director ? (
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="shrink-0 text-neutral-400">Directeur</span>
+                  <span className="text-sm font-medium">{detail.director.firstName} {detail.director.lastName}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="shrink-0 text-neutral-400">E-mail</span>
+                  <span className="break-all text-sm">{detail.director.email}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="shrink-0 text-neutral-400">Téléphone</span>
+                  <span className="text-sm">{detail.director.phone || "—"}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="shrink-0 text-neutral-400">Statut</span>
+                  <Badge tone={detail.director.status === "ACTIF" ? "success" : "neutral"}>
+                    {detail.director.status === "ACTIF" ? "Actif" : detail.director.status === "EN_ATTENTE" ? "En attente" : "Désactivé"}
+                  </Badge>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-neutral-500">Aucun directeur n'est enregistré pour cet établissement.</p>
+            )}
+          </Card>
         </div>
+      )}
+
+      {!editing && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard dark icon="groups" label="Élèves" value={String(detail.stats.students)} note={`${detail.stats.girls} filles · ${detail.stats.boys} garçons`} />
+            <StatCard icon="meeting_room" label="Classes" value={String(detail.stats.classes)} note="salles constituées" />
+            <StatCard icon="badge" label="Enseignants" value={String(detail.stats.teachers)} note="professeurs et instituteurs" />
+            <StatCard icon="family_restroom" label="Parents" value={String(detail.stats.parents)} note="comptes familiaux" />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-2">
+              <CardHeader title="Classes" subtitle={`${detail.stats.classes} classe(s) · ${detail.stats.students} élève(s)`} />
+              {detail.classes.length === 0 ? (
+                <p className="text-sm text-neutral-500">Aucune classe n'a encore été créée.</p>
+              ) : (
+                <Table
+                  columns={[
+                    { key: "name", header: "Classe", render: (r: SchoolClassRow) => <span className="font-medium">{r.name}</span> },
+                    { key: "level", header: "Niveau", render: (r: SchoolClassRow) => r.level },
+                    { key: "cycle", header: "Cycle", render: (r: SchoolClassRow) => cycleLabels[r.cycle] ?? r.cycle },
+                    {
+                      key: "count",
+                      header: "Effectif",
+                      align: "right",
+                      render: (r: SchoolClassRow) => (
+                        <span className={`tabular-nums ${r.studentCount > r.capacity ? "font-semibold text-danger" : ""}`}>
+                          {r.studentCount} / {r.capacity}
+                        </span>
+                      ),
+                    },
+                  ]}
+                  rows={detail.classes}
+                  rowKey={(r: SchoolClassRow) => r.id}
+                  caption="Effectifs par classe"
+                />
+              )}
+            </Card>
+
+            <Card>
+              <CardHeader title="Abonnement" />
+              {detail.subscription ? (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 text-neutral-400">Formule</span>
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium">{detail.subscription.plan?.name ?? "—"}</span>
+                      {detail.subscription.plan?.tagline && (
+                        <p className="text-xs text-neutral-500">{detail.subscription.plan.tagline}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 text-neutral-400">Statut</span>
+                    <Badge tone={detail.subscription.status === "ACTIF" ? "success" : detail.subscription.status === "EXPIRE" ? "danger" : "neutral"}>
+                      {detail.subscription.status === "ACTIF" ? "Actif" : detail.subscription.status === "EXPIRE" ? "Expiré" : "Aucun"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 text-neutral-400">Période</span>
+                    <span className="text-sm">
+                      {detail.subscription.startsAt ?? "—"} → {detail.subscription.endsAt ?? "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 text-neutral-400">Limite</span>
+                    <span className="text-sm">
+                      {detail.subscription.studentLimit ?? detail.subscription.plan?.studentLimit ?? "Illimité"} élève(s)
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 text-neutral-400">Payé</span>
+                    <span className="text-sm">{detail.subscription.amountPaid.toLocaleString("fr-FR")} FCFA</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-500">Aucun abonnement enregistré pour cet établissement.</p>
+              )}
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader title="Enseignants" subtitle={`${detail.teachersTotal} enseignant(s)`} />
+            {detail.teachers.length === 0 ? (
+              <p className="text-sm text-neutral-500">Aucun enseignant enregistré.</p>
+            ) : (
+              <>
+                <Table
+                  columns={[
+                    {
+                      key: "name",
+                      header: "Enseignant",
+                      render: (r: SchoolTeacherRow) => <span className="font-medium">{r.firstName} {r.lastName}</span>,
+                    },
+                    {
+                      key: "kind",
+                      header: "Type",
+                      render: (r: SchoolTeacherRow) => <span className="capitalize">{r.kind}</span>,
+                    },
+                    {
+                      key: "spec",
+                      header: "Spécialités",
+                      render: (r: SchoolTeacherRow) => r.specialties.join(" · ") || "—",
+                    },
+                    {
+                      key: "contact",
+                      header: "Contact",
+                      render: (r: SchoolTeacherRow) => (
+                        <span className="break-all text-xs text-neutral-500">{r.email}{r.phone ? ` · ${r.phone}` : ""}</span>
+                      ),
+                    },
+                  ]}
+                  rows={detail.teachers}
+                  rowKey={(r: SchoolTeacherRow) => r.id}
+                  caption="Corps enseignant"
+                />
+                {detail.teachersTotal > detail.teachers.length && (
+                  <p className="mt-3 text-xs text-neutral-500">
+                    + {detail.teachersTotal - detail.teachers.length} autre(s) enseignant(s) non affiché(s).
+                  </p>
+                )}
+              </>
+            )}
+          </Card>
+        </>
+      )}
+
+      {isSuperAdmin && !editing && (
+        <Card className="border border-red-200">
+          <CardHeader title="Zone de danger" subtitle="Actions irréversibles — à n'utiliser qu'en dernier recours" />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-neutral-600">
+              <p className="font-semibold text-danger">Suppression définitive de l'établissement</p>
+              <p className="mt-1 text-xs">
+                Efface irrévocablement <strong>{school.name}</strong> : élèves, classes, enseignants, parents,
+                abonnements, messages et tous les comptes de connexion associés.
+              </p>
+            </div>
+            <Button variant="danger" size="sm" icon="delete" onClick={openDeleteModal} className="shrink-0">
+              Supprimer définitivement…
+            </Button>
+          </div>
+        </Card>
       )}
 
       <Modal open={statusModal} onClose={() => setStatusModal(false)} title="Changer le statut de l'établissement" size="sm">
@@ -260,6 +461,58 @@ function Content({ school, isSuperAdmin }: { school: AdminSchool; isSuperAdmin: 
           </Button>
           <Button variant="danger" onClick={confirmStatusChange}>
             {pendingStatus === "ACTIF" ? "Activer" : "Suspendre"}
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal open={deleteModal} onClose={() => setDeleteModal(false)} title="Supprimer définitivement l'établissement" size="sm">
+        <div className="mb-4 rounded-xl border border-red-100 bg-red-50 p-3">
+          <p className="flex items-center gap-2 text-sm font-semibold text-danger">
+            <Icon name="warning" fill className="text-[20px]" />
+            Cette action est irréversible.
+          </p>
+          <p className="mt-1 text-xs text-neutral-600">
+            Seront définitivement supprimés : l'établissement <strong>{school.name}</strong>, ses élèves, classes,
+            enseignants, parents, abonnements, messages, ainsi que tous les comptes de connexion de son personnel
+            et de ses familles.
+          </p>
+        </div>
+        {deleteError && (
+          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-danger">
+            <Icon name="error" className="text-[20px]" />
+            {deleteError}
+          </p>
+        )}
+        {school.matricule ? (
+          <Input
+            label="Tapez la matricule de l'établissement pour confirmer"
+            hint={`Matricule attendue : ${school.matricule}`}
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder={school.matricule}
+            autoComplete="off"
+          />
+        ) : (
+          <Input
+            label="Cet établissement n'a pas encore de matricule : tapez son nom exact pour confirmer"
+            hint={`Nom attendu : ${school.name}`}
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder={school.name}
+            autoComplete="off"
+          />
+        )}
+        <div className="flex justify-end gap-3" slot="footer">
+          <Button variant="outline" onClick={() => setDeleteModal(false)} disabled={deleting}>
+            Annuler
+          </Button>
+          <Button
+            variant="danger"
+            onClick={confirmDelete}
+            loading={deleting}
+            disabled={deleteConfirm !== (school.matricule || school.name)}
+          >
+            Supprimer définitivement
           </Button>
         </div>
       </Modal>

@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 export async function callFunction<T>(
   name: string,
   body?: unknown,
-  method: "POST" | "GET" | "PATCH" = "POST",
+  method: "POST" | "GET" | "PATCH" | "DELETE" = "POST",
 ): Promise<T> {
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
   const base = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/+$/, "");

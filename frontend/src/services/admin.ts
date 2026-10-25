@@ -128,6 +128,72 @@ export async function listAdminSchools(params: ListSchoolsParams = {}): Promise<
   return callFunction<ListSchoolsResult>(`admin/schools?${query.toString()}`, undefined, "GET");
 }
 
+/* ------------------------------------------------------------------ */
+/* Fiche détaillée d'un établissement                                 */
+/* ------------------------------------------------------------------ */
+
+export interface SchoolDirector {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  status: string;
+  memberSince: string;
+}
+
+export interface SchoolClassRow {
+  id: string;
+  name: string;
+  level: string;
+  cycle: string;
+  capacity: number;
+  studentCount: number;
+}
+
+export interface SchoolTeacherRow {
+  id: string;
+  kind: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  specialties: string[];
+}
+
+export interface SchoolSubscription {
+  plan: { id: string; name: string; tagline: string; studentLimit: number | null; monthlyPrice: number; yearlyPrice: number } | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  studentLimit: number | null;
+  amountPaid: number;
+  method: string | null;
+  paidAt: string | null;
+  status: "ACTIF" | "EXPIRE" | "AUCUN";
+}
+
+export interface AdminSchoolDetail {
+  school: AdminSchool;
+  director: SchoolDirector | null;
+  stats: {
+    students: number;
+    girls: number;
+    boys: number;
+    classes: number;
+    teachers: number;
+    parents: number;
+  };
+  classes: SchoolClassRow[];
+  teachers: SchoolTeacherRow[];
+  teachersTotal: number;
+  subscription: SchoolSubscription | null;
+}
+
+/** Fiche complète d'un établissement (direction, effectifs, classes, enseignants, abonnement). */
+export async function getAdminSchoolDetail(schoolId: string): Promise<AdminSchoolDetail> {
+  return callFunction<AdminSchoolDetail>(`admin/schools?id=${encodeURIComponent(schoolId)}`, undefined, "GET");
+}
+
 /** Met à jour les informations administratives d'une école. */
 export interface UpdateSchoolInput {
   schoolId: string;
@@ -171,6 +237,28 @@ export async function setAdminSchoolStatus(input: SetSchoolStatusInput): Promise
     schoolId: input.schoolId,
     status: input.status,
   }, "POST");
+}
+
+/**
+ * Supprime DÉFINITIVEMENT un établissement (superadmin uniquement) : toutes
+ * ses données partent en cascade et ses comptes Auth sont supprimés. La
+ * matricule de l'établissement (ou son nom si la matricule n'existe pas
+ * encore) doit être saisie pour confirmation côté interface.
+ */
+export interface DeleteSchoolInput {
+  schoolId: string;
+  /** Matricule de l'établissement, ou son nom si la matricule est vide. */
+  confirmation: string;
+}
+
+export async function deleteAdminSchool(input: DeleteSchoolInput): Promise<{
+  message: string;
+  authUsersRemoved: number;
+}> {
+  return callFunction("admin/schools", {
+    schoolId: input.schoolId,
+    confirmation: input.confirmation,
+  }, "DELETE");
 }
 
 /* ------------------------------------------------------------------ */

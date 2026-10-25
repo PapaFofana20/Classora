@@ -5,9 +5,9 @@
  * du profil admin_agents, jamais du client.
  */
 import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
-import { expectObject, requireEmail, requireSnPhone, requireString, ValidationError } from "../lib/validate.js";
+import { expectObject, requireEmail, requireSnPhone, requireString, requireUuid, ValidationError } from "../lib/validate.js";
 
 export default route(async (req, res) => {
   const svc = serviceClient();
@@ -20,10 +20,27 @@ export default route(async (req, res) => {
       // Liste des écoles avec recherche, filtres, tri, pagination.
       await enforceRateLimit(svc, `admin-schools-list:${caller.id}`, 30, 300);
 
-      const page = Math.max(1, parseInt(req.query.page ?? "1", 10));
-      const pageSize = Math.min(100, Math.max(1, parseInt(req.query.pageSize ?? "20", 10)));
+      // Fiche complète d'un établissement (direction, effectifs, classes,
+      // enseignants, abonnement) quand l'identifiant est fourni.
+      const idParam = (req.query.id ?? "").toString().trim();
+      if (idParam) {
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idParam)) {
+          return badRequest(res, "Identifiant d'établissement invalide.");
+        }
+        return schoolProfile(svc, res, idParam);
+      }
+
+      // parseInt NaN → repli sur les valeurs par défaut (sinon .range(NaN) → 500).
+      const rawPage = parseInt(req.query.page ?? "1", 10);
+      const rawPageSize = parseInt(req.query.pageSize ?? "20", 10);
+      const page = Number.isInteger(rawPage) ? Math.max(1, rawPage) : 1;
+      const pageSize = Number.isInteger(rawPageSize) ? Math.min(100, Math.max(1, rawPageSize)) : 20;
       const search = (req.query.search ?? "").toString().trim();
-      const status = req.query.status ? String(req.query.status) : null; // ACTIF, SUSPENDUE, TOUTES
+      const rawStatus = req.query.status ? String(req.query.status) : null;
+      if (rawStatus !== null && !["ACTIF", "SUSPENDUE", "TOUTES"].includes(rawStatus)) {
+        return badRequest(res, "Statut de filtre invalide.");
+      }
+      const status = rawStatus === "TOUTES" ? null : rawStatus;
       const SORTABLE = new Set(["name", "matricule", "city", "created_at"]);
       const sortBy = SORTABLE.has(String(req.query.sortBy)) ? String(req.query.sortBy) : "created_at";
       const sortDir = req.query.sortDir === "asc" ? "asc" : "desc";
@@ -75,8 +92,18 @@ export default route(async (req, res) => {
 
     if (req.method === "PATCH") {
       // Modification d'une école (informations administratives).
+      await enforceRateLimit(svc, `admin-schools-patch:${caller.id}`, 30, 300);
       const body = expectObject(req.body);
-      const schoolId = requireString(body, "schoolId", "L'identifiant de l'établissement", { max: 64 });
+      const schoolId = requireUuid(body, "schoolId", "L'identifiant de l'établissement");
+
+      // Statut d'inscription / approbation automatique : réservés au
+      // superadmin, exactement comme setStatus — sinon un agent de niveau
+      // inférieur pouvait réactiver les inscriptions d'une école suspendue.
+      const touchesStatusFields =
+        body.registrationOpen !== undefined || body.autoApproveStudents !== undefined;
+      if (touchesStatusFields && caller.role !== "superadmin") {
+        return forbidden(res, "Seul le superadministrateur peut modifier le statut d'un établissement.");
+      }
 
       const patch = {};
       if (body.name !== undefined) patch.name = requireString(body, "name", "Le nom de l'école", { min: 2, max: 120 });
@@ -100,10 +127,14 @@ export default route(async (req, res) => {
         .update(patch)
         .eq("id", schoolId)
         .select("id, name, matricule")
-        .single();
+        .maybeSingle();
       if (updateError) {
         if (/duplicate|unique/i.test(updateError.message)) return badRequest(res, "Un établissement existe déjà avec ces informations.");
+        console.error("[admin-schools] patch", updateError);
         return serverError(res);
+      }
+      if (!updated) {
+        return notFound(res, "Établissement introuvable.");
       }
 
       await auditAdmin(svc, {
@@ -156,8 +187,109 @@ export default route(async (req, res) => {
       return ok(res, { message: `Établissement ${newStatus === "ACTIF" ? "activé" : "suspendu"} avec succès.` });
     }
 
+    if (req.method === "DELETE") {
+      // Suppression définitive d'un établissement (superadmin uniquement).
+      // Irréversible : toutes les données de l'école partent en cascade et
+      // ses comptes Auth sont supprimés. La matricule exacte doit être
+      // fournie en confirmation — elle protège d'une suppression précipitée
+      // sur la mauvaise ligne.
+      if (caller.role !== "superadmin") {
+        return forbidden(res, "Seul le superadministrateur peut supprimer un établissement.");
+      }
+      await enforceRateLimit(svc, `admin-schools-delete:${caller.id}`, 5, 300);
+
+      const body = expectObject(req.body);
+      const schoolId = requireString(body, "schoolId", "L'identifiant de l'établissement", { max: 64 });
+      // Matricule de confirmation (5 caractères) — ou nom de l'établissement
+      // en repli : la matricule scolaire reste NULL tant qu'aucun paiement
+      // d'abonnement n'a été confirmé.
+      const confirmation = requireString(body, "confirmation", "La confirmation de suppression", { min: 2, max: 120 });
+
+      const { data: school, error: findError } = await svc
+        .from("schools")
+        .select("id, name, matricule")
+        .eq("id", schoolId)
+        .maybeSingle();
+      if (findError || !school) {
+        return notFound(res, "Établissement introuvable.");
+      }
+      const expectedConfirmation = school.matricule ?? school.name;
+      if (confirmation !== expectedConfirmation) {
+        return badRequest(res, "La confirmation saisie ne correspond pas à cet établissement.");
+      }
+
+      // Les comptes Auth (profiles.id) partent en cascade côté profiles mais
+      // PAS côté auth.users : collecte AVANT la suppression pour nettoyage.
+      const { data: profiles, error: profilesError } = await svc
+        .from("profiles")
+        .select("id")
+        .eq("school_id", schoolId);
+      if (profilesError) throw new Error("Impossible de lire les comptes de l'établissement.");
+
+      // Effectifs pour le journal d'audit (avant la cascade).
+      const { count: studentCount } = await svc
+        .from("students")
+        .select("*", { count: "exact", head: true })
+        .eq("school_id", schoolId);
+
+      // Les élèves sont supprimés EXPLICITEMENT avant l'école : le trigger
+      // guard_class_delete refuse la suppression d'une classe qui contient
+      // encore des élèves, ce qui ferait échouer la cascade sur class_rooms.
+      const { error: studentsDeleteError } = await svc
+        .from("students")
+        .delete()
+        .eq("school_id", schoolId);
+      if (studentsDeleteError) {
+        console.error("[admin-schools] delete students", studentsDeleteError);
+        return serverError(res);
+      }
+
+      // Suppression de l'école : cascade sur classes, enseignants, parents,
+      // abonnements, messages, notes…
+      const { error: deleteError } = await svc.from("schools").delete().eq("id", schoolId);
+      if (deleteError) {
+        console.error("[admin-schools] delete", deleteError);
+        return serverError(res);
+      }
+
+      // Suppression des comptes Auth devenus orphelins (best-effort : les
+      // données sont déjà supprimées, un échec ne fait pas échouer l'opération).
+      let authUsersRemoved = 0;
+      for (const profile of profiles ?? []) {
+        const { error: userDeleteError } = await svc.auth.admin.deleteUser(profile.id);
+        if (!userDeleteError) authUsersRemoved += 1;
+      }
+
+      await auditAdmin(svc, {
+        schoolId: null,
+        actorId: caller.id,
+        actorRole: caller.role,
+        action: "admin_school_deleted",
+        entity: "schools",
+        entityId: schoolId,
+        payload: {
+          matricule: school.matricule,
+          name: school.name,
+          students: studentCount ?? 0,
+          accounts: (profiles ?? []).length,
+          authUsersRemoved,
+        },
+      });
+
+      return ok(res, {
+        message: `Établissement ${school.name} supprimé définitivement.`,
+        authUsersRemoved,
+      });
+    }
+
+    // POST sans action reconnue : 400 explicite (et non un 405 générique).
+    if (req.method === "POST") {
+      return badRequest(res, "Action inconnue.");
+    }
+
     return ok(res, { error: "Méthode non autorisée." }, 405);
   } catch (e) {
+    if (e instanceof Error && e.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
     console.error("[admin-schools]", e);
     return serverError(res);
@@ -184,4 +316,138 @@ function requireCyclesField(body) {
     throw new ValidationError("Sélection de cycles invalide.");
   }
   return Array.from(new Set(cycles));
+}
+
+/**
+ * Fiche complète d'un établissement : direction, effectifs, classes,
+ * enseignants et abonnement. Requêtes ciblées côté serveur — le navigateur
+ * ne télécharge jamais les données brutes des élèves.
+ */
+async function schoolProfile(svc, res, schoolId) {
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: school, error } = await svc.from("schools").select("*").eq("id", schoolId).maybeSingle();
+  if (error || !school) return notFound(res, "Établissement introuvable.");
+
+  // Direction (un directeur en pratique, liste exhaustive par sécurité).
+  const { data: directors, error: directorsError } = await svc
+    .from("profiles")
+    .select("id, first_name, last_name, email, phone, status, created_at")
+    .eq("school_id", schoolId)
+    .eq("role", "directeur");
+  if (directorsError) throw new Error("Impossible de charger la direction.");
+
+  // Effectifs globaux (garçons comptés explicitement : total − filles
+  // comptait un éventuel sexe non renseigné parmi les garçons).
+  const { count: studentsTotal } = await svc.from("students").select("*", { count: "exact", head: true }).eq("school_id", schoolId);
+  const { count: girls } = await svc.from("students").select("*", { count: "exact", head: true }).eq("school_id", schoolId).eq("gender", "F");
+  const { count: boys } = await svc.from("students").select("*", { count: "exact", head: true }).eq("school_id", schoolId).eq("gender", "M");
+  const { count: parents } = await svc.from("profiles").select("*", { count: "exact", head: true }).eq("school_id", schoolId).eq("role", "parent");
+
+  // Classes avec libellé de niveau et effectif par classe (une seule requête
+  // sur la colonne class_id pour tous les comptes).
+  const { data: classes, error: classesError } = await svc
+    .from("class_rooms")
+    .select("id, name, level_id, cycle, capacity")
+    .eq("school_id", schoolId)
+    .order("name");
+  if (classesError) throw new Error("Impossible de charger les classes.");
+  const { data: levels } = await svc.from("levels").select("id, label");
+  const levelLabels = new Map((levels ?? []).map((l) => [l.id, l.label]));
+  const { data: classLinks } = await svc.from("students").select("class_id").eq("school_id", schoolId);
+  const perClass = new Map();
+  for (const s of classLinks ?? []) perClass.set(s.class_id, (perClass.get(s.class_id) ?? 0) + 1);
+
+  // Enseignants : liste limitée (50) + total exact.
+  const { data: teachers, count: teachersTotal } = await svc
+    .from("teachers")
+    .select("id, kind, first_name, last_name, email, phone, specialties", { count: "exact" })
+    .eq("school_id", schoolId)
+    .order("last_name")
+    .limit(50);
+
+  // Abonnement avec sa formule (FK plan_id → plans).
+  const { data: sub } = await svc
+    .from("subscriptions")
+    .select("starts_at, ends_at, student_limit, amount_paid, method, paid_at, plans(id, name, tagline, student_limit, monthly_price, yearly_price)")
+    .eq("school_id", schoolId)
+    .maybeSingle();
+  const subscription = sub
+    ? {
+        plan: sub.plans
+          ? {
+              id: sub.plans.id,
+              name: sub.plans.name,
+              tagline: sub.plans.tagline,
+              studentLimit: sub.plans.student_limit,
+              monthlyPrice: sub.plans.monthly_price,
+              yearlyPrice: sub.plans.yearly_price,
+            }
+          : null,
+        startsAt: sub.starts_at,
+        endsAt: sub.ends_at,
+        studentLimit: sub.student_limit,
+        amountPaid: sub.amount_paid,
+        method: sub.method,
+        paidAt: sub.paid_at,
+        status: !sub.ends_at ? "AUCUN" : sub.ends_at < today ? "EXPIRE" : "ACTIF",
+      }
+    : null;
+
+  const director = (directors ?? [])[0]
+    ? {
+        id: directors[0].id,
+        firstName: directors[0].first_name,
+        lastName: directors[0].last_name,
+        email: directors[0].email,
+        phone: directors[0].phone,
+        status: directors[0].status,
+        memberSince: directors[0].created_at,
+      }
+    : null;
+
+  return ok(res, {
+    school: {
+      id: school.id,
+      name: school.name,
+      matricule: school.matricule ?? "",
+      city: school.city,
+      address: school.address,
+      phone: school.phone,
+      email: school.email,
+      logoUrl: school.logo_url,
+      cycles: school.cycles ?? [],
+      registrationOpen: school.registration_open,
+      autoApproveStudents: school.auto_approve_students,
+      createdAt: school.created_at,
+    },
+    director,
+    stats: {
+      students: studentsTotal ?? 0,
+      girls: girls ?? 0,
+      boys: boys ?? 0,
+      classes: (classes ?? []).length,
+      teachers: teachersTotal ?? 0,
+      parents: parents ?? 0,
+    },
+    classes: (classes ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      level: levelLabels.get(c.level_id) ?? c.level_id,
+      cycle: c.cycle,
+      capacity: c.capacity,
+      studentCount: perClass.get(c.id) ?? 0,
+    })),
+    teachers: (teachers ?? []).map((t) => ({
+      id: t.id,
+      kind: t.kind,
+      firstName: t.first_name,
+      lastName: t.last_name,
+      email: t.email,
+      phone: t.phone,
+      specialties: t.specialties ?? [],
+    })),
+    teachersTotal: teachersTotal ?? 0,
+    subscription,
+  });
 }
