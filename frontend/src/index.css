@@ -30,10 +30,18 @@
   --animate-shimmer: shimmer 1.4s infinite;
   /* Fondu d'apparition du texte des heroes de pages secondaires (300 ms). */
   --animate-hero-fade: hero-fade 300ms var(--ease-out) both;
+  /* Bandeau défilant du LogoStrip : le contenu y figure deux fois, la
+     translation de -50 % boucle donc sans à-coup. Durée calme (35 s). */
+  --animate-marquee: marquee 35s linear infinite;
 
 @keyframes fade-up {
     from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: none; }
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 
   @keyframes hero-fade {
@@ -240,6 +248,14 @@ button:active, a:active, [role="button"]:active {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Bandeau défilant (LogoStrip) : pause au survol, arrêt complet si
+   l'utilisateur préfère moins d'animations (le contenu reste lisible,
+   le track déborde simplement dans son conteneur masqué). */
+.animate-marquee:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none !important; overflow-x: auto; }
 }
 
 .no-scrollbar { scrollbar-width: none; }
