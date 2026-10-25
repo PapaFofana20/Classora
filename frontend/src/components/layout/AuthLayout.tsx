@@ -92,7 +92,8 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
               Retour
             </Link>
           </div>
-          <div className="w-full max-w-3xl">
+          {/* Marge au-dessus du titre : sépare nettement le logo du formulaire. */}
+          <div className="mt-8 w-full max-w-3xl">
             <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{title}</h1>
             <p className="mt-2 text-sm text-neutral-600">{subtitle}</p>
             <div className="mt-8">{children}</div>
