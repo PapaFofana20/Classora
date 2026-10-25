@@ -25,7 +25,9 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Table } from "@/components/ui/Table";
 
 export default function AdminSchoolDetailPage() {
-  const { schoolId } = useParams();
+  // La route est « ecoles/:id » : lire « id » (l'ancien code lisait
+  // « schoolId », toujours undefined → « École introuvable » systématique).
+  const { id: schoolId } = useParams();
   const { agent } = useAdminAuth();
   const isSuperAdmin = agent?.role === "superadmin";
 
