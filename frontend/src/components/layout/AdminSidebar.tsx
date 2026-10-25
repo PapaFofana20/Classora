@@ -149,7 +149,9 @@ function SidebarContent({ agent, expanded, onNavigate, onLogoClick }: { agent: A
         onConfirm={() => {
           setConfirmLogout(false);
           navigate("/", { replace: true });
-          logout();
+          // logout() est asynchrone (signOut Supabase) : sans ce void explicite,
+          // un échec silencieux laisserait la session Auth ouverte.
+          void logout();
         }}
       />
     </div>

@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACT } from "@/data/landing";
 import { pageHeroes } from "@/data/pageHeroes";
 import { ContactForm } from "@/features/landing/ContactForm";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const infos = [
   { label: "Téléphone", value: CONTACT.phone },
@@ -13,15 +15,23 @@ const infos = [
 ];
 
 export default function ContactPage() {
+  usePageMeta({
+    title: "Contact",
+    description:
+      "Une question sur Classora ? Écrivez-nous via le formulaire de contact : notre équipe basée à Dakar répond sous 24 heures.",
+    path: "/contact",
+  });
   return (
     <>
       <PageHero {...pageHeroes.contact} />
       <section className="mx-auto grid w-full max-w-[1280px] gap-8 px-gutter pb-20 lg:grid-cols-[1.4fr_1fr]">
         <Reveal>
+          <h2 className="sr-only">Formulaire de contact</h2>
           <ContactForm />
         </Reveal>
         <Reveal delay={120}>
           <div className="space-y-4">
+            <h2 className="sr-only">Coordonnées de Classora</h2>
             {infos.map((i) => (
               <div key={i.label} className="flex items-center gap-4 rounded-3xl bg-lime-soft p-5">
                 <div>
@@ -38,6 +48,44 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
+        </Reveal>
+      </section>
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-20" aria-labelledby="contact-more-title">
+        <Reveal>
+          <h2 id="contact-more-title" className="text-2xl font-extrabold tracking-tight">
+            Avant de nous écrire
+          </h2>
+          <p className="mt-3 max-w-2xl text-neutral-600">
+            Vous vous demandez combien coûte Classora pour votre établissement, ou ce que la plateforme
+            change au quotidien pour la direction, les enseignants et les parents ? Ces pages détaillent
+            chaque aspect du service.
+          </p>
+          <ul className="mt-5 flex flex-wrap gap-3">
+            <li>
+              <Link
+                to="/tarifs"
+                className="inline-flex min-h-11 items-center rounded-full bg-mist px-5 text-sm font-semibold text-forest transition hover:bg-lime-soft"
+              >
+                Voir les tarifs
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/fonctionnalites"
+                className="inline-flex min-h-11 items-center rounded-full bg-mist px-5 text-sm font-semibold text-forest transition hover:bg-lime-soft"
+              >
+                Découvrir les fonctionnalités
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/ecoles"
+                className="inline-flex min-h-11 items-center rounded-full bg-mist px-5 text-sm font-semibold text-forest transition hover:bg-lime-soft"
+              >
+                Classora pour les écoles
+              </Link>
+            </li>
+          </ul>
         </Reveal>
       </section>
     </>

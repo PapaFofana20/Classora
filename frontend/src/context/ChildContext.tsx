@@ -19,7 +19,7 @@ const STORAGE_KEY = "classora_active_child";
 export function ChildProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const isParent = user?.role === "parent";
-  const state = useAsync<StudentRow[]>(() => (isParent && user ? listStudentRows(user) : Promise.resolve([])), [user?.id]);
+  const state = useAsync<StudentRow[]>(() => (isParent && user ? listStudentRows(user) : Promise.resolve([])), [user?.id, user?.role]);
   const [activeId, setActiveId] = useState<string>(() => sessionStorage.getItem(STORAGE_KEY) ?? "");
   const list = useMemo(() => state.data ?? [], [state.data]);
   const activeChild = list.find((c) => c.id === activeId) ?? list[0] ?? null;

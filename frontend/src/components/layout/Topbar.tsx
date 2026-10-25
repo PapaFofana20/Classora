@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
 import { useTeaching } from "@/context/TeachingContext";
-import { TODAY_ISO } from "@/data/school";
+import { todayIso } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { countUnread } from "@/services/messageService";
 import type { SessionUser } from "@/types";
@@ -55,7 +55,7 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
         </button>
         <div className="min-w-0">
           <SchoolMark name={school.schoolName || "Mon école"} matricule={school.school?.matricule || undefined} size={40} />
-          <p className="mt-1 hidden text-xs text-neutral-500 sm:block">{formatLongDate(TODAY_ISO)}</p>
+          <p className="mt-1 hidden text-xs text-neutral-500 sm:block">{formatLongDate(todayIso())}</p>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
           {user.role === "professeur" && <ContextSwitcher id="ctx-desktop" contexts={contexts} value={active?.key} onChange={setActiveKey} className="hidden w-60 md:block" />}

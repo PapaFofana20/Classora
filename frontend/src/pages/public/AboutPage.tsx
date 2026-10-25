@@ -2,12 +2,19 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
 import { aboutValues, aboutStats } from "@/data/landing";
-import aboutTeamImg from "@/assets/images/about-team.jpg";
+const aboutTeamImg = "/images/about-team.jpg";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { Icon } from "@/components/ui/Icon";
 import { Counter } from "@/components/ui/Counter";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 export default function AboutPage() {
+  usePageMeta({
+    title: "À propos de Classora",
+    description:
+      "L'équipe Classora et sa mission : outiller les écoles privées du Sénégal avec des outils simples, adaptés aux réalités locales, du CI à la Terminale.",
+    path: "/a-propos",
+  });
   return (
     <>
       <PageHero {...pageHeroes.apropos} />

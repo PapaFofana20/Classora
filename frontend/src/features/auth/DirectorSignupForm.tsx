@@ -65,7 +65,20 @@ export function DirectorSignupForm({ initialPlan }: { initialPlan?: "essentiel" 
     setBusy(true);
     setError(null);
     try {
-      await registerDirector({ ...form, cycles });
+      // Payload explicite : sans "confirm" (le mot de passe de confirmation
+      // n'a pas à voyager jusqu'à l'API).
+      await registerDirector({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        schoolName: form.schoolName,
+        city: form.city,
+        address: form.address,
+        password: form.password,
+        plan: form.plan,
+        cycles,
+      });
       toast("Compte créé. Bienvenue sur Classora !");
       navigate("/app", { replace: true });
     } catch (err) {

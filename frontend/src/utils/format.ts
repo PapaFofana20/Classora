@@ -12,6 +12,8 @@ export function formatNumber(n: number, digits = 2): string {
 export function formatDate(iso: string | undefined | null): string {
   if (!iso) return "—";
   const [y, m, d] = iso.slice(0, 10).split("-");
+  // Donnée distante malformée : pas de rendu « undefined/undefined/2026 ».
+  if (!y || !m || !d) return "—";
   return `${d}/${m}/${y}`;
 }
 

@@ -45,11 +45,24 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
   );
 }
 
+// Fail-open CORS : sans FRONTEND_ORIGIN, toutes les origines sont admises —
+// acceptable en développement, à corriger absolument en production.
+if (process.env.NODE_ENV === "production" && !process.env.FRONTEND_ORIGIN) {
+  console.warn(
+    "[scolia-api] FRONTEND_ORIGIN absente en production : le CORS est actuellement OUVERT à toute origine.",
+  );
+}
+
 const app = express();
 
 // Rejets déguisés en réponses 400 { error } (jamais d'HTML d'erreur Express).
 app.disable("x-powered-by");
 app.set("trust proxy", true); // passerelle Render : X-Forwarded-For fiable
+
+// CORS AVANT le parseur JSON : un corps invalide doit aussi renvoyer les
+// en-têtes CORS, sinon le front sur une autre origine ne peut pas lire le
+// message d'erreur.
+app.use(corsMiddleware);
 
 // Corps JSON limité.
 app.use(express.json({ limit: "64kb" }));
@@ -62,8 +75,12 @@ app.use((err, _req, res, next) => {
   return next(err);
 });
 
-// CORS strict : la liste des origines vient de FRONTEND_ORIGIN.
-app.use(corsMiddleware);
+// Durcissement minimal des réponses (l'API ne sert que du JSON).
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  next();
+});
 
 // Sonde Render (keep-alive / déploiement) et état de configuration.
 app.get("/healthz", (_req, res) => {
@@ -102,9 +119,16 @@ app.all("/admin/agents", adminConfigGuard, adminAgents);
 app.all("/admin/schools", adminConfigGuard, adminSchools);
 app.all("/admin/stats", adminConfigGuard, adminStats);
 
+// Chemins inconnus : JSON 404 cohérent avec l'enveloppe { error } (l'HTML
+// par défaut d'Express fuirait la stack).
+app.use((_req, res) => {
+  res.status(404).json({ error: "Ressource introuvable." });
+});
+
 // Dernière barrière : enveloppe { error } même sur une exception imprévue.
 app.use((err, _req, res, _next) => {
   console.error("[api] erreur non gérée :", err);
+  if (res.headersSent) return; // réponse déjà partielle : ne pas relancer ERR_HTTP_HEADERS_SENT
   res.status(500).json({ error: "Une erreur inattendue est survenue. Réessayez dans un instant." });
 });
 

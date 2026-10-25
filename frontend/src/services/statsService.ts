@@ -42,7 +42,10 @@ export function getAdminStats(schoolId: string, periodId: Period["id"]): Promise
     await hydrate("settings");
     const { data, error } = await supabase.rpc("admin_dashboard", { p_period_id: periodId });
     if (error) throw new Error(/indisponible/.test(error.message) ? "Tableau de bord indisponible." : error.message);
-    const d = data as unknown as DashboardPayload;
+    const d = data as unknown as DashboardPayload | null;
+    // Une RPC qui renvoie null (aucune donnée) ne doit pas faire crasher le
+    // dashboard direction avec « Cannot read properties of null ».
+    if (!d) throw new Error("Tableau de bord indisponible.");
     const expected = n(d.expected);
     const collected = n(d.collected);
     const alerts: AdminStats["alerts"] = [];

@@ -1,8 +1,8 @@
-import fonctionnalitesHeroImg from "@/assets/images/fonctionnalites-hero.webp";
-import tarifsHeroImg from "@/assets/images/tarifs-hero.jpg";
-import ecolesHeroImg from "@/assets/images/ecoles-hero.jpg";
-import aproposHeroImg from "@/assets/images/apropos-hero.jpg";
-import contactHeroImg from "@/assets/images/contact-hero.jpg";
+const fonctionnalitesHeroImg = "/images/fonctionnalites-hero.webp";
+const tarifsHeroImg = "/images/tarifs-hero.jpg";
+const ecolesHeroImg = "/images/ecoles-hero.jpg";
+const aproposHeroImg = "/images/apropos-hero.jpg";
+const contactHeroImg = "/images/contact-hero.jpg";
 
 /** Un mot encadré par des astérisques est rendu en Fraunces italique lime. */
 export interface PageHeroImage {

@@ -8,7 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { SchoolProvider } from "@/context/SchoolContext";
 import { ToastProvider } from "@/context/ToastContext";
-import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop } from "@/routes/guards";
+import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop, SubscriptionGuard } from "@/routes/guards";
 import { AdminProtectedRoute } from "@/routes/adminGuards";
 import { ROUTE_ROLES } from "@/routes/navigation";
 import HomePage from "@/pages/public/HomePage";
@@ -20,6 +20,7 @@ const AboutPage = lazy(() => import("@/pages/public/AboutPage"));
 const ContactPage = lazy(() => import("@/pages/public/ContactPage"));
 const TermsPage = lazy(() => import("@/pages/public/TermsPage"));
 const PrivacyPage = lazy(() => import("@/pages/public/PrivacyPage"));
+const NotFoundPage = lazy(() => import("@/pages/public/NotFoundPage"));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
 const SignupSentPage = lazy(() => import("@/pages/auth/SignupSentPage"));
@@ -95,6 +96,9 @@ export default function App() {
               <Route path="contact" element={<ContactPage />} />
               <Route path="cgu" element={<TermsPage />} />
               <Route path="confidentialite" element={<PrivacyPage />} />
+              {/* 404 réelle (contenu + noindex) au lieu d'une redirection vers
+                  l'accueil, qui fabriquait des « soft 404 ». */}
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* PARTIE 2 : authentification scolaire (pas de session requise)} */}
@@ -128,6 +132,10 @@ export default function App() {
               <Route element={<ProtectedRoute />}>
                 <Route element={<MustChangePasswordGuard />}>
                   <Route path="mot-de-passe-temporaire" element={<ChangePasswordPage />} />
+                  {/* Verrou d'abonnement (écoles bloquées/sans abonnement) :
+                      il était défini mais jamais monté — les écrans dédiés
+                      de SubscriptionScreens étaient du code mort. */}
+                  <Route element={<SubscriptionGuard />}>
                   <Route path="" element={<DashboardLayout />}>
                       <Route index element={<DashboardPage />} />
                       <Route path="eleves" element={guard("eleves", <StudentsPage />)} />
@@ -147,8 +155,9 @@ export default function App() {
                     </Route>
                   </Route>
                 </Route>
+                </Route>
             </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Le 404 racine est géré dans PublicLayout (catch-all ci-dessus). */}
             </Routes>
             </Suspense>
         </AuthProvider>

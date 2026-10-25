@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
 import { useToast } from "@/context/ToastContext";
 import { passwordError } from "@/utils/password";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 /** /app/mot-de-passe-temporaire — changement obligatoire à la première connexion. */
 export default function ChangePasswordPage() {
@@ -16,6 +17,7 @@ export default function ChangePasswordPage() {
   const school = useSchool();
   const { toast } = useToast();
   const navigate = useNavigate();
+  usePageMeta({ title: "Changement de mot de passe", noindex: true });
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

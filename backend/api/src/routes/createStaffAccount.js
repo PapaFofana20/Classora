@@ -105,5 +105,7 @@ function optionalPassword(body) {
   const raw = body["tempPassword"];
   if (raw === undefined || raw === null) return undefined;
   if (typeof raw !== "string") throw new ValidationError("Le mot de passe temporaire est invalide.");
-  return raw.trim();
+  // Pas de trim : les espaces font partie du mot de passe choisi, sinon le
+  // mot de passe communiqué pouvait différer de celui réellement stocké.
+  return raw;
 }

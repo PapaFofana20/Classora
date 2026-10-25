@@ -6,9 +6,16 @@ import { pageHeroes } from "@/data/pageHeroes";
 import { roleHighlights } from "@/data/pages";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { StepsBento } from "@/features/landing/StepsBento";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { cn } from "@/utils/cn";
 
 export default function FeaturesPage() {
+  usePageMeta({
+    title: "Fonctionnalités de gestion scolaire",
+    description:
+      "Inscriptions en ligne, bulletins automatiques, suivi des paiements et messagerie : tout ce que Classora apporte à la direction, aux enseignants et aux parents.",
+    path: "/fonctionnalites",
+  });
   return (
     <>
       <PageHero {...pageHeroes.fonctionnalites} />
@@ -18,7 +25,7 @@ export default function FeaturesPage() {
           <Reveal key={f.id}>
             <article className={cn("grid items-center gap-8 lg:grid-cols-2 lg:gap-16", i % 2 === 1 && "lg:[&>div:first-child]:order-2")}>
               <div className="rounded-3xl bg-lime p-2 shadow-pop">
-                <img src={f.image} alt={f.title} loading="lazy" className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
+                <img src={f.image} alt={`Illustration : ${f.title}`} loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
               </div>
               <div>
                 <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{f.title}</h2>

@@ -26,7 +26,12 @@ export default route(async (req, res) => {
       .select("id, school_id, role, status, must_change_password")
       .eq("id", user.id)
       .maybeSingle();
-    if (error || !profile) {
+    if (error) {
+      // Panne base ≠ identifiants invalides : ne pas présenter une erreur
+      // Supabase comme un échec de connexion.
+      throw new Error("Impossible de vérifier le compte.");
+    }
+    if (!profile) {
       return unauthorized(res, "E-mail ou mot de passe incorrect.");
     }
 
@@ -57,6 +62,24 @@ export default route(async (req, res) => {
         status: "EN_ATTENTE",
         error: "Votre demande d'inscription est en attente de validation par votre école.",
       });
+    }
+
+    // Liste blanche : tout statut inconnu (future valeur) est refusé, jamais
+    // traité comme ACTIF par effet du fall-through.
+    if (profile.status !== "ACTIF") {
+      await audit(svc, {
+        schoolId: profile.school_id,
+        actorId: profile.id,
+        actorRole: profile.role,
+        action: "login_blocked_unknown_status",
+        entity: "profiles",
+        entityId: profile.id,
+        payload: { status: profile.status },
+      });
+      return ok(res, {
+        status: profile.status,
+        error: "Ce compte n'est pas activé. Contactez votre école.",
+      }, 403);
     }
 
     await audit(svc, {

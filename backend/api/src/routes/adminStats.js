@@ -2,8 +2,8 @@
  * Statistiques transversales : calculées côté serveur, jamais de téléchargement
  * de toutes les données dans le navigateur. Réservée aux agents admin/superadmin.
  */
-import { getAuthenticatedUser, getCallerAdminAgent, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { requireAdminRole, serviceClient } from "../lib/authAdmin.js";
+import { ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
 export default route(async (req, res) => {

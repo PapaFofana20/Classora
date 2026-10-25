@@ -4,7 +4,9 @@
  * que sur Render.
  */
 
-export const PORT = Number(process.env.PORT ?? 3000);
+const parsedPort = Number(process.env.PORT ?? 3000);
+/** PORT valide (app.listen(NaN) échouerait de façon obscure). */
+export const PORT = Number.isInteger(parsedPort) && parsedPort > 0 && parsedPort < 65536 ? parsedPort : 3000;
 
 /** URL publique du projet Supabase, ex. https://xxxx.supabase.co */
 export const SUPABASE_URL = process.env.SUPABASE_URL ?? "";

@@ -25,9 +25,11 @@ async function passwordIsValid(email, password) {
       method: "POST",
       headers: { apikey: SERVICE_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
+      signal: AbortSignal.timeout(10_000),
     });
     return res.ok;
   } catch {
+    // Timeout ou panne réseau : refus, sans distinguer la cause au client.
     return false;
   }
 }
@@ -52,6 +54,10 @@ export default route(async (req, res) => {
     query = isMatricule ? query.eq("matricule", value) : query.eq("email", value);
     const { data: agent, error } = await query.maybeSingle();
     if (error || !agent) {
+      // Même vérification de mot de passe (jetée) que sur le chemin « agent
+      // trouvé » : sans cela, la latence trahissait l'existence d'une
+      // matricule — or elles sont séquentielles et donc énumérables.
+      await passwordIsValid("matricule-inconnue@classora.invalid", password);
       return ok(res, { error: GENERIC_ERROR }, 401);
     }
 

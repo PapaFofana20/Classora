@@ -97,8 +97,9 @@ export default route(async (req, res) => {
       }
 
       try {
-        // Crée le profil agent.
-        const { error: profileError } = await svc
+        // Crée le profil agent (id renvoyé pour le journal d'audit — même
+        // espace d'identifiants que la branche PATCH).
+        const { data: inserted, error: profileError } = await svc
           .from("admin_agents")
           .insert({
             auth_user_id: created.user.id,
@@ -109,8 +110,10 @@ export default route(async (req, res) => {
             last_name: lastName,
             email,
             phone: phone ?? "",
-          });
-        if (profileError) throw new Error(profileError.message);
+          })
+          .select("id, matricule, role, status")
+          .single();
+        if (profileError || !inserted) throw new Error(profileError?.message ?? "réponse vide après insertion");
 
         await auditAdmin(svc, {
           schoolId: null,
@@ -118,7 +121,7 @@ export default route(async (req, res) => {
           actorRole: caller.role,
           action: "admin_agent_created",
           entity: "admin_agents",
-          entityId: created.user.id,
+          entityId: inserted.id,
           payload: { matricule, role, email },
         });
 
@@ -142,6 +145,7 @@ export default route(async (req, res) => {
 
     if (req.method === "PATCH") {
       // Modification d'un agent (rôle, statut, informations).
+      await enforceRateLimit(svc, `admin-agents-patch:${caller.id}`, 30, 300);
       const body = expectObject(req.body);
       const agentId = requireString(body, "agentId", "L'identifiant de l'agent", { max: 64 });
 
@@ -161,6 +165,27 @@ export default route(async (req, res) => {
       }
       if (caller.role !== "superadmin" && target.role === "superadmin") {
         return forbidden(res, "Seul le superadministrateur peut modifier un superadministrateur.");
+      }
+
+      // Protections anti-verrouillage : un superadmin ne peut ni se
+      // rétrograder ni se désactiver lui-même, et le DERNIER superadmin
+      // actif ne peut être ni rétrogradé ni désactivé (sinon plus aucun
+      // accès à la console sans repasser par le script d'amorçage).
+      const downgradesTarget =
+        (body.role !== undefined && body.role !== "superadmin") ||
+        (body.status !== undefined && body.status !== "ACTIF");
+      if (caller.id === target.auth_user_id && caller.role === "superadmin" && downgradesTarget) {
+        return forbidden(res, "Un superadministrateur ne peut pas se rétrograder ni se désactiver lui-même.");
+      }
+      if (target.role === "superadmin" && downgradesTarget) {
+        const { count } = await svc
+          .from("admin_agents")
+          .select("*", { count: "exact", head: true })
+          .eq("role", "superadmin")
+          .eq("status", "ACTIF");
+        if ((count ?? 0) <= 1) {
+          return forbidden(res, "Impossible de modifier le dernier superadministrateur actif.");
+        }
       }
 
       const patch = {};
@@ -224,6 +249,7 @@ export default route(async (req, res) => {
 
     return ok(res, { error: "Méthode non autorisée." }, 405);
   } catch (e) {
+    if (e instanceof Error && e.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
     console.error("[admin-agents]", e);
     return serverError(res);

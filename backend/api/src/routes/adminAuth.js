@@ -4,7 +4,7 @@
  * par Supabase Auth — jamais décodée sans signature.
  */
 import { audit, getAuthenticatedUser, serviceClient } from "../lib/auth.js";
-import { badRequest, ok, route, serverError, unauthorized } from "../lib/http.js";
+import { ok, RATE_LIMIT_RE, route, serverError, unauthorized } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
 export default route(async (req, res) => {
@@ -67,7 +67,7 @@ export default route(async (req, res) => {
       },
     });
   } catch (e) {
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return ok(res, { error: e.message }, 429);
+    if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
     console.error("[admin-auth]", e);
     return serverError(res);
   }

@@ -17,7 +17,9 @@ import type { Plan } from "@/types";
 import { formatDate } from "@/utils/format";
 import { STATUS_LABELS, STATUS_TONES } from "@/utils/subscription";
 
-const EMAIL_SUPPORT = "support@classora.com";
+// Contact unique du site public (legal.ts / landing.ts) — l'ancienne adresse
+// support@classora.com n'existait nulle part ailleurs.
+const EMAIL_SUPPORT = "contact@classora.sn";
 
 /** /app/abonnement — lecture seule : l'activation se fait côté support (l'achat en ligne mobile money est retiré pour l'instant). */
 export default function SubscriptionPage() {
@@ -38,7 +40,7 @@ export default function SubscriptionPage() {
         subtitle="Visible uniquement par le directeur de l'école."
         actions={
           !active ? (
-            <LinkButton to="/inscription/abonnement" icon="workspace_premium" variant="dark">
+            <LinkButton to="/app/abonnement" icon="workspace_premium" variant="dark">
               Choisir une formule
             </LinkButton>
           ) : undefined

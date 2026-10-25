@@ -3,7 +3,7 @@ import type { ReportCardData } from "@/types";
 import { SCHOOL_YEAR } from "@/data/school";
 import { ageFrom, formatDate, formatNumber } from "@/utils/format";
 import { councilAppreciation, primaryAppreciation } from "@/utils/grades";
-import { TODAY_ISO } from "@/data/school";
+import { todayIso } from "@/data/school";
 
 interface Props {
   card: ReportCardData;
@@ -35,7 +35,7 @@ function StudentBlock({ card, extra }: { card: ReportCardData; extra: ReactNode 
       <div><dt className="inline text-neutral-500">Élève : </dt><dd className="inline font-bold">{s.firstName} {s.lastName}</dd></div>
       <div><dt className="inline text-neutral-500">Matricule : </dt><dd className="inline font-semibold">{s.matricule}</dd></div>
       <div><dt className="inline text-neutral-500">Classe : </dt><dd className="inline font-bold">{card.classRoom.name}</dd></div>
-      <div><dt className="inline text-neutral-500">Né(e) le : </dt><dd className="inline font-semibold">{formatDate(s.birthDate)} ({ageFrom(s.birthDate, TODAY_ISO)} ans)</dd></div>
+      <div><dt className="inline text-neutral-500">Né(e) le : </dt><dd className="inline font-semibold">{formatDate(s.birthDate)} ({ageFrom(s.birthDate, todayIso())} ans)</dd></div>
       <div><dt className="inline text-neutral-500">Effectif : </dt><dd className="inline font-semibold">{card.classSize} élèves</dd></div>
       {extra}
     </dl>

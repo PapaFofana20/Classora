@@ -1,7 +1,7 @@
 import type { Payment, PaymentStatus, PayMethod, StudentPayStatus } from "@/types";
-import { TODAY_ISO } from "@/data/school";
+import { todayIso } from "@/data/school";
 
-export function computeStatus(amount: number, paid: number, dueDate: string, today: string = TODAY_ISO): PaymentStatus {
+export function computeStatus(amount: number, paid: number, dueDate: string, today: string = todayIso()): PaymentStatus {
   if (paid >= amount) return "paye";
   if (paid > 0) return "partiel";
   return dueDate <= today ? "en_retard" : "a_venir";
@@ -32,7 +32,7 @@ export function remaining(p: Payment): number {
 }
 
 export function studentPayStatus(payments: Payment[]): StudentPayStatus {
-  const due = payments.filter((p) => p.dueDate <= TODAY_ISO);
+  const due = payments.filter((p) => p.dueDate <= todayIso());
   if (due.some((p) => p.status === "en_retard")) return "impaye";
   if (due.some((p) => p.status === "partiel")) return "partiel";
   return "a_jour";

@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/context/AuthContext";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 import { TeachingProvider } from "@/context/TeachingContext";
 import { SubscriptionBanner } from "@/features/subscription/SubscriptionBanner";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
@@ -36,6 +37,8 @@ function Shell() {
 }
 
 export function DashboardLayout() {
+  // Espace scolaire privé : jamais proposé aux moteurs de recherche.
+  usePageMeta({ noindex: true });
   return (
     <SidebarProvider>
       <TeachingProvider>

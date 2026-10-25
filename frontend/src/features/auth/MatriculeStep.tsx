@@ -41,15 +41,24 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
     const seq = ++checkSeq.current;
     setState("checking");
     setError(null);
-    const result = await verifyMatricule(code);
-    if (seq !== checkSeq.current) return; // une saisie plus récente a pris le relais
-    if (result.ok && result.school) {
-      setSchool(result.school);
-      setState("found");
-    } else {
+    try {
+      const result = await verifyMatricule(code);
+      if (seq !== checkSeq.current) return; // une saisie plus récente a pris le relais
+      if (result.ok && result.school) {
+        setSchool(result.school);
+        setState("found");
+      } else {
+        setSchool(null);
+        setState("error");
+        setError(result.message ?? "Matricule introuvable.");
+      }
+    } catch {
+      // Panne réseau/API : sans ce catch, la promesse rejetée laissait
+      // l'étant bloqué sur « Vérification… » pour toujours.
+      if (seq !== checkSeq.current) return;
       setSchool(null);
       setState("error");
-      setError(result.message ?? "Matricule introuvable.");
+      setError("Vérification impossible pour le moment. Réessayez.");
     }
   };
 

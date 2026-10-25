@@ -12,7 +12,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Table, type Column } from "@/components/ui/Table";
 import { Tabs } from "@/components/ui/Tabs";
 import { useToast } from "@/context/ToastContext";
-import { TODAY_ISO } from "@/data/school";
+import { todayIso } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { addAbsence, listAbsences, type AbsenceRow } from "@/services/absenceService";
 import { listStudentRows } from "@/services/studentService";
@@ -32,7 +32,7 @@ export function SurveillantDashboard() {
   const [tab, setTab] = useState("all");
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ studentId: "", type: "absence" as AbsenceRecord["type"], date: TODAY_ISO, motif: "", sanction: "" });
+  const [form, setForm] = useState({ studentId: "", type: "absence" as AbsenceRecord["type"], date: todayIso(), motif: "", sanction: "" });
 
   const rows = state.data ?? [];
   const filtered = useMemo(() => (tab === "all" ? rows : rows.filter((r) => r.type === tab)), [rows, tab]);
@@ -55,7 +55,7 @@ export function SurveillantDashboard() {
       await addAbsence(user.schoolId, { studentId: form.studentId, type: form.type, date: form.date, motif: form.motif.trim(), justified: false, ...(form.type === "discipline" && form.sanction ? { sanction: form.sanction } : {}) });
       toast("Signalement enregistré.");
       setOpen(false);
-      setForm({ studentId: "", type: "absence", date: TODAY_ISO, motif: "", sanction: "" });
+      setForm({ studentId: "", type: "absence", date: todayIso(), motif: "", sanction: "" });
       state.reload();
     } catch {
       toast("Enregistrement impossible.", "error");

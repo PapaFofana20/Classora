@@ -32,6 +32,8 @@ export interface DirectorInput {
   password: string;
   schoolName: string;
   city: string;
+  /** Adresse de l'école (p_address, migration 00023). */
+  address?: string;
   cycles: Cycle[];
   plan?: "essentiel" | "premium";
 }
@@ -96,11 +98,14 @@ export async function login(email: string, password: string, matricule?: string)
   const cred = lower(email);
   const { error } = await supabase.auth.signInWithPassword({ email: cred, password });
   if (error) {
-    throw new Error(/invalid login/i.test(error.message) ? "E-mail ou mot de passe incorrect." : "E-mail ou mot de passe incorrect.");
+    // Message unique pour tous les refus d'Auth : ne pas révéler si c'est
+    // l'adresse ou le mot de passe qui est faux (anti-énumération).
+    throw new Error("E-mail ou mot de passe incorrect.");
   }
-  const id = (await supabase.auth.getUser()).data.user?.id;
-  const jwt = (await supabase.auth.getSession()).data.session?.access_token;
-  if (!id || !jwt) throw new Error("E-mail ou mot de passe incorrect.");
+  const session = (await supabase.auth.getSession()).data.session;
+  const id = session?.user?.id;
+  const jwt = session?.access_token;
+  if (!id || !jwt) throw new Error("Session indisponible. Reconnectez-vous.");
   let guard: { status?: string; error?: string; schoolId?: string; role?: string; mustChangePassword?: boolean };
   try {
     guard = await callFunction<{

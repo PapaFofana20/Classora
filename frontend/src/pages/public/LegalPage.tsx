@@ -3,8 +3,9 @@ import { Container } from "@/components/layout/Container";
 import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import type { LegalDocument } from "@/data/legal";
-import cguHeroImg from "@/assets/images/hero-5.jpg";
-import privacyHeroImg from "@/assets/images/hero-3.jpg";
+import { usePageMeta } from "@/hooks/usePageMeta";
+const cguHeroImg = "/images/hero-5.jpg";
+const privacyHeroImg = "/images/hero-3.jpg";
 
 const CONTACT_EMAIL = "contact@classora.sn";
 
@@ -27,6 +28,11 @@ const HERO_IMAGES = {
 
 /** Gabarit commun aux pages CGU et Politique de confidentialité. */
 export function LegalPage({ doc }: { doc: LegalDocument }) {
+  usePageMeta({
+    title: doc.title,
+    description: `${doc.title} du service Classora — ${doc.updatedAt}.`,
+    path: `/${doc.slug}`,
+  });
   const other =
     doc.slug === "cgu"
       ? { to: "/confidentialite", label: "Politique de confidentialité" }

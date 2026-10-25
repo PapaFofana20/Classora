@@ -1,5 +1,5 @@
 import type { ClassRoom, Parent, Payment, ReportCardData, SessionUser, Student, StudentOptions, StudentPayStatus } from "@/types";
-import { TODAY_ISO, levels } from "@/data/school";
+import { todayIso, levels } from "@/data/school";
 import { studentPayStatus } from "@/utils/payments";
 import { ensure, visibleStudents } from "./access";
 import { classesOf, db, hydrate, parentsOf, paymentsOf, respond, studentsOf } from "./db";
@@ -28,7 +28,7 @@ function toRow(s: Student): StudentRow {
     parentName: parent ? `${parent.firstName} ${parent.lastName}` : "—",
     parentPhone: parent?.phone ?? "",
     payStatus: studentPayStatus(pays),
-    balance: pays.filter((p) => p.dueDate <= TODAY_ISO).reduce((a, p) => a + Math.max(0, p.amount - p.paidAmount), 0),
+    balance: pays.filter((p) => p.dueDate <= todayIso()).reduce((a, p) => a + Math.max(0, p.amount - p.paidAmount), 0),
   };
 }
 

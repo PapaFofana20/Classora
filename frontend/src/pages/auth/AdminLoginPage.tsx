@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/Input";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { supabase } from "@/lib/supabase";
 import { adminResolveLogin } from "@/services/admin";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const MATRICULE_RE = /^CLA-ADM-\d{6}$/i;
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
   const { verify, logout } = useAdminAuth();
+  usePageMeta({ title: "Connexion administrative", noindex: true });
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

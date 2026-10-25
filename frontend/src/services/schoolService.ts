@@ -196,12 +196,13 @@ export function setClassSubject(schoolId: string, classId: string, subjectId: st
       if (error) throw new Error(/read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);
       // Règle élémentaire : le titulaire reçoit automatiquement la nouvelle matière.
       if (!existing && cls.cycle === "elementaire" && cls.headTeacherId) {
-        await supabase.from("teaching_assignments").insert({
+        const { error: assignError } = await supabase.from("teaching_assignments").insert({
           school_id: schoolId,
           teacher_id: cls.headTeacherId,
           class_id: classId,
           subject_id: subjectId,
         });
+        if (assignError) throw new Error(/read-only|row-level/i.test(assignError.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : assignError.message);
       }
     }
     await Promise.all([hydrate("classSubjects"), hydrate("assignments")]);
@@ -268,10 +269,11 @@ export function createClass(schoolId: string, input: NewClassInput): Promise<Cla
       classesOf(schoolId).find((c) => c.cycle === level.cycle);
     if (template && cls.id !== template.id) {
       for (const cs of classSubjectsOf(schoolId).filter((x) => x.classId === template.id)) {
-        await supabase.from("class_subjects").upsert(
+        const { error: copyError } = await supabase.from("class_subjects").upsert(
           { school_id: schoolId, class_id: cls.id, subject_id: cs.subjectId, coefficient: cs.coefficient },
           { onConflict: "school_id,class_id,subject_id" },
         );
+        if (copyError) throw new Error(/read-only|row-level/i.test(copyError.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : copyError.message);
       }
       await hydrate("classSubjects");
     }

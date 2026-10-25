@@ -10,7 +10,7 @@
 import { passwordError, serviceClient } from "../lib/auth.js";
 import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
-import { expectObject, requireCycles, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
+import { expectObject, optionalString, requireCycles, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
@@ -26,6 +26,10 @@ export default route(async (req, res) => {
     const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
     const schoolName = requireString(body, "schoolName", "Le nom de l'école", { min: 2, max: 120 });
     const city = requireString(body, "city", "La ville", { min: 1, max: 80 });
+    // p_address (migration 00023) : l'Edge Function la transmettait, la route
+    // Express la perdait silencieusement — l'adresse de l'école n'était jamais
+    // enregistrée à l'inscription.
+    const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
 
     const pwError = passwordError(password);
@@ -56,6 +60,7 @@ export default route(async (req, res) => {
         p_email: email,
         p_school_name: schoolName,
         p_city: city,
+        p_address: address,
         p_cycles: cycles,
       });
       if (error || !data) {

@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminTopbar } from "./AdminTopbar";
 import { useAdminAuth } from "@/context/AdminAuthContext";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 function Shell() {
   const { agent, logout } = useAdminAuth();
@@ -29,6 +30,8 @@ function Shell() {
 }
 
 export function AdminLayout() {
+  // Console d'administration : jamais proposée aux moteurs de recherche.
+  usePageMeta({ noindex: true });
   return (
     <SidebarProvider>
       <Shell />

@@ -8,7 +8,7 @@
 import { audit, generateTempPassword, isStaffRole, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
-import { expectObject, requireString } from "../lib/validate.js";
+import { expectObject, requireUuid } from "../lib/validate.js";
 
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
@@ -24,7 +24,7 @@ export default route(async (req, res) => {
     }
 
     const body = expectObject(req.body);
-    const userId = requireString(body, "userId", "Le compte", { max: 64 });
+    const userId = requireUuid(body, "userId", "Le compte");
 
     const { data: target, error } = await svc
       .from("profiles")

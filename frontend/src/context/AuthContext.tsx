@@ -18,7 +18,7 @@ interface AuthContextValue {
   registerParent: (input: ParentSignupInput) => Promise<{ user: SessionUser; childName: string }>;
   changePassword: (current: string, next: string) => Promise<void>;
   createStaffAccount: (input: StaffAccountInput) => Promise<StaffCredentials>;
-  refresh: () => void;
+  refresh: () => Promise<void>;
   logout: () => void;
 }
 

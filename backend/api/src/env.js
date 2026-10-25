@@ -36,7 +36,10 @@ for (const file of [".env.local", ".env"]) {
     const match = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(line);
     if (!match) continue;
     const [, key, raw] = match;
-    if (process.env[key] === undefined) process.env[key] = unquote(raw);
+    // Commentaire en fin de ligne (dièse précédé d'un blanc) : syntaxe dotenv
+    // usuelle. Un « # » collé à la valeur (ex. mot de passe) est conservé.
+    const value = unquote(raw.replace(/\s+#.*$/, ""));
+    if (process.env[key] === undefined) process.env[key] = value;
   }
   console.log(`[scolia-api] variables chargées depuis ${file}`);
 }

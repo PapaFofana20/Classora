@@ -1,8 +1,34 @@
+import { useEffect } from "react";
 import { Accordion } from "@/components/ui/Accordion";
 import { Reveal } from "@/components/ui/Reveal";
 import { faqs } from "@/data/landing";
 
 export function FaqSection() {
+  // Données structurées FAQPage : elles reprennent EXACTEMENT les questions
+  // et réponses visibles de l'accordéon, sans contenu additionnel.
+  useEffect(() => {
+    const id = "faq-jsonld";
+    let script = document.getElementById(id) as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = id;
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    });
+    return () => {
+      script?.remove();
+    };
+  }, []);
+
   return (
     <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="faq-title">
       <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">

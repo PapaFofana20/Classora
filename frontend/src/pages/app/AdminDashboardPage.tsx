@@ -76,10 +76,10 @@ function Content({ s }: { s: AdminOverviewStats }) {
             ) : (
               <div className="space-y-2">
                 {s.recentActivity.map((a, i) => (
-                  <div key={i} className="flex items-start gap-3 text-sm">
+                  <div key={`${a.createdAt}-${i}`} className="flex items-start gap-3 text-sm">
                     <span className="shrink-0 text-neutral-400">{formatDate(a.createdAt)}</span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-ink font-medium">{a.action.replace(/_/g, " ")}</p>
+                      <p className="text-ink font-medium">{a.action?.replace(/_/g, " ") ?? "—"}</p>
                       <p className="text-xs text-neutral-500">{a.entity} · {a.actorRole || "—"}</p>
                     </div>
                   </div>

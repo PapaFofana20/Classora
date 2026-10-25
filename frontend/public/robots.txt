@@ -1,0 +1,14 @@
+# Robots.txt — Classora (https://classora-gsay.onrender.com)
+# Pages publiques indexables ; espaces privés et formulaires de session exclus.
+
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /admin
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /inscription-envoyee
+Disallow: /mot-de-passe-oublie
+Disallow: /reinitialiser-mot-de-passe
+
+Sitemap: https://classora-gsay.onrender.com/sitemap.xml

@@ -1,6 +1,6 @@
 import type { Plan, PlanId, Subscription, SubscriptionStatus } from "@/types";
 import { plans } from "@/data/plans";
-import { TODAY_ISO } from "@/data/school";
+import { todayIso as todayNow } from "@/data/school";
 import { supabase } from "@/lib/supabase";
 import { computeSubscriptionInfo, type SubscriptionInfo } from "@/utils/subscription";
 import { db, hydrate, respond, schoolOf, studentsOf } from "./db";
@@ -12,7 +12,7 @@ export function lastSubscription(schoolId: string): Subscription | null {
 }
 
 /** Information d'abonnement d'une école (calcul synchrone, utilisé par les gardes). */
-export function subscriptionInfoOf(schoolId: string, todayIso: string = TODAY_ISO): SubscriptionInfo {
+export function subscriptionInfoOf(schoolId: string, todayIso: string = todayNow()): SubscriptionInfo {
   return computeSubscriptionInfo(lastSubscription(schoolId), schoolOf(schoolId), studentsOf(schoolId).length, todayIso);
 }
 
@@ -22,7 +22,7 @@ export function statusOf(schoolId: string): SubscriptionStatus {
 
 export const getPlans = (): Promise<Plan[]> => respond(() => plans);
 
-export const getStatus = (schoolId: string, todayIso: string = TODAY_ISO): Promise<SubscriptionInfo> => respond(() => subscriptionInfoOf(schoolId, todayIso));
+export const getStatus = (schoolId: string, todayIso: string = todayNow()): Promise<SubscriptionInfo> => respond(() => subscriptionInfoOf(schoolId, todayIso));
 
 export const listSubscriptions = (schoolId: string): Promise<Subscription[]> =>
   respond(() => db.subscriptions.filter((s) => s.schoolId === schoolId).sort((a, b) => b.paidAt.localeCompare(a.paidAt)));

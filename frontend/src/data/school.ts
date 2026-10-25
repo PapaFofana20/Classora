@@ -1,7 +1,13 @@
 import type { Cycle, Level, LevelFees, Period, PeriodType } from "@/types";
 
-/** Date du jour (ISO aaaa-mm-jj), recalculée au chargement de l'application. */
-export const TODAY_ISO = new Date().toISOString().slice(0, 10);
+/**
+ * Date du jour (ISO aaaa-mm-jj), évaluée À CHAQUE APPEL : une constante figée
+ * au chargement du module dérivait après minuit UTC (échéances « échues »,
+ * jours restants d'abonnement, date affichée dans la barre supérieure).
+ */
+export function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 export const SCHOOL_YEAR = "2026-2027";
 
 export const CYCLES: Cycle[] = ["elementaire", "moyen", "secondaire"];

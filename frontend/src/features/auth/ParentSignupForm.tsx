@@ -51,7 +51,17 @@ export function ParentSignupForm({ school, onBack }: Props) {
     setBusy(true);
     setError(null);
     try {
-      const { childName } = await registerParent({ schoolId: school.id, ...form });
+      // Payload explicite : ne pas transmettre le champ "confirm" (le mot de
+      // passe de confirmation n'a pas à voyager jusqu'à l'API).
+      const { childName } = await registerParent({
+        schoolId: school.id,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone,
+        email: form.email,
+        childCode: form.childCode,
+        password: form.password,
+      });
       logout();
       toast("Demande envoyée à l'école.");
       navigate(`/inscription-envoyee?role=parent&enfant=${encodeURIComponent(childName)}`, { replace: true });

@@ -5,9 +5,16 @@ import { pageHeroes } from "@/data/pageHeroes";
 import { aboutStats, schoolPartners } from "@/data/landing";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { TestimonialsSection } from "@/features/landing/TestimonialsSection";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { initials } from "@/utils/format";
 
 export default function SchoolsPage() {
+  usePageMeta({
+    title: "Classora pour les écoles privées du Sénégal",
+    description:
+      "Une plateforme pensée pour les écoles privées sénégalaises, de l'élémentaire au secondaire : inscriptions, vie scolaire et communication avec les familles.",
+    path: "/ecoles",
+  });
   return (
     <>
       <PageHero {...pageHeroes.ecoles} />

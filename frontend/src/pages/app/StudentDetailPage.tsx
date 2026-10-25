@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { Table, type Column } from "@/components/ui/Table";
 import { Tabs } from "@/components/ui/Tabs";
 import { useCurrentUser } from "@/context/AuthContext";
-import { CYCLE_LABELS, TODAY_ISO } from "@/data/school";
+import { CYCLE_LABELS, todayIso } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { getStudentDetail, type StudentDetail } from "@/services/studentService";
 import type { Payment, ReportLine } from "@/types";
@@ -90,7 +90,7 @@ function Detail({ d }: { d: StudentDetail }) {
       {tab === "apercu" && (
         <Card>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <Info label="Date de naissance" value={`${formatDate(r.birthDate)} (${ageFrom(r.birthDate, TODAY_ISO)} ans)`} />
+            <Info label="Date de naissance" value={`${formatDate(r.birthDate)} (${ageFrom(r.birthDate, todayIso())} ans)`} />
             <Info label="Genre" value={r.gender === "F" ? "Fille" : "Garçon"} />
             <Info label="Inscrit le" value={formatDate(r.enrolledAt)} />
             <Info label="Cantine" value={r.options.cantine ? "Oui" : "Non"} />

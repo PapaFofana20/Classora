@@ -16,7 +16,7 @@ import { Table, type Column } from "@/components/ui/Table";
 import { Tabs } from "@/components/ui/Tabs";
 import { useCurrentUser } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
-import { TODAY_ISO } from "@/data/school";
+import { todayIso } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { useDebounce } from "@/hooks/useDebounce";
 import { listPaymentRows, recordCashPayment, sendReminders } from "@/services/paymentService";
@@ -58,7 +58,7 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
   const rows = useMemo(() => state.data ?? [], [state.data]);
   useEffect(() => setPage(1), [dq, cls, status, tab]);
 
-  const due = rows.filter((p) => p.dueDate <= TODAY_ISO);
+  const due = rows.filter((p) => p.dueDate <= todayIso());
   const expected = sum(due.map((p) => p.amount));
   const collected = sum(due.map((p) => p.paidAmount));
   const classes = Array.from(new Set(rows.map((r) => r.className))).sort((a, b) => a.localeCompare(b, "fr", { numeric: true }));
@@ -72,7 +72,7 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
 
   const debtors = useMemo<Debtor[]>(() => {
     const map = new Map<string, Debtor>();
-    rows.filter((p) => p.dueDate <= TODAY_ISO && remaining(p) > 0).forEach((p) => {
+    rows.filter((p) => p.dueDate <= todayIso() && remaining(p) > 0).forEach((p) => {
       const d = map.get(p.studentId) ?? { studentId: p.studentId, studentName: p.studentName, className: p.className, parentName: p.parentName, parentPhone: p.parentPhone, count: 0, total: 0 };
       d.count += 1;
       d.total += remaining(p);

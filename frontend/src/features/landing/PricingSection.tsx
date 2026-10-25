@@ -5,8 +5,10 @@ import { plans } from "@/data/landing";
 import { cn } from "@/utils/cn";
 
 export function PricingSection({ withHeader = true }: { withHeader?: boolean }) {
+  // Sans en-tête (page /tarifs), le H2 #pricing-title n'est pas rendu : ne pas
+  // référencer un identifiant absent (aria-labelledby cassé).
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="pricing-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby={withHeader ? "pricing-title" : undefined}>
       {withHeader && (
         <Reveal>
           <div className="mb-12 text-center">

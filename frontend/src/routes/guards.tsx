@@ -7,11 +7,16 @@ import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { isAlwaysAllowed } from "./navigation";
 import { ContactSchoolScreen, RenewScreen, SubscriptionRequiredScreen } from "@/features/subscription/SubscriptionScreens";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 /** /app/* : redirige vers /connexion si non connecté. */
 export function ProtectedRoute() {
-  const { user, justLoggedOut } = useAuth();
+  const { user, justLoggedOut, loadingSession } = useAuth();
   const location = useLocation();
+  // Restauration de session en cours : ne PAS rediriger — au rechargement
+  // direct d'un lien profond, user est encore null et la redirection vers
+  // /connexion détruisait l'URL d'origine.
+  if (loadingSession) return <div className="min-h-screen bg-mist" aria-hidden="true" />;
   if (!user) return <Navigate to={justLoggedOut ? "/" : "/connexion"} replace state={{ from: location.pathname }} />;
   if (user.status === "DESACTIVE") {
     // Ceinture et bretelles : currentSession() fermant déjà la session d'un
@@ -26,7 +31,11 @@ export function ProtectedRoute() {
 
 /** /connexion, /inscription : redirige vers /app si déjà connecté. */
 export function PublicOnlyRoute() {
-  const { user } = useAuth();
+  const { user, loadingSession } = useAuth();
+  // Attendre la restauration pour éviter le flash « formulaire de connexion »
+  // puis rebond vers /app au rechargement d'une page publique.
+  if (loadingSession) return <div className="min-h-screen bg-mist" aria-hidden="true" />;
+  usePageMeta({ noindex: true });
   if (user) return <Navigate to="/app" replace />;
   return <Outlet />;
 }
