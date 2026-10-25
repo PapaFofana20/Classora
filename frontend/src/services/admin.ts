@@ -21,6 +21,19 @@ export async function verifyAdminSession(): Promise<{
   return callFunction<{ agent: AdminAgent; status: "ACTIF" }>("admin/auth", {}, "POST");
 }
 
+/**
+ * Résout une matricule (ou un e-mail) administratif en e-mail de connexion,
+ * après vérification du mot de passe côté serveur. Le client enchaîne ensuite
+ * avec signInWithPassword(email, password) : les jetons restent gérés par
+ * Supabase côté navigateur.
+ */
+export async function adminResolveLogin(input: {
+  identifier: string;
+  password: string;
+}): Promise<{ email: string }> {
+  return callFunction<{ email: string }>("admin/login", input, "POST");
+}
+
 /* ------------------------------------------------------------------ */
 /* Agents                                                             */
 /* ------------------------------------------------------------------ */

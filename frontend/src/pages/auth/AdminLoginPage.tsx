@@ -6,6 +6,9 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { supabase } from "@/lib/supabase";
+import { adminResolveLogin } from "@/services/admin";
+
+const MATRICULE_RE = /^CLA-ADM-\d{6}$/i;
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -13,7 +16,7 @@ export default function AdminLoginPage() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   const doLogin = async (e: React.FormEvent) => {
@@ -21,18 +24,28 @@ export default function AdminLoginPage() {
     setError(null);
     setBusy(true);
     try {
-      // 1. Connexion via Supabase Auth (identique à la connexion scolaire).
+      // 1. Résout la matricule en e-mail via l'API (le mot de passe est
+      // vérifié côté serveur : aucune information sans secret valide).
+      // Un e-mail est utilisé tel quel.
+      const trimmed = identifier.trim();
+      let email = trimmed.toLowerCase();
+      if (MATRICULE_RE.test(trimmed)) {
+        const { email: resolved } = await adminResolveLogin({ identifier: trimmed, password });
+        email = resolved;
+      }
+
+      // 2. Connexion via Supabase Auth (identique à la connexion scolaire).
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase().trim(),
+        email,
         password,
       });
       if (authError) {
-        setError("E-mail ou mot de passe incorrect.");
+        setError("Matricule/e-mail ou mot de passe incorrect.");
         setBusy(false);
         return;
       }
 
-      // 2. Vérifie le profil administrateur via l'API backend. On affiche le
+      // 3. Vérifie le profil administrateur via l'API backend. On affiche le
       // message exact (profil absent, compte désactivé, API indisponible) au
       // lieu de le masquer derrière « aucun accès ».
       const result = await verify();
@@ -64,14 +77,14 @@ export default function AdminLoginPage() {
           </div>
         )}
         <Input
-          label="Adresse e-mail administrative"
-          type="email"
-          icon="mail"
-          autoComplete="email"
-          placeholder="admin@classora.sn"
+          label="Matricule ou e-mail administratif"
+          type="text"
+          icon="badge"
+          autoComplete="username"
+          placeholder="CLA-ADM-000001 ou admin@classora.sn"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
         />
         <div className="relative">
           <Input

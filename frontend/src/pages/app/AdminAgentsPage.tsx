@@ -41,8 +41,11 @@ export default function AdminAgentsPage() {
     setCreateError("");
     setCreating(true);
     try {
-      await createAdminAgent(form);
-      setStatusMsg({ type: "success", text: "Agent créé avec succès. Communiquez-lui son mot de passe." });
+      const created = await createAdminAgent(form);
+      setStatusMsg({
+        type: "success",
+        text: `Agent créé — matricule ${created.matricule}. Il peut se connecter sur /admin/connexion avec cette matricule ou ${created.email}, et son mot de passe.`,
+      });
       setShowCreate(false);
       setForm({ role: "agent_suivi", firstName: "", lastName: "", email: "", phone: "", password: "" });
       state.reload();

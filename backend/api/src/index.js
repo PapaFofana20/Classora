@@ -32,6 +32,7 @@ import updateStaff from "./routes/updateStaff.js";
 import resetStaffPassword from "./routes/resetStaffPassword.js";
 import setStaffActive from "./routes/setStaffActive.js";
 import adminAuth from "./routes/adminAuth.js";
+import adminLogin from "./routes/adminLogin.js";
 import adminAgents from "./routes/adminAgents.js";
 import adminSchools from "./routes/adminSchools.js";
 import adminStats from "./routes/adminStats.js";
@@ -96,6 +97,7 @@ const adminConfigGuard = (_req, res, next) => {
 };
 
 app.all("/admin/auth", adminConfigGuard, adminAuth);
+app.all("/admin/login", adminConfigGuard, adminLogin);
 app.all("/admin/agents", adminConfigGuard, adminAgents);
 app.all("/admin/schools", adminConfigGuard, adminSchools);
 app.all("/admin/stats", adminConfigGuard, adminStats);
