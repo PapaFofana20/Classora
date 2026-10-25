@@ -55,10 +55,11 @@ function Content({ s }: { s: AdminOverviewStats }) {
                   key: "status",
                   header: "Statut",
                   align: "center",
-                  render: (r: { status: string }) => {
-                    const tone = r.status === "ACTIF" ? "success" : r.status === "EXPIRE" ? "danger" : "neutral";
-                    return <Badge tone={tone}>{r.status === "ACTIF" ? "Actif" : r.status === "EXPIRE" ? "Expiré" : "Aucun"}</Badge>;
-                  },
+                  render: (r: { status: string }) => (
+                    <Badge tone={r.status === "ACTIF" ? "success" : "danger"}>
+                      {r.status === "ACTIF" ? "Actif" : "Inactif"}
+                    </Badge>
+                  ),
                 },
               ]}
               rows={s.bySchool as unknown as { schoolName: string; matricule: string; studentCount: number; classCount: number; teacherCount: number; status: string }[]}

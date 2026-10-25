@@ -19,12 +19,16 @@ export default route(async (req, res) => {
     // Nombre total d'écoles.
     const { count: totalSchools } = await svc.from("schools").select("*", { count: "exact", head: true });
 
-    // Écoles actives (abonnement valide).
+    // Écoles réellement actives : inscriptions ouvertes ET abonnement valide
+    // — même définition que le statut ACTIF/INACTIF de la RPC
+    // admin_school_stats (l'ancien comptage ignorait la suspension admin).
     const today = new Date().toISOString().slice(0, 10);
-    const { count: activeSchools } = await svc
-      .from("subscriptions")
-      .select("school_id", { count: "exact", head: true })
-      .gte("ends_at", today);
+    const { data: schoolRows } = await svc.from("schools").select("id, registration_open");
+    const { data: subRows } = await svc.from("subscriptions").select("school_id, ends_at");
+    const subEndsBySchool = new Map((subRows ?? []).map((r) => [r.school_id, r.ends_at]));
+    const activeSchools = (schoolRows ?? []).filter(
+      (s) => s.registration_open && (subEndsBySchool.get(s.id) ?? "") >= today,
+    ).length;
 
     // Nombre total d'élèves (toutes écoles confondues).
     const { count: totalStudents } = await svc.from("students").select("*", { count: "exact", head: true });
@@ -71,7 +75,7 @@ export default route(async (req, res) => {
         studentCount: Number(s.student_count ?? 0),
         classCount: Number(s.class_count ?? 0),
         teacherCount: Number(s.teacher_count ?? 0),
-        status: s.subscription_status ?? "AUCUN",
+        status: s.subscription_status ?? "INACTIF",
       })),
       recentActivity: (recentActivity ?? []).map((a) => ({
         action: a.action,

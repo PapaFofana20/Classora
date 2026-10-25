@@ -4,6 +4,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { SIDEBAR_COLLAPSED, SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
 import { Icon } from "@/components/ui/Icon";
+import { Logo } from "@/components/ui/Brand";
 import { cn } from "@/utils/cn";
 import type { AdminAgent } from "@/types";
 import { adminNavFor } from "@/routes/adminNavigation";
@@ -106,12 +107,14 @@ function SidebarContent({ agent, expanded, onNavigate, onLogoClick }: { agent: A
 
   return (
     <div className="flex h-full flex-col text-white">
-      <div className={cn("flex h-[68px] shrink-0 items-center", expanded ? "px-6" : "justify-center px-4")}>
+      <div className={cn("flex h-[68px] shrink-0 items-center gap-2", expanded ? "px-6" : "justify-center px-4")}>
         {expanded ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-lime">Classora</span>
-            <span className="text-xs font-semibold text-white">Admin</span>
-          </div>
+          <>
+            <Logo dark to="/admin" className="h-8" />
+            <span className="shrink-0 rounded-full bg-lime/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-lime">
+              Admin
+            </span>
+          </>
         ) : (
           <button type="button" onClick={onLogoClick} aria-label="Déplier le menu" className="grid size-10 place-items-center rounded-xl bg-lime text-forest">
             <Icon name="school" fill className="text-[24px]" />
