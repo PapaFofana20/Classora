@@ -6,13 +6,22 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { Table } from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { Badge } from "@/components/ui/Badge";
+import { Button, LinkButton } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
-import { LinkButton } from "@/components/ui/Button";
 import { useAsync } from "@/hooks/useAsync";
-import { listAdminSchools, type ListSchoolsParams, type ListSchoolsResult } from "@/services/admin";
+import {
+  listAdminSchools,
+  setAdminSchoolStatus,
+  deleteAdminSchool,
+  type ListSchoolsParams,
+  type ListSchoolsResult,
+} from "@/services/admin";
 import type { AdminSchool } from "@/types";
 import { formatDate } from "@/utils/format";
+import { useAdminAuth } from "@/context/AdminAuthContext";
 
 export default function AdminSchoolsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -77,7 +86,7 @@ export default function AdminSchoolsPage() {
         }
       />
       <AsyncView state={state}>
-        {(s) => <Content s={s} updateQuery={updateQuery} setPageState={setPageState} setPageSizeState={setPageSizeState} />}
+        {(s) => <Content s={s} updateQuery={updateQuery} setPageState={setPageState} setPageSizeState={setPageSizeState} reload={state.reload} />}
       </AsyncView>
     </>
   );
@@ -88,15 +97,73 @@ function Content({
   updateQuery,
   setPageState,
   setPageSizeState,
+  reload,
 }: {
   s: ListSchoolsResult;
   updateQuery: (u: Record<string, string | null>) => void;
   setPageState: (p: number) => void;
   setPageSizeState: (p: number) => void;
+  reload: () => void;
 }) {
   void setPageSizeState;
+  const { isSuperAdmin } = useAdminAuth();
+
+  const [statusMsg, setStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [statusTarget, setStatusTarget] = useState<AdminSchool | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminSchool | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState("");
+
+  const expectedConfirmation = (school: AdminSchool) => school.matricule || school.name;
+
+  const toggleStatus = async () => {
+    if (!statusTarget) return;
+    const newStatus = statusTarget.registrationOpen ? "SUSPENDUE" : "ACTIF";
+    setActionError("");
+    setBusy(true);
+    try {
+      await setAdminSchoolStatus({ schoolId: statusTarget.id, status: newStatus });
+      setStatusMsg({ type: "success", text: `Établissement ${newStatus === "ACTIF" ? "activé" : "suspendu"} avec succès.` });
+      setStatusTarget(null);
+      reload();
+    } catch (e: any) {
+      setActionError(e.message || "Erreur lors du changement de statut.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setActionError("");
+    setBusy(true);
+    try {
+      await deleteAdminSchool({ schoolId: deleteTarget.id, confirmation: deleteConfirm });
+      setStatusMsg({ type: "success", text: `Établissement ${deleteTarget.name} supprimé définitivement.` });
+      setDeleteTarget(null);
+      setDeleteConfirm("");
+      reload();
+    } catch (e: any) {
+      setActionError(e.message || "Erreur lors de la suppression.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {statusMsg && (
+        <div className={`rounded-xl p-3 ${statusMsg.type === "success" ? "border border-emerald-100 bg-emerald-50" : "border border-red-100 bg-red-50"}`}>
+          <Icon
+            name={statusMsg.type === "success" ? "check_circle" : "error"}
+            fill
+            className={`mr-2 ${statusMsg.type === "success" ? "text-emerald-600" : "text-red-600"}`}
+          />
+          <span className="text-sm">{statusMsg.text}</span>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader title="Total établissements" />
@@ -130,14 +197,54 @@ function Content({
               header: "Statut",
               align: "center",
               render: (r: AdminSchool) => {
-                const active = r.matricule && r.registrationOpen;
+                // Le badge reflète l'état que les boutons modifient
+                // (registration_open). L'ancien test « matricule && open »
+                // affichait « Suspendu » à toute école sans matricule.
                 return (
-                  <Badge tone={active ? "success" : "danger"}>
-                    {active ? "Actif" : "Suspendu"}
+                  <Badge tone={r.registrationOpen ? "success" : "danger"}>
+                    {r.registrationOpen ? "Actif" : "Suspendu"}
                   </Badge>
                 );
               },
             },
+            ...(isSuperAdmin
+              ? [
+                  {
+                    key: "actions",
+                    header: "Actions",
+                    align: "center" as const,
+                    render: (r: AdminSchool) => (
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          title={r.registrationOpen ? "Suspendre cet établissement" : "Réactiver cet établissement"}
+                          aria-label={r.registrationOpen ? `Suspendre ${r.name}` : `Réactiver ${r.name}`}
+                          onClick={() => {
+                            setActionError("");
+                            setStatusTarget(r);
+                          }}
+                          className="grid size-9 place-items-center rounded-full text-neutral-500 transition hover:bg-mist hover:text-forest"
+                        >
+                          <Icon name={r.registrationOpen ? "pause" : "play_arrow"} className="text-[20px]" />
+                        </button>
+                        <button
+                          type="button"
+                          title="Supprimer définitivement cet établissement"
+                          aria-label={`Supprimer définitivement ${r.name}`}
+                          onClick={() => {
+                            setActionError("");
+                            setDeleteConfirm("");
+                            setDeleteTarget(r);
+                          }}
+                          className="grid size-9 place-items-center rounded-full text-danger/70 transition hover:bg-red-50 hover:text-danger"
+                        >
+                          <Icon name="delete" className="text-[20px]" />
+                        </button>
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
           ]}
           rows={s.schools}
           rowKey={(r: AdminSchool) => r.id}
@@ -150,6 +257,86 @@ function Content({
         setPageState(p);
         updateQuery({ page: String(p) });
       }} />
+
+      {/* Suspension / réactivation */}
+      <Modal
+        open={!!statusTarget}
+        onClose={() => setStatusTarget(null)}
+        title={statusTarget?.registrationOpen ? "Suspendre l'établissement" : "Activer l'établissement"}
+        size="sm"
+      >
+        <p className="mb-4">
+          Voulez-vous vraiment {statusTarget?.registrationOpen ? "suspendre" : "réactiver"} l'établissement{" "}
+          <strong>{statusTarget?.name}</strong> ?
+          {statusTarget?.registrationOpen && " Une école suspendue n'inscrit plus de nouveaux élèves et ses données deviennent inaccessibles."}
+        </p>
+        {actionError && (
+          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-danger">
+            <Icon name="error" className="text-[20px]" />
+            {actionError}
+          </p>
+        )}
+        <div className="flex justify-end gap-3" slot="footer">
+          <Button variant="outline" onClick={() => setStatusTarget(null)} disabled={busy}>
+            Annuler
+          </Button>
+          <Button variant={statusTarget?.registrationOpen ? "danger" : "primary"} onClick={toggleStatus} loading={busy}>
+            {statusTarget?.registrationOpen ? "Suspendre" : "Activer"}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Suppression définitive (confirmation par matricule ou nom) */}
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Supprimer définitivement l'établissement" size="sm">
+        <div className="mb-4 rounded-xl border border-red-100 bg-red-50 p-3">
+          <p className="flex items-center gap-2 text-sm font-semibold text-danger">
+            <Icon name="warning" fill className="text-[20px]" />
+            Cette action est irréversible.
+          </p>
+          <p className="mt-1 text-xs text-neutral-600">
+            Seront définitivement supprimés : l'établissement <strong>{deleteTarget?.name}</strong>, ses élèves, classes,
+            enseignants, parents, abonnements, messages, ainsi que tous les comptes de connexion associés.
+          </p>
+        </div>
+        {actionError && (
+          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-danger">
+            <Icon name="error" className="text-[20px]" />
+            {actionError}
+          </p>
+        )}
+        {deleteTarget?.matricule ? (
+          <Input
+            label="Tapez la matricule de l'établissement pour confirmer"
+            hint={`Matricule attendue : ${deleteTarget.matricule}`}
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder={deleteTarget.matricule}
+            autoComplete="off"
+          />
+        ) : (
+          <Input
+            label="Cet établissement n'a pas encore de matricule : tapez son nom exact pour confirmer"
+            hint={`Nom attendu : ${deleteTarget?.name}`}
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder={deleteTarget?.name}
+            autoComplete="off"
+          />
+        )}
+        <div className="flex justify-end gap-3" slot="footer">
+          <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={busy}>
+            Annuler
+          </Button>
+          <Button
+            variant="danger"
+            onClick={confirmDelete}
+            loading={busy}
+            disabled={!deleteTarget || deleteConfirm !== expectedConfirmation(deleteTarget)}
+          >
+            Supprimer définitivement
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
