@@ -26,3 +26,6 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Identifiants Git (stockage local du token via credential.helper=store)
+.git-credentials
