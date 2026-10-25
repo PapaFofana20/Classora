@@ -50,11 +50,14 @@ export function requireCycles(obj) {
   return Array.from(new Set(cycles));
 }
 
-export function requireStringArray(obj, field, label) {
+export function requireStringArray(obj, field, label, { maxItems = 20 } = {}) {
   const raw = obj[field];
   if (raw === undefined || raw === null) return [];
   if (!Array.isArray(raw) || raw.some((v) => typeof v !== "string" || v.length > 80)) {
     throw new ValidationError(`${label} est invalide.`);
+  }
+  if (raw.length > maxItems) {
+    throw new ValidationError(`${label} : ${maxItems} éléments maximum.`);
   }
   return raw.map((v) => v.trim()).filter(Boolean);
 }

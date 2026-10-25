@@ -17,7 +17,8 @@ import { expectObject, requireString, ValidationError } from "../_shared/validat
 Deno.serve(async (req) => {
   const options = handleOptions(req);
   if (options) return options;
-  if (req.method !== "POST") return methodNotAllowed();
+  const origin = req.headers.get("Origin");
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     const authResult = await requireDirecteur(svc, req);
@@ -29,7 +30,7 @@ Deno.serve(async (req) => {
     const userId = requireString(body, "userId", "Le compte", { max: 64 });
     const rawActive = body["active"];
     if (typeof rawActive !== "boolean") {
-      return badRequest("Requête invalide : active doit être un booléen.");
+      return badRequest(origin, "Requête invalide : active doit être un booléen.");
     }
     const active: boolean = rawActive;
 
@@ -39,23 +40,23 @@ Deno.serve(async (req) => {
       .eq("id", userId)
       .maybeSingle();
     if (error || !target || target.school_id !== caller.schoolId) {
-      return notFound("Compte introuvable dans votre école.");
+      return notFound(origin, "Compte introuvable dans votre école.");
     }
     if (target.role === "directeur") {
-      return badRequest("Le compte directeur ne peut pas être désactivé depuis l'application.");
+      return badRequest(origin, "Le compte directeur ne peut pas être désactivé depuis l'application.");
     }
     if (userId === caller.id) {
-      return badRequest("Vous ne pouvez pas désactiver votre propre compte.");
+      return badRequest(origin, "Vous ne pouvez pas désactiver votre propre compte.");
     }
     if (target.status === (active ? "ACTIF" : "DESACTIVE")) {
-      return ok({ alreadyActive: true, userId, status: target.status });
+      return ok(origin, { alreadyActive: true, userId, status: target.status });
     }
 
     const { error: statusError } = await svc
       .from("profiles")
       .update({ status: active ? "ACTIF" : "DESACTIVE" })
       .eq("id", userId);
-    if (statusError) return serverError();
+    if (statusError) return serverError(origin);
 
     await audit(svc, {
       schoolId: caller.schoolId,
@@ -66,10 +67,10 @@ Deno.serve(async (req) => {
       entityId: userId,
     });
 
-    return ok({ userId, status: active ? "ACTIF" : "DESACTIVE" });
+    return ok(origin, { userId, status: active ? "ACTIF" : "DESACTIVE" });
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });

@@ -16,7 +16,8 @@ type StaffRole = "professeur" | "instituteur" | "econome" | "surveillant";
 Deno.serve(async (req) => {
   const options = handleOptions(req);
   if (options) return options;
-  if (req.method !== "POST") return methodNotAllowed();
+  const origin = req.headers.get("Origin");
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     const authResult = await requireDirecteur(svc, req);
@@ -28,7 +29,7 @@ Deno.serve(async (req) => {
     const body = expectObject(await req.json());
     const role = requireString(body, "role", "Le rôle", { max: 20 }) as StaffRole;
     if (!["professeur", "instituteur", "econome", "surveillant"].includes(role)) {
-      return badRequest("Rôle invalide.");
+      return badRequest(origin, "Rôle invalide.");
     }
     const firstName = requireString(body, "firstName", "Le prénom", { min: 1, max: 60 });
     const lastName = requireString(body, "lastName", "Le nom", { min: 1, max: 60 });
@@ -39,12 +40,12 @@ Deno.serve(async (req) => {
 
     const tempPassword = providedTemp ?? generateTempPassword();
     const pwError = passwordError(tempPassword);
-    if (pwError) return badRequest(pwError);
+    if (pwError) return badRequest(origin, pwError);
 
     // L'école doit être en écriture (abonnement valide / non expiré).
     const { data: writable } = await svc.rpc("school_is_writable", { p_school_id: schoolId });
     if (writable !== true) {
-      return forbidden("Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
+      return forbidden(origin, "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
     }
 
     const { data: created, error: createError } = await svc.auth.admin.createUser({
@@ -55,7 +56,7 @@ Deno.serve(async (req) => {
     });
     if (createError || !created?.user) {
       const duplicate = /already|duplicate|registered/i.test(createError?.message ?? "");
-      return badRequest(
+      return badRequest(origin, 
         duplicate ? "Un compte existe déjà avec cet e-mail." : "Impossible de créer l'accès. Réessayez.",
       );
     }
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
         entityId: created.user.id,
         payload: { role },
       });
-      return ok({
+      return ok(origin, {
         userId: created.user.id,
         email,
         tempPassword,
@@ -93,13 +94,13 @@ Deno.serve(async (req) => {
     } catch (sqlError) {
       await svc.auth.admin.deleteUser(created.user.id);
       const message = sqlError instanceof Error ? sqlError.message : undefined;
-      if (message && /un compte existe déjà|rôle invalide/i.test(message)) return badRequest(message);
-      return serverError();
+      if (message && /un compte existe déjà|rôle invalide/i.test(message)) return badRequest(origin, message);
+      return serverError(origin);
     }
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });
 

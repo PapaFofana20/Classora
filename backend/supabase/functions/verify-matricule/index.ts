@@ -12,7 +12,8 @@ import { ValidationError } from "../_shared/validate.ts";
 Deno.serve(async (req) => {
   const options = handleOptions(req);
   if (options) return options;
-  if (req.method !== "GET" && req.method !== "POST") return methodNotAllowed();
+  const origin = req.headers.get("Origin");
+  if (req.method !== "GET" && req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     await enforceRateLimit(svc, `verify-matricule:${clientIp(req) ?? "sans-adresse"}`, 20, 600);
@@ -24,16 +25,16 @@ Deno.serve(async (req) => {
       raw = (await req.json())?.["matricule"] ?? null;
     }
     if (typeof raw !== "string" || raw.trim() === "") {
-      return badRequest("Saisissez le matricule communiqué par votre école.");
+      return badRequest(origin, "Saisissez le matricule communiqué par votre école.");
     }
 
     const { data: result, error } = await svc.rpc("verify_matricule", { p_matricule: raw });
-    if (error || !result) return serverError();
+    if (error || !result) return serverError(origin);
 
     const status = result.ok === true ? 200 : (result.reason === "format" ? 400 : 404);
-    return ok(result, status);
+    return ok(origin, result, status);
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });

@@ -59,11 +59,15 @@ export function requireStringArray(
   obj: Record<string, unknown>,
   field: string,
   label: string,
+  maxItems = 20,
 ): string[] {
   const raw = obj[field];
   if (raw === undefined || raw === null) return [];
   if (!Array.isArray(raw) || raw.some((v) => typeof v !== "string" || v.length > 80)) {
     throw new ValidationError(`${label} est invalide.`);
+  }
+  if (raw.length > maxItems) {
+    throw new ValidationError(`${label} : ${maxItems} éléments maximum.`);
   }
   return raw.map((v) => (v as string).trim()).filter(Boolean);
 }

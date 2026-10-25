@@ -2,10 +2,23 @@
  * En-têtes CORS et helpers de réponses HTTP pour les Edge Functions SCOLIA.
  */
 
+/**
+ * Allowlist CORS : l'origine n'est reflétée QUE si elle figure dans
+ * FRONTEND_ORIGIN (séparées par des virgules). Sans variable définie, repli
+ * sur « * » (aucune fonction n'utilise de cookies : pas de CSRF possible,
+ * mais un allowlist explicite reste préférable dès que la variable est posée).
+ * L'ancien code reflétait l'Origin arbitraire du demandeur : n'importe quel
+ * site pouvait piloter les inscriptions depuis le navigateur d'un visiteur.
+ */
 export function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowedOrigin = origin ?? Deno.env.get("FRONTEND_ORIGIN") ?? "";
+  const allowlist = (Deno.env.get("FRONTEND_ORIGIN") ?? "")
+    .split(",")
+    .map((o) => o.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+  const normalized = origin?.replace(/\/$/, "") ?? null;
+  const allowedOrigin = allowlist.length === 0 ? "*" : allowlist.includes(normalized ?? "") ? normalized : "null";
   return {
-    "Access-Control-Allow-Origin": allowedOrigin || "null",
+    "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",

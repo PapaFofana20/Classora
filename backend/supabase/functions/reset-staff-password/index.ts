@@ -13,7 +13,8 @@ import { expectObject, requireString, ValidationError } from "../_shared/validat
 Deno.serve(async (req) => {
   const options = handleOptions(req);
   if (options) return options;
-  if (req.method !== "POST") return methodNotAllowed();
+  const origin = req.headers.get("Origin");
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     const authResult = await requireDirecteur(svc, req);
@@ -30,23 +31,23 @@ Deno.serve(async (req) => {
       .eq("id", userId)
       .maybeSingle();
     if (error || !target || target.school_id !== caller.schoolId) {
-      return notFound("Compte introuvable dans votre école.");
+      return notFound(origin, "Compte introuvable dans votre école.");
     }
     if (target.role === "directeur") {
-      return badRequest("Le compte directeur sera réinitialisé via le service support.");
+      return badRequest(origin, "Le compte directeur sera réinitialisé via le service support.");
     }
 
     const tempPassword = generateTempPassword();
     const { error: pwError } = await svc.auth.admin.updateUserById(userId, {
       password: tempPassword,
     });
-    if (pwError) return serverError();
+    if (pwError) return serverError(origin);
 
     const { error: flagError } = await svc
       .from("profiles")
       .update({ must_change_password: true })
       .eq("id", userId);
-    if (flagError) return serverError();
+    if (flagError) return serverError(origin);
 
     await audit(svc, {
       schoolId: caller.schoolId,
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
       entityId: userId,
     });
 
-    return ok({
+    return ok(origin, {
       userId,
       email: target.email,
       tempPassword,
@@ -66,8 +67,8 @@ Deno.serve(async (req) => {
       role: target.role,
     });
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });

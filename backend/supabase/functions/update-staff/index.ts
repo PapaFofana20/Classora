@@ -12,7 +12,8 @@ import { expectObject, optionalString, requireString, ValidationError } from "..
 Deno.serve(async (req) => {
   const options = handleOptions(req);
   if (options) return options;
-  if (req.method !== "POST") return methodNotAllowed();
+  const origin = req.headers.get("Origin");
+  if (req.method !== "POST") return methodNotAllowed(origin);
   const svc = serviceClient();
   try {
     const authResult = await requireDirecteur(svc, req);
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
     const body = expectObject(await req.json());
     const userId = requireString(body, "userId", "Le compte", { max: 64 });
     if (userId === caller.id) {
-      return badRequest("Modifiez votre propre profil depuis votre page de profil.");
+      return badRequest(origin, "Modifiez votre propre profil depuis votre page de profil.");
     }
 
     const { data: target, error: targetError } = await svc
@@ -32,15 +33,22 @@ Deno.serve(async (req) => {
       .eq("id", userId)
       .maybeSingle();
     if (targetError || !target || target.school_id !== caller.schoolId) {
-      return notFound("Compte introuvable dans votre école.");
+      return notFound(origin, "Compte introuvable dans votre école.");
     }
     if (target.role === "directeur") {
-      return badRequest("Le compte directeur ne peut être modifié qu'au niveau du support.");
+      return badRequest(origin, "Le compte directeur ne peut être modifié qu'au niveau du support.");
     }
 
     const firstName = optionalString(body, "firstName", "Le prénom", 60);
     const lastName = optionalString(body, "lastName", "Le nom", 60);
-    const email = optionalString(body, "email", "L'e-mail", 120)?.toLowerCase();
+    // Format e-mail contrôlé (l'ancien code acceptait n'importe quelle
+    // chaîne) et doublon testé en égalité exacte : `.ilike` traitait « % »
+    // et « _ » comme des jokers (faux positifs).
+    const emailRaw = optionalString(body, "email", "L'e-mail", 120)?.toLowerCase();
+    if (emailRaw !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailRaw)) {
+      return badRequest(origin, "L'e-mail est invalide.");
+    }
+    const email = emailRaw;
     const phone = optionalString(body, "phone", "Le téléphone", 20);
     const specialties = requireStringArrayOptional(body);
 
@@ -48,16 +56,16 @@ Deno.serve(async (req) => {
       const { count } = await svc
         .from("profiles")
         .select("id", { count: "exact", head: true })
-        .ilike("email", email);
+        .eq("email", email);
       if (count && count > 0) {
-        return badRequest("Un compte existe déjà avec cet e-mail.");
+        return badRequest(origin, "Un compte existe déjà avec cet e-mail.");
       }
       const { error: emailError } = await svc.auth.admin.updateUserById(userId, {
         email,
         email_confirm: true,
       });
       if (emailError) {
-        return badRequest("Impossible de changer l'e-mail de ce compte. Vérifiez qu'il n'est pas déjà utilisé.");
+        return badRequest(origin, "Impossible de changer l'e-mail de ce compte. Vérifiez qu'il n'est pas déjà utilisé.");
       }
     }
 
@@ -68,7 +76,7 @@ Deno.serve(async (req) => {
     if (phone !== undefined) patch.phone = phone;
     if (Object.keys(patch).length) {
       const { error } = await svc.from("profiles").update(patch).eq("id", userId);
-      if (error) return serverError();
+      if (error) return serverError(origin);
     }
 
     if (target.teacher_id && (firstName !== undefined || lastName !== undefined || email !== undefined || phone !== undefined)) {
@@ -78,12 +86,12 @@ Deno.serve(async (req) => {
       if (email !== undefined) teacherPatch.email = email;
       if (phone !== undefined) teacherPatch.phone = phone;
       const { error } = await svc.from("teachers").update(teacherPatch).eq("id", target.teacher_id);
-      if (error) return serverError();
+      if (error) return serverError(origin);
     }
 
     if (target.teacher_id && specialties !== undefined) {
       const { error } = await svc.from("teachers").update({ specialties }).eq("id", target.teacher_id);
-      if (error) return serverError();
+      if (error) return serverError(origin);
     }
 
     await audit(svc, {
@@ -96,11 +104,11 @@ Deno.serve(async (req) => {
       payload: { fields: Object.keys({ ...patch, specialties }) },
     });
 
-    return ok({ updated: true });
+    return ok(origin, { updated: true });
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(e.message);
-    return serverError();
+    if (e instanceof ValidationError) return badRequest(origin, e.message);
+    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
+    return serverError(origin);
   }
 });
 
