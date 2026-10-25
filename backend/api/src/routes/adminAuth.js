@@ -16,6 +16,29 @@ export default route(async (req, res) => {
 
     await enforceRateLimit(svc, `admin-auth:${user.id}`, 30, 300);
 
+    // Séparation stricte des espaces : un compte scolaire (directeur,
+    // enseignant, parent — table profiles) ne peut JAMAIS accéder à la
+    // console d'administration, même si une ligne admin_agents le visait
+    // (donnée croisée). Le contrôle passe AVANT la recherche de l'agent.
+    const { data: schoolProfile } = await svc
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (schoolProfile) {
+      await audit(svc, {
+        schoolId: null,
+        actorId: user.id,
+        actorRole: "scolaire",
+        action: "admin_login_blocked_school_account",
+        entity: "profiles",
+        entityId: user.id,
+      });
+      return ok(res, {
+        error: "Ce compte est un compte scolaire : il n'a pas accès à l'administration. Utilisez la connexion école.",
+      }, 403);
+    }
+
     // Cherche le profil admin_agent de l'utilisateur connecté.
     const { data: agent, error } = await svc
       .from("admin_agents")

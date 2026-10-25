@@ -75,7 +75,17 @@ export default function AdminLoginPage() {
         {error && (
           <div role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger">
             <Icon name="error" className="text-[20px]" />
-            {error}
+            <span>
+              {error}
+              {error.includes("compte scolaire") && (
+                <>
+                  {" "}
+                  <Link to="/connexion" className="font-bold underline underline-offset-4">
+                    Se connecter à l'espace école
+                  </Link>
+                </>
+              )}
+            </span>
           </div>
         )}
         <Input

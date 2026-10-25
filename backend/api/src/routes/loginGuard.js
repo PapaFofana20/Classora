@@ -32,6 +32,27 @@ export default route(async (req, res) => {
       throw new Error("Impossible de vérifier le compte.");
     }
     if (!profile) {
+      // Séparation stricte des espaces : un agent Classora (admin_agents)
+      // n'a pas de profil scolaire — message dédié plutôt que « identifiants
+      // incorrects », et refus garanti de l'espace école.
+      const { data: adminAgent } = await svc
+        .from("admin_agents")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+      if (adminAgent) {
+        await audit(svc, {
+          schoolId: null,
+          actorId: user.id,
+          actorRole: "admin",
+          action: "login_blocked_admin_agent",
+          entity: "admin_agents",
+          entityId: user.id,
+        });
+        return ok(res, {
+          error: "Les agents Classora se connectent sur la console d'administration (/admin/connexion).",
+        }, 403);
+      }
       return unauthorized(res, "E-mail ou mot de passe incorrect.");
     }
 
