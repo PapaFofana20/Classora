@@ -81,14 +81,8 @@ export function buildClassReportCards(input: ReportInput): ReportCardData[] {
     rank: ranks.get(p.student.id) ?? null,
     classSize: students.length,
     classAverage,
-    meta: metas.find((m) => m.studentId === p.student.id && m.period === period.id) ?? {
-      schoolId: classRoom.schoolId,
-      studentId: p.student.id,
-      period: period.id,
-      conduct: "Bonne",
-      absences: 0,
-      comment: "",
-    },
+    // Aucune valeur inventée : sans saisie réelle, la fiche affiche « Non renseigné ».
+    meta: metas.find((m) => m.studentId === p.student.id && m.period === period.id) ?? null,
     headTeacherName,
   }));
 }

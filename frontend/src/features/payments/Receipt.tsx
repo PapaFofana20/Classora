@@ -33,9 +33,9 @@ export function Receipt({ payments, schoolName }: { payments: PaymentRow[]; scho
           </li>
         ))}
       </ul>
-      <div className="mt-4 flex items-center justify-between rounded-xl bg-forest px-4 py-3 text-white print:border print:bg-transparent print:text-black">
+      <div className="@container mt-4 flex items-center justify-between gap-3 rounded-xl bg-forest px-4 py-3 text-white print:border print:bg-transparent print:text-black">
         <span className="flex items-center gap-2 text-sm font-semibold"><Icon name="verified" fill className="text-lime print:text-black" />Total payé</span>
-        <span className="text-xl font-extrabold">{formatCurrency(total)}</span>
+        <span className="overflow-wrap-anywhere text-right text-[clamp(1rem,5cqi,1.25rem)] font-extrabold leading-tight tabular-nums">{formatCurrency(total)}</span>
       </div>
     </article>
   );

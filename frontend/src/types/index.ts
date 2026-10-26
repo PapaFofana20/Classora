@@ -399,7 +399,8 @@ export interface ReportCardData {
   rank: number | null;
   classSize: number;
   classAverage: number | null;
-  meta: ReportMeta;
+  /** Appréciation / conduite réellement saisies ; null tant que la direction n'a rien renseigné. */
+  meta: ReportMeta | null;
   headTeacherName: string;
 }
 

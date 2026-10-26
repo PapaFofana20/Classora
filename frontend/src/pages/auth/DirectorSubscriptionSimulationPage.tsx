@@ -68,12 +68,12 @@ function PriceChoice({ label, price, hint, selected, onClick }: { label: string;
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "rounded-2xl border-2 p-4 text-left transition-colors",
+        "@container min-w-0 rounded-2xl border-2 p-4 text-left transition-colors",
         selected ? "border-forest bg-lime-soft" : "border-neutral-200 bg-white hover:border-forest/40",
       )}
     >
       <span className="block text-xs font-bold uppercase tracking-wide text-neutral-500">{label}</span>
-      <span className="mt-1 block text-xl font-extrabold text-ink">{price}</span>
+      <span className="overflow-wrap-anywhere mt-1 block text-[clamp(1rem,7cqi,1.25rem)] font-extrabold leading-tight tabular-nums text-ink">{price}</span>
       <span className="mt-1 block text-xs text-neutral-500">{hint}</span>
     </button>
   );

@@ -17,7 +17,7 @@ import { useCurrentUser } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
 import { useChild } from "@/context/ChildContext";
 import { useToast } from "@/context/ToastContext";
-import { CYCLE_LABELS } from "@/data/school";
+import { CYCLE_LABELS, getPeriods } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { linkChild } from "@/services/authService";
 import { getStudentDetail } from "@/services/studentService";
@@ -28,7 +28,9 @@ import { STUDENT_STATUS_LABELS } from "@/utils/payments";
 
 export function ParentHome() {
   const user = useCurrentUser();
-  const { schoolName } = useSchool();
+  const school = useSchool();
+  const settings = school.settings;
+  const periodLabel = settings ? getPeriods(settings.periodType).find((p) => p.id === settings.currentPeriod)?.label : null;
   const { children, activeChild, setActiveChildId, loading, error, reload } = useChild();
   const detail = useAsync(() => (activeChild ? getStudentDetail(user, activeChild.id) : Promise.resolve(null)), [activeChild?.id]);
   const { toast } = useToast();
@@ -59,7 +61,7 @@ export function ParentHome() {
     <>
       <PageHeader
         title="Suivi de mes enfants"
-        subtitle={`${schoolName} · résultats et paiements de vos enfants.`}
+        subtitle={`${school.schoolName}${settings?.schoolYear ? ` · année scolaire ${settings.schoolYear}` : ""} · résultats et paiements de vos enfants.`}
         actions={<Button icon="add" onClick={() => setOpen(true)}>Ajouter un enfant</Button>}
       />
       {error && (
@@ -91,14 +93,14 @@ export function ParentHome() {
           d && (
             <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard dark icon="grade" label="Moyenne générale" value={d.report?.generalAverage == null ? "—" : `${formatNumber(d.report.generalAverage)} / 20`} note="1er semestre" />
+                <StatCard dark icon="grade" label="Moyenne générale" value={d.report?.generalAverage == null ? "—" : `${formatNumber(d.report.generalAverage)} / 20`} note={periodLabel ?? undefined} />
                 <StatCard icon="emoji_events" label="Rang" value={d.report?.rank ? `${d.report.rank}${d.report.rank === 1 ? "er" : "e"} / ${d.report.classSize}` : "—"} note={d.classRoom.name} />
-                <StatCard icon="event_busy" label="Absences" value={String(d.report?.meta.absences ?? 0)} note={`Conduite : ${d.report?.meta.conduct ?? "—"}`} />
+                <StatCard icon="event_busy" label="Absences" value={d.report?.meta ? `${d.report.meta.absences} h` : "—"} note={d.report?.meta?.conduct ? `Conduite : ${d.report.meta.conduct}` : "Non renseigné"} />
                 <StatCard icon="payments" label="Reste dû (échu)" value={formatCurrency(d.row.balance)} badge={d.row.balance > 0 ? { text: "À régler", tone: "down" } : { text: "À jour", tone: "up" }} />
               </div>
               <div className="grid gap-4 xl:grid-cols-3">
                 <Card className="xl:col-span-2">
-                  <CardHeader title={`Résultats de ${d.row.firstName}`} subtitle="Moyenne par matière (1er semestre)" action={<LinkButton to="/app/notes" variant="ghost" size="sm">Détails</LinkButton>} />
+                  <CardHeader title={`Résultats de ${d.row.firstName}`} subtitle={`Moyenne par matière${periodLabel ? ` (${periodLabel})` : ""}`} action={<LinkButton to="/app/notes" variant="ghost" size="sm">Détails</LinkButton>} />
                   <ul className="space-y-3">
                     {(d.report?.lines ?? []).map((l) => (
                       <li key={l.subjectId} className="flex items-center gap-3">
@@ -146,7 +148,7 @@ export function ParentHome() {
         <div className="space-y-4">
           <p className="flex items-start gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">
             <Icon name="confirmation_number" className="text-[20px]" />
-            Saisissez le code élève communiqué par {schoolName}. Il comporte {CHILD_CODE_LENGTH} caractères.
+            Saisissez le code élève communiqué par {school.schoolName}. Il comporte {CHILD_CODE_LENGTH} caractères.
           </p>
           <Input
             label="Code élève"

@@ -17,7 +17,7 @@ export function PlanCard({ plan, cycle, current }: Props) {
   return (
     <article
       className={cn(
-        "relative flex h-full flex-col rounded-3xl border-2 p-6 transition-transform",
+        "@container relative flex h-full min-w-0 flex-col rounded-3xl border-2 p-6 transition-transform",
         plan.highlight ? "border-forest bg-forest text-white shadow-soft" : "border-neutral-200 bg-white",
       )}
     >
@@ -28,7 +28,8 @@ export function PlanCard({ plan, cycle, current }: Props) {
         </div>
         {current && <Badge tone={plan.highlight ? "lime" : "dark"}>Formule actuelle</Badge>}
       </div>
-      <p className="mt-6 text-4xl font-extrabold tracking-tight">{formatCurrency(price)}</p>
+      {/* Le prix reste lisible sans dépasser la carte, même en grille 4 colonnes. */}
+      <p className="overflow-wrap-anywhere mt-6 text-[clamp(1.05rem,9cqi,1.75rem)] font-extrabold leading-tight tracking-tight tabular-nums">{formatCurrency(price)}</p>
       <p className={cn("text-sm", plan.highlight ? "text-white/70" : "text-neutral-500")}>{cycle === "yearly" ? "par an" : "par mois"}</p>
       <p className={cn("mt-2 inline-flex w-fit items-center gap-1 rounded-full px-3 py-1 text-xs font-bold", plan.highlight ? "bg-white/10 text-white" : "bg-lime-soft text-forest")}>
         <Icon name="groups" className="text-[16px]" />

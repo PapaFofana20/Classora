@@ -87,11 +87,11 @@ export function ElementaryReport({ card, schoolName, exam }: Props) {
         <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne générale</p><p className="text-2xl font-extrabold text-forest">{num(card.generalAverage)} / 20</p></div>
         <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Rang</p><p className="text-2xl font-extrabold text-forest">{rankLabel(card.rank, card.classSize)}</p></div>
         <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne de la classe</p><p className="text-xl font-bold">{num(card.classAverage)}</p></div>
-        <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Conduite · Absences</p><p className="text-base font-bold">{card.meta.conduct} · {card.meta.absences}</p></div>
+        <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Conduite · Absences</p><p className="text-base font-bold">{card.meta ? `${card.meta.conduct || "—"} · ${card.meta.absences} h` : "Non renseigné"}</p></div>
       </div>
       <section className="mt-5 rounded-xl border border-neutral-200 p-4">
         <h3 className="text-xs font-bold uppercase tracking-wide text-neutral-500">Appréciation de l'instituteur</h3>
-        <p className="mt-2 text-sm">{card.meta.comment || primaryAppreciation(card.generalAverage, card.student.firstName)}</p>
+        <p className="mt-2 text-sm">{card.meta?.comment || primaryAppreciation(card.generalAverage, card.student.firstName)}</p>
       </section>
       <Signatures labels={["L'instituteur", "Le directeur", "Le parent"]} />
     </article>
@@ -153,11 +153,11 @@ export function SecondaryReport({ card, schoolName, exam }: Props) {
         <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne générale pondérée</p><p className="text-2xl font-extrabold text-forest">{num(card.generalAverage)} / 20</p></div>
         <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Rang</p><p className="text-2xl font-extrabold text-forest">{rankLabel(card.rank, card.classSize)}</p></div>
         <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne de la classe</p><p className="text-xl font-bold">{num(card.classAverage)}</p></div>
-        <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Absences · Conduite</p><p className="text-base font-bold">{card.meta.absences} h · {card.meta.conduct}</p></div>
+        <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Absences · Conduite</p><p className="text-base font-bold">{card.meta ? `${card.meta.absences} h · ${card.meta.conduct || "—"}` : "Non renseigné"}</p></div>
       </div>
       <section className="mt-5 rounded-xl border border-neutral-200 p-4">
         <h3 className="text-xs font-bold uppercase tracking-wide text-neutral-500">Appréciation du conseil de classe</h3>
-        <p className="mt-2 text-sm">{card.meta.comment || councilAppreciation(card.generalAverage)}</p>
+        <p className="mt-2 text-sm">{card.meta?.comment || councilAppreciation(card.generalAverage)}</p>
       </section>
       <Signatures labels={["Le professeur principal", "Le directeur", "Le parent"]} />
     </article>

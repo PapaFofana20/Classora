@@ -11,6 +11,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCurrentUser } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
+import { getPeriods } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { getStudentDetail } from "@/services/studentService";
 import { formatCurrency, formatDate, formatNumber } from "@/utils/format";
@@ -22,6 +23,8 @@ import type { Payment } from "@/types";
 export function StudentHome() {
   const user = useCurrentUser();
   const school = useSchool();
+  const settings = school.settings;
+  const periodLabel = settings ? getPeriods(settings.periodType).find((p) => p.id === settings.currentPeriod)?.label : null;
   const state = useAsync(() => (user.studentId ? getStudentDetail(user, user.studentId) : Promise.resolve(null)), [user.studentId]);
 
   if (!user.studentId) return <EmptyState icon="hourglass_top" title="Dossier en cours de validation" text="Votre école doit encore valider votre inscription. Vous recevrez un accès dès validation." />;
@@ -30,7 +33,7 @@ export function StudentHome() {
     <>
       <PageHeader
         title="Ma scolarité"
-        subtitle={`${school.schoolName} · année scolaire 2026-2027`}
+        subtitle={`${school.schoolName}${settings?.schoolYear ? ` · année scolaire ${settings.schoolYear}` : ""}`}
         actions={<LinkButton to="/app/bulletins" icon="description">Mon bulletin</LinkButton>}
       />
       <AsyncView state={state} skeleton={<Skeleton className="h-72 w-full" />}>
@@ -49,14 +52,14 @@ export function StudentHome() {
                 </div>
               </Card>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard dark icon="grade" label="Moyenne générale" value={d.report?.generalAverage == null ? "—" : `${formatNumber(d.report.generalAverage)} / 20`} note="1er semestre" />
+                <StatCard dark icon="grade" label="Moyenne générale" value={d.report?.generalAverage == null ? "—" : `${formatNumber(d.report.generalAverage)} / 20`} note={periodLabel ?? undefined} />
                 <StatCard icon="emoji_events" label="Rang" value={d.report?.rank ? `${d.report.rank}e / ${d.report.classSize}` : "—"} note={d.classRoom.name} />
-                <StatCard icon="event_busy" label="Absences" value={String(d.report?.meta.absences ?? 0)} note={`Conduite : ${d.report?.meta.conduct ?? "—"}`} />
+                <StatCard icon="event_busy" label="Absences" value={d.report?.meta ? `${d.report.meta.absences} h` : "—"} note={d.report?.meta?.conduct ? `Conduite : ${d.report.meta.conduct}` : "Non renseigné"} />
                 <StatCard icon="payments" label="Reste dû (échu)" value={formatCurrency(d.row.balance)} badge={d.row.balance > 0 ? { text: "À régler", tone: "down" } : { text: "À jour", tone: "up" }} />
               </div>
               <div className="grid gap-4 xl:grid-cols-2">
                 <Card>
-                  <CardHeader title="Mes notes" subtitle="Moyenne par matière (1er semestre)" action={<Link to="/app/notes" className="text-sm font-semibold text-forest hover:underline">Détails</Link>} />
+                  <CardHeader title="Mes notes" subtitle={`Moyenne par matière${periodLabel ? ` (${periodLabel})` : ""}`} action={<Link to="/app/notes" className="text-sm font-semibold text-forest hover:underline">Détails</Link>} />
                   <ul className="space-y-3">
                     {(d.report?.lines ?? []).slice(0, 8).map((l) => (
                       <li key={l.subjectId} className="flex items-center gap-3">

@@ -9,7 +9,9 @@ import { Icon } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SkeletonCards } from "@/components/ui/Skeleton";
 import { useCurrentUser } from "@/context/AuthContext";
+import { useSchool } from "@/context/SchoolContext";
 import { useTeaching } from "@/context/TeachingContext";
+import { getPeriods } from "@/data/school";
 import { contextKey } from "@/hooks/useTeacherAssignments";
 import { useAsync } from "@/hooks/useAsync";
 import { getTeacherOverview, type ContextOverview } from "@/services/gradeService";
@@ -20,9 +22,12 @@ import { averageTone } from "@/utils/grades";
 /** « Mes classes » (professeur) ou « Ma classe » (instituteur : toutes les matières, sans sélecteur de classe). */
 export function TeacherHome() {
   const user = useCurrentUser();
+  const school = useSchool();
+  const settings = school.settings;
   const { headClasses, setActiveKey, loading } = useTeaching();
   const navigate = useNavigate();
   const period = periodInfo(user.schoolId).current;
+  const periodLabel = settings ? getPeriods(settings.periodType).find((p) => p.id === settings.currentPeriod)?.label : null;
   const state = useAsync(() => getTeacherOverview(user.schoolId, user.teacherId ?? "", period), [user.schoolId, user.teacherId]);
   const isInstit = user.role === "instituteur";
   const myClass = headClasses[0];
@@ -36,7 +41,11 @@ export function TeacherHome() {
     <>
       <PageHeader
         title={isInstit ? `Ma classe${myClass ? ` · ${myClass.name}` : ""}` : "Mes classes"}
-        subtitle={isInstit ? "Instituteur titulaire : vous enseignez toutes les matières de votre classe." : "Vos affectations (classe · matière) du 1er semestre 2026-2027."}
+        subtitle={
+          isInstit
+            ? "Instituteur titulaire : vous enseignez toutes les matières de votre classe."
+            : `Vos affectations (classe · matière)${periodLabel ? ` — ${periodLabel}` : ""}${settings?.schoolYear ? ` ${settings.schoolYear}` : ""}.`
+        }
       />
       <AsyncView state={state} skeleton={<SkeletonCards count={3} className="lg:grid-cols-3" />}>
         {(items) =>

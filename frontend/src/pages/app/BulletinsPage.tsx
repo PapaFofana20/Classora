@@ -22,15 +22,15 @@ import type { ReportCardData } from "@/types";
 function MetaEditor({ card, onSaved }: { card: ReportCardData; onSaved: () => void }) {
   const user = useCurrentUser();
   const { toast } = useToast();
-  const [conduct, setConduct] = useState(card.meta.conduct);
-  const [absences, setAbsences] = useState(String(card.meta.absences));
-  const [comment, setComment] = useState(card.meta.comment);
+  const [conduct, setConduct] = useState(card.meta?.conduct ?? "");
+  const [absences, setAbsences] = useState(card.meta ? String(card.meta.absences) : "");
+  const [comment, setComment] = useState(card.meta?.comment ?? "");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    setConduct(card.meta.conduct);
-    setAbsences(String(card.meta.absences));
-    setComment(card.meta.comment);
-  }, [card.student.id, card.meta.conduct, card.meta.absences, card.meta.comment]);
+    setConduct(card.meta?.conduct ?? "");
+    setAbsences(card.meta ? String(card.meta.absences) : "");
+    setComment(card.meta?.comment ?? "");
+  }, [card.student.id, card.meta?.conduct, card.meta?.absences, card.meta?.comment]);
   const abs = Number(absences);
   const absErr = !Number.isInteger(abs) || abs < 0 || abs > 200 ? "Nombre entier entre 0 et 200." : null;
   const elem = card.classRoom.cycle === "elementaire";

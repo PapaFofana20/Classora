@@ -71,8 +71,16 @@ export function updateReportMeta(actor: SessionUser, studentId: string, periodId
     if (error) throw new Error(/Modification non/.test(error.message) ? "Modification non autorisée." : error.message);
     await hydrate("reportMetas");
     const meta = reportMetasOf(actor.schoolId).find((m) => m.studentId === studentId && m.period === periodId);
+    // Repli sur les valeurs réellement enregistrées (jamais des valeurs inventées).
     return (
-      meta ?? { schoolId: actor.schoolId, studentId, period: periodId, conduct: "Bonne", absences: 0, comment: "" }
+      meta ?? {
+        schoolId: actor.schoolId,
+        studentId,
+        period: periodId,
+        conduct: patch.conduct ?? "",
+        absences: patch.absences ?? 0,
+        comment: patch.comment ?? "",
+      }
     );
   })();
 }
