@@ -173,6 +173,10 @@ begin
     raise exception 'Mode lecture seule : l''abonnement de votre école est expiré. Les modifications sont désactivées.';
   end if;
 
+  -- Verrou par école : sérialise les inscriptions concurrentes pour éviter
+  -- tout dépassement de la limite d'élèves de la formule.
+  perform pg_advisory_xact_lock(hashtextextended('scolia:enroll:' || v_school::text, 0));
+
   select * into v_class from public.class_rooms
     where id = p_class_id and school_id = v_school;
   if not found then raise exception 'Classe introuvable.'; end if;
@@ -269,6 +273,10 @@ begin
   if not public.school_is_writable(v_school) then
     raise exception 'Mode lecture seule : l''abonnement de votre école est expiré. Les modifications sont désactivées.';
   end if;
+
+  -- Verrou par école : sérialise les approbations concurrentes pour éviter
+  -- tout dépassement de la limite d'élèves de la formule.
+  perform pg_advisory_xact_lock(hashtextextended('scolia:enroll:' || v_school::text, 0));
 
   -- La table temporaire est recréée à chaque appel : sans ce DROP, un second
   -- appel dans la même transaction échouait ('relation tmp_requests already
