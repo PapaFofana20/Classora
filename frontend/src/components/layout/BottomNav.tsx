@@ -11,6 +11,7 @@ import { MoreSheet } from "./MoreSheet";
 const PRIMARY_PATHS: Record<Role, string[]> = {
   directeur: ["/app", "/app/eleves", "/app/paiements"],
   econome: ["/app", "/app/eleves", "/app/paiements"],
+  secretaire: ["/app", "/app/eleves", "/app/parametres"],
   surveillant: ["/app", "/app/eleves", "/app/messages"],
   instituteur: ["/app", "/app/eleves", "/app/notes"],
   professeur: ["/app", "/app/eleves", "/app/notes"],

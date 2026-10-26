@@ -38,7 +38,7 @@ export function OnboardingChecklist({ user }: { user: SessionUser }) {
 
   const steps: Step[] = [
     { id: "classes", label: "Créer les classes", to: "/app/classes", icon: "meeting_room", done: d.classes > 0, hint: `${d.classes} classe(s)` },
-    { id: "staff", label: "Créer les accès enseignants", to: "/app/enseignants", icon: "badge", done: d.staff > 0, hint: `${d.staff} accès` },
+    { id: "staff", label: "Créer les accès du personnel", to: "/app/enseignants", icon: "badge", done: d.staff > 0, hint: `${d.staff} accès` },
     { id: "matricule", label: "Partager le matricule aux élèves", to: "/app", icon: "key", done: d.students > 0 || d.pending > 0, hint: d.students + d.pending > 0 ? `${d.students} élève(s), ${d.pending} demande(s)` : "Copiez le matricule et partagez-le par WhatsApp" },
     { id: "affectations", label: "Affecter les enseignants", to: "/app/affectations", icon: "grid_view", done: d.assignments > 0 && d.teachers > 0, hint: `${d.assignments} affectation(s)` },
   ];

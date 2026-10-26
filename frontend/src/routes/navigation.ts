@@ -27,7 +27,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/eleves/demandes", label: "Demandes d'inscription", icon: "how_to_reg", section: "Menu" },
     { to: "/app/inscription-eleve", label: "Inscription élève", icon: "person_add", section: "Menu" },
     { to: "/app/classes", label: "Classes", icon: "meeting_room", section: "École" },
-    { to: "/app/enseignants", label: "Enseignants", icon: "badge", section: "École" },
+    { to: "/app/enseignants", label: "Personnel", icon: "badge", section: "École" },
     { to: "/app/affectations", label: "Affectations", icon: "grid_view", section: "École" },
     subscription,
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
@@ -41,6 +41,11 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/eleves", label: "Élèves", icon: "groups", section: "Menu" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },
     messages,
+    profile,
+  ],
+  secretaire: [
+    dashboard("Secrétariat", "support_agent"),
+    { to: "/app/eleves", label: "Élèves", icon: "groups", section: "Menu" },
     profile,
   ],
   surveillant: [
@@ -83,12 +88,12 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   ],
 };
 
-const ALL: Role[] = ["directeur", "econome", "surveillant", "instituteur", "professeur", "eleve", "parent"];
+const ALL: Role[] = ["directeur", "econome", "secretaire", "surveillant", "instituteur", "professeur", "eleve", "parent"];
 
 /** Rôles autorisés par route (utilisé par RoleRoute). */
 export const ROUTE_ROLES = {
-  eleves: ["directeur", "econome", "surveillant", "instituteur", "professeur", "parent"] as Role[],
-  eleve: ["directeur", "econome", "surveillant", "instituteur", "professeur", "eleve", "parent"] as Role[],
+  eleves: ["directeur", "econome", "secretaire", "surveillant", "instituteur", "professeur", "parent"] as Role[],
+  eleve: ["directeur", "econome", "secretaire", "surveillant", "instituteur", "professeur", "eleve", "parent"] as Role[],
   inscription: ["directeur"] as Role[],
   classes: ["directeur"] as Role[],
   enseignants: ["directeur"] as Role[],

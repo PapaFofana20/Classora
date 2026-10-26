@@ -62,7 +62,7 @@ export default function RegisterPage() {
 
         <p className="flex items-start gap-2 pt-2 text-xs text-neutral-500">
           <Icon name="info" className="text-[16px]" />
-          Les comptes enseignants, économe et surveillant sont créés uniquement par la direction de l'école.
+          Les comptes du personnel (enseignants, secrétaires, économes et surveillants) sont créés uniquement par la direction de l'école.
         </p>
         <p className="text-center text-sm text-neutral-600">
           Déjà inscrit ?{" "}

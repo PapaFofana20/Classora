@@ -3,6 +3,7 @@ import type { ClassRoom, Role, StaffRole, Teacher, TeachingAssignment } from "@/
 export const ROLE_LABELS: Record<Role, string> = {
   directeur: "Directeur",
   econome: "Économe",
+  secretaire: "Secrétaire",
   surveillant: "Surveillant général",
   instituteur: "Instituteur",
   professeur: "Professeur",
@@ -15,11 +16,12 @@ export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
   professeur: "Enseignant",
   instituteur: "Instituteur titulaire",
   econome: "Économe",
+  secretaire: "Secrétaire",
   surveillant: "Surveillant général",
 };
 
 /** Rôles que le directeur peut créer lui-même (aucune inscription publique). */
-export const STAFF_ROLES: StaffRole[] = ["professeur", "instituteur", "econome", "surveillant"];
+export const STAFF_ROLES: StaffRole[] = ["professeur", "instituteur", "econome", "secretaire", "surveillant"];
 
 /** Rôles qui peuvent s'inscrire seul sur /inscription. */
 export const PUBLIC_SIGNUP_ROLES: Role[] = ["directeur", "eleve", "parent"];

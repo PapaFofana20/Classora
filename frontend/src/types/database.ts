@@ -10,7 +10,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Cycle = "elementaire" | "moyen" | "secondaire";
-export type Role = "directeur" | "econome" | "surveillant" | "instituteur" | "professeur" | "eleve" | "parent";
+export type Role = "directeur" | "econome" | "secretaire" | "surveillant" | "instituteur" | "professeur" | "eleve" | "parent";
 export type UserStatus = "ACTIF" | "EN_ATTENTE" | "DESACTIVE";
 export type PeriodType = "semestre" | "trimestre";
 export type PayMethod = "wave" | "orange_money" | "free_money" | "especes";

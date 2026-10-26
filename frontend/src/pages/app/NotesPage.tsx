@@ -116,6 +116,7 @@ export default function NotesPage() {
     parent: activeChild ? `Résultats de ${activeChild.firstName} (${activeChild.className}).` : "Résultats de vos enfants.",
     eleve: "Vos notes du 1er semestre.",
     econome: "",
+    secretaire: "",
     surveillant: "",
   };
   return (

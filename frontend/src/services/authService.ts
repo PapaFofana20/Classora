@@ -294,7 +294,7 @@ export async function createStaffAccount(actor: SessionUser, input: StaffAccount
     lastName: input.lastName.trim(),
     email: input.email.trim(),
     phone: input.phone.trim(),
-    specialties: input.role === "instituteur" ? [] : input.specialties,
+    specialties: input.role === "professeur" ? input.specialties : [],
     tempPassword: input.tempPassword?.trim() || generateTempPassword(),
   });
   await Promise.all([hydrate("users"), hydrate("teachers")]);

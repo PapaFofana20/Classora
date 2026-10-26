@@ -41,7 +41,7 @@ export const plans: Plan[] = [
     features: [
       "Jusqu'à 600 élèves",
       "Tous les modules Pro",
-      "Comptes econome et surveillant inclus",
+      "Comptes économe, secrétaire et surveillant inclus",
       "Export des données et rapports",
       "Accompagnement dédié",
     ],

@@ -1,7 +1,7 @@
 export type Cycle = "elementaire" | "moyen" | "secondaire";
-export type Role = "directeur" | "econome" | "surveillant" | "instituteur" | "professeur" | "eleve" | "parent";
-/** Rôles que seul le directeur peut créer via un accès enseignant. */
-export type StaffRole = Extract<Role, "professeur" | "instituteur" | "econome" | "surveillant">;
+export type Role = "directeur" | "econome" | "secretaire" | "surveillant" | "instituteur" | "professeur" | "eleve" | "parent";
+/** Rôles que seul le directeur peut créer via un accès du personnel. */
+export type StaffRole = Extract<Role, "professeur" | "instituteur" | "econome" | "secretaire" | "surveillant">;
 /** Cycle de vie d'un compte : en attente de validation par la direction, actif, ou désactivé. */
 export type UserStatus = "ACTIF" | "EN_ATTENTE" | "DESACTIVE";
 export type PeriodType = "semestre" | "trimestre";

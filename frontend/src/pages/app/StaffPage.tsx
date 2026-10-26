@@ -63,7 +63,7 @@ export default function StaffPage() {
         setOpen(false);
         setEditing(null);
       } else {
-        const created = await createStaffAccount(user, { role: value.role, firstName: value.firstName, lastName: value.lastName, email: value.email, phone: value.phone, specialties: value.role === "instituteur" ? [] : value.specialties, tempPassword: value.tempPassword });
+        const created = await createStaffAccount(user, { role: value.role, firstName: value.firstName, lastName: value.lastName, email: value.email, phone: value.phone, specialties: value.role === "professeur" ? value.specialties : [], tempPassword: value.tempPassword });
         setCredentials(created);
         setOpen(false);
         toast("Accès créé. Communiquez les identifiants à l'intéressé.");
@@ -143,8 +143,8 @@ export default function StaffPage() {
     <>
       <PageHeader
         title="Personnel de l'école"
-        subtitle="Créez les accès enseignants, économe et surveillant. Un enseignant désactivé ne peut plus se connecter."
-        actions={<Button icon="person_add" onClick={() => { setEditing(null); setOpen(true); }} disabled={readOnly}>Créer un accès enseignant</Button>}
+        subtitle="Créez les accès du personnel : enseignants, secrétaires, économe et surveillant. Un compte désactivé ne peut plus se connecter."
+        actions={<Button icon="person_add" onClick={() => { setEditing(null); setOpen(true); }} disabled={readOnly}>Créer un accès</Button>}
       />
       <Card className="mb-4">
         <div className="grid gap-3 md:grid-cols-2">
@@ -185,7 +185,7 @@ export default function StaffPage() {
         {() =>
           tab === "comptes" ? (
             filteredStaff.length === 0 ? (
-              <EmptyState icon="badge" title="Aucun accès" text="Créez un accès enseignant, économe ou surveillant pour votre école." action={<Button icon="person_add" onClick={() => setOpen(true)}>Créer un accès</Button>} />
+              <EmptyState icon="badge" title="Aucun accès" text="Créez un accès pour un membre du personnel : enseignant, secrétaire, économe ou surveillant." action={<Button icon="person_add" onClick={() => setOpen(true)}>Créer un accès</Button>} />
             ) : (
               <Card padded={false} className="p-2">
                 <Table caption="Comptes d'accès du personnel" columns={staffCols} rows={filteredStaff} rowKey={(s) => s.userId} stagger />
@@ -201,10 +201,10 @@ export default function StaffPage() {
         }
       </AsyncView>
 
-      <Modal open={open} onClose={() => { setOpen(false); setEditing(null); }} title={editing ? `Modifier l'accès de ${editing.firstName}` : "Créer un accès enseignant"} size="lg">
+      <Modal open={open} onClose={() => { setOpen(false); setEditing(null); }} title={editing ? `Modifier l'accès de ${editing.firstName}` : "Créer un accès du personnel"} size="lg">
         <StaffForm
           subjects={subjects}
-          initial={editing ? { role: editing.role as StaffFormValue["role"], firstName: editing.firstName, lastName: editing.lastName, email: editing.email, phone: editing.phone, tempPassword: "" } : undefined}
+          initial={editing ? { role: editing.role as StaffFormValue["role"], firstName: editing.firstName, lastName: editing.lastName, email: editing.email, phone: editing.phone, specialties: teachers.find((t) => t.id === editing.teacherId)?.specialties ?? [], tempPassword: "" } : undefined}
           submitLabel={editing ? "Enregistrer" : "Créer l'accès"}
           busy={busy}
           onCancel={() => { setOpen(false); setEditing(null); }}

@@ -36,7 +36,7 @@ export const cgu: LegalDocument = {
       paragraphs: [
         "Classora met à disposition une plateforme permettant aux établissements scolaires de gérer leurs inscriptions, classes, élèves, enseignants, notes, bulletins, paiements et échanges avec les familles.",
         "Le service est accessible depuis un navigateur web, sur ordinateur, tablette ou téléphone. Certaines fonctionnalités peuvent dépendre du forfait souscrit par l'établissement.",
-        "Les présentes CGU s'appliquent à tous les comptes, quel que soit le rôle : directeur, économe, surveillant, instituteur, professeur, élève ou parent.",
+        "Les présentes CGU s'appliquent à tous les comptes, quel que soit le rôle : directeur, économe, secrétaire, surveillant, instituteur, professeur, élève ou parent.",
       ],
     },
     {
@@ -66,7 +66,7 @@ export const cgu: LegalDocument = {
       title: "4. Comptes, rôles et habilitations",
       paragraphs: [
         "Chaque Utilisateur dispose d'un rôle qui détermine les données et les fonctionnalités auxquelles il peut accéder. Les droits d'accès sont limités au strict nécessaire et sont configurés par l'Établissement pour les comptes qu'il crée.",
-        "Les comptes enseignants, économes et surveillants sont créés par la direction de l'Établissement. Un enseignant ne peut consulter et saisir que les notes des classes et matières qui lui sont affectées.",
+        "Les comptes du personnel (enseignants, secrétaires, économes et surveillants) sont créés par la direction de l'Établissement. Un enseignant ne peut consulter et saisir que les notes des classes et matières qui lui sont affectées. Le secrétariat dispose d'un accès de consultation, sans droit de modification des notes ni de gestion du personnel.",
         "L'Établissement s'engage à vérifier l'identité des personnes auxquelles il attribue un compte et à retirer sans délai les accès des personnes qui ne font plus partie de son personnel.",
       ],
     },

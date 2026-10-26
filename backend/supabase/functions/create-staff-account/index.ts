@@ -1,6 +1,6 @@
 /**
  * Création d'un accès du personnel (professeur, instituteur, econome,
- * surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
+ * secretaire, surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
  * school_id vient du token (profils), jamais du corps de la requête.
  * Le mot de passe temporaire est renvoyé UNE SEULE FOIS et jamais stocké.
  * Limité en débit par compte appelant, sans garder la requête.
@@ -11,7 +11,7 @@ import { badRequest, forbidden, handleOptions, methodNotAllowed, ok, serverError
 import { enforceRateLimit } from "../_shared/rateLimit.ts";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../_shared/validate.ts";
 
-type StaffRole = "professeur" | "instituteur" | "econome" | "surveillant";
+type StaffRole = "professeur" | "instituteur" | "econome" | "secretaire" | "surveillant";
 
 Deno.serve(async (req) => {
   const options = handleOptions(req);
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
     const body = expectObject(await req.json());
     const role = requireString(body, "role", "Le rôle", { max: 20 }) as StaffRole;
-    if (!["professeur", "instituteur", "econome", "surveillant"].includes(role)) {
+    if (!["professeur", "instituteur", "econome", "secretaire", "surveillant"].includes(role)) {
       return badRequest(origin, "Rôle invalide.");
     }
     const firstName = requireString(body, "firstName", "Le prénom", { min: 1, max: 60 });

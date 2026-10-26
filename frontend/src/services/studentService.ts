@@ -51,7 +51,7 @@ export function getStudentDetail(actor: SessionUser, id: string): Promise<Studen
     const classRoom = classesOf(s.schoolId).find((c) => c.id === s.classId);
     const parent = db.parents.find((p) => p.id === s.parentId && p.schoolId === s.schoolId) ?? null;
     if (!classRoom) throw new Error("Dossier incomplet.");
-    const showMoney = actor.role !== "professeur" && actor.role !== "instituteur" && actor.role !== "surveillant";
+    const showMoney = actor.role !== "professeur" && actor.role !== "instituteur" && actor.role !== "surveillant" && actor.role !== "secretaire";
     const card = cardsForClass(classRoom.id, db.settings.find((x) => x.schoolId === s.schoolId)?.currentPeriod ?? "S1").find((c) => c.student.id === id) ?? null;
     return {
       row: toRow(s),

@@ -1,6 +1,6 @@
 /**
  * Création d'un accès du personnel (professeur, instituteur, econome,
- * surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
+ * secretaire, surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
  * school_id vient du profil (JWT vérifié), jamais du corps de la requête.
  * Le mot de passe temporaire est renvoyé UNE SEULE FOIS et jamais stocké.
  * Limité en débit par compte appelant.

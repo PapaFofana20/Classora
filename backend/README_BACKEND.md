@@ -101,6 +101,7 @@ Secrets Edge Functions (Dashboard > Edge Functions > Secrets) : `PAYMENT_WEBHOOK
 | `00011_function_execute_durcissement` | droits d'exécution des fonctions `security definer` : aucune n'est accessible à `anon` en dehors des surfaces publiques (`verify_matricule`, `open_classes`) |
 | `00012_fix_student_matricule` | correctif matricule élève |
 | `00013_referentiels_globaux` | insertions idempotentes des référentiels `levels` et `plans` (données de production ; sorties du seed) |
+| `00029_role_secretaire` | rôle `secretaire` (domaine `app_role`), création d'accès par la direction, lecture seule des élèves/notes/annuaire du personnel |
 
 ## 4. Edge Functions (Deno)
 

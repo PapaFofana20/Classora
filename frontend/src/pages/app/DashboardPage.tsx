@@ -1,6 +1,7 @@
 import { useCurrentUser } from "@/context/AuthContext";
 import { AdminDashboard } from "@/features/dashboard/AdminDashboard";
 import { ParentHome } from "@/features/dashboard/ParentHome";
+import { SecretaireDashboard } from "@/features/dashboard/SecretaireDashboard";
 import { StudentHome } from "@/features/dashboard/StudentHome";
 import { SurveillantDashboard } from "@/features/dashboard/SurveillantDashboard";
 import { TeacherHome } from "@/features/dashboard/TeacherHome";
@@ -13,6 +14,8 @@ export default function DashboardPage() {
       return <AdminDashboard />;
     case "econome":
       return <AdminDashboard finance />;
+    case "secretaire":
+      return <SecretaireDashboard />;
     case "surveillant":
       return <SurveillantDashboard />;
     case "instituteur":

@@ -36,8 +36,8 @@ Index impératifs : `(school_id)` sur chaque table, uniques composites
 ## 2. Row Level Security
 
 RLS est activé sur **toutes** les tables, avec une politique par rôle. Rôles applicatifs
-(créés dans `app_metadata.role`) : `directeur`, `econome`, `surveillant`, `instituteur`,
-`professeur`, `eleve`, `parent`.
+(créés dans `app_metadata.role`) : `directeur`, `econome`, `secretaire`, `surveillant`,
+`instituteur`, `professeur`, `eleve`, `parent`.
 
 ```sql
 alter table students   enable row level security;
@@ -80,7 +80,7 @@ Règles complémentaires :
 
 ## 3. Création des comptes staff (fonction serveur)
 
-Les enseignants, économes et surveillants sont créés **uniquement** par la direction.
+Les enseignants, économes, secrétaires et surveillants sont créés **uniquement** par la direction.
 Dans l'application, cela passe par `services/authService.createStaffAccount`. En production :
 
 1. Edge Function `create-staff-account` (service role, jamais appelée depuis le navigateur).

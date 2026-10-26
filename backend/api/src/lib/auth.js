@@ -82,7 +82,7 @@ export async function requireDirecteur(svc, req, res) {
 }
 
 /** Rôles gérables depuis l'espace direction (jamais parent/élève/directeur). */
-export const STAFF_ROLES = Object.freeze(["professeur", "instituteur", "econome", "surveillant"]);
+export const STAFF_ROLES = Object.freeze(["professeur", "instituteur", "econome", "secretaire", "surveillant"]);
 
 export function isStaffRole(role) {
   return STAFF_ROLES.includes(role);
