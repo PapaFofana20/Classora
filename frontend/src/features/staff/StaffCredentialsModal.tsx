@@ -26,10 +26,9 @@ export function credentialsMessage(credentials: StaffCredentials, school: School
     ``,
     `🔑 Lien de connexion : ${link}`,
     `✉️ E-mail : ${credentials.email}`,
-    `🔒 Mot de passe temporaire : ${credentials.tempPassword}`,
+    `🔒 Mot de passe : ${credentials.password}`,
     school?.matricule ? `🏫 Matricule de l'école : ${school.matricule}` : "",
     ``,
-    `À la première connexion, vous devrez choisir un nouveau mot de passe.`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -49,7 +48,7 @@ export function StaffCredentialsModal({ open, credentials, school, kind = "creat
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(`${credentials.email}\n${credentials.tempPassword}`);
+      await navigator.clipboard.writeText(`${credentials.email}\n${credentials.password}`);
     } catch {
       /* presse-papiers indisponible */
     }
@@ -82,7 +81,7 @@ export function StaffCredentialsModal({ open, credentials, school, kind = "creat
     >
       <div className="space-y-4">
         <p className="rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">
-          Transmettez ces identifiants à {credentials.firstName}. Ce mot de passe ne sera plus jamais affiché après la fermeture de cette fenêtre.
+          Transmettez ces identifiants à {credentials.firstName}. Ce mot de passe définitif ne sera plus jamais affiché après la fermeture de cette fenêtre. L'utilisateur pourra le modifier plus tard depuis son profil.
         </p>
         <dl className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-mist p-4">
@@ -100,8 +99,8 @@ export function StaffCredentialsModal({ open, credentials, school, kind = "creat
             <dd className="mt-1 break-all font-bold">{credentials.email}</dd>
           </div>
           <div className="rounded-xl bg-mist p-4">
-            <dt className="text-xs font-semibold uppercase text-neutral-500">Mot de passe temporaire</dt>
-            <dd className="mt-1 font-mono text-lg font-bold tracking-wider">{credentials.tempPassword}</dd>
+            <dt className="text-xs font-semibold uppercase text-neutral-500">Mot de passe</dt>
+            <dd className="mt-1 font-mono text-lg font-bold tracking-wider">{credentials.password}</dd>
           </div>
         </dl>
         {school?.matricule && (

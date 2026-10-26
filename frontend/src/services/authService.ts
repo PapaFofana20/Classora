@@ -9,7 +9,6 @@ import type {
   Teacher,
   User,
 } from "@/types";
-import { generateTempPassword } from "@/utils/password";
 import { canManageStaff, isStaffRole } from "@/utils/permissions";
 import { callFunction } from "@/lib/functions";
 import { supabase } from "@/lib/supabase";
@@ -263,15 +262,15 @@ export interface StaffAccountInput {
   email: string;
   phone: string;
   specialties: string[];
-  /** Mot de passe temporaire ; généré côté interface si vide. */
-  tempPassword?: string;
+  /** Mot de passe définitif choisi par le directeur. */
+  password: string;
 }
 
 export interface StaffCredentials {
   userId: string;
   email: string;
-  /** Affiché UNE SEULE FOIS à la création ou à la réinitialisation. */
-  tempPassword: string;
+  /** Affiché UNE SEULE FOIS à la création. */
+  password: string;
   firstName: string;
   lastName: string;
   role: Role;
@@ -284,7 +283,7 @@ export async function createStaffAccount(actor: SessionUser, input: StaffAccount
   const credentials = await callFunction<{
     userId: string;
     email: string;
-    tempPassword: string;
+    password: string;
     firstName: string;
     lastName: string;
     role: Role;
@@ -295,7 +294,7 @@ export async function createStaffAccount(actor: SessionUser, input: StaffAccount
     email: input.email.trim(),
     phone: input.phone.trim(),
     specialties: input.role === "professeur" ? input.specialties : [],
-    tempPassword: input.tempPassword?.trim() || generateTempPassword(),
+    password: input.password.trim(),
   });
   await Promise.all([hydrate("users"), hydrate("teachers")]);
   return credentials;
@@ -333,7 +332,15 @@ export async function resetStaffPassword(actor: SessionUser, userId: string): Pr
     role: Role;
   }>("reset-staff-password", { userId });
   await hydrate("users");
-  return credentials;
+  // Le backend renvoie tempPassword pour la réinitialisation, on le mappe vers password
+  return {
+    userId: credentials.userId,
+    email: credentials.email,
+    password: credentials.tempPassword,
+    firstName: credentials.firstName,
+    lastName: credentials.lastName,
+    role: credentials.role,
+  };
 }
 
 /** Désactivation / réactivation : un compte désactivé ne peut plus se connecter. */

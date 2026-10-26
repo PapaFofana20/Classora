@@ -2,11 +2,11 @@
  * Création d'un accès du personnel (professeur, instituteur, econome,
  * secretaire, surveillant) : réservée au DIRECTEUR de l'école de l'appelant. Le
  * school_id vient du profil (JWT vérifié), jamais du corps de la requête.
- * Le mot de passe temporaire est renvoyé UNE SEULE FOIS et jamais stocké.
+ * Le mot de passe est fourni par le directeur (aucun mot de passe temporaire).
  * Limité en débit par compte appelant.
  */
 
-import { audit, generateTempPassword, isStaffRole, passwordError, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
+import { audit, isStaffRole, passwordError, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../lib/validate.js";
@@ -32,11 +32,10 @@ export default route(async (req, res) => {
     const email = requireEmail(body);
     const phone = requireSnPhone(body, "phone", "Le téléphone");
     const specialties = requireStringArray(body, "specialties", "Les spécialités");
-    const providedTemp = optionalPassword(body);
-
-    const tempPassword = providedTemp ?? generateTempPassword();
-    const pwError = passwordError(tempPassword);
-    if (pwError) return badRequest(res, pwError);
+    // Mot de passe DÉFINITIF choisi par le directeur (obligatoire, pas de temporaire)
+    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 72, trim: false });
+    const pwError = passwordError(password);
+    if (pwError) return badRequest(res, `Mot de passe invalide : ${pwError}`);
 
     if (!(await schoolIsWritable(svc, schoolId))) {
       return forbidden(res, "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
@@ -44,7 +43,7 @@ export default route(async (req, res) => {
 
     const { data: created, error: createError } = await svc.auth.admin.createUser({
       email,
-      password: tempPassword,
+      password,
       email_confirm: true,
       app_metadata: { role, school_id: schoolId },
     });
@@ -81,7 +80,7 @@ export default route(async (req, res) => {
       return ok(res, {
         userId: created.user.id,
         email,
-        tempPassword,
+        password,
         firstName,
         lastName,
         role,
@@ -100,12 +99,3 @@ export default route(async (req, res) => {
     return serverError(res);
   }
 });
-
-function optionalPassword(body) {
-  const raw = body["tempPassword"];
-  if (raw === undefined || raw === null) return undefined;
-  if (typeof raw !== "string") throw new ValidationError("Le mot de passe temporaire est invalide.");
-  // Pas de trim : les espaces font partie du mot de passe choisi, sinon le
-  // mot de passe communiqué pouvait différer de celui réellement stocké.
-  return raw;
-}

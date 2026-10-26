@@ -63,7 +63,7 @@ export default function StaffPage() {
         setOpen(false);
         setEditing(null);
       } else {
-        const created = await createStaffAccount(user, { role: value.role, firstName: value.firstName, lastName: value.lastName, email: value.email, phone: value.phone, specialties: value.role === "professeur" ? value.specialties : [], tempPassword: value.tempPassword });
+        const created = await createStaffAccount(user, { role: value.role, firstName: value.firstName, lastName: value.lastName, email: value.email, phone: value.phone, specialties: value.role === "professeur" ? value.specialties : [], password: value.password });
         setCredentials(created);
         setOpen(false);
         toast("Accès créé. Communiquez les identifiants à l'intéressé.");
@@ -204,7 +204,7 @@ export default function StaffPage() {
       <Modal open={open} onClose={() => { setOpen(false); setEditing(null); }} title={editing ? `Modifier l'accès de ${editing.firstName}` : "Créer un accès du personnel"} size="lg">
         <StaffForm
           subjects={subjects}
-          initial={editing ? { role: editing.role as StaffFormValue["role"], firstName: editing.firstName, lastName: editing.lastName, email: editing.email, phone: editing.phone, specialties: teachers.find((t) => t.id === editing.teacherId)?.specialties ?? [], tempPassword: "" } : undefined}
+          initial={editing ? { role: editing.role as StaffFormValue["role"], firstName: editing.firstName, lastName: editing.lastName, email: editing.email, phone: editing.phone, specialties: teachers.find((t) => t.id === editing.teacherId)?.specialties ?? [], password: "" } : undefined}
           submitLabel={editing ? "Enregistrer" : "Créer l'accès"}
           busy={busy}
           onCancel={() => { setOpen(false); setEditing(null); }}
