@@ -73,6 +73,20 @@ export function MustChangePasswordGuard() {
 }
 
 /**
+ * Verrou d'abonnement : PAS encore actif. Les moyens de paiement ne sont
+ * pas configurés — l'accès est ouvert à tous les plans (Découverte comme
+ * Premium) dès la création du compte, sans demande de paiement. La base
+ * elle-même autorise le travail sans abonnement (school_is_writable :
+ * « AUCUN » = l'école prépare sa structure en attendant).
+ *
+ * Pour réactiver le verrou quand le paiement sera branché : passer cette
+ * constante à `true` — les écrans de blocage (RenewScreen,
+ * ContactSchoolScreen, SubscriptionRequiredScreen) se remontent alors
+ * automatiquement.
+ */
+const PAIEMENTS_CONFIGURES = false;
+
+/**
  * Verrouille le tableau de bord selon l'abonnement de l'école :
  * • aucun abonnement (directeur) → abonnement + profil uniquement, aperçu flouté ailleurs ;
  * • échéance proche → bandeau d'alerte, accès conservé ;
@@ -84,6 +98,7 @@ export function SubscriptionGuard() {
   const { user } = useAuth();
   const school = useSchool();
 
+  if (!PAIEMENTS_CONFIGURES) return <Outlet />;
   if (isAlwaysAllowed(pathname)) return <Outlet />;
   // Tant que l'abonnement n'est pas chargé, on laisse la page afficher ses skeletons.
   if (school.loading) return <Outlet />;

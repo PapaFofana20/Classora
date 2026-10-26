@@ -69,7 +69,7 @@ create or replace function public.subscription_status_of(
   p_ends_at date,
   p_today date default current_date
 ) returns text
-language sql immutable parallel safe as $$
+language sql stable parallel safe as $$
   -- Identique à computeSubscriptionInfo (frontend/src/utils/subscription.ts) :
   -- ACTIF tant que l'échéance n'est pas passée, EXPIRE dès qu'elle l'est.
   select case

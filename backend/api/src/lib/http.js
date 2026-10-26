@@ -12,20 +12,22 @@ import { FRONTEND_ORIGIN } from "../config.js";
 const ALLOWED_HEADERS = "authorization, apikey, content-type, x-client-info";
 
 /**
- * Origines admises : FRONTEND_ORIGIN (déploiement) ; en développement, tout
- * est ouvert si la variable est absente (repli documenté, à NE PAS activer
- * en production).
+ * Origines admises : FRONTEND_ORIGIN (déploiement).
+ * En développement (variable absente), toute origine est acceptée pour
+ * faciliter les tests locaux. En production, l'absence de FRONTEND_ORIGIN
+ * signifie qu'aucune origine n'est autorisée (sécurisation par défaut).
  */
 function allowedOrigin(origin) {
-  if (!origin) return true;
-  if (!FRONTEND_ORIGIN) return true;
+  if (!origin) return false;
+  if (!FRONTEND_ORIGIN) return process.env.NODE_ENV !== "production";
   return FRONTEND_ORIGIN.split(",").map((o) => o.trim().replace(/\/$/, "")).includes(origin.replace(/\/$/, ""));
 }
 
 export function corsMiddleware(req, res, next) {
   const origin = req.headers.origin;
-  if (allowedOrigin(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin ?? "*");
+  const originAllowed = allowedOrigin(origin);
+  if (originAllowed) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS);
     // PATCH (agents/écoles) et DELETE (suppression d'école) sont utilisés par
@@ -37,7 +39,7 @@ export function corsMiddleware(req, res, next) {
   if (req.method === "OPTIONS") {
     return res.status(204).end();
   }
-  if (origin && !allowedOrigin(origin)) {
+  if (origin && !originAllowed) {
     return res.status(403).json({ error: "Origine non autorisée." });
   }
   return next();

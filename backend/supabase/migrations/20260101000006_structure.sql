@@ -15,7 +15,7 @@
 create or replace function public.payment_status_of(
   p_amount int, p_paid int, p_due date, p_today date default current_date
 ) returns app_payment_status
-language sql immutable parallel safe as $$
+language sql stable parallel safe as $$
   select case
     when p_paid >= p_amount then 'paye'
     when p_paid > 0 then 'partiel'
@@ -412,7 +412,7 @@ begin
     if not exists (select 1 from public.teachers where id = v_teacher and school_id = v_school) then
       raise exception 'Cet enseignant n''appartient pas à votre école.';
     end if;
-    select count(*) into v_count from public.teaching_assignments where teacher_id = v_teacher;
+    select count(*) into v_count from public.teaching_assignments where teacher_id = v_teacher and school_id = v_school;
     if v_count >= 10 then
       raise exception '% % est surchargé : % affectations (maximum conseillé : 10).',
         (select first_name from public.teachers where id = v_teacher),

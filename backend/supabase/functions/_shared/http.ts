@@ -4,11 +4,11 @@
 
 /**
  * Allowlist CORS : l'origine n'est reflétée QUE si elle figure dans
- * FRONTEND_ORIGIN (séparées par des virgules). Sans variable définie, repli
- * sur « * » (aucune fonction n'utilise de cookies : pas de CSRF possible,
- * mais un allowlist explicite reste préférable dès que la variable est posée).
- * L'ancien code reflétait l'Origin arbitraire du demandeur : n'importe quel
- * site pouvait piloter les inscriptions depuis le navigateur d'un visiteur.
+ * FRONTEND_ORIGIN (séparées par des virgules). Sans variable définie,
+ * aucune origine n'est reflétée (« null ») en dehors du développement
+ * local (Deno.env "DEV" = "true"). L'ancien code reflétait l'Origin
+ * arbitraire du demandeur : n'importe quel site pouvait piloter les
+ * inscriptions depuis le navigateur d'un visiteur.
  */
 export function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowlist = (Deno.env.get("FRONTEND_ORIGIN") ?? "")
@@ -16,7 +16,13 @@ export function getCorsHeaders(origin: string | null): Record<string, string> {
     .map((o) => o.trim().replace(/\/$/, ""))
     .filter(Boolean);
   const normalized = origin?.replace(/\/$/, "") ?? null;
-  const allowedOrigin = allowlist.length === 0 ? "*" : allowlist.includes(normalized ?? "") ? normalized : "null";
+  const dev = Deno.env.get("DEV") === "true";
+  const allowedOrigin =
+    allowlist.length === 0
+      ? dev ? "*" : "null"
+      : allowlist.includes(normalized ?? "")
+        ? normalized
+        : "null";
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers":

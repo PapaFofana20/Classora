@@ -33,8 +33,8 @@ export function recordCashPayment(actor: SessionUser, paymentId: string, amount:
     if (error) {
       if (error.message.includes("Montant invalide.")) throw new Error("Montant invalide.");
       if (error.message.includes("Échéance introuvable.")) throw new Error("Échéance introuvable.");
-      if (error.message.includes("lecture seule")) throw new Error(error.message);
-      throw new Error(error.message);
+      if (error.message.includes("lecture seule")) throw new Error("Mode lecture seule : l'abonnement de votre école est expiré.");
+      throw new Error("Impossible d'enregistrer l'encaissement. Réessayez.");
     }
     await hydrate("payments");
     const p = paymentsOf(actor.schoolId).find((x) => x.id === paymentId);

@@ -540,6 +540,11 @@ create policy "absences_insert_surveillant" on public.absences
     )
   );
 
+-- conversation_reads : lecture de ses propres marqueurs de lecture uniquement.
+create policy "conversation_reads_select_self" on public.conversation_reads
+  for select to authenticated
+  using (actor_id = auth.uid());
+
 -- ============================================================================
 -- Privilèges : messagerie / annonces en lecture directe (sous politiques),
 -- écritures par RPCs uniquement.
