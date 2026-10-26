@@ -7,15 +7,23 @@
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SERVICE_KEY } from "../config.js";
 
-/** Client service_role — NE JAMAIS l'exposer au navigateur. */
+/** Client service_role — NE JAMAIS l'exposer au navigateur.
+ * Instance unique (singleton) réutilisée par toutes les routes, afin d'éviter
+ * de recréer un client à chaque requête HTTP. Le pooling de connexions
+ * PostgreSQL lui-même est géré côté infrastructure par Supabase / PgBouncer. */
+let _svc = null;
+
 export function serviceClient(options = {}) {
   if (!SERVICE_KEY) {
     throw new Error("Configuration serveur incomplète (SUPABASE_SERVICE_ROLE_KEY).");
   }
-  return createClient(SUPABASE_URL, SERVICE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    db: { schema: options.dbSchema ?? "public" },
-  });
+  if (!_svc || (options.dbSchema && _svc.db && _svc.db.schema !== options.dbSchema)) {
+    _svc = createClient(SUPABASE_URL, SERVICE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      db: { schema: options.dbSchema ?? "public" },
+    });
+  }
+  return _svc;
 }
 
 /** Vérifie le JWT d'un utilisateur connecté auprès de Supabase Auth. */
