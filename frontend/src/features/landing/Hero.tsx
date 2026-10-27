@@ -48,7 +48,7 @@ export function Hero() {
           <div className="relative z-10 grid gap-8 px-6 pb-6 pt-nav-clearance sm:px-10 sm:pb-10 lg:px-14 lg:pb-14">
             <div className="max-w-3xl animate-fade-up">
               <h1 id="hero-title" className="text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-                Gérez votre école avec <Highlight dark>sérénité</Highlight>, du CI à la Terminale
+                <Highlight dark>Sérénité</Highlight>
               </h1>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ArrowButton to="/fonctionnalites" tone="lime">
