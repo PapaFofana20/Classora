@@ -10,7 +10,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 export default function AboutPage() {
   usePageMeta({
-    title: "À propos de Classora",
+    title: "À propos",
     description:
       "L'équipe Classora et sa mission : outiller les écoles privées du Sénégal avec des outils simples, adaptés aux réalités locales, du CI à la Terminale.",
     path: "/a-propos",

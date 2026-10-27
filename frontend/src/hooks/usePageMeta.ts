@@ -35,7 +35,7 @@ function upsertMeta(attr: "name" | "property", key: string, content: string) {
  */
 export function usePageMeta({ title, description, path, noindex }: PageMeta) {
   useEffect(() => {
-    const fullTitle = title !== undefined ? `${title} | Classora` : undefined;
+    const fullTitle = title !== undefined ? (title.toLowerCase().includes("classora") ? title : `${title} | Classora`) : undefined;
     if (fullTitle !== undefined) {
       document.title = fullTitle;
       upsertMeta("property", "og:title", fullTitle);
