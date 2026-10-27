@@ -24,9 +24,10 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { createStaffAccount, listStaff, resetStaffPassword, setStaffActive, updateStaff, type StaffCredentials, type StaffRow } from "@/services/authService";
 import { getSchoolOverview } from "@/services/schoolService";
 import { listTeacherRows } from "@/services/teacherService";
-import { STAFF_ROLE_LABELS } from "@/utils/permissions";
+import { STAFF_ROLE_LABELS, STAFF_ROLES } from "@/utils/permissions";
 import { cn } from "@/utils/cn";
 import { isValidEmail } from "@/utils/format";
+import { hasFeatureForSchool } from "@/utils/features";
 
 type Tab = "comptes" | "enseignants";
 
@@ -50,6 +51,10 @@ export default function StaffPage() {
   const staff = state.data?.staff ?? [];
   const teachers = state.data?.teachers ?? [];
   const subjects = (state.data?.overview.subjects ?? []).filter((s) => s.cycles.some((c) => c !== "elementaire")).map((s) => ({ id: s.id, name: s.name }));
+
+  // Rôles autorisés selon le plan : économe, secrétaire, surveillant = Premium+
+  const hasPremiumStaff = hasFeatureForSchool(schoolId, "staff_accounts");
+  const allowedRoles = hasPremiumStaff ? STAFF_ROLES : STAFF_ROLES.filter((r) => !["econome", "secretaire", "surveillant"].includes(r));
 
   const filteredStaff = staff.filter((s) => (!role || s.role === role) && `${s.firstName} ${s.lastName} ${s.email}`.toLowerCase().includes(dq.trim().toLowerCase()));
   const filteredTeachers = teachers.filter((t) => `${t.firstName} ${t.lastName} ${t.email}`.toLowerCase().includes(dq.trim().toLowerCase()));
@@ -209,6 +214,7 @@ export default function StaffPage() {
           busy={busy}
           onCancel={() => { setOpen(false); setEditing(null); }}
           onSubmit={submit}
+          allowedRoles={allowedRoles}
         />
       </Modal>
 

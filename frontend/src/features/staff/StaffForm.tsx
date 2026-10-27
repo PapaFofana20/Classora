@@ -25,14 +25,21 @@ interface Props {
   submitLabel: string;
   busy?: boolean;
   onCancel?: () => void;
+  /** Rôles autorisés (filtrés par plan). Par défaut : tous les STAFF_ROLES. */
+  allowedRoles?: StaffRole[];
 }
 
 const EMPTY: StaffFormValue = { role: "professeur", firstName: "", lastName: "", email: "", phone: "", specialties: [], password: "" };
 
 /** Formulaire de création / modification d'un accès du personnel (directeur uniquement). */
-export function StaffForm({ subjects, initial, onSubmit, submitLabel, busy, onCancel }: Props) {
+export function StaffForm({ subjects, initial, onSubmit, submitLabel, busy, onCancel, allowedRoles = STAFF_ROLES }: Props) {
   const [form, setForm] = useState<StaffFormValue>({ ...EMPTY, ...initial });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Si le rôle initial n'est pas dans allowedRoles, on prend le premier autorisé
+  if (!allowedRoles.includes(form.role) && allowedRoles.length > 0) {
+    setForm((f) => ({ ...f, role: allowedRoles[0] }));
+  }
 
   const errors = {
     firstName: form.firstName.trim().length < 2 ? "Le prénom est obligatoire." : null,
@@ -57,7 +64,7 @@ export function StaffForm({ subjects, initial, onSubmit, submitLabel, busy, onCa
       }}
       aria-label="Formulaire d'accès du personnel"
     >
-      <Select label="Rôle" required value={form.role} disabled={!!initial?.role} onChange={(e) => setForm({ ...form, role: e.target.value as StaffRole })} options={STAFF_ROLES.map((r) => ({ value: r, label: STAFF_ROLE_LABELS[r] }))} />
+      <Select label="Rôle" required value={form.role} disabled={!!initial?.role} onChange={(e) => setForm({ ...form, role: e.target.value as StaffRole })} options={allowedRoles.map((r) => ({ value: r, label: STAFF_ROLE_LABELS[r] }))} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Input label="Prénom" required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
         <Input label="Nom" required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />

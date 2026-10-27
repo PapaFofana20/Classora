@@ -281,6 +281,14 @@ export interface StaffCredentials {
 export async function createStaffAccount(actor: SessionUser, input: StaffAccountInput): Promise<StaffCredentials> {
   if (!canManageStaff(actor.role)) throw new Error("Seule la direction peut créer un accès.");
   if (!isStaffRole(input.role)) throw new Error("Rôle invalide.");
+
+  // Vérification du plan pour les rôles premium (économe, secrétaire, surveillant)
+  const premiumStaffRoles: StaffRole[] = ["econome", "secretaire", "surveillant"];
+  if (premiumStaffRoles.includes(input.role)) {
+    const { requireFeature } = await import("@/utils/features");
+    requireFeature("staff_accounts", actor.schoolId);
+  }
+
   const credentials = await callFunction<{
     userId: string;
     email: string;
