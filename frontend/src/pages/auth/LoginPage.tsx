@@ -1,10 +1,9 @@
 import { AuthLayout } from "@/components/layout/AuthLayout";
-import { Highlight } from "@/features/landing/Highlight";
 import { LoginForm } from "@/features/auth/LoginForm";
 
 export default function LoginPage() {
   return (
-    <AuthLayout title={<Highlight>Connectez-vous</Highlight>} subtitle="" showVisual={false} backgroundImage>
+    <AuthLayout title={<>Bon retour, connectez-vous</>} subtitle="Accédez à votre espace Classora : école, classes, notes, paiements et messages." showVisual={false} backgroundImage>
       <LoginForm />
     </AuthLayout>
   );

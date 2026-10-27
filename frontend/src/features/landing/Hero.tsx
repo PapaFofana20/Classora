@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
 import { ArrowButton } from "@/components/ui/ArrowButton";
-import { Highlight } from "@/features/landing/Highlight";
+
 import { heroSlides } from "@/data/landing";
 
 const SLIDE_DURATION = 8000;
@@ -25,7 +25,7 @@ export function Hero() {
   return (
     <section className="mt-hero-top mb-hero-bottom">
       <Container>
-        <div className="relative flex min-h-[720px] flex-col justify-end overflow-hidden rounded-3xl bg-forest sm:min-h-[640px] lg:min-h-[540px]">
+        <div className="relative flex min-h-[520px] flex-col justify-end overflow-hidden rounded-3xl bg-forest sm:min-h-[580px] lg:min-h-[540px]">
           {heroSlides.map((slide, index) => (
             <img
               key={slide.src}
@@ -35,7 +35,7 @@ export function Hero() {
               loading={index === 0 ? "eager" : "lazy"}
               fetchPriority={index === 0 ? "high" : "low"}
               decoding="async"
-              className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ease-out ${
+              className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-500 ease-out ${
                 index === active ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -48,7 +48,7 @@ export function Hero() {
           <div className="relative z-10 grid gap-8 px-6 pb-6 pt-nav-clearance sm:px-10 sm:pb-10 lg:px-14 lg:pb-14">
             <div className="max-w-3xl animate-fade-up">
               <h1 id="hero-title" className="text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
-                <Highlight dark>Sérénité</Highlight>
+                Gérez votre école avec sérénité, du CI à la Terminale
               </h1>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ArrowButton to="/fonctionnalites" tone="lime">
