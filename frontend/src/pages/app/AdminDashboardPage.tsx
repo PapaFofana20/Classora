@@ -10,6 +10,7 @@ import { useAsync } from "@/hooks/useAsync";
 import { getAdminOverviewStats } from "@/services/admin";
 import type { AdminOverviewStats } from "@/types";
 import { formatDate } from "@/utils/format";
+import { cn } from "@/utils/cn";
 import { Table } from "@/components/ui/Table";
 
 export default function AdminDashboardPage() {
@@ -152,6 +153,57 @@ function Content({ s }: { s: AdminOverviewStats }) {
                 </div>
               </div>
             )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Section SaaS — Graphiques et revenus */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="rounded-3xl bg-white shadow-soft">
+          <CardHeader title="Répartition des formules" />
+          <div className="space-y-3">
+            {[
+              { label: "Plan découverte (gratuit)", value: s.schools.total - (s.schools.active ?? 0), total: s.schools.total, color: "bg-forest" },
+              { label: "Premium (payant)", value: s.schools.active ?? 0, total: s.schools.total, color: "bg-lime" },
+            ].map((b) => (
+              <div key={b.label}>
+                <div className="flex justify-between text-sm font-medium text-ink"><span>{b.label}</span><span>{b.value} école{b.value > 1 ? 's' : ''}</span></div>
+                <div className="mt-1.5 h-3 w-full overflow-hidden rounded-full bg-neutral-100"><div className={cn("h-full rounded-full transition-all", b.color)} style={{ width: `${(b.value / (b.total || 1)) * 100}%` }} /></div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="rounded-3xl bg-gradient-to-br from-ink to-forest text-white shadow-soft">
+          <CardHeader title="Estimation du chiffre d'affaires" className="text-white/90" />
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Revenus estimés / mois</p>
+              <p className="mt-1 text-3xl font-extrabold">{(s.schools.active ?? 0) * 50000} FCFA</p>
+              <p className="text-xs text-white/60">Basé sur {s.schools.active ?? 0} école(s) Premium · 50 000 FCFA/mois</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 p-3 backdrop-blur">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Projection annuelle (estimée)</p>
+              <p className="mt-1 text-xl font-extrabold">{(s.schools.active ?? 0) * 50000 * 12} FCFA</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="rounded-3xl bg-mist shadow-soft">
+          <CardHeader title="Activité par période" />
+          <div className="space-y-3">
+            {[
+              { label: "Écoles actives", val: s.schools.active, max: Math.max(s.schools.active ?? 1, 1), color: "bg-forest" },
+              { label: "Élèves (total)", val: s.people.totalStudents, max: Math.max(s.people.totalStudents ?? 1, 1), color: "bg-lime" },
+            ].map((m) => (
+              <div key={m.label}>
+                <div className="flex justify-between text-xs font-semibold text-neutral-600"><span>{m.label}</span><span>{m.val}</span></div>
+                <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-neutral-200"><div className={cn("h-full rounded-full", m.color)} style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%` }} /></div>
+              </div>
+            ))}
+            <div className="mt-2 rounded-xl bg-forest/5 p-3 text-xs text-neutral-600 leading-relaxed">
+              <strong>Note SaaS :</strong> chaque école Premium = 50 000 FCFA/mois. Les écoles en Découverte sont gratuites mais génèrent du flux (inscriptions, support). L'objectif : convertir les écoles actives vers Premium.
+            </div>
           </div>
         </Card>
       </div>
