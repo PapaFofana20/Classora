@@ -98,7 +98,7 @@ export const steps = [
   { id: 1, icon: "tune", title: "Configurez votre école", text: "Choisissez vos cycles, vos périodes (semestres ou trimestres), vos matières et vos tarifs par niveau." },
   { id: 2, icon: "assignment_ind", title: "Affectez vos enseignants", text: "Un instituteur titulaire par classe à l'élémentaire, des professeurs par matière au moyen et au secondaire." },
   { id: 3, icon: "edit_note", title: "Saisissez les notes", text: "Chaque enseignant ne voit que ses classes. Moyennes, rangs et bulletins sont générés automatiquement." },
-  { id: 4, icon: "savings", title: "Encaissez et communiquez", text: "Les parents paient par mobile money, reçoivent leurs reçus et échangent avec les enseignants, depuis un seul compte, même avec plusieurs enfants." },
+  { id: 4, icon: "savings", title: "Encaissez et communiquez", text: "Les parents paient par mobile money, reçoivent leurs reçus et échangent avec les enseignants, depuis un seul compte, même avec plusieurs élèves." },
 ];
 
 export interface Plan {
@@ -163,7 +163,7 @@ export interface Faq {
 export const faqs: Faq[] = [
   { q: "Classora convient-il à une école élémentaire uniquement ?", a: "Oui. Vous choisissez les cycles proposés par votre école (élémentaire, moyen, secondaire). Chaque cycle a son modèle de bulletin et ses règles : un instituteur titulaire à l'élémentaire, plusieurs professeurs au moyen et secondaire." },
   { q: "Comment fonctionne le paiement par Wave, Orange Money ou Free Money ?", a: "Le parent choisit l'échéance à régler, sélectionne son opérateur et valide le paiement depuis son téléphone. Le reçu est généré immédiatement et l'économe voit le paiement en temps réel." },
-  { q: "Un parent avec plusieurs enfants a-t-il plusieurs comptes ?", a: "Non. Un seul compte parent permet de suivre tous les enfants, même dans des cycles différents, grâce à un sélecteur d'enfant. La réduction fratrie est appliquée automatiquement." },
+  { q: "Un parent avec plusieurs élèves a-t-il plusieurs comptes ?", a: "Non. Un seul compte parent permet de suivre tous les élèves, même dans des cycles différents, grâce à un sélecteur d'élève. La réduction fratrie est appliquée automatiquement." },
   { q: "Un professeur peut-il modifier les notes d'une autre classe ?", a: "Non. Un enseignant ne voit et ne saisit que les notes des couples classe/matière qui lui sont affectés. Le professeur principal dispose en plus d'une lecture de toutes les matières de sa classe." },
   { q: "Les bulletins respectent-ils le système sénégalais ?", a: "Oui. Devoirs et composition, coefficients par série, rang, appréciation du conseil de classe, conduite et absences. Les examens CFEE, BFEM et BAC sont pris en compte dans l'organisation des niveaux." },
   { q: "L'application fonctionne-t-elle avec une connexion lente ?", a: "Classora est conçu pour les connexions mobiles : pages légères, images compressées et chargement progressif." },

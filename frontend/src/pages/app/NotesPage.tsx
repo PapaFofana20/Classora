@@ -113,7 +113,7 @@ export default function NotesPage() {
     directeur: "Consultation de toutes les classes (lecture seule).",
     instituteur: "Toutes les matières de votre classe.",
     professeur: "Saisie limitée à vos classes et matières.",
-    parent: activeChild ? `Résultats de ${activeChild.firstName} (${activeChild.className}).` : "Résultats de vos enfants.",
+    parent: activeChild ? `Résultats de ${activeChild.firstName} (${activeChild.className}).` : "Résultats de vos élèves.",
     eleve: "Vos notes du 1er semestre.",
     econome: "",
     secretaire: "",

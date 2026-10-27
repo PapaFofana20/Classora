@@ -120,7 +120,7 @@ export interface Contact {
   label: string;
 }
 
-/** Destinataires possibles : parents de mes élèves (enseignant) ou enseignants de mes enfants (parent). */
+/** Destinataires possibles : parents de mes élèves (enseignant) ou enseignants de mes élèves (parent). */
 export function listContacts(actor: SessionUser): Promise<Contact[]> {
   return respond(() => {
     const out: Contact[] = [];

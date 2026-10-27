@@ -151,7 +151,7 @@ export function EnrollmentWizard({ overview, parents, childrenByParent }: Props)
             ) : (
               <div className="space-y-3">
                 <Select label="Parent" required placeholder="Rechercher un parent" value={parentId} onChange={(e) => setParentId(e.target.value)} options={parents.map((p) => ({ value: p.id, label: `${p.firstName} ${p.lastName} · ${p.phone}` }))} />
-                {siblings > 0 && <p className="rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">Réduction fratrie de {overview.settings.siblingDiscount} % appliquée sur la mensualité ({siblings} enfant{siblings > 1 ? "s" : ""} déjà inscrit{siblings > 1 ? "s" : ""}).</p>}
+                {siblings > 0 && <p className="rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">Réduction fratrie de {overview.settings.siblingDiscount} % appliquée sur la mensualité ({siblings} élève{siblings > 1 ? "s" : ""} déjà inscrit{siblings > 1 ? "s" : ""}).</p>}
               </div>
             )}
           </div>

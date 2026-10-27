@@ -64,7 +64,7 @@ export function ParentSignupForm({ school, onBack }: Props) {
       });
       logout();
       toast("Demande envoyée à l'école.");
-      navigate(`/inscription-envoyee?role=parent&enfant=${encodeURIComponent(childName)}`, { replace: true });
+      navigate(`/inscription-envoyee?role=parent&eleve=${encodeURIComponent(childName)}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Inscription impossible.");
       setBusy(false);
@@ -96,7 +96,7 @@ export function ParentSignupForm({ school, onBack }: Props) {
       </div>
       <p className="flex items-start gap-2 rounded-2xl bg-mist p-4 text-xs text-neutral-600">
         <Icon name="family_restroom" className="text-[18px]" />
-        Le code élève permet de rattacher votre compte à votre enfant dans cette école. Vous pourrez ajouter d'autres enfants depuis votre espace.
+        Le code élève permet de rattacher votre compte à votre élève dans cette école. Vous pourrez ajouter d'autres élèves depuis votre espace.
       </p>
       <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <div className="flex gap-3">

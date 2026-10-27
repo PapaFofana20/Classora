@@ -79,7 +79,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     profile,
   ],
   parent: [
-    dashboard("Suivi de mes enfants", "family_restroom"),
+    dashboard("Suivi de mes élèves", "family_restroom"),
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },

@@ -35,7 +35,7 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
   const unpaid = mine.filter((p) => remaining(p) > 0);
   const next = unpaid.find((p) => p.status === "a_venir");
 
-  if (!loading && !self && children.length === 0) return <EmptyState icon="child_care" title="Aucun enfant rattaché" />;
+  if (!loading && !self && children.length === 0) return <EmptyState icon="child_care" title="Aucun élève rattaché" />;
 
   const cols: Column<PaymentRow>[] = [
     { key: "l", header: "Échéance", render: (p) => <span className="font-semibold">{p.label}</span> },
@@ -61,7 +61,7 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
             <StatCard icon="task_alt" label="Déjà payé" value={formatCurrency(sum(mine.map((p) => p.paidAmount)))} />
             <StatCard icon="event" label="Prochaine échéance" value={next ? formatDate(next.dueDate) : "—"} note={next ? `${next.label} · ${formatCurrency(next.amount)}` : "Tout est à jour"} />
           </div>
-          {children.length > 1 && !self && <p className="flex items-start gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest"><Icon name="family_restroom" className="text-[20px]" />Réduction fratrie de 10 % appliquée sur la mensualité à partir du 2e enfant inscrit dans l'école.</p>}
+          {children.length > 1 && !self && <p className="flex items-start gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest"><Icon name="family_restroom" className="text-[20px]" />Réduction fratrie de 10 % appliquée sur la mensualité à partir du 2e élève inscrit dans l'école.</p>}
           <Tabs label="Paiements" value={tab} onChange={setTab} items={[{ id: "echeancier", label: "Échéancier", icon: "calendar_month" }, { id: "historique", label: "Historique et reçus", icon: "receipt_long" }]} />
           {tab === "echeancier" ? (
             <>

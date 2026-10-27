@@ -1,14 +1,14 @@
 import { useChild } from "@/context/ChildContext";
 import { Icon } from "@/components/ui/Icon";
 
-/** Sélecteur d'enfant (compte parent). */
+/** Sélecteur d'élève (compte parent). */
 export function ChildSwitcher({ className, id = "child-switcher" }: { className?: string; id?: string }) {
   const { children, activeChild, setActiveChildId } = useChild();
   if (children.length === 0) return null;
   return (
     <div className={className}>
       <label htmlFor={id} className="sr-only">
-        Enfant sélectionné
+        Élève sélectionné
       </label>
       <div className="relative">
         <Icon name="face" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-forest" />

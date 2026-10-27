@@ -303,7 +303,7 @@ export const privacy: LegalDocument = {
       paragraphs: [
         "La plateforme est utilisée pour le suivi d'élèves pouvant être mineurs. Les comptes d'élèves sont créés par l'Établissement ou par un parent ou tuteur légal. Le consentement du titulaire de l'autorité parentale est requis lorsque la loi l'impose.",
         "Les données des mineurs sont traitées uniquement pour les besoins de la scolarité, de la vie scolaire et de la communication avec les familles. Elles ne font l'objet d'aucune prospection commerciale.",
-        "Les parents et tuteurs peuvent exercer les droits de leur enfant mineur dans les conditions prévues par la loi et les règles applicables à l'établissement.",
+        "Les parents et tuteurs peuvent exercer les droits de leur élève mineur dans les conditions prévues par la loi et les règles applicables à l'établissement.",
       ],
     },
     {

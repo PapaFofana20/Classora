@@ -14,7 +14,7 @@ interface Option {
 export const SIGNUP_OPTIONS: Option[] = [
   { role: "directeur", title: "Je suis directeur d'école", text: "Créez votre école, abonnez-vous et recevez votre matricule.", icon: "admin_panel_settings", hint: "Licence annuelle, sans engagement" },
   { role: "eleve", title: "Je suis élève", text: "Inscrivez-vous avec le matricule reçu auprès de votre école.", icon: "backpack" },
-  { role: "parent", title: "Je suis parent", text: "Rattachez vos enfants avec le matricule et leur code élève.", icon: "family_restroom" },
+  { role: "parent", title: "Je suis parent", text: "Rattachez vos élèves avec le matricule et leur code élève.", icon: "family_restroom" },
 ];
 
 export function RoleChoice({ value, onChange }: { value: Role | null; onChange: (role: Role) => void }) {

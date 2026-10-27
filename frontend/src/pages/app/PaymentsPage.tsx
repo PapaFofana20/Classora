@@ -19,7 +19,7 @@ export default function PaymentsPage() {
           isStudent
             ? "Votre échéancier de scolarité"
             : isParent
-              ? `Échéancier de ${activeChild ? activeChild.firstName : "vos enfants"}`
+              ? `Échéancier de ${activeChild ? activeChild.firstName : "vos élèves"}`
               : "Échéanciers, encaissements, relances et reçus · 2026-2027"
         }
       />

@@ -12,7 +12,7 @@ import type { ReportLine } from "@/types";
 import { formatNumber } from "@/utils/format";
 import { averageTone } from "@/utils/grades";
 
-/** Notes du compte : parent (enfant sélectionné) ou élève (son propre relevé). */
+/** Notes du compte : parent (élève sélectionné) ou élève (son propre relevé). */
 export function ParentGrades({ period }: { period: string }) {
   const user = useCurrentUser();
   const { activeChild, loading, children } = useChild();
@@ -33,7 +33,7 @@ export function ParentGrades({ period }: { period: string }) {
     return cards.find((c) => c.student.id === studentId) ?? null;
   }, [studentId, period, self.data]);
 
-  if (!loading && !isStudent && children.length === 0) return <EmptyState icon="child_care" title="Aucun enfant rattaché" />;
+  if (!loading && !isStudent && children.length === 0) return <EmptyState icon="child_care" title="Aucun élève rattaché" />;
   if (state.loading && !state.error) return <SkeletonTable rows={7} />;
 
   return (

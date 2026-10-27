@@ -39,7 +39,7 @@ export function ParentHome() {
   const [busy, setBusy] = useState(false);
 
   if (!loading && !error && children.length === 0)
-    return <EmptyState icon="child_care" title="Aucun enfant rattaché à votre compte" text="Contactez l'école pour rattacher vos enfants à votre compte parent." action={<Button icon="add" onClick={() => setOpen(true)}>Ajouter un enfant avec son code</Button>} />;
+    return <EmptyState icon="child_care" title="Aucun élève rattaché à votre compte" text="Contactez l'école pour rattacher vos élèves à votre compte parent." action={<Button icon="add" onClick={() => setOpen(true)}>Ajouter un élève avec son code</Button>} />;
 
   const addChild = async () => {
     if (code.length !== CHILD_CODE_LENGTH) return;
@@ -60,9 +60,9 @@ export function ParentHome() {
   return (
     <>
       <PageHeader
-        title="Suivi de mes enfants"
-        subtitle={`${school.schoolName}${settings?.schoolYear ? ` · année scolaire ${settings.schoolYear}` : ""} · résultats et paiements de vos enfants.`}
-        actions={<Button icon="add" onClick={() => setOpen(true)}>Ajouter un enfant</Button>}
+        title="Suivi de mes élèves"
+        subtitle={`${school.schoolName}${settings?.schoolYear ? ` · année scolaire ${settings.schoolYear}` : ""} · résultats et paiements de vos élèves.`}
+        actions={<Button icon="add" onClick={() => setOpen(true)}>Ajouter un élève</Button>}
       />
       {error && (
         <button type="button" onClick={reload} className="mb-4 underline">
@@ -132,7 +132,7 @@ export function ParentHome() {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Ajouter un enfant"
+        title="Ajouter un élève"
         size="sm"
         footer={
           <>

@@ -82,7 +82,7 @@ export default function BulletinsPage() {
     <>
       <PageHeader
         title="Bulletins"
-        subtitle={isStudent ? "Votre bulletin du semestre, imprimable en PDF." : isParent ? "Bulletin de votre enfant, imprimable en PDF." : "Aperçu imprimable des bulletins. Le modèle dépend du cycle de la classe."}
+        subtitle={isStudent ? "Votre bulletin du semestre, imprimable en PDF." : isParent ? "Bulletin de votre élève, imprimable en PDF." : "Aperçu imprimable des bulletins. Le modèle dépend du cycle de la classe."}
         actions={<><PeriodSelect periods={periods} value={period} onChange={setPeriod} />{current && <Button icon="print" variant="dark" onClick={() => window.print()}>Imprimer / PDF</Button>}</>}
       />
       <AsyncView state={classes} skeleton={<Skeleton className="h-96 w-full" />}>

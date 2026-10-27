@@ -150,7 +150,7 @@ export function ChildCodeInput({ value, onChange, error }: { value: string; onCh
       maxLength={CHILD_CODE_LENGTH + 2}
       onChange={(e) => onChange(formatMatriculeInput(e.target.value, CHILD_CODE_LENGTH))}
       error={error}
-      hint="Code à 6 caractères donné par l'école pour chaque enfant."
+      hint="Code à 6 caractères donné par l'école pour chaque élève."
     />
   );
 }

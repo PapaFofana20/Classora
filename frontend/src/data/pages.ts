@@ -4,7 +4,7 @@ export const roleHighlights = [
   { role: "Instituteur", text: "Toutes les matières de sa classe en onglets, bulletins et messagerie avec ses parents." },
   { role: "Professeur", text: "Saisie limitée à ses couples classe · matière, plus la synthèse de sa classe principale." },
   { role: "Surveillant général", text: "Absences, retards et discipline suivis au quotidien." },
-  { role: "Parent", text: "Un compte, plusieurs enfants, tous cycles confondus : notes, bulletins et paiements." },
+  { role: "Parent", text: "Un compte, plusieurs élèves, tous cycles confondus : notes, bulletins et paiements." },
 ];
 
 export const subjectsContact = ["Demande de démonstration", "Tarifs et devis", "Support technique", "Partenariat", "Autre"];

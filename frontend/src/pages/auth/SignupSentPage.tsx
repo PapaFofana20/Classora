@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 export default function SignupSentPage() {
   const [params] = useSearchParams();
   const role = params.get("role");
-  const child = params.get("enfant");
+  const eleve = params.get("eleve");
   const childCode = params.get("code");
   const autoApprove = params.get("auto") === "1";
   const isParent = role === "parent";
@@ -39,13 +39,13 @@ export default function SignupSentPage() {
             ? "Votre école doit valider votre inscription. Vous recevrez un accès à votre espace dès validation par la direction."
             : "Votre école doit valider votre inscription. Vous recevrez un accès à votre espace dès validation par la direction."}
         </p>
-        {child && (
-          <p className="mx-auto mt-4 w-fit rounded-full bg-lime-soft px-4 py-2 text-sm font-semibold text-forest">Enfant rattaché : {child}</p>
+        {eleve && (
+          <p className="mx-auto mt-4 w-fit rounded-full bg-lime-soft px-4 py-2 text-sm font-semibold text-forest">Élève rattaché : {eleve}</p>
         )}
         {isStudent && childCode && (
           <div className="mt-6 rounded-2xl bg-lime-soft p-4 text-left border border-lime">
             <p className="text-sm font-semibold text-forest mb-2">
-              {autoApprove ? "Votre code élève (accès immédiat) :" : "Code élève de votre enfant :"}
+              {autoApprove ? "Votre code élève (accès immédiat) :" : "Code élève :"}
             </p>
             <div className="flex items-center gap-2">
               <span className="flex-1 font-mono text-2xl font-bold tracking-widest text-ink bg-white px-4 py-3 rounded-xl border border-neutral-200 text-center select-all">
