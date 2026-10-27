@@ -11,7 +11,7 @@ import { cn } from "@/utils/cn";
 
 export default function FeaturesPage() {
   usePageMeta({
-    title: "Fonctionnalités de gestion scolaire",
+    title: "Fonctionnalités de Classora",
     description:
       "Inscriptions en ligne, bulletins automatiques, suivi des paiements et messagerie : tout ce que Classora apporte à la direction, aux enseignants et aux parents.",
     path: "/fonctionnalites",

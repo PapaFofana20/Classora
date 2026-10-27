@@ -30,7 +30,9 @@ const HERO_IMAGES = {
 export function LegalPage({ doc }: { doc: LegalDocument }) {
   usePageMeta({
     title: doc.title,
-    description: `${doc.title} du service Classora — ${doc.updatedAt}.`,
+    description: doc.slug === "cgu"
+      ? "Conditions Générales d'Utilisation de Classora : règles d'accès, obligations des utilisateurs, tarifs, responsabilité et droit applicable."
+      : "Politique de confidentialité de Classora : collecte, usage, protection et conservation des données personnelles des écoles et de leurs membres.",
     path: `/${doc.slug}`,
   });
   const other =

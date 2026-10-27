@@ -16,7 +16,7 @@ const infos = [
 
 export default function ContactPage() {
   usePageMeta({
-    title: "Contact",
+    title: "Contactez Classora",
     description:
       "Une question sur Classora ? Écrivez-nous via le formulaire de contact : notre équipe basée à Dakar répond sous 24 heures.",
     path: "/contact",

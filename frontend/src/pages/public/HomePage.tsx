@@ -11,7 +11,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 export default function HomePage() {
   usePageMeta({
-    title: "Gestion scolaire pour les écoles privées au Sénégal",
+    title: "Classora",
     description:
       "Classora digitalise votre école privée au Sénégal : inscriptions, bulletins automatiques, suivi des paiements et messagerie parents-enseignants, du CI à la Terminale.",
     path: "/",

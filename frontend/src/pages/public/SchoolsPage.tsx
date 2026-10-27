@@ -10,7 +10,7 @@ import { initials } from "@/utils/format";
 
 export default function SchoolsPage() {
   usePageMeta({
-    title: "Classora pour les écoles privées du Sénégal",
+    title: "Écoles partenaires au Sénégal",
     description:
       "Une plateforme pensée pour les écoles privées sénégalaises, de l'élémentaire au secondaire : inscriptions, vie scolaire et communication avec les familles.",
     path: "/ecoles",
