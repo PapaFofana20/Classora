@@ -179,11 +179,12 @@ export interface StudentSignupInput {
 /** Inscription d'un élève : compte créé en attente, la direction valide ensuite. */
 export async function registerStudent(
   input: StudentSignupInput,
-): Promise<{ user: SessionUser; requestId: string }> {
+): Promise<{ user: SessionUser; requestId: string; childCode?: string }> {
   const result = await callFunction<{
     user: { id: string; email: string; firstName: string; lastName: string; role: string; status: string };
     requestId: string;
     approved: boolean;
+    child_code?: string;
   }>("register-student", input);
   const user: User = {
     id: result.user.id,
@@ -198,7 +199,7 @@ export async function registerStudent(
     mustChangePassword: false,
     createdAt: new Date().toISOString(),
   };
-  return { user: toSession(user), requestId: result.requestId };
+  return { user: toSession(user), requestId: result.requestId, childCode: result.child_code };
 }
 
 export interface ParentSignupInput {

@@ -1,13 +1,26 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { Button } from "@/components/ui/Button";
 
 /** /inscription-envoyee : confirmation après une inscription élève ou parent. */
 export default function SignupSentPage() {
   const [params] = useSearchParams();
   const role = params.get("role");
   const child = params.get("enfant");
+  const childCode = params.get("code");
   const isParent = role === "parent";
+  const isStudent = role === "eleve";
+
+  const copyCode = async () => {
+    if (childCode) {
+      try {
+        await navigator.clipboard.writeText(childCode);
+      } catch {
+        /* presse-papiers indisponible */
+      }
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-mist px-4 py-10">
@@ -21,6 +34,22 @@ export default function SignupSentPage() {
         </p>
         {child && (
           <p className="mx-auto mt-4 w-fit rounded-full bg-lime-soft px-4 py-2 text-sm font-semibold text-forest">Enfant rattaché : {child}</p>
+        )}
+        {isStudent && childCode && (
+          <div className="mt-6 rounded-2xl bg-lime-soft p-4 text-left border border-lime">
+            <p className="text-sm font-semibold text-forest mb-2">Code élève de votre enfant :</p>
+            <div className="flex items-center gap-2">
+              <span className="flex-1 font-mono text-2xl font-bold tracking-widest text-ink bg-white px-4 py-3 rounded-xl border border-neutral-200 text-center select-all">
+                {childCode}
+              </span>
+              <Button variant="outline" icon="content_copy" onClick={copyCode} aria-label="Copier le code">
+                Copier
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-forest/80">
+              Communiquez ce code à vos parents pour qu'ils puissent créer leur compte et suivre vos notes, devoirs, etc.
+            </p>
+          </div>
         )}
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link to="/connexion" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-forest px-6 text-sm font-semibold text-white hover:bg-forest-600">

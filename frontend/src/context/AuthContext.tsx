@@ -14,7 +14,7 @@ interface AuthContextValue {
   justLoggedOut: boolean;
   login: (email: string, password: string, matricule?: string) => Promise<SessionUser>;
   registerDirector: (input: DirectorInput) => Promise<SessionUser>;
-  registerStudent: (input: StudentSignupInput) => Promise<SessionUser>;
+  registerStudent: (input: StudentSignupInput) => Promise<{ user: SessionUser; childCode?: string }>;
   registerParent: (input: ParentSignupInput) => Promise<{ user: SessionUser; childName: string }>;
   changePassword: (current: string, next: string) => Promise<void>;
   createStaffAccount: (input: StaffAccountInput) => Promise<StaffCredentials>;
@@ -63,10 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerStudent = useCallback(async (input: StudentSignupInput) => {
-    const { user: u } = await authService.registerStudent(input);
+    const { user: u, childCode } = await authService.registerStudent(input);
     setUser(u);
     setJustLoggedOut(false);
-    return u;
+    return { user: u, childCode };
   }, []);
 
   const registerParent = useCallback(async (input: ParentSignupInput) => {

@@ -60,7 +60,7 @@ export function StudentSignupForm({ school, onBack }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await registerStudent({
+      const result = await registerStudent({
         schoolId: school.id,
         firstName: form.firstName,
         lastName: form.lastName,
@@ -73,7 +73,9 @@ export function StudentSignupForm({ school, onBack }: Props) {
       });
       logout();
       toast("Demande envoyée à l'école.");
-      navigate("/inscription-envoyee?role=eleve", { replace: true });
+      // Passer le child_code dans l'URL pour l'afficher
+      const childCode = result.childCode ? `&code=${encodeURIComponent(result.childCode)}` : "";
+      navigate(`/inscription-envoyee?role=eleve${childCode}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Inscription impossible.");
       setBusy(false);
