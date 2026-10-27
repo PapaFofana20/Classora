@@ -9,6 +9,7 @@ export default function SignupSentPage() {
   const role = params.get("role");
   const child = params.get("enfant");
   const childCode = params.get("code");
+  const autoApprove = params.get("auto") === "1";
   const isParent = role === "parent";
   const isStudent = role === "eleve";
 
@@ -28,16 +29,24 @@ export default function SignupSentPage() {
         <span className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-lime text-forest">
           <Icon name="mark_email_read" fill className="text-[32px]" />
         </span>
-        <h1 className="text-2xl font-extrabold tracking-tight text-ink">Demande envoyée</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-ink">
+          {isStudent && autoApprove ? "Inscription confirmée" : "Demande envoyée"}
+        </h1>
         <p className="mx-auto mt-3 max-w-md text-sm text-neutral-600">
-          {isParent ? "Votre école doit valider votre inscription." : "Votre école doit valider votre inscription."} Vous recevrez un accès à votre espace dès validation par la direction.
+          {isStudent && autoApprove
+            ? "Votre compte est activé. Vous pouvez dès maintenant vous connecter et communiquer votre code à vos parents."
+            : isParent
+            ? "Votre école doit valider votre inscription. Vous recevrez un accès à votre espace dès validation par la direction."
+            : "Votre école doit valider votre inscription. Vous recevrez un accès à votre espace dès validation par la direction."}
         </p>
         {child && (
           <p className="mx-auto mt-4 w-fit rounded-full bg-lime-soft px-4 py-2 text-sm font-semibold text-forest">Enfant rattaché : {child}</p>
         )}
         {isStudent && childCode && (
           <div className="mt-6 rounded-2xl bg-lime-soft p-4 text-left border border-lime">
-            <p className="text-sm font-semibold text-forest mb-2">Code élève de votre enfant :</p>
+            <p className="text-sm font-semibold text-forest mb-2">
+              {autoApprove ? "Votre code élève (accès immédiat) :" : "Code élève de votre enfant :"}
+            </p>
             <div className="flex items-center gap-2">
               <span className="flex-1 font-mono text-2xl font-bold tracking-widest text-ink bg-white px-4 py-3 rounded-xl border border-neutral-200 text-center select-all">
                 {childCode}
@@ -47,7 +56,9 @@ export default function SignupSentPage() {
               </Button>
             </div>
             <p className="mt-3 text-xs text-forest/80">
-              Communiquez ce code à vos parents pour qu'ils puissent créer leur compte et suivre vos notes, devoirs, etc.
+              {autoApprove
+                ? "Votre compte est déjà actif. Communiquez ce code à vos parents pour qu'ils puissent créer leur compte et suivre vos notes, devoirs, etc."
+                : "Communiquez ce code à vos parents pour qu'ils puissent créer leur compte. Votre accès sera ouvert après validation par la direction."}
             </p>
           </div>
         )}
@@ -62,11 +73,11 @@ export default function SignupSentPage() {
         <p className="mt-8 border-t border-neutral-100 pt-6 text-left text-xs text-neutral-500">
           <strong className="text-ink">Et ensuite ?</strong>
           <br />
-          La direction de votre école examine la demande. Dès qu'elle est acceptée, vous
-          recevez un e-mail avec votre accès personnel.
+          {autoApprove && isStudent
+            ? "Votre compte est déjà actif. Connectez-vous avec votre e-mail et votre mot de passe."
+            : "La direction de votre école examine la demande. Dès qu'elle est acceptée, vous recevez un e-mail avec votre accès personnel."}
           <br />
-          Vous avez utilisé l'adresse e-mail&nbsp;? Conservez-la : elle sert à vous
-          identifier auprès de l'école.
+          Vous avez utilisé l'adresse e-mail&nbsp;? Conservez-la : elle sert à vous identifier auprès de l'école.
         </p>
       </Card>
     </div>

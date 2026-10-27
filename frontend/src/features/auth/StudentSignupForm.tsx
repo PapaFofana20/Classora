@@ -73,9 +73,10 @@ export function StudentSignupForm({ school, onBack }: Props) {
       });
       logout();
       toast("Demande envoyée à l'école.");
-      // Passer le child_code dans l'URL pour l'afficher
+      // Passer le child_code et l'info d'auto-approbation dans l'URL
       const childCode = result.childCode ? `&code=${encodeURIComponent(result.childCode)}` : "";
-      navigate(`/inscription-envoyee?role=eleve${childCode}`, { replace: true });
+      const autoApprove = school.autoApproveStudents ? "&auto=1" : "";
+      navigate(`/inscription-envoyee?role=eleve${childCode}${autoApprove}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Inscription impossible.");
       setBusy(false);
@@ -118,7 +119,9 @@ export function StudentSignupForm({ school, onBack }: Props) {
       </div>
       <p className="flex items-start gap-2 rounded-2xl bg-mist p-4 text-xs text-neutral-600">
         <Icon name="info" className="text-[18px]" />
-        Votre compte est créé immédiatement, mais l'accès à l'espace de l'école est ouvert après validation par la direction.
+        {school.autoApproveStudents
+          ? "Votre compte sera activé immédiatement après l'inscription (approbation automatique activée par la direction)."
+          : "Votre compte est créé immédiatement, mais l'accès à l'espace de l'école est ouvert après validation par la direction."}
       </p>
       <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <div className="flex gap-3">
