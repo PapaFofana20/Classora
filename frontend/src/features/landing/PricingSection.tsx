@@ -32,8 +32,8 @@ export function PricingSection({ withHeader = true }: { withHeader?: boolean }) 
                 <ul className="my-7 flex-1 space-y-3 text-sm">
                   {p.items.map((it) => (
                     <li key={it} className="flex items-start gap-3">
-                      <Icon name="check_circle" fill className={cn("mt-0.5 text-[20px]", p.highlight ? "text-lime" : isGroup ? "text-forest" : "text-leaf")} />
-                      {it}
+                      <Icon name="check_circle" fill className={cn("mt-0.5 shrink-0 text-[20px]", p.highlight ? "text-lime" : isGroup ? "text-forest" : "text-leaf")} />
+                      <span className="overflow-wrap-anywhere break-words">{it}</span>
                     </li>
                   ))}
                 </ul>

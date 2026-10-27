@@ -38,8 +38,8 @@ export function PlanCard({ plan, cycle, current }: Props) {
       <ul className="my-6 flex-1 space-y-2.5 text-sm">
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-2.5">
-            <Icon name="check_circle" fill className={cn("mt-0.5 text-[18px]", plan.highlight ? "text-lime" : "text-leaf")} />
-            <span className={plan.highlight ? "text-white/90" : "text-neutral-700"}>{f}</span>
+            <Icon name="check_circle" fill className={cn("mt-0.5 shrink-0 text-[18px]", plan.highlight ? "text-lime" : "text-leaf")} />
+            <span className={cn("overflow-wrap-anywhere break-words", plan.highlight ? "text-white/90" : "text-neutral-700")}>{f}</span>
           </li>
         ))}
       </ul>
