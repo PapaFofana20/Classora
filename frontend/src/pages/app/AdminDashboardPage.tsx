@@ -33,6 +33,38 @@ export default function AdminDashboardPage() {
 function Content({ s }: { s: AdminOverviewStats }) {
   return (
     <div className="space-y-4">
+      {/* Bandeau d'actions rapides — autorité admin */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link to="/admin/ecoles" className="group relative overflow-hidden rounded-3xl bg-forest p-5 text-white shadow-soft transition-transform hover:-translate-y-0.5">
+          <div className="flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-xl bg-white/10"><Icon name="school" fill className="text-[22px] text-lime" /></span>
+            <div><p className="text-xs font-bold uppercase tracking-wide text-white/60">Établissements</p><p className="text-lg font-extrabold">{s.schools.total} écoles</p></div>
+          </div>
+          <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-lime"><Icon name="arrow_forward" className="text-[14px]" /> Voir la répartition</div>
+        </Link>
+        <Link to="/admin/agents" className="group relative overflow-hidden rounded-3xl bg-ink p-5 text-white shadow-soft transition-transform hover:-translate-y-0.5">
+          <div className="flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-xl bg-white/10"><Icon name="verified_user" fill className="text-[22px] text-lime" /></span>
+            <div><p className="text-xs font-bold uppercase tracking-wide text-white/60">Agents</p><p className="text-lg font-extrabold">Administration</p></div>
+          </div>
+          <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-lime"><Icon name="arrow_forward" className="text-[14px]" /> Gérer les accès</div>
+        </Link>
+        <Link to="/admin/ecoles" className="group relative overflow-hidden rounded-3xl bg-mist p-5 text-ink shadow-soft transition-transform hover:-translate-y-0.5">
+          <div className="flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-xl bg-forest/10"><Icon name="warning" fill className="text-[22px] text-danger" /></span>
+            <div><p className="text-xs font-bold uppercase tracking-wide text-neutral-500">Alertes</p><p className="text-lg font-extrabold">{s.schools.suspended} suspendue{Number(s.schools.suspended) > 1 ? 's' : ''}</p></div>
+          </div>
+          <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-forest"><Icon name="arrow_forward" className="text-[14px]" /> Vérifier</div>
+        </Link>
+        <Card className="rounded-3xl bg-gradient-to-br from-forest/10 to-lime/20 p-5 shadow-soft">
+          <div className="flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-xl bg-forest text-lime"><Icon name="security" fill className="text-[22px]" /></span>
+            <div><p className="text-xs font-bold uppercase tracking-wide text-forest-500">Intégrité</p><p className="text-lg font-extrabold text-ink">Plateforme active</p></div>
+          </div>
+          <div className="mt-2 text-xs font-medium text-neutral-600">RLS actives · JWT vérifié · Audit journalisé</div>
+        </Card>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard dark icon="school" label="Écoles totales" value={String(s.schools.total)} badge={{ text: `${s.schools.active} actives`, tone: "up" }} note={`${s.schools.suspended} suspendue${s.schools.suspended > 1 ? "es" : ""}`} />
         <StatCard icon="groups" label="Élèves" value={String(s.people.totalStudents)} note="toutes écoles confondues" />
@@ -120,6 +152,49 @@ function Content({ s }: { s: AdminOverviewStats }) {
                 </div>
               </div>
             )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Section autoritaire : conformité et audit */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2 bg-gradient-to-br from-forest via-ink to-forest text-white rounded-3xl shadow-soft">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-white">Supervision — Audit administratif</h3>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Sessions actives</p>
+              <p className="mt-1 text-2xl font-extrabold">{s.schools.active}</p>
+              <p className="mt-1 text-xs text-white/60">Établissements avec abonnement valide</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Écoles surveillées</p>
+              <p className="mt-1 text-2xl font-extrabold">{s.schools.total}</p>
+              <p className="mt-1 text-xs text-white/60">Sur la plateforme</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 p-4 backdrop-blur">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Plateforme</p>
+              <p className="mt-1 text-2xl font-extrabold">Active</p>
+              <p className="mt-1 text-xs text-white/60">RLS · JWT · Audit journalisé</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="rounded-3xl bg-white shadow-soft">
+          <CardHeader title="Contrôle d'accès" />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-xl bg-forest/5 px-4 py-3">
+              <div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full bg-forest text-lime"><Icon name="verified_user" fill className="text-[14px]" /></span><span className="text-sm font-semibold text-ink">Agents autorisés</span></div>
+              <Badge tone="success">Actif</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-xl bg-mist px-4 py-3">
+              <div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full bg-ink text-lime"><Icon name="security" fill className="text-[14px]" /></span><span className="text-sm font-semibold text-ink">JWT vérifié</span></div>
+              <Badge tone="lime">Oui</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-xl bg-lime-soft px-4 py-3">
+              <div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full bg-forest text-white"><Icon name="history" fill className="text-[14px]" /></span><span className="text-sm font-semibold text-ink">Audit actif</span></div>
+              <Badge tone="forest">Oui</Badge>
+            </div>
           </div>
         </Card>
       </div>
