@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Icon } from "@/components/ui/Icon";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -12,6 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { SkeletonTable } from "@/components/ui/Skeleton";
 import { Tabs } from "@/components/ui/Tabs";
 import { useCurrentUser } from "@/context/AuthContext";
+import { useSchool } from "@/context/SchoolContext";
 import { useToast } from "@/context/ToastContext";
 import { counterpartName, Thread } from "@/features/messages/Thread";
 import { NewMessageModal } from "@/features/messages/NewMessageModal";
@@ -20,10 +22,34 @@ import { listAnnouncements, listContacts, listConversations, postAnnouncement } 
 import type { Role } from "@/types";
 import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/format";
+import { hasFeatureForSchool } from "@/utils/features";
 
 export default function MessagesPage() {
   const user = useCurrentUser();
+  const { schoolId } = useSchool();
   const { toast } = useToast();
+
+  // Feature gate: messagerie = Pro+
+  const hasMessaging = hasFeatureForSchool(schoolId, "messaging");
+
+  if (!hasMessaging) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-mist px-4 py-10">
+        <Card className="w-full max-w-xl text-center">
+          <Icon name="lock" className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-amber-soft text-amber-700" />
+          <h1 className="text-xl font-extrabold text-ink">Fonctionnalité Premium</h1>
+          <p className="mt-3 text-sm text-neutral-600">
+            La messagerie parents-enseignants est disponible à partir du plan <strong>Pro</strong>.
+            Votre école est actuellement sur le plan Découverte.
+          </p>
+          <p className="mt-2 text-xs text-neutral-500">
+            Contactez l'administration pour faire évoluer votre abonnement.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
   const hasConversations = user.role === "directeur" || user.role === "instituteur" || user.role === "professeur" || user.role === "parent" || user.role === "eleve";
   const canCompose = user.role === "instituteur" || user.role === "professeur" || user.role === "parent" || user.role === "eleve";
   const canAnnounce = user.role === "directeur" || user.role === "econome";

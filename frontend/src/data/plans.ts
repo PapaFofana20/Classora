@@ -11,8 +11,8 @@ export const plans: Plan[] = [
     name: "Plan découverte",
     tagline: "Pour démarrer une école",
     studentLimit: 100,
-    monthlyPrice: 15000,
-    yearlyPrice: 150000,
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     features: ["Jusqu'à 100 élèves", "Classes, notes et bulletins", "Espace parents", "Support par WhatsApp"],
   },
   {

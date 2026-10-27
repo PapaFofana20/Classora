@@ -27,7 +27,6 @@ import { listTeacherRows } from "@/services/teacherService";
 import { STAFF_ROLE_LABELS, STAFF_ROLES } from "@/utils/permissions";
 import { cn } from "@/utils/cn";
 import { isValidEmail } from "@/utils/format";
-import { hasFeatureForSchool } from "@/utils/features";
 
 type Tab = "comptes" | "enseignants";
 
@@ -52,9 +51,11 @@ export default function StaffPage() {
   const teachers = state.data?.teachers ?? [];
   const subjects = (state.data?.overview.subjects ?? []).filter((s) => s.cycles.some((c) => c !== "elementaire")).map((s) => ({ id: s.id, name: s.name }));
 
-  // Rôles autorisés selon le plan : économe, secrétaire, surveillant = Premium+
-  const hasPremiumStaff = hasFeatureForSchool(schoolId, "staff_accounts");
-  const allowedRoles = hasPremiumStaff ? STAFF_ROLES : STAFF_ROLES.filter((r) => !["econome", "secretaire", "surveillant"].includes(r));
+  // Les rôles de personnel (enseignants, économe, secrétaire, surveillant)
+  // sont disponibles dès le plan Découverte (gratuit) : la direction a besoin
+  // de créer les accès pour que l'administration et les enseignants puissent
+  // écrire des notes, gérer les élèves, etc.
+  const allowedRoles = STAFF_ROLES;
 
   const filteredStaff = staff.filter((s) => (!role || s.role === role) && `${s.firstName} ${s.lastName} ${s.email}`.toLowerCase().includes(dq.trim().toLowerCase()));
   const filteredTeachers = teachers.filter((t) => `${t.firstName} ${t.lastName} ${t.email}`.toLowerCase().includes(dq.trim().toLowerCase()));

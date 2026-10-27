@@ -1,4 +1,5 @@
 import { subscriptionInfoOf } from "@/services/subscriptionService";
+import { useSchool } from "@/context/SchoolContext";
 import type { PlanId } from "@/types";
 
 /**
@@ -12,7 +13,7 @@ export type FeatureKey =
   | "auto_reminders"            // Rappels automatiques des impayés
   | "scheduling"                // Affectations et emplois du temps
   /** Plans Premium+ */
-  | "staff_accounts"            // Comptes économe, secrétaire, surveillant
+  | "staff_accounts"            // Comptes économe, secrétaire, surveillant (disponible dès le plan Découverte)
   | "data_export"               // Export des données et rapports
   /** Plans Illimité */
   | "multi_campus";             // Multi-sièges / multi-campus
@@ -26,7 +27,7 @@ const FEATURE_REQUIREMENTS: Record<FeatureKey, PlanId> = {
   mobile_payments: "pro",
   auto_reminders: "pro",
   scheduling: "pro",
-  staff_accounts: "premium",
+  staff_accounts: "essentiel",
   data_export: "premium",
   multi_campus: "illimite",
 };
@@ -35,16 +36,12 @@ const FEATURE_REQUIREMENTS: Record<FeatureKey, PlanId> = {
  * Vérifie si une fonctionnalité est disponible pour l'école actuelle.
  * À utiliser côté client pour masquer/désactiver des UI.
  */
-export function hasFeature(feature: FeatureKey): boolean {
-  const info = subscriptionInfoOf("");
-  if (!info.plan) return false; // Aucun abonnement = plan essentiel par défaut ?
-  
+export function hasFeature(feature: FeatureKey, schoolId: string): boolean {
+  const info = subscriptionInfoOf(schoolId);
+  if (!info.plan) return false;
   const currentPlanIndex = PLAN_ORDER.indexOf(info.plan.id as PlanId);
   const requiredPlanIndex = PLAN_ORDER.indexOf(FEATURE_REQUIREMENTS[feature]);
-  
-  // Si le plan actuel n'est pas dans la liste (ex: plan custom), on autorise par sécurité
   if (currentPlanIndex === -1) return true;
-  
   return currentPlanIndex >= requiredPlanIndex;
 }
 
@@ -53,15 +50,7 @@ export function hasFeature(feature: FeatureKey): boolean {
  * Pour usage dans les services (côté serveur ou client avec schoolId).
  */
 export function hasFeatureForSchool(schoolId: string, feature: FeatureKey): boolean {
-  const info = subscriptionInfoOf(schoolId);
-  if (!info.plan) return false;
-  
-  const currentPlanIndex = PLAN_ORDER.indexOf(info.plan.id as PlanId);
-  const requiredPlanIndex = PLAN_ORDER.indexOf(FEATURE_REQUIREMENTS[feature]);
-  
-  if (currentPlanIndex === -1) return true;
-  
-  return currentPlanIndex >= requiredPlanIndex;
+  return hasFeature(feature, schoolId);
 }
 
 /**
@@ -86,8 +75,8 @@ export function getRequiredPlanLabel(feature: FeatureKey): string {
  * Vérifie et lève une erreur si la fonctionnalité n'est pas disponible.
  * À utiliser dans les actions critiques (création de compte staff, etc.)
  */
-export function requireFeature(feature: FeatureKey, schoolId?: string): void {
-  const has = schoolId ? hasFeatureForSchool(schoolId, feature) : hasFeature(feature);
+export function requireFeature(feature: FeatureKey, schoolId: string): void {
+  const has = hasFeature(feature, schoolId);
   if (!has) {
     const planLabel = getRequiredPlanLabel(feature);
     throw new Error(`Cette fonctionnalité nécessite le plan ${planLabel} ou supérieur.`);
@@ -98,7 +87,6 @@ export function requireFeature(feature: FeatureKey, schoolId?: string): void {
  * Hook React pour vérifier une fonctionnalité dans un composant.
  */
 export function useFeature(feature: FeatureKey): boolean {
-  // Note: dans un vrai hook, on utiliserait le contexte d'abonnement
-  // Pour l'instant, on appelle la fonction synchrone
-  return hasFeature(feature);
+  const { schoolId } = useSchool();
+  return hasFeature(feature, schoolId);
 }

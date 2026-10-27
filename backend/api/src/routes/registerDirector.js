@@ -31,6 +31,7 @@ export default route(async (req, res) => {
     // enregistrée à l'inscription.
     const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
+    const plan = optionalString(body, "plan", "Le plan d'abonnement", 50) ?? "essentiel";
 
     const pwError = passwordError(password);
     if (pwError) return badRequest(res, pwError);
@@ -62,6 +63,7 @@ export default route(async (req, res) => {
         p_city: city,
         p_address: address,
         p_cycles: cycles,
+        p_plan_id: plan,
       });
       if (error || !data) {
         throw new Error(error?.message ?? "Inscription incomplète.");
