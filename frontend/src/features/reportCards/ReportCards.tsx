@@ -55,7 +55,7 @@ function Signatures({ labels }: { labels: string[] }) {
   );
 }
 
-function ElementaryReport({ card, schoolName, exam }: Props) {
+export function ElementaryReport({ card, schoolName, exam }: Props) {
   const scale = 10;
   return (
     <article className="print-area rounded-2xl bg-white p-6 shadow-card sm:p-10" aria-label={`Bulletin de ${card.student.firstName} ${card.student.lastName}`}>
