@@ -82,13 +82,13 @@ export function averageTone(avg: number | null): Tone {
 
 export type ParseResult = { ok: true; value: number | null } | { ok: false; error: string };
 
-/** Valide une saisie de note (0 à 20, virgule acceptée). Vide = pas de note. */
-export function parseGradeInput(raw: string): ParseResult {
+/** Valide une saisie de note (0 à max, virgule acceptée). Vide = pas de note. */
+export function parseGradeInput(raw: string, max = 20): ParseResult {
   const text = raw.trim().replace(",", ".");
   if (text === "") return { ok: true, value: null };
-  if (!/^\d{1,2}(\.\d{1,2})?$/.test(text)) return { ok: false, error: "Saisissez un nombre entre 0 et 20." };
+  if (!/^\d{1,2}(\.\d{1,2})?$/.test(text)) return { ok: false, error: `Saisissez un nombre entre 0 et ${max}.` };
   const n = Number(text);
-  if (n < 0 || n > 20) return { ok: false, error: "La note doit être comprise entre 0 et 20." };
+  if (n < 0 || n > max) return { ok: false, error: `La note doit être comprise entre 0 et ${max}.` };
   return { ok: true, value: n };
 }
 

@@ -55,8 +55,8 @@ function Signatures({ labels }: { labels: string[] }) {
   );
 }
 
-/** Bulletin élémentaire : une seule appréciation de l'instituteur. */
-export function ElementaryReport({ card, schoolName, exam }: Props) {
+function ElementaryReport({ card, schoolName, exam }: Props) {
+  const scale = 10;
   return (
     <article className="print-area rounded-2xl bg-white p-6 shadow-card sm:p-10" aria-label={`Bulletin de ${card.student.firstName} ${card.student.lastName}`}>
       <Header card={card} schoolName={schoolName} title="Bulletin de notes · Cycle élémentaire" />
@@ -67,7 +67,7 @@ export function ElementaryReport({ card, schoolName, exam }: Props) {
         <thead>
           <tr className="bg-forest text-left text-xs uppercase text-white print:bg-neutral-200 print:text-black">
             <th className="px-3 py-2">Matière</th>
-            <th className="px-3 py-2 text-center">Note de composition /20</th>
+            <th className="px-3 py-2 text-center">Note de composition /{scale}</th>
             <th className="px-3 py-2 text-center">Rang</th>
             <th className="px-3 py-2">Appréciation</th>
           </tr>
@@ -84,9 +84,9 @@ export function ElementaryReport({ card, schoolName, exam }: Props) {
         </tbody>
       </table>
       <div className="mt-4 grid gap-3 sm:grid-cols-4">
-        <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne générale</p><p className="text-2xl font-extrabold text-forest">{num(card.generalAverage)} / 20</p></div>
+        <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne générale</p><p className="text-2xl font-extrabold text-forest">{num(card.generalAverage)} / {scale}</p></div>
         <div className="rounded-xl bg-lime-soft p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Rang</p><p className="text-2xl font-extrabold text-forest">{rankLabel(card.rank, card.classSize)}</p></div>
-        <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne de la classe</p><p className="text-xl font-bold">{num(card.classAverage)}</p></div>
+        <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Moyenne de la classe</p><p className="text-xl font-bold">{num(card.classAverage)} / {scale}</p></div>
         <div className="rounded-xl bg-mist p-3 print:border print:bg-transparent"><p className="text-xs text-neutral-600">Conduite · Absences</p><p className="text-base font-bold">{card.meta ? `${card.meta.conduct || "—"} · ${card.meta.absences} h` : "Non renseigné"}</p></div>
       </div>
       <section className="mt-5 rounded-xl border border-neutral-200 p-4">

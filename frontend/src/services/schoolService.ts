@@ -34,6 +34,7 @@ export function updateSettings(schoolId: string, patch: Partial<SchoolSettings>)
     if (patch.currentPeriod !== undefined) settingsPatch.current_period = patch.currentPeriod;
     if (patch.annexFees !== undefined) settingsPatch.annex_fees = patch.annexFees;
     if (patch.siblingDiscount !== undefined) settingsPatch.sibling_discount = patch.siblingDiscount;
+    if (patch.blockStudentBulletins !== undefined) settingsPatch.block_student_bulletins = patch.blockStudentBulletins;
     if (Object.keys(settingsPatch).length > 0) {
       const { error } = await supabase.from("school_settings").update(settingsPatch).eq("school_id", schoolId);
       if (error) throw new Error(/read-only|row-level/i.test(error.message) ? "Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées." : error.message);

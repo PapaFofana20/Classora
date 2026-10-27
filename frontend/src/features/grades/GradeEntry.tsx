@@ -82,7 +82,8 @@ function Sheet({ sheet, period }: { sheet: GradeSheet; period: string }) {
   const onChange = (studentId: string, field: Field, text: string) => {
     const k = keyOf(studentId, field);
     setDraft((d) => ({ ...d, [k]: text }));
-    const r = parseGradeInput(text);
+    const max = cycle === "elementaire" ? 10 : 20;
+    const r = parseGradeInput(text, max);
     if (!r.ok) {
       setErrors((e) => ({ ...e, [k]: r.error }));
       return;
@@ -143,7 +144,7 @@ function Sheet({ sheet, period }: { sheet: GradeSheet; period: string }) {
         </Card>
         <Card>
           <p className="text-xs font-semibold uppercase text-neutral-500">Moyenne de classe</p>
-          <p className="text-3xl font-extrabold">{classAvg === null ? "—" : formatNumber(classAvg)}<span className="text-base text-neutral-400"> /20</span></p>
+          <p className="text-3xl font-extrabold">{classAvg === null ? "—" : formatNumber(classAvg)}<span className="text-base text-neutral-400"> /{cycle === "elementaire" ? 10 : 20}</span></p>
         </Card>
         <Card>
           <p className="text-xs font-semibold uppercase text-neutral-500">Notes saisies</p>
@@ -166,7 +167,7 @@ function Sheet({ sheet, period }: { sheet: GradeSheet; period: string }) {
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-neutral-500">
                 <th scope="col" className="px-4 py-3">Élève</th>
-                {fields.map((f) => (<th key={f} scope="col" className="px-2 py-3 text-center">{FIELD_LABELS[f]} /20</th>))}
+                {fields.map((f) => (<th key={f} scope="col" className="px-2 py-3 text-center">{FIELD_LABELS[f]} /{cycle === "elementaire" ? 10 : 20}</th>))}
                 <th scope="col" className="px-2 py-3 text-center">Moyenne</th>
                 <th scope="col" className="px-2 py-3 text-center">Rang</th>
                 <th scope="col" className="px-2 py-3">Appréciation</th>

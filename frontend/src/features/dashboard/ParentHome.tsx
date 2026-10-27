@@ -25,6 +25,9 @@ import { formatMatriculeInput, CHILD_CODE_LENGTH } from "@/utils/matricule";
 import { formatCurrency, formatNumber } from "@/utils/format";
 import { averageTone } from "@/utils/grades";
 import { STUDENT_STATUS_LABELS } from "@/utils/payments";
+import type { Cycle } from "@/types";
+
+const getScale = (cycle?: Cycle | null) => (cycle === "elementaire" ? 10 : 20);
 
 export function ParentHome() {
   const user = useCurrentUser();
@@ -93,26 +96,36 @@ export function ParentHome() {
           d && (
             <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard dark icon="grade" label="Moyenne générale" value={d.report?.generalAverage == null ? "—" : `${formatNumber(d.report.generalAverage)} / 20`} note={periodLabel ?? undefined} />
-                <StatCard icon="emoji_events" label="Rang" value={d.report?.rank ? `${d.report.rank}${d.report.rank === 1 ? "er" : "e"} / ${d.report.classSize}` : "—"} note={d.classRoom.name} />
-                <StatCard icon="event_busy" label="Absences" value={d.report?.meta ? `${d.report.meta.absences} h` : "—"} note={d.report?.meta?.conduct ? `Conduite : ${d.report.meta.conduct}` : "Non renseigné"} />
-                <StatCard icon="payments" label="Reste dû (échu)" value={formatCurrency(d.row.balance)} badge={d.row.balance > 0 ? { text: "À régler", tone: "down" } : { text: "À jour", tone: "up" }} />
+                {(() => {
+                  const scale = getScale(d.classRoom.cycle);
+                  return (
+                    <>
+                      <StatCard dark icon="grade" label="Moyenne générale" value={d.report?.generalAverage == null ? "—" : `${formatNumber(d.report.generalAverage)} / ${scale}`} note={periodLabel ?? undefined} />
+                      <StatCard icon="emoji_events" label="Rang" value={d.report?.rank ? `${d.report.rank}${d.report.rank === 1 ? "er" : "e"} / ${d.report.classSize}` : "—"} note={d.classRoom.name} />
+                      <StatCard icon="event_busy" label="Absences" value={d.report?.meta ? `${d.report.meta.absences} h` : "—"} note={d.report?.meta?.conduct ? `Conduite : ${d.report.meta.conduct}` : "Non renseigné"} />
+                      <StatCard icon="payments" label="Reste dû (échu)" value={formatCurrency(d.row.balance)} badge={d.row.balance > 0 ? { text: "À régler", tone: "down" } : { text: "À jour", tone: "up" }} />
+                    </>
+                  );
+                })()}
               </div>
               <div className="grid gap-4 xl:grid-cols-3">
                 <Card className="xl:col-span-2">
                   <CardHeader title={`Résultats de ${d.row.firstName}`} subtitle={`Moyenne par matière${periodLabel ? ` (${periodLabel})` : ""}`} action={<LinkButton to="/app/notes" variant="ghost" size="sm">Détails</LinkButton>} />
                   <ul className="space-y-3">
-                    {(d.report?.lines ?? []).map((l) => (
-                      <li key={l.subjectId} className="flex items-center gap-3">
-                        <span className="w-44 truncate text-sm font-medium">{l.subjectName}</span>
-                        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
-                          <div className="h-full rounded-full bg-leaf" style={{ width: `${((l.average ?? 0) / 20) * 100}%` }} />
-                        </div>
-                        <Badge tone={averageTone(l.average)} className="w-16 justify-center">
-                          {l.average === null ? "—" : formatNumber(l.average)}
-                        </Badge>
-                      </li>
-                    ))}
+                    {(d.report?.lines ?? []).map((l) => {
+                      const scale = getScale(d.classRoom.cycle);
+                      return (
+                        <li key={l.subjectId} className="flex items-center gap-3">
+                          <span className="w-44 truncate text-sm font-medium">{l.subjectName}</span>
+                          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
+                            <div className="h-full rounded-full bg-leaf" style={{ width: `${Math.min(100, ((l.average ?? 0) / scale) * 100)}%` }} />
+                          </div>
+                          <Badge tone={averageTone(l.average)} className="w-16 justify-center">
+                            {l.average === null ? "—" : formatNumber(l.average)}
+                          </Badge>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </Card>
                 <Card>

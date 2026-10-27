@@ -38,7 +38,7 @@ export interface SchoolRow {
 export interface SchoolSettingsRow {
   school_id: string; school_year: string; period_type: PeriodType; current_period: string;
   annex_fees: { cantine: number; transport: number; tenue: number };
-  sibling_discount: number; created_at: string;
+  sibling_discount: number; block_student_bulletins: boolean; created_at: string;
 }
 export interface LevelFeesRow { school_id: string; level_id: string; inscription: number; mensualite: number; created_at: string }
 export interface SubscriptionRow {

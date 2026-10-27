@@ -369,6 +369,7 @@ export interface SchoolSettings {
   fees: Record<string, LevelFees>;
   annexFees: { cantine: number; transport: number; tenue: number };
   siblingDiscount: number;
+  blockStudentBulletins?: boolean;
 }
 
 export interface Period {

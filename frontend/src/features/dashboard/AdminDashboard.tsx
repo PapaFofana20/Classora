@@ -6,17 +6,21 @@ import { Icon } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { LinkButton } from "@/components/ui/Button";
 import { StatCard } from "@/components/ui/StatCard";
+import { Switch } from "@/components/ui/Switch";
 import { CYCLE_LABELS } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
 import { periodInfo } from "@/services/reportService";
 import { getAdminStats, type AdminStats } from "@/services/statsService";
+import { updateSettings } from "@/services/schoolService";
 import { useSchool } from "@/context/SchoolContext";
 import { useCurrentUser } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { MatriculeCard } from "@/features/subscription/MatriculeCard";
 import { OnboardingChecklist } from "@/features/subscription/OnboardingChecklist";
 import { formatCurrency, formatNumber } from "@/utils/format";
 import { ClassBars, CycleDonut, CYCLE_COLORS, PaymentsChart } from "./charts";
 import { LatestPayments } from "./LatestPayments";
+import { useState } from "react";
 
 export function AdminDashboard({ finance = false }: { finance?: boolean }) {
   const { schoolId, schoolName } = useSchool();
@@ -44,13 +48,44 @@ export function AdminDashboard({ finance = false }: { finance?: boolean }) {
 }
 
 function Content({ s, finance }: { s: AdminStats; finance: boolean }) {
-  const { school } = useSchool();
+  const { school, schoolId, reload, settings } = useSchool();
+  const { toast } = useToast();
+  const [busy, setBusy] = useState(false);
+  const isBlocked = settings?.blockStudentBulletins ?? false;
+
+  const toggle = async (checked: boolean) => {
+    setBusy(true);
+    try {
+      await updateSettings(schoolId, { blockStudentBulletins: checked });
+      reload();
+      toast(checked ? "Bulletins masqués aux élèves et parents." : "Bulletins visibles aux élèves et parents.");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Impossible de mettre à jour.", "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {!finance && (
         <>
           <OnboardingChecklist user={useCurrentUser()} />
           {school && <MatriculeCard school={school} canManage onChanged={() => window.location.reload()} />}
+          {!finance && (
+            <Card>
+              <CardHeader title="Accès aux bulletins" subtitle="Contrôle l'affichage et le téléchargement des bulletins pour les élèves et parents." />
+              <div className="px-6 pb-6">
+                <Switch
+                  checked={isBlocked}
+                  disabled={busy}
+                  onChange={(v) => void toggle(v)}
+                  label="Bloquer les bulletins (élèves / parents)"
+                  description="Quand activé, les bulletins sont masqués et le téléchargement/impression est désactivé."
+                />
+              </div>
+            </Card>
+          )}
         </>
       )}
       {/* Grilles pilotées par le conteneur (@container) : le nombre de colonnes ne change pas pendant la transition de la sidebar. */}

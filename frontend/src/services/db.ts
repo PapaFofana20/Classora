@@ -111,6 +111,7 @@ function mapSettings(r: any): SchoolSettings {
     fees: r.fees ?? {},
     annexFees: r.annex_fees ?? { cantine: 0, transport: 0, tenue: 0 },
     siblingDiscount: r.sibling_discount ?? 0,
+    blockStudentBulletins: r.block_student_bulletins ?? false,
   };
 }
 

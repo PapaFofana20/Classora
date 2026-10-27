@@ -62,7 +62,7 @@ export function ParentGrades({ period }: { period: string }) {
               <Card dark>
                 <p className="text-xs font-semibold uppercase text-white/70">Moyenne générale</p>
                 <p className="text-3xl font-extrabold text-lime">
-                  {card.generalAverage === null ? "—" : formatNumber(card.generalAverage)} <span className="text-base text-white/60">/ 20</span>
+                  {card.generalAverage === null ? "—" : formatNumber(card.generalAverage)} <span className="text-base text-white/60">/ {elem ? 10 : 20}</span>
                 </p>
               </Card>
               <Card>
@@ -74,7 +74,7 @@ export function ParentGrades({ period }: { period: string }) {
               </Card>
               <Card>
                 <p className="text-xs font-semibold uppercase text-neutral-500">Moyenne de la classe</p>
-                <p className="text-3xl font-extrabold">{card.classAverage === null ? "—" : formatNumber(card.classAverage)}</p>
+                <p className="text-3xl font-extrabold">{card.classAverage === null ? "—" : formatNumber(card.classAverage)} <span className="text-base text-neutral-400">/ {elem ? 10 : 20}</span></p>
               </Card>
             </div>
             <Card padded={false} className="p-2">

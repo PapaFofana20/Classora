@@ -8,8 +8,10 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { PeriodSelect } from "@/components/ui/PeriodSelect";
 import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Icon } from "@/components/ui/Icon";
 import { useCurrentUser } from "@/context/AuthContext";
 import { useChild } from "@/context/ChildContext";
+import { useSchool } from "@/context/SchoolContext";
 import { useToast } from "@/context/ToastContext";
 import { CONDUCT_OPTIONS, levels } from "@/data/school";
 import { ElementaryReport, SecondaryReport } from "@/features/reportCards/ReportCards";
@@ -64,8 +66,10 @@ export default function BulletinsPage() {
   const user = useCurrentUser();
   const { periods, period, setPeriod } = usePeriods();
   const { activeChild } = useChild();
+  const { settings } = useSchool();
   const isParent = user.role === "parent";
   const isStudent = user.role === "eleve";
+  const isRestricted = (isParent || isStudent) && (settings?.blockStudentBulletins ?? false);
   const classes = useAsync(async () => ({ list: await bulletinClasses(user), overview: await getSchoolOverview(user.schoolId) }), [user.id]);
   const [classId, setClassId] = useState("");
   const [idx, setIdx] = useState(0);
@@ -82,47 +86,57 @@ export default function BulletinsPage() {
     <>
       <PageHeader
         title="Bulletins"
-        subtitle={isStudent ? "Votre bulletin du semestre, imprimable en PDF." : isParent ? "Bulletin de votre élève, imprimable en PDF." : "Aperçu imprimable des bulletins. Le modèle dépend du cycle de la classe."}
-        actions={<><PeriodSelect periods={periods} value={period} onChange={setPeriod} />{current && <Button icon="print" variant="dark" onClick={() => window.print()}>Imprimer / PDF</Button>}</>}
+        subtitle={isRestricted ? "L'accès aux bulletins est temporairement désactivé par la direction." : isStudent ? "Votre bulletin du semestre, imprimable en PDF." : isParent ? "Bulletin de votre élève, imprimable en PDF." : "Aperçu imprimable des bulletins. Le modèle dépend du cycle de la classe."}
+        actions={current && !isRestricted ? <><PeriodSelect periods={periods} value={period} onChange={setPeriod} /><Button icon="print" variant="dark" onClick={() => window.print()}>Imprimer / PDF</Button></> : <>{!isRestricted && periods.length > 0 && <PeriodSelect periods={periods} value={period} onChange={setPeriod} />}</>}
       />
-      <AsyncView state={classes} skeleton={<Skeleton className="h-96 w-full" />}>
-        {({ list: allowed, overview }) =>
-          allowed.length === 0 ? (
-            <EmptyState icon="description" title="Aucun bulletin disponible" text={user.role === "professeur" ? "Les bulletins sont réservés au professeur principal de la classe." : "Aucune classe n'est disponible pour votre compte."} />
-          ) : (
-            <div className="space-y-4">
-              {!isParent && !isStudent && (
-                <Card className="no-print">
-                  <div className="grid gap-3 md:grid-cols-[1fr_2fr_auto] md:items-end">
-                    {allowed.length > 1 ? <Select label="Classe" value={effectiveClass} onChange={(e) => setClassId(e.target.value)} options={allowed.map((c) => ({ value: c.id, label: c.name }))} /> : <div><p className="mb-1.5 text-sm font-semibold">Classe</p><p className="min-h-12 rounded-2xl bg-mist px-4 py-3 text-sm font-bold">{allowed[0].name}</p></div>}
-                    <Select label="Élève" value={String(Math.min(idx, Math.max(0, data.length - 1)))} onChange={(e) => setIdx(Number(e.target.value))} options={data.map((c, i) => ({ value: String(i), label: `${c.student.firstName} ${c.student.lastName}` }))} />
-                    <div className="flex gap-2">
-                      <Button variant="outline" aria-label="Élève précédent" icon="chevron_left" disabled={idx <= 0} onClick={() => setIdx(idx - 1)} />
-                      <Button variant="outline" aria-label="Élève suivant" icon="chevron_right" disabled={idx >= data.length - 1} onClick={() => setIdx(idx + 1)} />
+      {isRestricted ? (
+        <Card className="p-8 text-center">
+          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-neutral-100">
+            <Icon name="lock" className="text-3xl text-neutral-500" />
+          </div>
+          <h2 className="text-lg font-bold">Bulletins indisponibles</h2>
+          <p className="mt-1 text-sm text-neutral-500">La direction a temporairement masqué les bulletins pour les élèves et les parents. Veuillez réessayer ultérieurement.</p>
+        </Card>
+      ) : (
+        <AsyncView state={classes} skeleton={<Skeleton className="h-96 w-full" />}>
+          {({ list: allowed, overview }) =>
+            allowed.length === 0 ? (
+              <EmptyState icon="description" title="Aucun bulletin disponible" text={user.role === "professeur" ? "Les bulletins sont réservés au professeur principal de la classe." : "Aucune classe n'est disponible pour votre compte."} />
+            ) : (
+              <div className="space-y-4">
+                {!isParent && !isStudent && (
+                  <Card className="no-print">
+                    <div className="grid gap-3 md:grid-cols-[1fr_2fr_auto] md:items-end">
+                      {allowed.length > 1 ? <Select label="Classe" value={effectiveClass} onChange={(e) => setClassId(e.target.value)} options={allowed.map((c) => ({ value: c.id, label: c.name }))} /> : <div><p className="mb-1.5 text-sm font-semibold">Classe</p><p className="min-h-12 rounded-2xl bg-mist px-4 py-3 text-sm font-bold">{allowed[0].name}</p></div>}
+                      <Select label="Élève" value={String(Math.min(idx, Math.max(0, data.length - 1)))} onChange={(e) => setIdx(Number(e.target.value))} options={data.map((c, i) => ({ value: String(i), label: `${c.student.firstName} ${c.student.lastName}` }))} />
+                      <div className="flex gap-2">
+                        <Button variant="outline" aria-label="Élève précédent" icon="chevron_left" disabled={idx <= 0} onClick={() => setIdx(idx - 1)} />
+                        <Button variant="outline" aria-label="Élève suivant" icon="chevron_right" disabled={idx >= data.length - 1} onClick={() => setIdx(idx + 1)} />
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              )}
-              {cards.loading && !cards.error ? (
-                <Skeleton className="h-[600px] w-full" />
-              ) : cards.error ? (
-                <EmptyState icon="cloud_off" title="Chargement impossible" text={cards.error} action={<Button onClick={cards.reload} icon="refresh">Réessayer</Button>} />
-              ) : !current ? (
-                <EmptyState icon="description" title="Pas de bulletin" text="Aucun élève dans cette classe pour cette période." />
-              ) : (
-                <>
-                  {current.classRoom.cycle === "elementaire" ? (
-                    <ElementaryReport card={current} schoolName={overview.settings.name} exam={levels.find((l) => l.id === current.classRoom.levelId)?.exam} />
-                  ) : (
-                    <SecondaryReport card={current} schoolName={overview.settings.name} exam={levels.find((l) => l.id === current.classRoom.levelId)?.exam} />
-                  )}
-                  {!isParent && !isStudent && <MetaEditor card={current} onSaved={cards.reload} />}
-                </>
-              )}
-            </div>
-          )
-        }
-      </AsyncView>
+                  </Card>
+                )}
+                {cards.loading && !cards.error ? (
+                  <Skeleton className="h-[600px] w-full" />
+                ) : cards.error ? (
+                  <EmptyState icon="cloud_off" title="Chargement impossible" text={cards.error} action={<Button onClick={cards.reload} icon="refresh">Réessayer</Button>} />
+                ) : !current ? (
+                  <EmptyState icon="description" title="Pas de bulletin" text="Aucun élève dans cette classe pour cette période." />
+                ) : (
+                  <>
+                    {current.classRoom.cycle === "elementaire" ? (
+                      <ElementaryReport card={current} schoolName={overview.settings.name} exam={levels.find((l) => l.id === current.classRoom.levelId)?.exam} />
+                    ) : (
+                      <SecondaryReport card={current} schoolName={overview.settings.name} exam={levels.find((l) => l.id === current.classRoom.levelId)?.exam} />
+                    )}
+                    {!isParent && !isStudent && <MetaEditor card={current} onSaved={cards.reload} />}
+                  </>
+                )}
+              </div>
+            )
+          }
+        </AsyncView>
+      )}
     </>
   );
 }
