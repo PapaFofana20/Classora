@@ -20,11 +20,16 @@ function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean
 
   const toUrl = item.to as string;
   const [toPath, toSearch] = toUrl.split("?");
+  const items = (item as any).sectionItems || [];
+  const hasSpecificFilterMatch = items.some((i: any) => {
+    const [p, s] = (i.to as string).split("?");
+    return s && pathname === p && search === `?${s}`;
+  });
   const isActive = toSearch
     ? pathname === toPath && search === `?${toSearch}`
     : toPath === "/admin"
       ? pathname === "/admin"
-      : pathname.startsWith(toPath);
+      : pathname.startsWith(toPath) && !hasSpecificFilterMatch;
 
   const showTip = useCallback((delay: number) => {
     window.clearTimeout(timer.current);
@@ -141,7 +146,7 @@ function SidebarContent({ agent, expanded, onNavigate, onLogoClick }: { agent: A
             </div>
             <ul className="space-y-1">
               {items.filter((i) => i.section === section).map((i) => (
-                <MenuItem key={i.to} item={i} expanded={expanded} onNavigate={onNavigate} />
+                <MenuItem key={i.to} item={{ ...i, sectionItems: items.filter((x) => x.section === section) }} expanded={expanded} onNavigate={onNavigate} />
               ))}
             </ul>
           </div>
