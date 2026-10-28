@@ -33,24 +33,6 @@ export default function RegisterPage() {
       backgroundImage
     >
       <div className="space-y-5">
-        <ol className="flex gap-2" aria-label="Étapes de l'inscription">
-          {["Situation", "Vérification", "Informations"].map((s, i) => {
-            const done = role === "directeur" ? i === 0 : !!role && (!school || !!school);
-            const active = role === "directeur" ? false : role ? !!school : true;
-            const index = i === 0 ? 0 : !role ? 0 : !school ? 1 : 2;
-            return (
-              <li
-                key={s}
-                aria-current={active && i === index ? "step" : undefined}
-                className={cn("flex min-w-0 flex-1 items-center gap-1.5 rounded-full px-1.5 py-2 text-xs font-bold sm:gap-2 sm:px-3", i === index && active ? "bg-forest text-white" : done ? "bg-lime text-forest" : "bg-mist text-neutral-500")}
-              >
-                <span className={cn("hidden size-6 shrink-0 place-items-center rounded-full text-[11px] sm:grid", i === index && active ? "bg-lime text-forest" : "bg-white")}>{i + 1}</span>
-                <span className="truncate">{s}</span>
-              </li>
-            );
-          })}
-        </ol>
-
         {!role && <RoleChoice value={role} onChange={setRole} />}
 
         {role === "directeur" && <DirectorSignupForm initialPlan={plan} />}

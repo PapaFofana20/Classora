@@ -66,11 +66,12 @@ function Content({ s }: { s: AdminOverviewStats }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard dark icon="school" label="Écoles totales" value={String(s.schools.total)} badge={{ text: `${s.schools.active} actives`, tone: "up" }} note={`${s.schools.suspended} suspendue${s.schools.suspended > 1 ? "es" : ""}`} />
-        <StatCard icon="groups" label="Élèves" value={String(s.people.totalStudents)} note="toutes écoles confondues" />
+        <StatCard icon="groups" label="Élèves inscrits" value={String(s.people.totalStudents)} note="toutes écoles confondues" />
         <StatCard icon="meeting_room" label="Classes" value={String(s.people.totalClasses)} note="établissements actifs" />
         <StatCard icon="badge" label="Enseignants" value={String(s.people.totalTeachers)} note="professeurs et instituteurs" />
+        <StatCard icon="workspace_premium" label="Abonnements payants actifs" value={String(s.schools.active ?? 0)} badge={{ text: "Estimé", tone: "lime" }} note="sur la base des écoles actives" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

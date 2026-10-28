@@ -46,6 +46,12 @@ const AdminDashboardPage = lazy(() => import("@/pages/app/AdminDashboardPage"));
 const AdminSchoolsPage = lazy(() => import("@/pages/app/AdminSchoolsPage"));
 const AdminSchoolDetailPage = lazy(() => import("@/pages/app/AdminSchoolDetailPage"));
 const AdminAgentsPage = lazy(() => import("@/pages/app/AdminAgentsPage"));
+const AdminSubscriptionsPage = lazy(() => import("@/pages/app/AdminSubscriptionsPage"));
+const AdminFinancesPage = lazy(() => import("@/pages/app/AdminFinancesPage"));
+const AdminAnalyticsPage = lazy(() => import("@/pages/app/AdminAnalyticsPage"));
+const AdminAuditPage = lazy(() => import("@/pages/app/AdminAuditPage"));
+const AdminSecurityPage = lazy(() => import("@/pages/app/AdminSecurityPage"));
+const AdminSettingsPage = lazy(() => import("@/pages/app/AdminSettingsPage"));
 
 /** Wrapper : authentification scolaire (SchoolProvider). Ne s'applique qu'à /app/*. */
 function SchoolAuthWrapper() {
@@ -122,6 +128,15 @@ export default function App() {
                   <Route path="ecoles" element={<AdminSchoolsPage />} />
                   <Route path="ecoles/:id" element={<AdminSchoolDetailPage />} />
                   <Route path="agents" element={<AdminAgentsPage />} />
+                  <Route path="abonnements" element={<AdminSubscriptionsPage />} />
+                  <Route path="abonnements/offres" element={<AdminSubscriptionsPage />} />
+                  <Route path="finances" element={<AdminFinancesPage />} />
+                  <Route path="finances/transactions" element={<AdminFinancesPage />} />
+                  <Route path="finances/factures" element={<AdminFinancesPage />} />
+                  <Route path="analyses" element={<AdminAnalyticsPage />} />
+                  <Route path="supervision/audit" element={<AdminAuditPage />} />
+                  <Route path="supervision/securite" element={<AdminSecurityPage />} />
+                  <Route path="parametres" element={<AdminSettingsPage />} />
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Route>
               </Route>
