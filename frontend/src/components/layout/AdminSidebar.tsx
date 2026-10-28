@@ -16,6 +16,15 @@ function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean
   const linkRef = useRef<HTMLAnchorElement>(null);
   const timer = useRef<number | undefined>(undefined);
   const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
+  const { pathname, search } = useLocation();
+
+  const toUrl = item.to as string;
+  const [toPath, toSearch] = toUrl.split("?");
+  const isActive = toSearch
+    ? pathname === toPath && search === `?${toSearch}`
+    : toPath === "/admin"
+      ? pathname === "/admin"
+      : pathname.startsWith(toPath);
 
   const showTip = useCallback((delay: number) => {
     window.clearTimeout(timer.current);
@@ -35,20 +44,18 @@ function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean
       <NavLink
         ref={linkRef}
         to={item.to}
-        end={item.to === "/admin"}
+        end={toPath === "/admin" && !toSearch}
         onClick={onNavigate}
         aria-label={expanded ? undefined : item.label}
         onPointerEnter={() => showTip(TOOLTIP_DELAY)}
         onPointerLeave={hideTip}
         onFocus={() => showTip(0)}
         onBlur={hideTip}
-        className={({ isActive }) =>
-          cn(
-            "group relative flex min-h-11 items-center rounded-full transition-colors duration-200",
-            expanded ? "gap-3 px-4" : "mx-auto size-11 justify-center",
-            isActive ? "bg-lime text-forest shadow-lg shadow-black/20" : "text-white/85 hover:bg-white/10",
-          )
-        }
+        className={cn(
+          "group relative flex min-h-11 items-center rounded-full transition-colors duration-200",
+          expanded ? "gap-3 px-4" : "mx-auto size-11 justify-center",
+          isActive ? "bg-lime text-forest shadow-lg shadow-black/20" : "text-white/85 hover:bg-white/10",
+        )}
       >
         <Icon name={item.icon} className="shrink-0 text-[22px]" />
         <span
