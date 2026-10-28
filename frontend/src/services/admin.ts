@@ -5,7 +5,19 @@
  * callFunction() ajoute automatiquement le header Authorization: Bearer <JWT>.
  */
 import { callFunction } from "@/lib/functions";
-import type { AdminAgent, AdminAgentRole, AdminOverviewStats, AdminSchool } from "@/types";
+import type {
+  AdminAgent,
+  AdminAgentRole,
+  AdminAnalyticsData,
+  AdminAuditData,
+  AdminFinancesData,
+  AdminOverviewStats,
+  AdminSchool,
+  AdminSecurityData,
+  AdminSettingsData,
+  AdminSubscriptionsData,
+  PlatformSettings,
+} from "@/types";
 
 export type { AdminAgent, AdminAgentRole, AdminSchool };
 
@@ -267,4 +279,125 @@ export async function deleteAdminSchool(input: DeleteSchoolInput): Promise<{
 
 export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
   return callFunction<AdminOverviewStats>("admin/stats", undefined, "GET");
+}
+
+/* ------------------------------------------------------------------ */
+/* Abonnements                                                        */
+/* ------------------------------------------------------------------ */
+
+export interface ListSubscriptionsParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: "all" | "ACTIF" | "EXPIRE" | "AUCUN" | "BIENTOT" | "SUSPENDUE";
+  plan?: string;
+}
+
+export async function listAdminSubscriptions(params: ListSubscriptionsParams = {}): Promise<AdminSubscriptionsData> {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.pageSize) query.set("pageSize", String(params.pageSize));
+  if (params.search) query.set("search", params.search);
+  if (params.status && params.status !== "all") query.set("status", params.status);
+  if (params.plan) query.set("plan", params.plan);
+  return callFunction<AdminSubscriptionsData>(`admin/subscriptions?${query.toString()}`, undefined, "GET");
+}
+
+export interface ActivateSubscriptionInput {
+  schoolId: string;
+  planId: string;
+  cycle: "monthly" | "yearly";
+  method?: "wave" | "orange_money" | "free_money" | "especes";
+  reference?: string;
+  amount?: number;
+}
+
+export async function activateSubscription(input: ActivateSubscriptionInput): Promise<{
+  message: string;
+  activation: {
+    school_id: string;
+    matricule: string;
+    plan_id: string;
+    plan_name: string;
+    cycle: string;
+    amount_paid: number;
+    payment_ref: string;
+    method: string;
+    starts_at: string;
+    ends_at: string;
+    new_subscription: boolean;
+  };
+}> {
+  return callFunction("admin/subscriptions", { action: "activate", ...input }, "POST");
+}
+
+export async function cancelSubscriptionRequest(input: { requestId: string; reason?: string }): Promise<{ message: string }> {
+  return callFunction("admin/subscriptions", { action: "cancelRequest", ...input }, "POST");
+}
+
+/* ------------------------------------------------------------------ */
+/* Finances                                                           */
+/* ------------------------------------------------------------------ */
+
+export async function getAdminFinances(): Promise<AdminFinancesData> {
+  return callFunction<AdminFinancesData>("admin/finances", undefined, "GET");
+}
+
+/* ------------------------------------------------------------------ */
+/* Analyses                                                           */
+/* ------------------------------------------------------------------ */
+
+export async function getAdminAnalytics(): Promise<AdminAnalyticsData> {
+  return callFunction<AdminAnalyticsData>("admin/analytics", undefined, "GET");
+}
+
+/* ------------------------------------------------------------------ */
+/* Journal d'audit                                                    */
+/* ------------------------------------------------------------------ */
+
+export interface ListAuditParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  action?: string;
+  days?: 7 | 30 | 90;
+}
+
+export async function listAdminAudit(params: ListAuditParams = {}): Promise<AdminAuditData> {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.pageSize) query.set("pageSize", String(params.pageSize));
+  if (params.search) query.set("search", params.search);
+  if (params.action) query.set("action", params.action);
+  if (params.days) query.set("days", String(params.days));
+  return callFunction<AdminAuditData>(`admin/audit?${query.toString()}`, undefined, "GET");
+}
+
+export async function purgeAdminAudit(olderThanDays: number): Promise<{ message: string; deleted: number; cutoff: string }> {
+  return callFunction("admin/audit", { olderThanDays }, "DELETE");
+}
+
+/* ------------------------------------------------------------------ */
+/* Sécurité                                                           */
+/* ------------------------------------------------------------------ */
+
+export async function getAdminSecurity(): Promise<AdminSecurityData> {
+  return callFunction<AdminSecurityData>("admin/security", undefined, "GET");
+}
+
+/* ------------------------------------------------------------------ */
+/* Paramètres de la plateforme                                        */
+/* ------------------------------------------------------------------ */
+
+export async function getAdminSettings(): Promise<AdminSettingsData> {
+  return callFunction<AdminSettingsData>("admin/settings", undefined, "GET");
+}
+
+export async function updateAdminSettings(patch: Partial<PlatformSettings>): Promise<{
+  settings: PlatformSettings;
+  updatedAt: string | null;
+  updatedByName: string | null;
+  message: string;
+}> {
+  return callFunction("admin/settings", patch, "PATCH");
 }

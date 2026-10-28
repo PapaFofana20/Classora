@@ -15,7 +15,6 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Table, type Column } from "@/components/ui/Table";
 import { Tabs } from "@/components/ui/Tabs";
 import { useCurrentUser } from "@/context/AuthContext";
-import { useSchool } from "@/context/SchoolContext";
 import { useToast } from "@/context/ToastContext";
 import { todayIso } from "@/data/school";
 import { useAsync } from "@/hooks/useAsync";
@@ -26,7 +25,6 @@ import { formatCurrency, formatDate } from "@/utils/format";
 import { PAY_METHOD_LABELS, PAY_STATUS_LABELS, remaining, sum } from "@/utils/payments";
 import { PAY_TONE } from "./ParentPayments";
 import { Receipt } from "./Receipt";
-import { hasFeatureForSchool } from "@/utils/features";
 
 const PAGE = 12;
 
@@ -42,11 +40,7 @@ interface Debtor {
 
 export function FinancePayments({ schoolName, canAct }: { schoolName: string; canAct: boolean }) {
   const user = useCurrentUser();
-  const { schoolId } = useSchool();
   const { toast } = useToast();
-
-  // Feature gate: rappels automatiques = Pro+
-  const hasAutoReminders = hasFeatureForSchool(schoolId, "auto_reminders");
 
   const state = useAsync(() => listPaymentRows(user), [user.id]);
   const [tab, setTab] = useState("echeances");

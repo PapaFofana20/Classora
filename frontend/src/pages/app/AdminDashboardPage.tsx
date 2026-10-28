@@ -9,7 +9,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { useAsync } from "@/hooks/useAsync";
 import { getAdminOverviewStats } from "@/services/admin";
 import type { AdminOverviewStats } from "@/types";
-import { formatDate } from "@/utils/format";
+import { formatCurrency, formatDate } from "@/utils/format";
 import { cn } from "@/utils/cn";
 import { Table } from "@/components/ui/Table";
 
@@ -32,6 +32,18 @@ export default function AdminDashboardPage() {
 }
 
 function Content({ s }: { s: AdminOverviewStats }) {
+  // Repli si l'API déployée est antérieure à l'ajout du bloc `subscriptions`.
+  const subs = s.subscriptions ?? {
+    active: 0,
+    expiringSoon: 0,
+    expired: 0,
+    none: s.schools.total,
+    pendingRequests: 0,
+    pendingAmount: 0,
+    mrr: 0,
+    revenueThisMonth: 0,
+  };
+  const subTotal = subs.active + subs.expired + subs.none;
   return (
     <div className="space-y-4">
       {/* Bandeau d'actions rapides — autorité admin */}
@@ -53,7 +65,7 @@ function Content({ s }: { s: AdminOverviewStats }) {
         <Link to="/admin/ecoles" className="group relative overflow-hidden rounded-3xl bg-mist p-5 text-ink shadow-soft transition-transform hover:-translate-y-0.5">
           <div className="flex items-center gap-3">
             <span className="grid size-10 place-items-center rounded-xl bg-forest/10"><Icon name="warning" fill className="text-[22px] text-danger" /></span>
-            <div><p className="text-xs font-bold uppercase tracking-wide text-neutral-500">Alertes</p><p className="text-lg font-extrabold">{s.schools.suspended} suspendue{Number(s.schools.suspended) > 1 ? 's' : ''}</p></div>
+            <div><p className="text-xs font-bold uppercase tracking-wide text-neutral-500">Alertes</p><p className="text-lg font-extrabold">{s.schools.suspended} inactive{Number(s.schools.suspended) > 1 ? 's' : ''}</p></div>
           </div>
           <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-forest"><Icon name="arrow_forward" className="text-[14px]" /> Vérifier</div>
         </Link>
@@ -67,11 +79,11 @@ function Content({ s }: { s: AdminOverviewStats }) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard dark icon="school" label="Écoles totales" value={String(s.schools.total)} badge={{ text: `${s.schools.active} actives`, tone: "up" }} note={`${s.schools.suspended} suspendue${s.schools.suspended > 1 ? "es" : ""}`} />
+        <StatCard dark icon="school" label="Écoles totales" value={String(s.schools.total)} badge={{ text: `${s.schools.active} actives`, tone: "up" }} note={`${s.schools.suspended} inactive${s.schools.suspended > 1 ? "s" : ""}`} />
         <StatCard icon="groups" label="Élèves inscrits" value={String(s.people.totalStudents)} note="toutes écoles confondues" />
         <StatCard icon="meeting_room" label="Classes" value={String(s.people.totalClasses)} note="établissements actifs" />
         <StatCard icon="badge" label="Enseignants" value={String(s.people.totalTeachers)} note="professeurs et instituteurs" />
-        <StatCard icon="workspace_premium" label="Abonnements payants actifs" value={String(s.schools.active ?? 0)} badge={{ text: "Estimé", tone: "lime" }} note="sur la base des écoles actives" />
+        <StatCard icon="workspace_premium" label="Abonnements payants actifs" value={String(subs.active)} badge={{ text: `${subs.expiringSoon} à renouveler`, tone: subs.expiringSoon > 0 ? "down" : "neutral" }} note={`${subs.expired} expiré(s) · ${subs.none} sans abonnement`} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -131,8 +143,8 @@ function Content({ s }: { s: AdminOverviewStats }) {
               <div className="flex items-start gap-3 rounded-xl p-3 bg-red-50">
                 <Icon name="warning" fill className="text-[20px] text-danger shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-danger">{s.schools.suspended} établissement(s) suspendu(s)</p>
-                  <p className="text-xs text-neutral-500">Vérifiez les abonnements expirés.</p>
+                  <p className="text-sm font-medium text-danger">{s.schools.suspended} établissement(s) inactif(s)</p>
+                  <p className="text-xs text-neutral-500">Abonnement expiré ou absent, ou inscriptions fermées.</p>
                 </div>
               </div>
             )}
@@ -145,7 +157,25 @@ function Content({ s }: { s: AdminOverviewStats }) {
                 </div>
               </div>
             )}
-            {s.schools.suspended === 0 && s.people.totalStudents > 0 && (
+            {subs.pendingRequests > 0 && (
+              <Link to="/admin/abonnements" className="flex items-start gap-3 rounded-xl p-3 bg-amber-50">
+                <Icon name="assignment" fill className="text-[20px] text-amber-800 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">{subs.pendingRequests} demande(s) d'abonnement</p>
+                  <p className="text-xs text-neutral-500">{formatCurrency(subs.pendingAmount)} à encaisser · cliquez pour traiter.</p>
+                </div>
+              </Link>
+            )}
+            {subs.expiringSoon > 0 && (
+              <Link to="/admin/abonnements" className="flex items-start gap-3 rounded-xl p-3 bg-amber-50">
+                <Icon name="schedule" fill className="text-[20px] text-amber-800 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">{subs.expiringSoon} échéance(s) sous 30 jours</p>
+                  <p className="text-xs text-neutral-500">Anticipez les renouvellements pour éviter les suspensions.</p>
+                </div>
+              </Link>
+            )}
+            {s.schools.suspended === 0 && s.people.totalStudents > 0 && subs.pendingRequests === 0 && subs.expiringSoon === 0 && (
               <div className="flex items-start gap-3 rounded-xl p-3 bg-emerald-50">
                 <Icon name="check_circle" fill className="text-[20px] text-emerald-800 shrink-0 mt-0.5" />
                 <div>
@@ -158,53 +188,80 @@ function Content({ s }: { s: AdminOverviewStats }) {
         </Card>
       </div>
 
-      {/* Section SaaS — Graphiques et revenus */}
+      {/* Section SaaS — Abonnements et revenus réels */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="rounded-3xl bg-white shadow-soft">
-          <CardHeader title="Répartition des formules" />
+          <CardHeader
+            title="Répartition des abonnements"
+            subtitle={`${subs.pendingRequests} demande(s) en attente`}
+            action={<Link to="/admin/abonnements" className="text-sm font-medium">Gérer</Link>}
+          />
           <div className="space-y-3">
             {[
-              { label: "Plan découverte (gratuit)", value: s.schools.total - (s.schools.active ?? 0), total: s.schools.total, color: "bg-forest" },
-              { label: "Premium (payant)", value: s.schools.active ?? 0, total: s.schools.total, color: "bg-lime" },
+              { label: "Abonnements actifs", value: subs.active, color: "bg-lime" },
+              { label: "Échéance < 30 jours", value: subs.expiringSoon, color: "bg-amber-500" },
+              { label: "Abonnements expirés", value: subs.expired, color: "bg-danger" },
+              { label: "Écoles sans abonnement", value: subs.none, color: "bg-forest/40" },
             ].map((b) => (
               <div key={b.label}>
-                <div className="flex justify-between text-sm font-medium text-ink"><span>{b.label}</span><span>{b.value} école{b.value > 1 ? 's' : ''}</span></div>
-                <div className="mt-1.5 h-3 w-full overflow-hidden rounded-full bg-neutral-100"><div className={cn("h-full rounded-full transition-all", b.color)} style={{ width: `${(b.value / (b.total || 1)) * 100}%` }} /></div>
+                <div className="flex justify-between text-sm font-medium text-ink">
+                  <span>{b.label}</span>
+                  <span>
+                    {b.value} école{b.value > 1 ? "s" : ""}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-3 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div className={cn("h-full rounded-full transition-all", b.color)} style={{ width: `${(b.value / (subTotal || 1)) * 100}%` }} />
+                </div>
               </div>
             ))}
           </div>
         </Card>
 
         <Card className="rounded-3xl bg-gradient-to-br from-ink to-forest text-white shadow-soft">
-          <CardHeader title="Estimation du chiffre d'affaires" className="text-white/90" />
+          <CardHeader title="Revenus réels des abonnements" />
           <div className="space-y-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Revenus estimés / mois</p>
-              <p className="mt-1 text-3xl font-extrabold">{(s.schools.active ?? 0) * 50000} FCFA</p>
-              <p className="text-xs text-white/60">Basé sur {s.schools.active ?? 0} école(s) Premium · 50 000 FCFA/mois</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Encaissé ce mois</p>
+              <p className="mt-1 text-3xl font-extrabold">{formatCurrency(subs.revenueThisMonth)}</p>
+              <p className="text-xs text-white/60">Journal des activations et renouvellements</p>
             </div>
             <div className="rounded-2xl bg-white/10 p-3 backdrop-blur">
-              <p className="text-xs font-bold uppercase tracking-wide text-white/50">Projection annuelle (estimée)</p>
-              <p className="mt-1 text-xl font-extrabold">{(s.schools.active ?? 0) * 50000 * 12} FCFA</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50">MRR (abonnements actifs)</p>
+              <p className="mt-1 text-xl font-extrabold">{formatCurrency(subs.mrr)}</p>
+              <p className="mt-0.5 text-[11px] text-white/60">ARR projeté : {formatCurrency(subs.mrr * 12)}</p>
             </div>
+            <Link to="/admin/finances" className="flex items-center gap-2 text-xs font-semibold text-lime">
+              <Icon name="arrow_forward" className="text-[14px]" /> Voir les finances détaillées
+            </Link>
           </div>
         </Card>
 
         <Card className="rounded-3xl bg-mist shadow-soft">
-          <CardHeader title="Activité par période" />
+          <CardHeader title="Demandes d'abonnement" action={<Badge tone={subs.pendingRequests > 0 ? "warning" : "success"}>{subs.pendingRequests} en attente</Badge>} />
           <div className="space-y-3">
             {[
-              { label: "Écoles actives", val: s.schools.active, max: Math.max(s.schools.active ?? 1, 1), color: "bg-forest" },
-              { label: "Élèves (total)", val: s.people.totalStudents, max: Math.max(s.people.totalStudents ?? 1, 1), color: "bg-lime" },
+              { label: "Écoles actives", val: s.schools.active, max: Math.max(s.schools.total, 1), color: "bg-forest" },
+              { label: "Abonnements actifs", val: subs.active, max: Math.max(subTotal, 1), color: "bg-lime" },
+              { label: "Renouvellements < 30 j", val: subs.expiringSoon, max: Math.max(subs.active, 1), color: "bg-amber-500" },
             ].map((m) => (
               <div key={m.label}>
-                <div className="flex justify-between text-xs font-semibold text-neutral-600"><span>{m.label}</span><span>{m.val}</span></div>
-                <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-neutral-200"><div className={cn("h-full rounded-full", m.color)} style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%` }} /></div>
+                <div className="flex justify-between text-xs font-semibold text-neutral-600">
+                  <span>{m.label}</span>
+                  <span>{m.val}</span>
+                </div>
+                <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-neutral-200">
+                  <div className={cn("h-full rounded-full", m.color)} style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%` }} />
+                </div>
               </div>
             ))}
-            <div className="mt-2 rounded-xl bg-forest/5 p-3 text-xs text-neutral-600 leading-relaxed">
-              <strong>Note SaaS :</strong> chaque école Premium = 50 000 FCFA/mois. Les écoles en Découverte sont gratuites mais génèrent du flux (inscriptions, support). L'objectif : convertir les écoles actives vers Premium.
+            <div className="mt-2 rounded-xl bg-forest/5 p-3 text-xs leading-relaxed text-neutral-600">
+              <strong>Montants en attente :</strong> {formatCurrency(subs.pendingAmount)}. Les demandes sont traitées depuis
+              l'onglet Abonnements après encaissement.
             </div>
+            <Link to="/admin/abonnements" className="inline-flex items-center gap-2 text-xs font-semibold text-forest">
+              <Icon name="assignment" className="text-[14px]" /> Traiter les demandes
+            </Link>
           </div>
         </Card>
       </div>
@@ -246,7 +303,7 @@ function Content({ s }: { s: AdminOverviewStats }) {
             </div>
             <div className="flex items-center justify-between rounded-xl bg-lime-soft px-4 py-3">
               <div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full bg-forest text-white"><Icon name="history" fill className="text-[14px]" /></span><span className="text-sm font-semibold text-ink">Audit actif</span></div>
-              <Badge tone="forest">Oui</Badge>
+              <Badge tone="dark">Oui</Badge>
             </div>
           </div>
         </Card>

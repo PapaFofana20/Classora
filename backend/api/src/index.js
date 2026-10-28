@@ -36,6 +36,13 @@ import adminLogin from "./routes/adminLogin.js";
 import adminAgents from "./routes/adminAgents.js";
 import adminSchools from "./routes/adminSchools.js";
 import adminStats from "./routes/adminStats.js";
+import adminSubscriptions from "./routes/adminSubscriptions.js";
+import adminFinances from "./routes/adminFinances.js";
+import adminAnalytics from "./routes/adminAnalytics.js";
+import adminAudit from "./routes/adminAudit.js";
+import adminSecurity from "./routes/adminSecurity.js";
+import adminSettings from "./routes/adminSettings.js";
+import platformStatus from "./routes/platformStatus.js";
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.warn(
@@ -118,6 +125,15 @@ app.all("/admin/login", adminConfigGuard, adminLogin);
 app.all("/admin/agents", adminConfigGuard, adminAgents);
 app.all("/admin/schools", adminConfigGuard, adminSchools);
 app.all("/admin/stats", adminConfigGuard, adminStats);
+app.all("/admin/subscriptions", adminConfigGuard, adminSubscriptions);
+app.all("/admin/finances", adminConfigGuard, adminFinances);
+app.all("/admin/analytics", adminConfigGuard, adminAnalytics);
+app.all("/admin/audit", adminConfigGuard, adminAudit);
+app.all("/admin/security", adminConfigGuard, adminSecurity);
+app.all("/admin/settings", adminConfigGuard, adminSettings);
+
+// État public (bandeau maintenance, inscription ouverte), sans authentification.
+app.all("/platform-status", platformStatus);
 
 // Chemins inconnus : JSON 404 cohérent avec l'enveloppe { error } (l'HTML
 // par défaut d'Express fuirait la stack).

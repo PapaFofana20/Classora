@@ -291,7 +291,7 @@ export interface AdminOverviewStats {
     studentCount: number;
     classCount: number;
     teacherCount: number;
-    status: "AUCUN" | "ACTIF" | "EXPIRE";
+    status: "AUCUN" | "ACTIF" | "EXPIRE" | "INACTIF";
   }>;
   recentActivity: Array<{
     action: string;
@@ -300,6 +300,332 @@ export interface AdminOverviewStats {
     schoolId: string | null;
     actorRole: string | null;
   }>;
+  subscriptions: {
+    active: number;
+    expiringSoon: number;
+    expired: number;
+    none: number;
+    pendingRequests: number;
+    pendingAmount: number;
+    mrr: number;
+    revenueThisMonth: number;
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Abonnements (console admin)                                          */
+/* ------------------------------------------------------------------ */
+
+export interface AdminSubscriptionSummary {
+  totalSchools: number;
+  active: number;
+  expiringSoon: number;
+  expired: number;
+  none: number;
+  suspendedSchools: number;
+  pendingRequests: number;
+  pendingRequestsAmount: number;
+  mrr: number;
+  arr: number;
+}
+
+export interface AdminSubscriptionRow {
+  schoolId: string;
+  schoolName: string;
+  matricule: string;
+  city: string;
+  planId: string | null;
+  planName: string | null;
+  planMonthlyPrice: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  daysLeft: number | null;
+  amountPaid: number;
+  method: string | null;
+  paidAt: string | null;
+  studentLimit: number | null;
+  status: "ACTIF" | "EXPIRE" | "AUCUN";
+  registrationOpen: boolean;
+  expiringSoon: boolean;
+}
+
+export interface AdminSubscriptionRequest {
+  id: string;
+  schoolId: string;
+  schoolName: string;
+  matricule: string;
+  planId: string;
+  planName: string;
+  cycle: "monthly" | "yearly";
+  studentCount: number;
+  amount: number;
+  status: "EN_ATTENTE" | "ACTIVEE" | "ANNULEE";
+  createdAt: string;
+  decidedAt: string | null;
+}
+
+export interface AdminPlan {
+  id: string;
+  name: string;
+  tagline: string;
+  studentLimit: number | null;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  features: string[];
+  highlight: boolean;
+  activeSchools: number;
+  totalRevenue: number;
+  mrr: number;
+}
+
+export interface AdminSubscriptionsData {
+  generatedAt: string;
+  summary: AdminSubscriptionSummary;
+  subscriptions: {
+    rows: AdminSubscriptionRow[];
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+  plans: AdminPlan[];
+  requests: AdminSubscriptionRequest[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Finances (console admin)                                             */
+/* ------------------------------------------------------------------ */
+
+export interface AdminFinanceSummary {
+  revenueTotal: number;
+  revenueThisMonth: number;
+  revenueLastMonth: number;
+  revenueYtd: number;
+  mrr: number;
+  arr: number;
+  averagePerPayingSchool: number;
+  payingSchools: number;
+  activeSubscriptions: number;
+  expiredSubscriptions: number;
+  atRiskMrr: number;
+  renewalsDue30: number;
+  renewalsDue30Amount: number;
+  pendingRequests: number;
+  pendingRequestsAmount: number;
+  paidActivations: number;
+}
+
+export interface AdminFinanceMonthlyPoint {
+  key: string;
+  label: string;
+  revenue: number;
+  events: number;
+  purchases: number;
+  renewals: number;
+}
+
+export interface AdminFinancePlan {
+  planId: string;
+  name: string;
+  monthlyPrice: number;
+  activeSubscriptions: number;
+  activations: number;
+  revenue: number;
+  mrr: number;
+}
+
+export interface AdminFinanceMethod {
+  method: string;
+  count: number;
+  amount: number;
+}
+
+export interface AdminFinanceEvent {
+  id: string;
+  schoolId: string;
+  schoolName: string;
+  matricule: string;
+  eventType: "purchase" | "renewal" | "plan_change" | "expiration_warning";
+  planId: string | null;
+  planName: string;
+  amountPaid: number;
+  method: string | null;
+  paymentRef: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdAt: string;
+}
+
+export interface AdminFinancesData {
+  generatedAt: string;
+  today: string;
+  monthStart: string;
+  summary: AdminFinanceSummary;
+  monthly: AdminFinanceMonthlyPoint[];
+  byPlan: AdminFinancePlan[];
+  byMethod: AdminFinanceMethod[];
+  recentEvents: AdminFinanceEvent[];
+  /** Journal des mouvements (1 000 derniers), pour les onglets Transactions et Factures. */
+  events?: AdminFinanceEvent[];
+  eventsTruncated?: boolean;
+  schoolsWithSubscription: number;
+}
+
+/* ------------------------------------------------------------------ */
+/* Analyses (console admin)                                             */
+/* ------------------------------------------------------------------ */
+
+export interface AdminAnalyticsGrowthPoint {
+  key: string;
+  label: string;
+  newSchools: number;
+  newStudents: number;
+  totalSchools: number;
+}
+
+export interface AdminAnalyticsData {
+  generatedAt: string;
+  summary: {
+    totalSchools: number;
+    activeSchools: number;
+    payingSchools: number;
+    newSchoolsThisMonth: number;
+    newSchoolsLastMonth: number;
+    schoolsGrowthPct: number;
+    studentsThisMonth: number;
+    studentsLastMonth: number;
+    totalStudents: number;
+    totalClasses: number;
+    totalTeachers: number;
+    totalParents: number;
+    averageStudentsPerSchool: number;
+    conversionRate: number;
+    churnRate: number;
+    mrr: number;
+  };
+  growth: AdminAnalyticsGrowthPoint[];
+  byCity: Array<{ city: string; schools: number; students: number }>;
+  byCycle: Array<{ cycle: string; label: string; schools: number }>;
+  byPlan: Array<{ planId: string; name: string; monthlyPrice: number; schools: number; share: number }>;
+  topSchools: Array<{
+    schoolId: string;
+    schoolName: string;
+    matricule: string;
+    students: number;
+    classes: number;
+    teachers: number;
+    subscriptionStatus: string;
+  }>;
+}
+
+/* ------------------------------------------------------------------ */
+/* Journal d'audit (console admin)                                      */
+/* ------------------------------------------------------------------ */
+
+export interface AdminAuditRow {
+  id: string;
+  schoolId: string | null;
+  schoolName: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  actorRole: string | null;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  payload: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface AdminAuditData {
+  generatedAt: string;
+  periodDays: number;
+  retentionDays: number;
+  total: number;
+  page: number;
+  pageSize: number;
+  rows: AdminAuditRow[];
+  actionCounts: Array<{ action: string; count: number }>;
+}
+
+/* ------------------------------------------------------------------ */
+/* Sécurité (console admin)                                             */
+/* ------------------------------------------------------------------ */
+
+export interface AdminSecurityData {
+  generatedAt: string;
+  summary: {
+    totalAgents: number;
+    activeAgents: number;
+    disabledAgents: number;
+    pendingAgents: number;
+    logins30: number;
+    blocked30: number;
+    blockedRate: number;
+    lastLoginAt: string | null;
+    activeRateLimits: number;
+    auditEvents24h: number;
+  };
+  agents: Array<{
+    id: string;
+    matricule: string;
+    role: AdminAgentRole;
+    status: "ACTIF" | "EN_ATTENTE" | "DESACTIVE";
+    firstName: string;
+    lastName: string;
+    email: string;
+    createdAt: string;
+    lastLoginAt: string | null;
+    loginCount30: number;
+    blockedCount30: number;
+  }>;
+  daily: Array<{ key: string; label: string; logins: number; blocked: number }>;
+  alerts: Array<{
+    id: string;
+    action: string;
+    actorRole: string | null;
+    actorName: string | null;
+    createdAt: string;
+    payload: Record<string, unknown>;
+  }>;
+  sensitiveActions: Array<{
+    id: string;
+    action: string;
+    actorRole: string | null;
+    actorName: string | null;
+    entity: string;
+    entityId: string | null;
+    schoolId: string | null;
+    createdAt: string;
+    payload: Record<string, unknown>;
+  }>;
+  rateLimits: Array<{ key: string; count: number; windowStart: string }>;
+}
+
+/* ------------------------------------------------------------------ */
+/* Paramètres de la plateforme                                          */
+/* ------------------------------------------------------------------ */
+
+export interface PlatformSettings {
+  platformName: string;
+  supportEmail: string;
+  supportPhone: string;
+  schoolYear: string;
+  registrationOpen: boolean;
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
+  sessionTimeoutMinutes: number;
+  auditRetentionDays: number;
+}
+
+export interface PlatformStatus extends Omit<PlatformSettings, "auditRetentionDays"> {
+  migrationApplied?: boolean;
+}
+
+export interface AdminSettingsData {
+  settings: PlatformSettings;
+  migrationApplied: boolean;
+  updatedAt: string | null;
+  updatedByName: string | null;
+  canEdit: boolean;
 }
 
 /* ------------------------------------------------------------------ */

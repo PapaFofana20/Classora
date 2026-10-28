@@ -9,7 +9,6 @@ import { RoleChoice } from "@/features/auth/RoleChoice";
 import { StudentSignupForm } from "@/features/auth/StudentSignupForm";
 import { formatMatriculeInput } from "@/utils/matricule";
 import type { Role, School } from "@/types";
-import { cn } from "@/utils/cn";
 
 /**
  * /inscription — trois parcours : directeur (direct), élève et parent (matricule d'abord).

@@ -9,6 +9,7 @@
 
 import { passwordError, serviceClient } from "../lib/auth.js";
 import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { readPlatformSettings } from "../lib/platformSettings.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 import { expectObject, optionalString, requireCycles, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
@@ -17,6 +18,20 @@ export default route(async (req, res) => {
   const svc = serviceClient();
   try {
     await enforceRateLimit(svc, `register-director:${clientIp(req) ?? "sans-adresse"}`, 5, 300);
+
+    // Réglages plateforme : la maintenance et la fermeture des inscriptions
+    // bloquent réellement la création de nouveaux établissements.
+    const platform = await readPlatformSettings(svc);
+    if (platform.settings.maintenanceMode) {
+      return badRequest(
+        res,
+        platform.settings.maintenanceMessage ||
+          "La plateforme est en maintenance. Les inscriptions rouvriront très prochainement.",
+      );
+    }
+    if (!platform.settings.registrationOpen) {
+      return badRequest(res, "Les inscriptions sont momentanément fermées. Contactez le support Classora.");
+    }
 
     const body = expectObject(req.body);
     const firstName = requireString(body, "firstName", "Le prénom", { min: 1, max: 60 });

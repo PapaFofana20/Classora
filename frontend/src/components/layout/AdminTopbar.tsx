@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import type { AdminAgent } from "@/types";
 import { Icon } from "@/components/ui/Icon";
 import { ConfirmDialog } from "@/components/ui/Modal";
+import { usePlatformStatus } from "@/context/PlatformContext";
 
 export function AdminTopbar({ agent, onMenu, onLogout }: { agent: AdminAgent; onMenu: () => void; onLogout: () => void }) {
   const navigate = useNavigate();
+  const { status } = usePlatformStatus();
   const [menu, setMenu] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -25,7 +27,7 @@ export function AdminTopbar({ agent, onMenu, onLogout }: { agent: AdminAgent; on
               {agent.matricule.slice(-2)}
             </span>
             <div>
-              <p className="text-sm font-bold text-ink">Classora Admin</p>
+              <p className="text-sm font-bold text-ink">{status.platformName} Admin</p>
               <p className="text-xs text-neutral-500">{formatDate(new Date().toISOString())}</p>
             </div>
           </div>
@@ -44,6 +46,16 @@ export function AdminTopbar({ agent, onMenu, onLogout }: { agent: AdminAgent; on
             </button>
             {menu && (
               <div role="menu" className="absolute right-0 mt-2 w-56 dropdown-enter rounded-2xl bg-white p-2 shadow-soft ring-1 ring-black/5">
+                {status.supportEmail && (
+                  <a
+                    role="menuitem"
+                    href={`mailto:${status.supportEmail}`}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-forest hover:bg-lime-soft"
+                  >
+                    <Icon name="support_agent" className="text-[20px]" />
+                    Contacter le support
+                  </a>
+                )}
                 <button role="menuitem" type="button" onClick={handleLogoutMenu} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-danger hover:bg-red-50">
                   <Icon name="logout" className="text-[20px]" />
                   Se déconnecter

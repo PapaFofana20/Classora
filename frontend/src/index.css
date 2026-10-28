@@ -286,12 +286,15 @@ button:active, a:active, [role="button"]:active {
 .flex-shrink-1 { flex-shrink: 1; }
 .flex-shrink-2 { flex-shrink: 2; }
 
-/* Impression des bulletins */
+/* Impression des bulletins et des reçus */
 @media print {
   @page { size: A4; margin: 12mm; }
   body { background: #fff !important; }
   body * { visibility: hidden; }
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: none !important; }
+  .print-only { display: block !important; }
   .no-print { display: none !important; }
 }
+/* Bloc rendu uniquement à l'impression (reçus, pièces justificatives). */
+.print-only { display: none; }

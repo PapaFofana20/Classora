@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/context/AuthContext";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 import { TeachingProvider } from "@/context/TeachingContext";
 import { SubscriptionBanner } from "@/features/subscription/SubscriptionBanner";
+import { MaintenanceBanner } from "./MaintenanceBanner";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
@@ -26,6 +27,7 @@ function Shell() {
         <div ref={registerContent} className="@container min-w-0 flex-1 overflow-x-clip px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10">
           <Topbar user={user} onMenu={() => setDrawer(true)} />
           <main id="contenu" tabIndex={-1} key={pathname} className="min-w-0 focus:outline-none">
+            <MaintenanceBanner />
             <SubscriptionBanner />
             <Outlet />
           </main>

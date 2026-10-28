@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AuthProvider } from "@/context/AuthContext";
 import { AdminAuthProvider } from "@/context/AdminAuthContext";
+import { PlatformProvider } from "@/context/PlatformContext";
 import { SchoolProvider } from "@/context/SchoolContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop, SubscriptionGuard } from "@/routes/guards";
@@ -89,9 +90,10 @@ export default function App() {
         {/* AuthProvider enveloppe TOUTES les routes (comme dans le code original),
             afin que useAuth() fonctionne partout (PublicOnlyRoute, ProtectedRoute, etc.). */}
         <AuthProvider>
-          <ScrollToTop />
-          <Suspense fallback={<Fallback />}>
-            <Routes>
+          <PlatformProvider>
+            <ScrollToTop />
+            <Suspense fallback={<Fallback />}>
+              <Routes>
             {/* PARTIE 1 : site public */}
             <Route element={<PublicLayout />}>
               <Route index element={<HomePage />} />
@@ -175,6 +177,7 @@ export default function App() {
             {/* Le 404 racine est géré dans PublicLayout (catch-all ci-dessus). */}
             </Routes>
             </Suspense>
+          </PlatformProvider>
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

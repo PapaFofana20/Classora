@@ -1,15 +1,26 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminTopbar } from "./AdminTopbar";
+import { MaintenanceBanner } from "./MaintenanceBanner";
 import { useAdminAuth } from "@/context/AdminAuthContext";
+import { usePlatformStatus } from "@/context/PlatformContext";
+import { useIdleLogout } from "@/hooks/useIdleLogout";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 function Shell() {
   const { agent, logout } = useAdminAuth();
+  const { status } = usePlatformStatus();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [drawer, setDrawer] = useState(false);
+
+  useIdleLogout(status.sessionTimeoutMinutes, () => {
+    void logout();
+    navigate("/admin/connexion", { replace: true });
+  });
+
   if (!agent) return null; // géré par AdminAuthWrapper / redirection
   return (
     <div className="min-h-screen bg-mist">
@@ -20,6 +31,7 @@ function Shell() {
         <AdminSidebar agent={agent} drawerOpen={drawer} onClose={() => setDrawer(false)} />
         <div className="min-w-0 flex-1 overflow-x-clip px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10">
           <AdminTopbar agent={agent} onMenu={() => setDrawer(true)} onLogout={logout} />
+          <MaintenanceBanner />
           <main id="contenu-admin" tabIndex={-1} key={pathname} className="min-w-0 focus:outline-none">
             <Outlet />
           </main>

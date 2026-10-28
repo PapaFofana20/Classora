@@ -23,12 +23,37 @@ export default route(async (req, res) => {
     // — même définition que le statut ACTIF/INACTIF de la RPC
     // admin_school_stats (l'ancien comptage ignorait la suspension admin).
     const today = new Date().toISOString().slice(0, 10);
+    const monthStart = `${today.slice(0, 7)}-01`;
     const { data: schoolRows } = await svc.from("schools").select("id, registration_open");
-    const { data: subRows } = await svc.from("subscriptions").select("school_id, ends_at");
+    const { data: subRows } = await svc.from("subscriptions").select("school_id, plan_id, ends_at");
     const subEndsBySchool = new Map((subRows ?? []).map((r) => [r.school_id, r.ends_at]));
     const activeSchools = (schoolRows ?? []).filter(
       (s) => s.registration_open && (subEndsBySchool.get(s.id) ?? "") >= today,
     ).length;
+
+    // Abonnements et revenus réels : formules, échéances, encaissements du mois.
+    const [{ data: planRows }, { data: pendingRequests }, { data: monthEvents }] = await Promise.all([
+      svc.from("plans").select("id, monthly_price"),
+      svc.from("subscription_requests").select("amount, status").eq("status", "EN_ATTENTE"),
+      svc.from("subscription_events").select("amount_paid, created_at").gte("created_at", monthStart),
+    ]);
+    const planPriceById = new Map((planRows ?? []).map((p) => [p.id, Number(p.monthly_price ?? 0)]));
+    const activeSubs = (subRows ?? []).filter((s) => s.ends_at && s.ends_at >= today);
+    const expiringSoon = activeSubs.filter((s) => {
+      const left = Math.round((Date.parse(`${s.ends_at}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
+      return Number.isFinite(left) && left <= 30;
+    }).length;
+    const expiredSubs = (subRows ?? []).filter((s) => s.ends_at && s.ends_at < today).length;
+    const subscriptions = {
+      active: activeSubs.length,
+      expiringSoon,
+      expired: expiredSubs,
+      none: Math.max(0, (schoolRows ?? []).length - (subRows ?? []).length),
+      pendingRequests: (pendingRequests ?? []).length,
+      pendingAmount: (pendingRequests ?? []).reduce((sum, r) => sum + Number(r.amount ?? 0), 0),
+      mrr: activeSubs.reduce((sum, s) => sum + (planPriceById.get(s.plan_id) ?? 0), 0),
+      revenueThisMonth: (monthEvents ?? []).reduce((sum, e) => sum + Number(e.amount_paid ?? 0), 0),
+    };
 
     // Nombre total d'élèves (toutes écoles confondues).
     const { count: totalStudents } = await svc.from("students").select("*", { count: "exact", head: true });
@@ -68,6 +93,7 @@ export default route(async (req, res) => {
         totalTeachers: totalTeachers ?? 0,
         totalParents: totalParents ?? 0,
       },
+      subscriptions,
       bySchool: (schoolStats ?? []).map((s) => ({
         schoolId: s.school_id,
         schoolName: s.school_name,
