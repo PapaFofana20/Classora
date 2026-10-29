@@ -46,7 +46,12 @@ export default route(async (req, res) => {
     // enregistrée à l'inscription.
     const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
-    const plan = optionalString(body, "plan", "Le plan d'abonnement", 50) ?? "essentiel";
+    // Le plan choisi reste dans le payload front (pré-sélection côté UI) mais
+    // n'est PAS transmis à la RPC : la signature déployée de
+    // finish_director_registration ne l'accepte pas (9 arguments, migration
+    // 00023). L'envoyer provoquait un PGRST202 « function not found », donc un
+    // 500 générique à chaque inscription. La persistance du plan choisi fera
+    // l'objet d'une migration dédiée.
 
     const pwError = passwordError(password);
     if (pwError) return badRequest(res, pwError);
@@ -78,7 +83,6 @@ export default route(async (req, res) => {
         p_city: city,
         p_address: address,
         p_cycles: cycles,
-        p_plan_id: plan,
       });
       if (error || !data) {
         throw new Error(error?.message ?? "Inscription incomplète.");
