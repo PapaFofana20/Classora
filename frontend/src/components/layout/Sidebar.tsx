@@ -48,7 +48,7 @@ function MenuItem({ item, expanded, onNavigate }: { item: NavItem; expanded: boo
       <NavLink
         ref={linkRef}
         to={item.to}
-        end={item.to === "/app"}
+        end={item.to === "/app" || item.to === "/app/eleves"}
         onClick={onNavigate}
         aria-label={expanded ? undefined : item.label}
         onPointerEnter={() => showTip(TOOLTIP_DELAY)}

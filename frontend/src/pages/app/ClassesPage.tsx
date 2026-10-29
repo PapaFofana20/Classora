@@ -126,7 +126,9 @@ export default function ClassesPage() {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Nouvelle classe" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button><Button variant="dark" disabled={!formValid} loading={busy} onClick={() => void create()}>Créer la classe</Button></>}>
         <div className="grid gap-4">
-          <Select label="Niveau" required placeholder="Choisir un niveau" value={form.levelId} onChange={(e) => setForm({ ...form, levelId: e.target.value })} options={(state.data?.overview.levels ?? []).map((l) => ({ value: l.id, label: `${l.label} (${CYCLE_LABELS[l.cycle]})` }))} />
+          <Select label="Niveau" required placeholder="Choisir un niveau" value={form.levelId} onChange={(e) => setForm({ ...form, levelId: e.target.value })} options={(state.data?.overview.levels ?? [])
+            .filter((l) => (state.data?.overview.settings.cycles ?? CYCLES).includes(l.cycle))
+            .map((l) => ({ value: l.id, label: `${l.label} (${CYCLE_LABELS[l.cycle]})` }))} />
           {levelCycle === "secondaire" ? (
             <Select label="Série" required placeholder="Choisir une série" value={form.series} onChange={(e) => setForm({ ...form, series: e.target.value })} options={SERIES_OPTIONS.map((s) => ({ value: s, label: s }))} />
           ) : (

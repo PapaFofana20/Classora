@@ -24,9 +24,10 @@ export function CoefficientsTab({ overview, onSaved }: TabProps) {
   const [classId, setClassId] = useState(overview.classes[0]?.id ?? "");
   const [draft, setDraft] = useState<Record<string, string>>({});
 
-  /** Sur le plan gratuit (essentiel), seuls les cycles de l'école sont autorisés. */
+  /** Sur le plan gratuit (essentiel), seuls le cycle choisi sont autorisés. */
   const isFreePlan = school.plan?.id === "essentiel";
-  const allowedCycles = isFreePlan ? (school.school?.cycles ?? CYCLES) : CYCLES;
+  const freeCycle = isFreePlan ? (school.school?.cycles?.[0] ?? (school.settings?.cycles?.[0])) : undefined;
+  const allowedCycles = isFreePlan && freeCycle ? [freeCycle] : (isFreePlan ? (school.school?.cycles ?? school.settings?.cycles ?? CYCLES) : CYCLES);
 
   /** Classes filtrées selon les cycles autorisés. */
   const eligibleClasses = overview.classes.filter((c) => allowedCycles.includes(c.cycle));
@@ -36,7 +37,7 @@ export function CoefficientsTab({ overview, onSaved }: TabProps) {
 
   /** Matières de l'école restreintes aux cycles autorisés ET au cycle de la classe sélectionnée. */
   const eligible = overview.subjects.filter((s) =>
-    allowedCycles.includes(s.cycles[0]) && (!selectedClass || s.cycles.includes(selectedClass.cycle))
+    allowedCycles.includes(selectedClass?.cycle ?? s.cycles[0]) && (!selectedClass || s.cycles.includes(selectedClass.cycle))
   );
 
   const apply = async (subjectId: string, value: number | null, ok: string) => {
