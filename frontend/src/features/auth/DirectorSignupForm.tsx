@@ -135,8 +135,8 @@ export function DirectorSignupForm() {
             </p>
           </div>
         </div>
-        <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
-        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
+        <PasswordField value={form.password} placeholder="••••••••" onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
+        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." placeholder="••••••••" value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>
       <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>

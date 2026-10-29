@@ -48,7 +48,7 @@ export function ForgotForm() {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4" aria-label="Mot de passe oublié">
-      <Input label="Adresse e-mail" type="email" icon="mail" required autoComplete="email" {...form.field("email")} />
+      <Input label="Adresse e-mail" type="email" icon="mail" required autoComplete="email" placeholder="vous@exemple.sn" {...form.field("email")} />
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy}>
         Envoyer le lien
       </Button>

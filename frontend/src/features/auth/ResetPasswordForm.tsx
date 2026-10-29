@@ -137,6 +137,7 @@ export function ResetPasswordForm() {
       </div>
       <PasswordField
         label="Nouveau mot de passe"
+        placeholder="••••••••"
         value={password}
         onChange={(value) => {
           setPassword(value);
@@ -147,6 +148,7 @@ export function ResetPasswordForm() {
       <PasswordField
         label="Confirmer le mot de passe"
         showStrength={false}
+        placeholder="••••••••"
         value={confirm}
         onChange={(value) => {
           setConfirm(value);

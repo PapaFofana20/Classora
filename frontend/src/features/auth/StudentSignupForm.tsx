@@ -114,8 +114,8 @@ export function StudentSignupForm({ school, onBack }: Props) {
         />
         <Input label="Adresse e-mail" type="email" required autoComplete="email" placeholder="vous@exemple.sn" hint="Cette adresse servira à vous connecter." value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
         <Input label="Téléphone (facultatif)" type="tel" placeholder="77 123 45 67" hint="Numéro sénégalais à 9 chiffres." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
-        <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
-        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
+        <PasswordField value={form.password} placeholder="••••••••" onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
+        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." placeholder="••••••••" value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>
       <p className="flex items-start gap-2 rounded-2xl bg-mist p-4 text-xs text-neutral-600">
         <Icon name="info" className="text-[18px]" />

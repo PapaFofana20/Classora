@@ -53,10 +53,10 @@ export function SchoolTab({ overview, onSaved }: TabProps) {
       <Card>
         <CardHeader title="Informations de l'école" subtitle={`Année scolaire ${s.schoolYear}`} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="Nom de l'école" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} error={errors.name} />
-          <Input label="Téléphone" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
-          <Input label="E-mail" type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} error={errors.email} />
-          <Input label="Adresse" value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} />
+          <Input label="Nom de l'école" required placeholder="Ex. Groupe Scolaire Les Baobabs" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} error={errors.name} />
+          <Input label="Téléphone" placeholder="77 123 45 67" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
+          <Input label="E-mail" type="email" placeholder="contact@ecole.sn" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} error={errors.email} />
+          <Input label="Adresse" placeholder="Quartier, rue, numéro" value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} />
         </div>
         <Button className="mt-5" variant="dark" icon="save" loading={busy} disabled={!!errors.name || !!errors.email} onClick={() => void run(() => updateSettings(schoolId, { ...f, name: f.name.trim() }), "Informations enregistrées.")}>Enregistrer</Button>
       </Card>
@@ -172,7 +172,7 @@ export function SubjectsTab({ overview, onSaved }: TabProps) {
       </Card>
       <Card>
         <CardHeader title="Ajouter une matière" />
-        <Input label="Nom de la matière" value={name} onChange={(e) => setName(e.target.value)} error={name && name.trim().length < 3 ? "Nom trop court." : null} />
+        <Input label="Nom de la matière" placeholder="Ex. Mathématiques" value={name} onChange={(e) => setName(e.target.value)} error={name && name.trim().length < 3 ? "Nom trop court." : null} />
         <fieldset className="mt-4">
           <legend className="mb-2 text-sm font-semibold">Cycles concernés</legend>
           <div className="flex flex-wrap gap-2">

@@ -66,13 +66,13 @@ export function StaffForm({ subjects, initial, onSubmit, submitLabel, busy, onCa
     >
       <Select label="Rôle" required value={form.role} disabled={!!initial?.role} onChange={(e) => setForm({ ...form, role: e.target.value as StaffRole })} options={allowedRoles.map((r) => ({ value: r, label: STAFF_ROLE_LABELS[r] }))} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Prénom" required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
-        <Input label="Nom" required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
+        <Input label="Prénom" required placeholder="Ex. Aminata" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
+        <Input label="Nom" required placeholder="Ex. Diop" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
         <Input label="Adresse e-mail" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
         <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Mot de passe" type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} onBlur={() => touch("password")} error={show("password")} />
+        <Input label="Mot de passe" type="password" required placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} onBlur={() => touch("password")} error={show("password")} />
       </div>
       {form.role === "professeur" && (
         <fieldset>

@@ -13,10 +13,11 @@ interface Props {
   autoComplete?: string;
   id?: string;
   hint?: string;
+  placeholder?: string;
 }
 
 /** Champ mot de passe : règles lisibles, force, afficher/masquer, copier. */
-export function PasswordField({ label = "Mot de passe", value, onChange, error, showStrength = true, autoComplete = "new-password", id, hint }: Props) {
+export function PasswordField({ label = "Mot de passe", value, onChange, error, showStrength = true, autoComplete = "new-password", id, hint, placeholder }: Props) {
   const [show, setShow] = useState(false);
   const strength = passwordStrength(value);
 
@@ -30,6 +31,7 @@ export function PasswordField({ label = "Mot de passe", value, onChange, error, 
           type={show ? "text" : "password"}
           icon="lock"
           autoComplete={autoComplete}
+          placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           error={error}

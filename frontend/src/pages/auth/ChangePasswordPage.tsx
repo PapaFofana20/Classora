@@ -60,9 +60,9 @@ export default function ChangePasswordPage() {
               {error}
             </p>
           )}
-          <PasswordField label="Mot de passe temporaire" showStrength={false} autoComplete="current-password" hint="Le mot de passe communiqué par la direction de votre école." value={form.current} onChange={(v) => setForm({ ...form, current: v })} error={currentErr} />
-          <PasswordField label="Nouveau mot de passe" value={form.next} onChange={(v) => setForm({ ...form, next: v })} error={nextErr} />
-          <PasswordField label="Confirmer le nouveau mot de passe" showStrength={false} hint="Ressaisissez le nouveau mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={confirmErr} />
+          <PasswordField label="Mot de passe temporaire" showStrength={false} autoComplete="current-password" hint="Le mot de passe communiqué par la direction de votre école." placeholder="••••••••" value={form.current} onChange={(v) => setForm({ ...form, current: v })} error={currentErr} />
+          <PasswordField label="Nouveau mot de passe" placeholder="••••••••" value={form.next} onChange={(v) => setForm({ ...form, next: v })} error={nextErr} />
+          <PasswordField label="Confirmer le nouveau mot de passe" showStrength={false} hint="Ressaisissez le nouveau mot de passe." placeholder="••••••••" value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={confirmErr} />
           <Button className="w-full" size="lg" variant="dark" icon="lock" loading={busy} disabled={!valid} onClick={() => void submit()}>
             Enregistrer et continuer
           </Button>

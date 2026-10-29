@@ -111,15 +111,16 @@ export default function AdminAgentsPage() {
               ]}
               onChange={(e) => setForm({ ...form, role: e.target.value as AdminAgentRole })}
             />
-            <Input label="Prénom" required value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-            <Input label="Nom" required value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-            <Input label="E-mail" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <Input label="Téléphone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input label="Prénom" required placeholder="Ex. Aminata" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+            <Input label="Nom" required placeholder="Ex. Diop" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+            <Input label="E-mail" type="email" required placeholder="vous@exemple.sn" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input label="Téléphone" placeholder="77 123 45 67" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             <Input
               label="Mot de passe"
               type="password"
               required
               autoComplete="new-password"
+              placeholder="••••••••"
               className="sm:col-span-2"
               hint="Mot de passe fixe de l'agent : il servira à chaque connexion. 8 caractères minimum, avec majuscule, minuscule et chiffre."
               value={form.password}
