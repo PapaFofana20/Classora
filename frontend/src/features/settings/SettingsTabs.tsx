@@ -106,20 +106,46 @@ export function RegistrationTab({ school, onSaved }: { school: School; onSaved: 
 
 export function CyclesTab({ overview, onSaved }: TabProps) {
   const { schoolId } = useAuth();
+  const school = useSchool();
   const [cycles, setCycles] = useState<Cycle[]>(overview.settings.cycles);
   const { busy, run } = useSave(onSaved);
-  const toggle = (c: Cycle) => setCycles((l) => (l.includes(c) ? l.filter((x) => x !== c) : [...l, c]));
+  const isFreePlan = school.plan?.id === "essentiel";
+  /** Sur le plan gratuit, un seul cycle est autorisé : il est définitif. */
+  const canSelectAnother = !isFreePlan || cycles.length === 0;
+  const toggle = (c: Cycle) => {
+    if (cycles.includes(c)) {
+      // On peut toujours retirer un cycle (mais il doit en rester au moins un)
+      if (cycles.length > 1) {
+        setCycles((l) => l.filter((x) => x !== c));
+      }
+    } else if (canSelectAnother) {
+      setCycles([c]);
+    }
+  };
   const levelsOf = (c: Cycle) => overview.levels.filter((l) => l.cycle === c).map((l) => l.label).join(", ");
   return (
     <Card>
-      <CardHeader title="Cycles proposés par l'école" subtitle="Une école peut proposer un ou plusieurs cycles." />
+      <CardHeader
+        title="Cycles proposés par l'école"
+        subtitle={
+          isFreePlan
+            ? "Plan Découverte (gratuit) : un seul cycle est autorisé, il est définitif."
+            : "Une école peut proposer un ou plusieurs cycles."
+        }
+      />
+      {isFreePlan && cycles.length > 0 && (
+        <p className="mb-3 text-xs text-neutral-600">
+          Vous avez choisi le cycle <strong>{CYCLE_LABELS[cycles[0]]}</strong>. Sur le plan gratuit, ce cycle est définitif : vous ne pouvez pas en ajouter d‘autre sans passer à un plan payant.
+        </p>
+      )}
       <div className="grid gap-3 md:grid-cols-3">
         {CYCLES.map((c) => {
           const on = cycles.includes(c);
+          const disabled = isFreePlan && cycles.length > 0 && !on;
           return (
-            <label key={c} className={cn("cursor-pointer rounded-2xl border-2 p-5 transition", on ? "border-forest bg-lime-pale" : "border-neutral-200")}>
-              <input type="checkbox" className="sr-only" checked={on} onChange={() => toggle(c)} />
-              <span className="flex items-center justify-between"><span className="text-lg font-extrabold">{CYCLE_LABELS[c]}</span><Icon name={on ? "check_circle" : "radio_button_unchecked"} fill={on} className={on ? "text-forest" : "text-neutral-300"} /></span>
+            <label key={c} className={cn("cursor-pointer rounded-2xl border-2 p-5 transition", on ? "border-forest bg-lime-pale" : disabled ? "border-neutral-200 bg-mist/50 text-neutral-400" : "border-neutral-200")}>
+              <input type="checkbox" className="sr-only" checked={on} disabled={disabled} onChange={() => toggle(c)} />
+              <span className="flex items-center justify-between"><span className="text-lg font-extrabold">{CYCLE_LABELS[c]}</span><Icon name={on ? "check_circle" : "radio_button_unchecked"} fill={on} className={on ? "text-forest" : disabled ? "text-neutral-300" : "text-neutral-300"} /></span>
               <span className="mt-2 block text-sm text-neutral-600">{levelsOf(c)}</span>
               <Badge tone="dark" className="mt-3">Examen : {CYCLE_EXAMS[c]}</Badge>
             </label>
