@@ -29,12 +29,12 @@ const SENEGAL_CITIES = [
 ];
 
 /**
- * Inscription du directeur : école + compte + abonnement activé, puis accès
- * direct au tableau de bord. La formule n'est plus choisie ici : elle vient de
- * la page /tarifs (`/inscription?plan=premium`) et vaut « découverte » par
- * défaut.
+ * Inscription du directeur : école + compte + abonnement Découverte activé,
+ * puis accès direct au tableau de bord. Il n'y a plus de choix de formule à
+ * l'inscription : l'école démarre gratuitement sur le plan Découverte. L'upgrade
+ * vers Premium se fait depuis l'onglet Abonnement du tableau de bord.
  */
-export function DirectorSignupForm({ plan = "essentiel" }: { plan?: "essentiel" | "premium" }) {
+export function DirectorSignupForm() {
   const { registerDirector } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -80,7 +80,7 @@ export function DirectorSignupForm({ plan = "essentiel" }: { plan?: "essentiel" 
         city: form.city,
         address: form.address,
         password: form.password,
-        plan,
+        plan: "essentiel",
         cycles,
       });
       toast("Compte créé. Bienvenue sur Classora !");
@@ -129,13 +129,9 @@ export function DirectorSignupForm({ plan = "essentiel" }: { plan?: "essentiel" 
         <div className="flex items-start gap-3 rounded-2xl bg-lime-soft p-4">
           <Icon name="workspace_premium" className="text-[22px] text-forest" />
           <div className="text-sm">
-            <p className="font-bold text-forest">
-              {plan === "premium" ? "Formule Premium" : "Plan découverte — gratuit"}
-            </p>
+            <p className="font-bold text-forest">Plan Découverte — gratuit</p>
             <p className="text-neutral-600">
-              {plan === "premium"
-                ? "Votre école démarre sur la formule Premium choisie sur la page Tarifs."
-                : "Votre école démarre gratuitement, avec les fonctionnalités essentielles."}
+              Votre école démarre gratuitement, avec les fonctionnalités essentielles. Vous pourrez passer à Premium depuis l'onglet Abonnement de votre tableau de bord.
             </p>
           </div>
         </div>

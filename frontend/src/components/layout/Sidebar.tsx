@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
 import { SIDEBAR_COLLAPSED, SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
@@ -144,6 +144,32 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
             <p className="mt-3 text-xs text-white/70">
               {ROLE_LABELS[user.role]} · {user.firstName} {user.lastName}
             </p>
+
+            {user.role === "directeur" && school.plan && (
+              <div className="mt-3 rounded-2xl border border-forest/20 bg-forest/10 p-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-lime">Votre abonnement</p>
+                <p className="mt-1 text-sm font-semibold text-white">{school.plan.name}</p>
+                {school.plan.id === "essentiel" ? (
+                  <div className="mt-2">
+                    <p className="text-[10px] text-white/60 mb-1">
+                      Passez à Premium pour plus d'élèves et de modules.
+                    </p>
+                    <Link
+                      to="/app/abonnement"
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-forest px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-forest-600"
+                    >
+                      <Icon name="workspace_premium" className="text-[14px]" />
+                      Basculer vers Premium
+                    </Link>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-[10px] text-white/60">
+                    Vous êtes déjà sur la formule {school.plan.name}.
+                  </p>
+                )}
+              </div>
+            )}
+
             <button type="button" onClick={handleLogout} className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-forest-600 text-sm font-semibold transition hover:bg-forest-500">
               <Icon name="logout" className="text-[20px]" />
               Se déconnecter
