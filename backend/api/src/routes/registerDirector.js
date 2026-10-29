@@ -46,12 +46,9 @@ export default route(async (req, res) => {
     // enregistrée à l'inscription.
     const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
-    // Le plan choisi reste dans le payload front (pré-sélection côté UI) mais
-    // n'est PAS transmis à la RPC : la signature déployée de
-    // finish_director_registration ne l'accepte pas (9 arguments, migration
-    // 00023). L'envoyer provoquait un PGRST202 « function not found », donc un
-    // 500 générique à chaque inscription. La persistance du plan choisi fera
-    // l'objet d'une migration dédiée.
+    // Formule choisie sur la page d'inscription (indicative : l'activation
+    // reste manuelle). Transmise à la RPC à partir de la migration 00032.
+    const plan = optionalString(body, "plan", "Le plan d'abonnement", 50) ?? "essentiel";
 
     const pwError = passwordError(password);
     if (pwError) return badRequest(res, pwError);
@@ -73,7 +70,7 @@ export default route(async (req, res) => {
 
     // 2. Écritures transactionnelles côté SQL.
     try {
-      const { data, error } = await svc.rpc("finish_director_registration", {
+      const args = {
         p_user_id: created.user.id,
         p_first_name: firstName,
         p_last_name: lastName,
@@ -83,7 +80,16 @@ export default route(async (req, res) => {
         p_city: city,
         p_address: address,
         p_cycles: cycles,
-      });
+      };
+      let { data, error } = await svc.rpc("finish_director_registration", { ...args, p_plan_id: plan });
+      // Compatibilité descendante : avant la migration 00032, la fonction
+      // n'exposait que 9 arguments et PostgREST renvoyait PGRST202/PGRST203
+      // (« function not found »), ce qui faisait échouer toute inscription en
+      // 500. On rejoue alors sans la formule au lieu de perdre le compte.
+      if (error && /PGRST20[23]|could not find the function/i.test(`${error.code ?? ""} ${error.message ?? ""}`)) {
+        console.warn("[register-director] RPC à 9 arguments (migration 00032 non appliquée)");
+        ({ data, error } = await svc.rpc("finish_director_registration", args));
+      }
       if (error || !data) {
         throw new Error(error?.message ?? "Inscription incomplète.");
       }
