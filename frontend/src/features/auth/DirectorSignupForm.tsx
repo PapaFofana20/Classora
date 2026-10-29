@@ -38,7 +38,7 @@ export function DirectorSignupForm() {
   const { registerDirector } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [cycles, setCycles] = useState<Cycle[]>(["elementaire", "moyen"]);
+  const [cycle, setCycle] = useState<Cycle>("elementaire");
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "" });
   const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -55,7 +55,7 @@ export function DirectorSignupForm() {
     address: form.address.trim().length < 3 ? "Indiquez l'adresse de l'école." : null,
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
-    cycles: cycles.length === 0 ? "Choisissez au moins un cycle." : null,
+    cycle: null,
     terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
   };
   const valid = Object.values(errors).every((e) => e === null);
@@ -81,7 +81,7 @@ export function DirectorSignupForm() {
         address: form.address,
         password: form.password,
         plan: "essentiel",
-        cycles,
+        cycles: [cycle],
       });
       toast("Compte créé. Bienvenue sur Classora !");
       navigate("/app", { replace: true });
@@ -111,19 +111,28 @@ export function DirectorSignupForm() {
         <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" autoComplete="tel" hint="Numéro sénégalais à 9 chiffres." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
       </div>
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold text-ink">Cycles proposés par votre école</legend>
-        <div className="flex flex-wrap gap-2">
+        <legend className="mb-2 text-sm font-semibold text-ink">Cycle de votre école</legend>
+        <p className="text-xs text-neutral-600 mb-3">
+          Sur le plan Découverte (gratuit), votre école démarre sur un seul cycle. Vous pourrez en ajouter d’autres depuis votre tableau de bord.
+        </p>
+        <div className="grid gap-2 sm:grid-cols-3">
           {CYCLES.map((c) => {
-            const on = cycles.includes(c);
+            const selected = cycle === c;
             return (
-              <label key={c} className={cn("flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-medium", on ? "border-forest bg-lime" : "border-neutral-200")}>
-                <input type="checkbox" className="sr-only" checked={on} onChange={() => setCycles((l) => (on ? l.filter((x) => x !== c) : [...l, c]))} />
+              <label key={c} className={cn("flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium transition-colors", selected ? "border-forest bg-lime text-forest" : "border-neutral-200 text-neutral-700 hover:border-forest/40")}>
+                <input
+                  type="radio"
+                  name="cycle"
+                  className="sr-only"
+                  checked={selected}
+                  onChange={() => setCycle(c)}
+                  aria-label={CYCLE_LABELS[c]}
+                />
                 {CYCLE_LABELS[c]}
               </label>
             );
           })}
         </div>
-        {cycles.length === 0 && <p className="mt-2 text-xs font-medium text-danger">Choisissez au moins un cycle.</p>}
       </fieldset>
       <div className="grid gap-4">
         <div className="flex items-start gap-3 rounded-2xl bg-lime-soft p-4">
