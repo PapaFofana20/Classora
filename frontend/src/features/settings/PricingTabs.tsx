@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSchool } from "@/context/SchoolContext";
 import { setClassSubject, updateSettings, type SchoolOverview } from "@/services/schoolService";
 import type { LevelFees } from "@/types";
 import { formatCurrency } from "@/utils/format";
+import { CYCLES, CYCLE_LABELS } from "@/data/school";
 
 interface TabProps {
   overview: SchoolOverview;
@@ -18,14 +20,29 @@ interface TabProps {
 export function CoefficientsTab({ overview, onSaved }: TabProps) {
   const { toast } = useToast();
   const { schoolId } = useAuth();
+  const school = useSchool();
   const [classId, setClassId] = useState(overview.classes[0]?.id ?? "");
   const [draft, setDraft] = useState<Record<string, string>>({});
-  const cls = overview.classes.find((c) => c.id === classId);
-  const eligible = overview.subjects.filter((s) => cls && s.cycles.includes(cls.cycle));
+
+  /** Sur le plan gratuit (essentiel), seuls les cycles de l'école sont autorisés. */
+  const isFreePlan = school.plan?.id === "essentiel";
+  const allowedCycles = isFreePlan ? (school.school?.cycles ?? CYCLES) : CYCLES;
+
+  /** Classes filtrées selon les cycles autorisés. */
+  const eligibleClasses = overview.classes.filter((c) => allowedCycles.includes(c.cycle));
+  const selectedClass = eligibleClasses.find((c) => c.id === classId) ?? eligibleClasses[0];
+
+  const cycleLabel = selectedClass ? CYCLE_LABELS[selectedClass.cycle] : "";
+
+  /** Matières de l'école restreintes aux cycles autorisés ET au cycle de la classe sélectionnée. */
+  const eligible = overview.subjects.filter((s) =>
+    allowedCycles.includes(s.cycles[0]) && (!selectedClass || s.cycles.includes(selectedClass.cycle))
+  );
 
   const apply = async (subjectId: string, value: number | null, ok: string) => {
+    if (!selectedClass) return;
     try {
-      await setClassSubject(schoolId, classId, subjectId, value);
+      await setClassSubject(schoolId, selectedClass.id, subjectId, value);
       toast(ok);
       onSaved();
     } catch (e) {
@@ -35,32 +52,50 @@ export function CoefficientsTab({ overview, onSaved }: TabProps) {
 
   return (
     <Card>
-      <CardHeader title="Coefficients par classe" subtitle="Les coefficients dépendent de la classe et de la série. À l'élémentaire, tous valent 1." />
-      <Select compact className="mb-4 w-56" aria-label="Classe" value={classId} onChange={(e) => { setClassId(e.target.value); setDraft({}); }} options={overview.classes.map((c) => ({ value: c.id, label: `${c.name}${c.series ? ` (série ${c.series})` : ""}` }))} />
-      <ul className="divide-y divide-neutral-100">
-        {eligible.map((s) => {
-          const cs = overview.classSubjects.find((x) => x.classId === classId && x.subjectId === s.id);
-          const key = s.id;
-          const val = draft[key] ?? String(cs?.coefficient ?? "");
-          const n = Number(val);
-          const err = cs && (!Number.isInteger(n) || n < 1 || n > 10) ? "Entier de 1 à 10." : null;
-          return (
-            <li key={s.id} className="flex flex-wrap items-center gap-3 py-3">
-              <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3 font-semibold">
-                <input type="checkbox" className="size-5 accent-forest" checked={!!cs} onChange={() => void apply(s.id, cs ? null : 1, cs ? `${s.name} retirée de la classe.` : `${s.name} ajoutée à la classe.`)} />
-                {s.name}
-              </label>
-              {cs && (
-                <div>
-                  <label className="sr-only" htmlFor={`coef-${s.id}`}>Coefficient de {s.name}</label>
-                  <input id={`coef-${s.id}`} type="number" min={1} max={10} value={val} onChange={(e) => setDraft({ ...draft, [key]: e.target.value })} onBlur={() => { if (!err && n !== cs.coefficient) void apply(s.id, n, "Coefficient enregistré."); }} aria-invalid={!!err} className={`min-h-11 w-24 rounded-xl border px-3 text-center font-bold ${err ? "border-danger bg-red-50" : "border-neutral-300"}`} />
-                  {err && <p role="alert" className="mt-1 text-xs text-danger">{err}</p>}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      <CardHeader
+        title="Coefficients par classe"
+        subtitle={
+          isFreePlan
+            ? `Plan Découverte (gratuit) : coefficients réservés au cycle ${cycleLabel} seul. Passez à un plan payant pour gérer tous les cycles.`
+            : "Les coefficients dépendent de la classe et de la série. À l'élémentaire, tous valent 1."
+        }
+      />
+      {eligibleClasses.length === 0 && (
+        <p className="p-4 text-sm text-neutral-500">Aucune classe dans les cycles autorisés.</p>
+      )}
+      {eligibleClasses.length > 0 && (
+        <>
+          <Select compact className="mb-4 w-56" aria-label="Classe" value={classId} onChange={(e) => { setClassId(e.target.value); setDraft({}); }} options={eligibleClasses.map((c) => ({ value: c.id, label: `${c.name}${c.series ? ` (série ${c.series})` : ""}` }))} />
+          <ul className="divide-y divide-neutral-100">
+            {eligible.map((s) => {
+              if (selectedClass && !s.cycles.includes(selectedClass.cycle)) return null;
+              const cs = overview.classSubjects.find((x) => x.classId === selectedClass.id && x.subjectId === s.id);
+              const key = s.id;
+              const val = draft[key] ?? String(cs?.coefficient ?? "");
+              const n = Number(val);
+              const err = cs && (!Number.isInteger(n) || n < 1 || n > 10) ? "Entier de 1 à 10." : null;
+              return (
+                <li key={s.id} className="flex flex-wrap items-center gap-3 py-3">
+                  <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3 font-semibold">
+                    <input type="checkbox" className="size-5 accent-forest" checked={!!cs} onChange={() => void apply(s.id, cs ? null : 1, cs ? `${s.name} retirée de la classe.` : `${s.name} ajoutée à la classe.`)} />
+                    {s.name}
+                  </label>
+                  {cs && (
+                    <div>
+                      <label className="sr-only" htmlFor={`coef-${s.id}`}>Coefficient de {s.name}</label>
+                      <input id={`coef-${s.id}`} type="number" min={1} max={10} value={val} onChange={(e) => setDraft({ ...draft, [key]: e.target.value })} onBlur={() => { if (!err && n !== cs.coefficient) void apply(s.id, n, "Coefficient enregistré."); }} aria-invalid={!!err} className={`min-h-11 w-24 rounded-xl border px-3 text-center font-bold ${err ? "border-danger bg-red-50" : "border-neutral-300"}`} />
+                      {err && <p role="alert" className="mt-1 text-xs text-danger">{err}</p>}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {eligible.length > 0 && selectedClass && !eligible.some((s) => s.cycles.includes(selectedClass.cycle)) && (
+            <p className="mt-3 text-xs text-neutral-500">Aucune matière éligible pour cette classe.</p>
+          )}
+        </>
+      )}
     </Card>
   );
 }

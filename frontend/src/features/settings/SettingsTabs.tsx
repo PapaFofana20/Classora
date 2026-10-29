@@ -179,9 +179,13 @@ export function PeriodsTab({ overview, onSaved }: TabProps) {
 
 export function SubjectsTab({ overview, onSaved }: TabProps) {
   const { schoolId } = useAuth();
+  const school = useSchool();
   const [name, setName] = useState("");
-  const [cycles, setCycles] = useState<Cycle[]>(["moyen", "secondaire"]);
+  const [cycles, setCycles] = useState<Cycle[]>(school.school?.cycles.length ?? 0 > 0 ? [school.school?.cycles[0] as Cycle] : ["moyen", "secondaire"]);
   const { busy, run } = useSave(onSaved);
+  const isFreePlan = school.plan?.id === "essentiel";
+  /** Sur le plan gratuit, seul le cycle de l'école peut être sélectionné. */
+  const selectableCycles: Cycle[] = isFreePlan ? (school.school?.cycles ?? CYCLES) : CYCLES;
   const valid = name.trim().length >= 3 && cycles.length > 0;
   return (
     <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
@@ -202,13 +206,29 @@ export function SubjectsTab({ overview, onSaved }: TabProps) {
         <fieldset className="mt-4">
           <legend className="mb-2 text-sm font-semibold">Cycles concernés</legend>
           <div className="flex flex-wrap gap-2">
-            {CYCLES.map((c) => (
-              <label key={c} className={cn("flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-sm font-medium", cycles.includes(c) ? "border-forest bg-lime" : "border-neutral-200")}>
-                <input type="checkbox" className="sr-only" checked={cycles.includes(c)} onChange={() => setCycles((l) => (l.includes(c) ? l.filter((x) => x !== c) : [...l, c]))} />
-                {CYCLE_LABELS[c]}
-              </label>
-            ))}
+            {selectableCycles.map((c) => {
+              const on = cycles.includes(c);
+              const disabled = isFreePlan && cycles.length > 0 && !on;
+              return (
+                <label key={c} className={cn("flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-sm font-medium transition-colors", disabled ? "border-neutral-200 bg-mist/50 text-neutral-400" : on ? "border-forest bg-lime" : "border-neutral-200")}>
+                  <input type="checkbox" className="sr-only" checked={on} disabled={disabled} onChange={() => {
+                    if (disabled) return;
+                    if (cycles.includes(c)) {
+                      if (cycles.length > 1) setCycles((l) => l.filter((x) => x !== c));
+                    } else {
+                      setCycles([c]);
+                    }
+                  }} />
+                  {CYCLE_LABELS[c]}
+                </label>
+              );
+            })}
           </div>
+          {isFreePlan && cycles.length > 0 && (
+            <p className="mt-2 text-xs text-neutral-600">
+              Plan Découverte : le cycle <strong>{CYCLE_LABELS[cycles[0]]}</strong> est définitif.
+            </p>
+          )}
         </fieldset>
         <Button className="mt-5" variant="dark" icon="add" disabled={!valid} loading={busy} onClick={() => void run(async () => { await addSubject(schoolId, name, cycles); setName(""); }, "Matière ajoutée.")}>Ajouter</Button>
       </Card>

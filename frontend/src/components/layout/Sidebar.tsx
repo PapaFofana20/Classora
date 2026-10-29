@@ -133,58 +133,11 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
         ))}
       </nav>
 
-      <div className="m-4 shrink-0 rounded-2xl bg-black/25 p-4">
-        {expanded ? (
-          <>
-            <p className="text-xs font-bold uppercase tracking-wider text-lime">Année scolaire</p>
-            <p className="mt-1 text-lg font-extrabold">{SCHOOL_YEAR}</p>
-            <div className="mt-3 border-t border-white/10 pt-3">
-              <SchoolMark name={school.schoolName || "École"} size={32} dark />
-            </div>
-            <p className="mt-3 text-xs text-white/70">
-              {ROLE_LABELS[user.role]} · {user.firstName} {user.lastName}
-            </p>
-
-            {user.role === "directeur" && school.plan && (
-              <div className="mt-3 rounded-2xl border border-forest/20 bg-forest/10 p-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-lime">Votre abonnement</p>
-                <p className="mt-1 text-sm font-semibold text-white">{school.plan.name}</p>
-                {school.plan.id === "essentiel" ? (
-                  <div className="mt-2">
-                    <p className="text-[10px] text-white/60 mb-1">
-                      Passez à Premium pour plus d'élèves et de modules.
-                    </p>
-                    <Link
-                      to="/app/abonnement"
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-forest px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-forest-600"
-                    >
-                      <Icon name="workspace_premium" className="text-[14px]" />
-                      Basculer vers Premium
-                    </Link>
-                  </div>
-                ) : (
-                  <p className="mt-2 text-[10px] text-white/60">
-                    Vous êtes déjà sur la formule {school.plan.name}.
-                  </p>
-                )}
-              </div>
-            )}
-
-            <button type="button" onClick={handleLogout} className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-forest-600 text-sm font-semibold transition hover:bg-forest-500">
-              <Icon name="logout" className="text-[20px]" />
-              Se déconnecter
-            </button>
-          </>
-        ) : (
-          <div className="flex flex-col items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-xl bg-lime text-sm font-extrabold text-forest" aria-label={school.schoolName}>
-              {schoolInitials(school.schoolName || "École")}
-            </span>
-            <button type="button" onClick={handleLogout} aria-label="Se déconnecter" className="grid size-11 place-items-center rounded-full text-white/85 transition hover:bg-white/10">
-              <Icon name="logout" />
-            </button>
-          </div>
-        )}
+      <div className="m-4 shrink-0">
+        <button type="button" onClick={handleLogout} className={cn("flex min-h-11 items-center justify-center gap-2 rounded-full bg-forest-600 text-sm font-semibold transition hover:bg-forest-500", expanded ? "w-full" : "mx-auto size-11 px-0")}>
+          <Icon name="logout" className={expanded ? "text-[20px]" : "text-[22px]"} />
+          {expanded && "Se déconnecter"}
+        </button>
       </div>
       <ConfirmDialog
         open={confirmLogout}
