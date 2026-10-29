@@ -28,13 +28,18 @@ const SENEGAL_CITIES = [
   "Sedhiou", "Goudomp", "Marsassoum",
 ];
 
-/** Inscription du directeur : école + compte + matricule, puis accès direct au tableau de bord. */
-export function DirectorSignupForm({ initialPlan }: { initialPlan?: "essentiel" | "premium" | null }) {
+/**
+ * Inscription du directeur : école + compte + abonnement activé, puis accès
+ * direct au tableau de bord. La formule n'est plus choisie ici : elle vient de
+ * la page /tarifs (`/inscription?plan=premium`) et vaut « découverte » par
+ * défaut.
+ */
+export function DirectorSignupForm({ plan = "essentiel" }: { plan?: "essentiel" | "premium" }) {
   const { registerDirector } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [cycles, setCycles] = useState<Cycle[]>(["elementaire", "moyen"]);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "", plan: (initialPlan ?? "essentiel") as "essentiel" | "premium" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "" });
   const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
@@ -52,7 +57,6 @@ export function DirectorSignupForm({ initialPlan }: { initialPlan?: "essentiel" 
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
     cycles: cycles.length === 0 ? "Choisissez au moins un cycle." : null,
     terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
-    plan: null,
   };
   const valid = Object.values(errors).every((e) => e === null);
   const show = (key: keyof typeof errors) => (touched[key] ? errors[key] : null);
@@ -76,7 +80,7 @@ export function DirectorSignupForm({ initialPlan }: { initialPlan?: "essentiel" 
         city: form.city,
         address: form.address,
         password: form.password,
-        plan: form.plan,
+        plan,
         cycles,
       });
       toast("Compte créé. Bienvenue sur Classora !");
@@ -122,10 +126,19 @@ export function DirectorSignupForm({ initialPlan }: { initialPlan?: "essentiel" 
         {cycles.length === 0 && <p className="mt-2 text-xs font-medium text-danger">Choisissez au moins un cycle.</p>}
       </fieldset>
       <div className="grid gap-4">
-        <Select label="Plan d'abonnement" required options={[
-          { value: "essentiel", label: "Plan découverte — Gratuit" },
-          { value: "premium", label: "Premium — 500 FCFA/élève/mois" }
-        ]} value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as "essentiel" | "premium" })} error={show("plan")} />
+        <div className="flex items-start gap-3 rounded-2xl bg-lime-soft p-4">
+          <Icon name="workspace_premium" className="text-[22px] text-forest" />
+          <div className="text-sm">
+            <p className="font-bold text-forest">
+              {plan === "premium" ? "Formule Premium" : "Plan découverte — gratuit"}
+            </p>
+            <p className="text-neutral-600">
+              {plan === "premium"
+                ? "Votre école démarre sur la formule Premium choisie sur la page Tarifs."
+                : "Votre école démarre gratuitement, avec les fonctionnalités essentielles."}
+            </p>
+          </div>
+        </div>
         <PasswordField value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
         <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>

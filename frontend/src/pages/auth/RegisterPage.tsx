@@ -13,7 +13,8 @@ import type { Role, School } from "@/types";
 /**
  * /inscription — trois parcours : directeur (direct), élève et parent (matricule d'abord).
  * Le lien partagé par l'école (?matricule=X7K9Q) pré-remplit le champ.
- * Le paramètre ?plan=essentiel|premium pré-sélectionne le plan d'abonnement.
+ * Le paramètre ?plan=essentiel|premium détermine la formule activée à
+ * l'inscription (découverte par défaut, Premium depuis la page Tarifs).
  */
 export default function RegisterPage() {
   const [params] = useSearchParams();
@@ -21,7 +22,7 @@ export default function RegisterPage() {
   const [school, setSchool] = useState<School | null>(null);
 
   const prefill = formatMatriculeInput(params.get("matricule") ?? "");
-  const plan = params.get("plan") as "essentiel" | "premium" | null;
+  const plan = params.get("plan") === "premium" ? "premium" : "essentiel";
   const isParent = role === "parent";
 
   return (
@@ -34,7 +35,7 @@ export default function RegisterPage() {
       <div className="space-y-5">
         {!role && <RoleChoice value={role} onChange={setRole} />}
 
-        {role === "directeur" && <DirectorSignupForm initialPlan={plan} />}
+        {role === "directeur" && <DirectorSignupForm plan={plan} />}
 
         {(role === "eleve" || role === "parent") && !school && <MatriculeStep initial={prefill} onFound={setSchool} onBack={() => setRole(null)} />}
 
