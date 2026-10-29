@@ -68,7 +68,7 @@ export default function SubscriptionPage() {
             </p>
           )}
           {info === "AUCUN" && (
-            <p className="mt-3 flex items-start gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">
+            <p className="mt-3 flex items-center gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">
               <Icon name="info" className="text-[20px]" />
               Le paiement en ligne (mobile money) est momentanément désactivé. Pour activer votre abonnement, contactez le support Classora : l'activation est effectuée manuellement.
             </p>

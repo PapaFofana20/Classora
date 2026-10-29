@@ -61,11 +61,11 @@ export function ParentPayments({ schoolName, self = false }: { schoolName: strin
             <StatCard icon="task_alt" label="Déjà payé" value={formatCurrency(sum(mine.map((p) => p.paidAmount)))} />
             <StatCard icon="event" label="Prochaine échéance" value={next ? formatDate(next.dueDate) : "—"} note={next ? `${next.label} · ${formatCurrency(next.amount)}` : "Tout est à jour"} />
           </div>
-          {children.length > 1 && !self && <p className="flex items-start gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest"><Icon name="family_restroom" className="text-[20px]" />Réduction fratrie de 10 % appliquée sur la mensualité à partir du 2e élève inscrit dans l'école.</p>}
+          {children.length > 1 && !self && <p className="flex items-center gap-2 rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest"><Icon name="family_restroom" className="text-[20px]" />Réduction fratrie de 10 % appliquée sur la mensualité à partir du 2e élève inscrit dans l'école.</p>}
           <Tabs label="Paiements" value={tab} onChange={setTab} items={[{ id: "echeancier", label: "Échéancier", icon: "calendar_month" }, { id: "historique", label: "Historique et reçus", icon: "receipt_long" }]} />
           {tab === "echeancier" ? (
             <>
-              {overdue.length > 0 && <p className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger"><Icon name="priority_high" className="text-[20px]" />{overdue.length} échéance{overdue.length > 1 ? "s" : ""} en retard : réglez auprès de l'économe de l'école.</p>}
+              {overdue.length > 0 && <p className="flex items-center gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger"><Icon name="priority_high" className="text-[20px]" />{overdue.length} échéance{overdue.length > 1 ? "s" : ""} en retard : réglez auprès de l'économe de l'école.</p>}
               <Card padded={false} className="p-2"><Table caption="Échéancier" columns={cols} rows={mine} rowKey={(p) => p.id} /></Card>
             </>
           ) : mine.some((p) => p.paidAmount > 0) ? (

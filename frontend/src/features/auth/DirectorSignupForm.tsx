@@ -135,9 +135,11 @@ export function DirectorSignupForm() {
         </div>
       </fieldset>
       <div className="grid gap-4">
-        <div className="flex items-start gap-3 rounded-2xl bg-lime-soft p-4">
-          <Icon name="workspace_premium" className="text-[22px] text-forest" />
-          <div className="text-sm">
+        <div className="flex items-center gap-3 rounded-2xl bg-lime-soft p-4">
+          <div className="shrink-0">
+              <Icon name="workspace_premium" className="text-[22px] text-forest" />
+            </div>
+          <div className="text-sm min-w-0">
             <p className="font-bold text-forest">Plan Découverte — gratuit</p>
             <p className="text-neutral-600">
               Votre école démarre gratuitement, avec les fonctionnalités essentielles. Vous pourrez passer à Premium depuis l'onglet Abonnement de votre tableau de bord.
