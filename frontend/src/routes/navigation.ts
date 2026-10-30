@@ -73,6 +73,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   ],
   eleve: [
     dashboard("Ma scolarité", "backpack"),
+    { to: "/app/emploi-du-temps", label: "Emploi du temps", icon: "calendar_month", section: "Scolarité" },
     { to: "/app/notes", label: "Mes notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/paiements", label: "Mes paiements", icon: "payments", section: "Finances" },
@@ -81,6 +82,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   ],
   parent: [
     dashboard("Suivi de mes élèves", "family_restroom"),
+    { to: "/app/emploi-du-temps", label: "Emploi du temps", icon: "calendar_month", section: "Scolarité" },
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },
@@ -102,7 +104,7 @@ export const ROUTE_ROLES = {
   abonnement: ["directeur"] as Role[],
   onboarding: ["directeur"] as Role[],
   affectations: ["directeur"] as Role[],
-  emploiDuTemps: ["directeur"] as Role[],
+  emploiDuTemps: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],
   notes: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],
   bulletins: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],
   paiements: ["directeur", "econome", "eleve", "parent"] as Role[],
