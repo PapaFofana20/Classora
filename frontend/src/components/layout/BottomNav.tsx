@@ -49,7 +49,7 @@ export function BottomNav({ user }: { user: SessionUser }) {
   const { headClasses } = useTeaching();
   const school = useSchool();
   const [moreOpen, setMoreOpen] = useState(false);
-  const items = navFor(user.role, { isHead: headClasses.length > 0, locked: school.missing });
+  const items = navFor(user.role, { isHead: (headClasses || []).length > 0, locked: school?.missing });
   const primary = primaryItems(items, user.role);
 
   return (

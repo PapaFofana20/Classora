@@ -94,7 +94,7 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
   const navigate = useNavigate();
   const { headClasses } = useTeaching();
   const school = useSchool();
-  const items = navFor(user.role, { isHead: headClasses.length > 0, locked: school.missing, badges: pending > 0 ? { "/app/eleves/demandes": pending } : {} });
+  const items = navFor(user.role, { isHead: (headClasses || []).length > 0, locked: school?.missing, badges: pending > 0 ? { "/app/eleves/demandes": pending } : {} });
   const sections = Array.from(new Set(items.map((i) => i.section)));
   const [confirmLogout, setConfirmLogout] = useState(false);
 
