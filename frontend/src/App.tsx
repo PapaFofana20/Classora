@@ -169,7 +169,7 @@ export default function App() {
                       <Route path="paiements" element={guard("paiements", <PaymentsPage />)} />
                       <Route path="messages" element={guard("messages", <MessagesPage />)} />
 
-                      <Route path="emploi-du-temps" element={<TimetablePage />} />
+                      <Route path="emploi-du-temps" element={guard("emploiDuTemps", <TimetablePage />)} />
                       <Route path="parametres" element={guard("parametres", <SettingsPage />)} />
                       <Route path="*" element={<Navigate to="/app" replace />} />
                     </Route>
