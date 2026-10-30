@@ -73,47 +73,65 @@ async function transformTimetableCourseRow(row: any): Promise<TimetableCourse> {
 }
 
 export async function listTimetables(_filters?: TimetableFilters): Promise<Timetable[]> {
-  // Récupération de base des emplois du temps
-  const { data: timetables, error: tError } = await supabase
-    .from("timetables")
-    .select("id, name, school_year, status, class_id");
+  try {
+    // Récupération de base des emplois du temps
+    const { data: timetables, error: tError } = await supabase
+      .from("timetables")
+      .select("id, name, school_year, status, class_id");
 
-  if (tError) throw tError;
-  if (!timetables) return [];
+    if (tError) throw tError;
+    if (!timetables || timetables.length === 0) return [];
 
-  // Récupération des noms de classes
-  const classIds = timetables.map((t: any) => t.class_id);
-  const { data: classes, error: cError } = await supabase
-    .from("class_rooms")
-    .select("id, name")
-    .in("id", classIds);
+    // Récupération des noms de classes
+    const classIds = timetables.map((t: any) => t.class_id).filter(Boolean);
+    let classMap: Record<string, string> = {};
+    if (classIds.length > 0) {
+      try {
+        const { data: classes, error: cError } = await supabase
+          .from("class_rooms")
+          .select("id, name")
+          .in("id", classIds);
 
-  if (cError) throw cError;
-  const classMap: Record<string, string> = {};
-  classes.forEach((cl: any) => {
-    classMap[cl.id] = cl.name;
-  });
+        if (!cError && classes) {
+          classes.forEach((cl: any) => {
+            classMap[cl.id] = cl.name;
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
 
-  // Compter les cours par emploi du temps
-  const { data: courses, error: crError } = await supabase
-    .from("timetable_courses")
-    .select("timetable_id");
+    // Compter les cours par emploi du temps
+    let courseCounts: Record<string, number> = {};
+    try {
+      const { data: courses, error: crError } = await supabase
+        .from("timetable_courses")
+        .select("timetable_id");
 
-  if (crError) throw crError;
-  const courseCounts: Record<string, number> = {};
-  (courses as any[]).forEach((c: any) => {
-    courseCounts[c.timetable_id] = (courseCounts[c.timetable_id] || 0) + 1;
-  });
+      if (!crError && courses) {
+        (courses as any[]).forEach((c: any) => {
+          if (c.timetable_id) {
+            courseCounts[c.timetable_id] = (courseCounts[c.timetable_id] || 0) + 1;
+          }
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
 
-  // Association des données
-  return timetables.map((t: any) => ({
-    id: t.id,
-    name: t.name,
-    school_year: t.school_year,
-    status: t.status,
-    class_name: classMap[t.class_id] || "",
-    course_count: courseCounts[t.id] || 0,
-  }));
+    // Association des données
+    return timetables.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      school_year: t.school_year,
+      status: t.status,
+      class_name: classMap[t.class_id] || "",
+      course_count: courseCounts[t.id] || 0,
+    }));
+  } catch (e) {
+    throw e;
+  }
 }
 
 export async function getTimetable(timetableId: string): Promise<Timetable | null> {
@@ -140,13 +158,24 @@ export async function getTimetable(timetableId: string): Promise<Timetable | nul
 export async function createTimetable(input: CreateTimetableInput, schoolId: string, actorId: string): Promise<Timetable> {
   const { data, error } = await supabase
     .from("timetables")
-    .insert({ school_id: schoolId, class_id: input.classId, name: input.name, school_year: input.schoolYear, created_by: actorId })
+    .insert({ school_id: schoolId, class_id: input.classId, name: input.name, school_year: input.schoolYear || "2026-2027", created_by: actorId })
     .select()
     .single();
 
   if (error) throw error;
+  if (!data) throw new Error("Erreur lors de la création de l'emploi du temps");
 
-  return transformTimetableRow(data);
+  try {
+    return transformTimetableRow(data);
+  } catch (e) {
+    return {
+      id: data.id,
+      name: data.name,
+      school_year: data.school_year,
+      status: data.status,
+      course_count: 0,
+    };
+  }
 }
 
 export async function updateTimetable(timetableId: string, updates: { name: string; schoolYear?: string }): Promise<void> {

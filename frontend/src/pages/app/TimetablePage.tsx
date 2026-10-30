@@ -88,14 +88,14 @@ export default function TimetablePage() {
           if (e.message?.includes("timetables") || e.message?.includes("schema cache")) {
             setMigrationError(true);
           }
-          throw e;
+          return [];
         }),
-        getSchoolOverview(schoolId),
-        listTeacherRows(schoolId),
+        getSchoolOverview(schoolId).catch(() => ({ classes: [], subjects: [], levels: [] })),
+        listTeacherRows(schoolId).catch(() => []),
       ]);
       setTimetables(timetablesData || []);
-      setClasses(overview.classes || []);
-      setSubjects(overview.subjects || []);
+      setClasses(overview?.classes || []);
+      setSubjects(overview?.subjects || []);
       setTeachers(teachersData || []);
     } catch (e: any) {
       if (e.message?.includes("timetables") || e.message?.includes("schema cache")) {
@@ -103,6 +103,10 @@ export default function TimetablePage() {
       } else {
         toast(e.message || "Erreur lors du chargement", "error");
       }
+      setTimetables([]);
+      setClasses([]);
+      setSubjects([]);
+      setTeachers([]);
     } finally {
       setLoading(false);
     }
@@ -194,7 +198,11 @@ export default function TimetablePage() {
         classId: "",
         schoolYear: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
       });
-      loadData();
+      try {
+        loadData();
+      } catch (err) {
+        // Ignore reload errors
+      }
     } catch (e: any) {
       toast(e.message || "Erreur lors de la création", "error");
     }
