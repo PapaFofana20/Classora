@@ -52,7 +52,6 @@ const AdminFinancesPage = lazy(() => import("@/pages/app/AdminFinancesPage"));
 const AdminAnalyticsPage = lazy(() => import("@/pages/app/AdminAnalyticsPage"));
 const AdminAuditPage = lazy(() => import("@/pages/app/AdminAuditPage"));
 const AdminSecurityPage = lazy(() => import("@/pages/app/AdminSecurityPage"));
-const TimetablePage = lazy(() => import("@/pages/app/TimetablePage"));
 const AdminSettingsPage = lazy(() => import("@/pages/app/AdminSettingsPage"));
 
 /** Wrapper : authentification scolaire (SchoolProvider). Ne s'applique qu'à /app/*. */
@@ -169,7 +168,7 @@ export default function App() {
                       <Route path="paiements" element={guard("paiements", <PaymentsPage />)} />
                       <Route path="messages" element={guard("messages", <MessagesPage />)} />
 
-                      <Route path="emploi-du-temps" element={guard("emploiDuTemps", <TimetablePage />)} />
+
                       <Route path="parametres" element={guard("parametres", <SettingsPage />)} />
                       <Route path="*" element={<Navigate to="/app" replace />} />
                     </Route>
