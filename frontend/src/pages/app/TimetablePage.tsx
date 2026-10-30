@@ -8,8 +8,6 @@ import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
-import { AsyncView } from "@/components/ui/AsyncView";
-import { useAsync } from "@/hooks/useAsync";
 import { supabase } from "@/lib/supabase";
 import { getSchoolOverview } from "@/services/schoolService";
 import { listTeacherRows } from "@/services/teacherService";
@@ -43,6 +41,12 @@ export default function TimetablePage() {
   const [classes, setClasses] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [migrationError, setMigrationError] = useState(false);
+
+  const [studentClassId, setStudentClassId] = useState<string | null>(null);
+  const [studentTimetable, setStudentTimetable] = useState<any>(null);
+  const [studentCourses, setStudentCourses] = useState<any[]>([]);
+  const [loadingStudent, setLoadingStudent] = useState(true);
 
   const [form, setForm] = useState({
     name: "",
@@ -59,14 +63,23 @@ export default function TimetablePage() {
     room: "",
   });
 
-  const [migrationError, setMigrationError] = useState(false);
-
   useEffect(() => {
     loadData();
   }, [schoolId]);
 
+  useEffect(() => {
+    if (!isDirector && user) {
+      loadStudentTimetable();
+    } else {
+      setLoadingStudent(false);
+    }
+  }, [isDirector, user, schoolId]);
+
   const loadData = async () => {
-    if (!schoolId) return;
+    if (!schoolId || !isDirector) {
+      if (!isDirector) setLoading(false);
+      return;
+    }
     setLoading(true);
     setMigrationError(false);
     try {
@@ -92,6 +105,70 @@ export default function TimetablePage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStudentTimetable = async () => {
+    if (!user || !schoolId) {
+      setLoadingStudent(false);
+      return;
+    }
+    try {
+      if (user.role === "eleve" && user.studentId) {
+        const { data: student } = await supabase
+          .from("students")
+          .select("class_id")
+          .eq("id", user.studentId)
+          .single();
+        if (student?.class_id) {
+          setStudentClassId(student.class_id);
+          const { data: timetable } = await supabase
+            .from("timetables")
+            .select("*")
+            .eq("class_id", student.class_id)
+            .eq("status", "published")
+            .single();
+          if (timetable) {
+            setStudentTimetable(timetable);
+            const { data: courseData } = await supabase
+              .from("timetable_courses")
+              .select(
+                `
+                *,
+                subjects(name),
+                profiles:teacher_id(first_name, last_name)
+              `
+              )
+              .eq("timetable_id", timetable.id);
+            setStudentCourses(courseData || []);
+          }
+        }
+      } else if (user.role === "parent") {
+        const { data: timetable } = await supabase
+          .from("timetables")
+          .select("*")
+          .eq("status", "published")
+          .limit(1)
+          .single();
+        if (timetable) {
+          setStudentTimetable(timetable);
+          const { data: courseData } = await supabase
+            .from("timetable_courses")
+            .select(
+              `
+              *,
+              subjects(name),
+              profiles:teacher_id(first_name, last_name)
+            `
+            )
+            .eq("timetable_id", timetable.id);
+          setStudentCourses(courseData || []);
+        }
+      }
+    } catch (e) {
+      // Pas d'emploi du temps trouvé
+    } finally {
+      setLoadingStudent(false);
     }
   };
 
@@ -178,17 +255,19 @@ export default function TimetablePage() {
     try {
       await timetableService.deleteCourse(courseId);
       toast("Cours supprimé");
-      const data = await supabase
-        .from("timetable_courses")
-        .select(
+      if (selectedTimetable) {
+        const data = await supabase
+          .from("timetable_courses")
+          .select(
+            `
+            *,
+            subjects(name),
+            profiles:teacher_id(first_name, last_name)
           `
-          *,
-          subjects(name),
-          profiles:teacher_id(first_name, last_name)
-        `
-        )
-        .eq("timetable_id", selectedTimetable.id);
-      setCourses(data.data || []);
+          )
+          .eq("timetable_id", selectedTimetable.id);
+        setCourses(data.data || []);
+      }
     } catch (e: any) {
       toast(e.message || "Erreur", "error");
     }
@@ -220,11 +299,7 @@ export default function TimetablePage() {
     }
   };
 
-  const getCourseForCell = (day: string, hour: string) => {
-    return courses.find((c) => c.day === day && c.start_time === hour);
-  };
-
-  if (loading) {
+  if (loading && isDirector) {
     return (
       <>
         <PageHeader title="Emploi du temps" subtitle="Chargement..." />
@@ -255,79 +330,6 @@ export default function TimetablePage() {
 
   // Vue pour élève/parent
   if (!isDirector) {
-    const [studentClassId, setStudentClassId] = useState<string | null>(null);
-    const [studentTimetable, setStudentTimetable] = useState<any>(null);
-    const [studentCourses, setStudentCourses] = useState<any[]>([]);
-    const [loadingStudent, setLoadingStudent] = useState(true);
-
-    useEffect(() => {
-      const loadStudentTimetable = async () => {
-        if (!user || !schoolId) return;
-        try {
-          // Trouver la classe de l'élève
-          if (user.role === "eleve" && user.studentId) {
-            const { data: student } = await supabase
-              .from("students")
-              .select("class_id")
-              .eq("id", user.studentId)
-              .single();
-            if (student?.class_id) {
-              setStudentClassId(student.class_id);
-              // Chercher l'emploi du temps publié pour cette classe
-              const { data: timetable } = await supabase
-                .from("timetables")
-                .select("*")
-                .eq("class_id", student.class_id)
-                .eq("status", "published")
-                .single();
-              if (timetable) {
-                setStudentTimetable(timetable);
-                const { data: courseData } = await supabase
-                  .from("timetable_courses")
-                  .select(
-                    `
-                    *,
-                    subjects(name),
-                    profiles:teacher_id(first_name, last_name)
-                  `
-                  )
-                  .eq("timetable_id", timetable.id);
-                setStudentCourses(courseData || []);
-              }
-            }
-          } else if (user.role === "parent") {
-            // Pour un parent, on peut prendre le premier enfant ou afficher tous
-            // Pour simplifier, on cherche tous les emplois du temps publiés
-            const { data: timetable } = await supabase
-              .from("timetables")
-              .select("*")
-              .eq("status", "published")
-              .limit(1)
-              .single();
-            if (timetable) {
-              setStudentTimetable(timetable);
-              const { data: courseData } = await supabase
-                .from("timetable_courses")
-                .select(
-                  `
-                  *,
-                  subjects(name),
-                  profiles:teacher_id(first_name, last_name)
-                `
-                )
-                .eq("timetable_id", timetable.id);
-              setStudentCourses(courseData || []);
-            }
-          }
-        } catch (e) {
-          // Pas d'emploi du temps trouvé
-        } finally {
-          setLoadingStudent(false);
-        }
-      };
-      loadStudentTimetable();
-    }, [user, schoolId]);
-
     if (loadingStudent) {
       return (
         <>
