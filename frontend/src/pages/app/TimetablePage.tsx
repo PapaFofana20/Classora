@@ -409,7 +409,7 @@ export default function TimetablePage() {
         }
       />
 
-      {timetables.length === 0 ? (
+      {(timetables || []).length === 0 ? (
         <Card>
           <div className="p-8 text-center">
             <Icon name="calendar_month" className="mx-auto text-4xl text-gray-400 mb-2" />
@@ -419,7 +419,7 @@ export default function TimetablePage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {timetables.map((timetable) => (
+          {(timetables || []).map((timetable) => (
             <Card key={timetable.id} hover>
               <div className="p-4">
                 <div className="flex justify-between items-start mb-2">
