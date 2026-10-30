@@ -198,11 +198,14 @@ export default function TimetablePage() {
         classId: "",
         schoolYear: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
       });
-      try {
-        loadData();
-      } catch (err) {
-        // Ignore reload errors
-      }
+      // Try to reload but don't crash if it fails
+      setTimeout(() => {
+        try {
+          loadData();
+        } catch (err) {
+          // Ignore reload errors
+        }
+      }, 100);
     } catch (e: any) {
       toast(e.message || "Erreur lors de la création", "error");
     }
