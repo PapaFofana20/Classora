@@ -59,6 +59,8 @@ export default function TimetablePage() {
     room: "",
   });
 
+  const [migrationError, setMigrationError] = useState(false);
+
   useEffect(() => {
     loadData();
   }, [schoolId]);
@@ -66,9 +68,15 @@ export default function TimetablePage() {
   const loadData = async () => {
     if (!schoolId) return;
     setLoading(true);
+    setMigrationError(false);
     try {
       const [timetablesData, overview, teachersData] = await Promise.all([
-        timetableService.listTimetables(),
+        timetableService.listTimetables().catch((e) => {
+          if (e.message?.includes("timetables") || e.message?.includes("schema cache")) {
+            setMigrationError(true);
+          }
+          throw e;
+        }),
         getSchoolOverview(schoolId),
         listTeacherRows(schoolId),
       ]);
@@ -77,7 +85,11 @@ export default function TimetablePage() {
       setSubjects(overview.subjects || []);
       setTeachers(teachersData || []);
     } catch (e: any) {
-      toast(e.message || "Erreur lors du chargement", "error");
+      if (e.message?.includes("timetables") || e.message?.includes("schema cache")) {
+        setMigrationError(true);
+      } else {
+        toast(e.message || "Erreur lors du chargement", "error");
+      }
     } finally {
       setLoading(false);
     }
@@ -217,6 +229,26 @@ export default function TimetablePage() {
       <>
         <PageHeader title="Emploi du temps" subtitle="Chargement..." />
         <div className="p-8 text-center">Chargement...</div>
+      </>
+    );
+  }
+
+  if (migrationError && isDirector) {
+    return (
+      <>
+        <PageHeader title="Emploi du temps" subtitle="Configuration requise" />
+        <Card>
+          <div className="p-8 text-center">
+            <Icon name="warning" className="mx-auto text-4xl text-yellow-500 mb-4" />
+            <h3 className="text-lg font-bold mb-2">Migration de base de données requise</h3>
+            <p className="text-gray-600 mb-4">
+              Les tables pour le module emploi du temps n'existent pas encore dans la base de données.
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Appliquez la migration <code className="bg-gray-100 px-2 py-1 rounded">20260515000001_timetable_module.sql</code> dans votre base de données Supabase.
+            </p>
+          </div>
+        </Card>
       </>
     );
   }
