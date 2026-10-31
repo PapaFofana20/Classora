@@ -30,9 +30,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/enseignants", label: "Personnel", icon: "badge", section: "École" },
     { to: "/app/affectations", label: "Affectations", icon: "grid_view", section: "École" },
     subscription,
-{ to: \"/app/emploi-du-temps\", label: \"Emploi du temps\", icon: \"schedule\", section: \"École\" }
-{ to: "/app/emploi-du-temps", label: "Emploi du temps", icon: "schedule", section: "École" },
-
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },
@@ -67,7 +64,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   ],
   professeur: [
     dashboard("Mes classes", "co_present"),
-    { to: "/app/emploi-du-temps-prof", label: "Emploi du temps", icon: "schedule", section: "Scolarité" },
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/eleves", label: "Mes élèves", icon: "groups", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité", requiresHead: true },
@@ -134,5 +130,3 @@ export function navFor(role: Role, options: NavOptions = {}): NavItem[] {
 }
 
 export const isAlwaysAllowed = (pathname: string): boolean => ALWAYS_ALLOWED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-
-
