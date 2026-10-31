@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { Button, LinkButton } from "@/components/ui/Button";
@@ -6,19 +6,27 @@ import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SkeletonCards, SkeletonTable } from "@/components/ui/Skeleton";
-import { Table, type Column } from "@/components/ui/Table";
 import { useCurrentUser } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { TimetableGrid } from "@/features/timetables/TimetableGrid";
 import {
-  courseSubject,
-  courseTeacher,
+  createCourse,
+  deleteCourse,
+  ensurePlaceholderTeacher,
   getTimetable,
+  listTimetableSubjects,
+  listTimetableTeachers,
   listTimetables,
   publishTimetable,
   timetableClassLabel,
   timetableCourseCount,
+  unpublishTimetable,
+  updateCourse,
+  type CourseInput,
   type Timetable,
   type TimetableCourse,
+  type TimetableSubjectOption,
+  type TimetableTeacherOption,
 } from "@/services/timetableService";
 
 const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
@@ -27,17 +35,8 @@ const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
 };
 
 const DAY_ORDER = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
-const DAY_LABELS: Record<string, string> = {
-  lundi: "Lundi",
-  mardi: "Mardi",
-  mercredi: "Mercredi",
-  jeudi: "Jeudi",
-  vendredi: "Vendredi",
-  samedi: "Samedi",
-};
 
 const formatDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR") : "—");
-const formatTime = (time: string) => time.slice(0, 5);
 
 const sortCourses = (courses: TimetableCourse[]) =>
   [...courses].sort((a, b) => {
@@ -53,9 +52,13 @@ export default function TimetableViewPage() {
   const [timetables, setTimetables] = useState<Timetable[]>([]);
   const [timetable, setTimetable] = useState<Timetable | null>(null);
   const [courses, setCourses] = useState<TimetableCourse[]>([]);
+  const [subjects, setSubjects] = useState<TimetableSubjectOption[]>([]);
+  const [teachers, setTeachers] = useState<TimetableTeacherOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isDirector = user.role === "directeur";
 
   useEffect(() => {
     let cancelled = false;
@@ -89,13 +92,51 @@ export default function TimetableViewPage() {
     };
   }, [id, user.schoolId]);
 
+  useEffect(() => {
+    if (!isDirector) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const [subjectRows, teacherRows] = await Promise.all([
+          listTimetableSubjects(user.schoolId),
+          listTimetableTeachers(user.schoolId),
+        ]);
+        if (cancelled) return;
+        setSubjects(subjectRows);
+        setTeachers(teacherRows);
+      } catch (e) {
+        if (!cancelled) toast(e instanceof Error ? e.message : "Impossible de charger les matières et enseignants.", "error");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDirector, user.schoolId, toast]);
+
+  const refresh = useCallback(async () => {
+    if (!id) return;
+    const data = await getTimetable(id);
+    setTimetable(data.timetable);
+    setCourses(sortCourses(data.courses));
+  }, [id]);
+
+  /** Si aucun enseignant n'est choisi, on rattache le cours à l'enseignant « à définir ». */
+  const resolveTeacher = async (input: CourseInput): Promise<CourseInput> => {
+    if (input.teacherId) return input;
+    const teacherId = await ensurePlaceholderTeacher(user.schoolId);
+    setTeachers(await listTimetableTeachers(user.schoolId));
+    return { ...input, teacherId };
+  };
+
   const publish = async () => {
     if (!timetable) return;
     setPublishing(true);
     try {
       await publishTimetable(timetable.id);
       setTimetable({ ...timetable, status: "published", published_at: new Date().toISOString() });
-      toast("Emploi du temps publié.");
+      toast("Emploi du temps publié : les classes concernées peuvent maintenant le consulter.");
     } catch (e) {
       toast(e instanceof Error ? e.message : "Publication impossible.", "error");
     } finally {
@@ -103,15 +144,50 @@ export default function TimetableViewPage() {
     }
   };
 
+  const unpublish = async () => {
+    if (!timetable) return;
+    setPublishing(true);
+    try {
+      await unpublishTimetable(timetable.id);
+      setTimetable({ ...timetable, status: "draft", published_at: null });
+      toast("Emploi du temps repassé en brouillon : il n'est plus visible par les classes.");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Modification impossible.", "error");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleCreateCourse = async (input: CourseInput) => {
+    if (!id) return;
+    await createCourse(id, await resolveTeacher(input));
+    await refresh();
+    toast("Cours ajouté à l'emploi du temps.");
+  };
+
+  const handleUpdateCourse = async (courseId: string, input: CourseInput) => {
+    await updateCourse(courseId, await resolveTeacher(input));
+    await refresh();
+    toast("Cours modifié.");
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    await deleteCourse(courseId);
+    await refresh();
+    toast("Cours supprimé.");
+  };
+
   /* ----------------------------- Liste ----------------------------- */
   if (!id) {
+    const visibleTimetables = isDirector ? timetables : timetables.filter((row) => row.status === "published");
+
     return (
       <>
         <PageHeader
           title="Emplois du temps"
           subtitle="Plannings des classes de l'école"
           actions={
-            user.role === "directeur" ? (
+            isDirector ? (
               <LinkButton to="/app/timetables/nouveau" icon="add">
                 Nouvel emploi du temps
               </LinkButton>
@@ -125,13 +201,13 @@ export default function TimetableViewPage() {
           <Card>
             <p className="text-sm text-danger">{error}</p>
           </Card>
-        ) : timetables.length === 0 ? (
+        ) : visibleTimetables.length === 0 ? (
           <Card>
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <Icon name="calendar_month" className="text-4xl text-neutral-300" />
               <p className="font-semibold text-ink">Aucun emploi du temps</p>
               <p className="max-w-sm text-sm text-neutral-500">
-                {user.role === "directeur"
+                {isDirector
                   ? "Créez le premier emploi du temps de votre école."
                   : "Aucun emploi du temps n'a encore été publié pour votre classe."}
               </p>
@@ -139,7 +215,7 @@ export default function TimetableViewPage() {
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {timetables.map((row) => {
+            {visibleTimetables.map((row) => {
               const status = STATUS[row.status] ?? STATUS.draft;
               return (
                 <Link key={row.id} to={`/app/timetables/${row.id}`} className="block">
@@ -170,15 +246,7 @@ export default function TimetableViewPage() {
 
   /* ---------------------------- Détail ----------------------------- */
   const status = timetable ? STATUS[timetable.status] ?? STATUS.draft : STATUS.draft;
-
-  const columns: Column<TimetableCourse>[] = [
-    { key: "day", header: "Jour", render: (course) => DAY_LABELS[course.day] ?? course.day },
-    { key: "start", header: "Début", render: (course) => formatTime(course.start_time) },
-    { key: "end", header: "Fin", render: (course) => formatTime(course.end_time) },
-    { key: "subject", header: "Matière", render: (course) => courseSubject(course) },
-    { key: "teacher", header: "Enseignant", render: (course) => courseTeacher(course) },
-    { key: "room", header: "Salle", render: (course) => course.room || "Non spécifiée" },
-  ];
+  const hiddenFromViewer = timetable && !isDirector && timetable.status !== "published";
 
   return (
     <>
@@ -190,9 +258,14 @@ export default function TimetableViewPage() {
             <LinkButton to="/app/timetables" variant="outline" icon="arrow_back">
               Retour
             </LinkButton>
-            {timetable && user.role === "directeur" && timetable.status !== "published" && (
+            {timetable && isDirector && timetable.status !== "published" && (
               <Button icon="publish" loading={publishing} onClick={publish}>
                 Publier
+              </Button>
+            )}
+            {timetable && isDirector && timetable.status === "published" && (
+              <Button variant="outline" icon="visibility_off" loading={publishing} onClick={unpublish}>
+                Dépublier
               </Button>
             )}
           </>
@@ -205,12 +278,12 @@ export default function TimetableViewPage() {
         <Card>
           <p className="text-sm text-danger">{error}</p>
         </Card>
-      ) : !timetable ? (
+      ) : !timetable || hiddenFromViewer ? (
         <Card>
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <Icon name="event_busy" className="text-4xl text-neutral-300" />
             <p className="font-semibold text-ink">Emploi du temps introuvable</p>
-            <p className="text-sm text-neutral-500">Il a peut-être été supprimé ou vous n'y avez pas accès.</p>
+            <p className="text-sm text-neutral-500">Il a peut-être été supprimé, n'est pas encore publié ou vous n'y avez pas accès.</p>
           </div>
         </Card>
       ) : (
@@ -220,10 +293,14 @@ export default function TimetableViewPage() {
               <Badge tone={status.tone}>{status.label}</Badge>
               <p className="text-sm text-neutral-600">{timetableClassLabel(timetable)}</p>
             </div>
-            <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+            <dl className="mt-4 grid gap-4 sm:grid-cols-4">
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Année scolaire</dt>
                 <dd className="mt-1 text-sm font-medium text-ink">{timetable.school_year}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Cours programmés</dt>
+                <dd className="mt-1 text-sm font-medium text-ink">{courses.length}</dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Créé le</dt>
@@ -237,12 +314,25 @@ export default function TimetableViewPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-4 text-lg font-bold text-ink">Cours</h2>
-            {courses.length === 0 ? (
-              <p className="rounded-2xl bg-mist p-6 text-sm text-neutral-500">Aucun cours enregistré pour cet emploi du temps.</p>
-            ) : (
-              <Table columns={columns} rows={courses} rowKey={(course) => course.id} caption={`Cours de ${timetable.name}`} stagger />
-            )}
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-ink">Maquette de l'emploi du temps</h2>
+                <p className="text-sm text-neutral-500">Du lundi au samedi · 08:00 – 19:00</p>
+              </div>
+              {isDirector && timetable.status === "published" && (
+                <Badge tone="success">Visible par les classes</Badge>
+              )}
+            </div>
+
+            <TimetableGrid
+              courses={courses}
+              editable={isDirector}
+              subjects={subjects}
+              teachers={teachers}
+              onCreate={handleCreateCourse}
+              onUpdate={handleUpdateCourse}
+              onDelete={handleDeleteCourse}
+            />
           </Card>
         </div>
       )}

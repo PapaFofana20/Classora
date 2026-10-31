@@ -46,6 +46,30 @@ export interface CreateTimetableInput {
   schoolYear?: string;
 }
 
+export interface TimetableSubjectOption {
+  id: string;
+  name: string;
+}
+
+export interface TimetableTeacherOption {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface CourseInput {
+  subjectId: string;
+  teacherId: string;
+  /** Jour en minuscules : lundi … samedi (contrainte de la base). */
+  day: string;
+  /** Heure au format HH:MM. */
+  startTime: string;
+  /** Heure au format HH:MM. */
+  endTime: string;
+  room?: string;
+  description?: string;
+}
+
 const TIMETABLE_SELECT =
   "id, school_id, name, class_id, school_year, status, created_by, created_at, updated_at, published_at, class_rooms(name, levels(label))";
 
@@ -106,6 +130,74 @@ export async function getTimetable(timetableId: string): Promise<{ timetable: Ti
   };
 }
 
+export async function listTimetableSubjects(schoolId: string): Promise<TimetableSubjectOption[]> {
+  const { data, error } = await supabase
+    .from("subjects")
+    .select("id, name")
+    .eq("school_id", schoolId)
+    .order("name");
+
+  if (error) throw error;
+  return (data ?? []) as TimetableSubjectOption[];
+}
+
+export async function listTimetableTeachers(schoolId: string): Promise<TimetableTeacherOption[]> {
+  const { data, error } = await supabase
+    .from("teachers")
+    .select("id, first_name, last_name")
+    .eq("school_id", schoolId)
+    .order("last_name");
+
+  if (error) throw error;
+  return (data ?? []) as TimetableTeacherOption[];
+}
+
+/**
+ * La table `timetable_courses` exige un enseignant. Tant que l'école n'en a
+ * aucun, on crée (une seule fois) un enseignant « à définir » pour permettre
+ * au directeur de remplir la maquette. Il pourra être remplacé plus tard.
+ */
+export async function ensurePlaceholderTeacher(schoolId: string): Promise<string> {
+  const email = `enseignant-a-definir+${schoolId}@classora.local`;
+
+  const find = async (): Promise<string | null> => {
+    const { data, error } = await supabase
+      .from("teachers")
+      .select("id")
+      .eq("school_id", schoolId)
+      .eq("email", email)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as { id: string } | null)?.id ?? null;
+  };
+
+  const existing = await find();
+  if (existing) return existing;
+
+  const { data, error } = await supabase
+    .from("teachers")
+    .insert({
+      school_id: schoolId,
+      kind: "professeur",
+      first_name: "Enseignant",
+      last_name: "à définir",
+      email,
+      phone: "",
+      specialties: [],
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    // Course possible entre deux enregistrements : on relit la ligne créée.
+    const retry = await find();
+    if (retry) return retry;
+    throw error;
+  }
+
+  return (data as { id: string }).id;
+}
+
 export async function createTimetable(input: CreateTimetableInput, schoolId: string, actorId: string): Promise<string> {
   const { data, error } = await supabase
     .from("timetables")
@@ -130,6 +222,57 @@ export async function publishTimetable(timetableId: string): Promise<void> {
     .update({ status: "published", published_at: new Date().toISOString() })
     .eq("id", timetableId);
 
+  if (error) throw error;
+}
+
+export async function unpublishTimetable(timetableId: string): Promise<void> {
+  const { error } = await supabase
+    .from("timetables")
+    .update({ status: "draft", published_at: null })
+    .eq("id", timetableId);
+
+  if (error) throw error;
+}
+
+/** Convertit "HH:MM" en "HH:MM:00" (format attendu par Postgres pour les colonnes time). */
+function normalizeTime(value: string): string {
+  return value.length === 5 ? `${value}:00` : value;
+}
+
+export async function createCourse(timetableId: string, input: CourseInput): Promise<void> {
+  const { error } = await supabase.from("timetable_courses").insert({
+    timetable_id: timetableId,
+    subject_id: input.subjectId,
+    teacher_id: input.teacherId,
+    day: input.day,
+    start_time: normalizeTime(input.startTime),
+    end_time: normalizeTime(input.endTime),
+    room: input.room?.trim() || null,
+    description: input.description?.trim() || null,
+  });
+
+  if (error) throw error;
+}
+
+export async function updateCourse(courseId: string, input: CourseInput): Promise<void> {
+  const { error } = await supabase
+    .from("timetable_courses")
+    .update({
+      subject_id: input.subjectId,
+      teacher_id: input.teacherId,
+      day: input.day,
+      start_time: normalizeTime(input.startTime),
+      end_time: normalizeTime(input.endTime),
+      room: input.room?.trim() || null,
+      description: input.description?.trim() || null,
+    })
+    .eq("id", courseId);
+
+  if (error) throw error;
+}
+
+export async function deleteCourse(courseId: string): Promise<void> {
+  const { error } = await supabase.from("timetable_courses").delete().eq("id", courseId);
   if (error) throw error;
 }
 
