@@ -8,110 +8,100 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { SkeletonCards, SkeletonTable } from "@/components/ui/Skeleton";
 import { Table, type Column } from "@/components/ui/Table";
 import { useCurrentUser } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabase";
-
-interface LevelRef {
-  label: string | null;
-}
-
-interface ClassRoomRef {
-  name: string | null;
-  levels?: LevelRef[] | null;
-}
-
-interface TimetableRow {
-  id: string;
-  title: string;
-  description: string | null;
-  class_id: string | null;
-  grade_level: string | null;
-  period_type: string;
-  status: string;
-  created_by: string;
-  created_at: string;
-  published_at: string | null;
-  class_rooms?: ClassRoomRef | null;
-}
-
-interface SlotRow {
-  id: string;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  subject: string;
-  teacher_id: string | null;
-  class_room_id: string | null;
-  notes: string | null;
-}
+import { useToast } from "@/context/ToastContext";
+import {
+  courseSubject,
+  courseTeacher,
+  getTimetable,
+  listTimetables,
+  publishTimetable,
+  timetableClassLabel,
+  timetableCourseCount,
+  type Timetable,
+  type TimetableCourse,
+} from "@/services/timetableService";
 
 const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
   draft: { label: "Brouillon", tone: "warning" },
   published: { label: "Publié", tone: "success" },
-  archived: { label: "Archivé", tone: "neutral" },
 };
 
-const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+const DAY_ORDER = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+const DAY_LABELS: Record<string, string> = {
+  lundi: "Lundi",
+  mardi: "Mardi",
+  mercredi: "Mercredi",
+  jeudi: "Jeudi",
+  vendredi: "Vendredi",
+  samedi: "Samedi",
+};
 
 const formatDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR") : "—");
 const formatTime = (time: string) => time.slice(0, 5);
 
-const classLabel = (timetable: TimetableRow) => {
-  const room = timetable.class_rooms;
-  const level = room?.levels?.[0]?.label ?? timetable.grade_level;
-  if (room?.name && level) return `${room.name} · ${level}`;
-  return room?.name ?? level ?? "Classe non spécifiée";
-};
+const sortCourses = (courses: TimetableCourse[]) =>
+  [...courses].sort((a, b) => {
+    const dayDiff = DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
+    return dayDiff !== 0 ? dayDiff : a.start_time.localeCompare(b.start_time);
+  });
 
 export default function TimetableViewPage() {
   const user = useCurrentUser();
   const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
 
-  const [timetables, setTimetables] = useState<TimetableRow[]>([]);
-  const [timetable, setTimetable] = useState<TimetableRow | null>(null);
-  const [slots, setSlots] = useState<SlotRow[]>([]);
+  const [timetables, setTimetables] = useState<Timetable[]>([]);
+  const [timetable, setTimetable] = useState<Timetable | null>(null);
+  const [courses, setCourses] = useState<TimetableCourse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    (async () => {
       setLoading(true);
       setError(null);
       setTimetable(null);
-      setSlots([]);
+      setCourses([]);
 
-      if (id) {
-        const [{ data: row, error: rowError }, { data: slotRows, error: slotError }] = await Promise.all([
-          supabase.from("timetables").select("*, class_rooms(name, levels(label))").eq("id", id).single(),
-          supabase.from("timetable_slots").select("*").eq("timetable_id", id).order("day_of_week").order("start_time"),
-        ]);
-
-        if (cancelled) return;
-        if (rowError) setError(rowError.message);
-        else setTimetable(row as TimetableRow);
-        if (slotError) setError(slotError.message);
-        else setSlots((slotRows ?? []) as SlotRow[]);
-      } else {
-        const { data, error: listError } = await supabase
-          .from("timetables")
-          .select("*, class_rooms(name, levels(label))")
-          .eq("school_id", user.schoolId)
-          .order("created_at", { ascending: false });
-
-        if (cancelled) return;
-        if (listError) setError(listError.message);
-        else setTimetables((data ?? []) as TimetableRow[]);
+      try {
+        if (id) {
+          const data = await getTimetable(id);
+          if (cancelled) return;
+          setTimetable(data.timetable);
+          setCourses(sortCourses(data.courses));
+        } else {
+          const data = await listTimetables(user.schoolId);
+          if (cancelled) return;
+          setTimetables(data);
+        }
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Impossible de charger les emplois du temps.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
+    })();
 
-      if (!cancelled) setLoading(false);
-    };
-
-    void load();
     return () => {
       cancelled = true;
     };
   }, [id, user.schoolId]);
+
+  const publish = async () => {
+    if (!timetable) return;
+    setPublishing(true);
+    try {
+      await publishTimetable(timetable.id);
+      setTimetable({ ...timetable, status: "published", published_at: new Date().toISOString() });
+      toast("Emploi du temps publié.");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Publication impossible.", "error");
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   /* ----------------------------- Liste ----------------------------- */
   if (!id) {
@@ -156,12 +146,15 @@ export default function TimetableViewPage() {
                   <Card hover className="h-full">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-lg font-bold text-ink">{row.title}</p>
-                        <p className="mt-1 text-sm text-neutral-500">{classLabel(row)}</p>
+                        <p className="text-lg font-bold text-ink">{row.name}</p>
+                        <p className="mt-1 text-sm text-neutral-500">{timetableClassLabel(row)}</p>
                       </div>
                       <Badge tone={status.tone}>{status.label}</Badge>
                     </div>
-                    <p className="mt-4 text-xs text-neutral-500">Créé le {formatDate(row.created_at)}</p>
+                    <p className="mt-3 text-xs text-neutral-500">
+                      {row.school_year} · {timetableCourseCount(row)} cours
+                    </p>
+                    <p className="mt-1 text-xs text-neutral-500">Créé le {formatDate(row.created_at)}</p>
                     <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-forest">
                       Consulter <Icon name="arrow_forward" className="text-[18px]" />
                     </span>
@@ -178,32 +171,28 @@ export default function TimetableViewPage() {
   /* ---------------------------- Détail ----------------------------- */
   const status = timetable ? STATUS[timetable.status] ?? STATUS.draft : STATUS.draft;
 
-  const columns: Column<SlotRow>[] = [
-    { key: "day", header: "Jour", render: (slot) => DAYS[slot.day_of_week] ?? "Inconnu" },
-    { key: "start", header: "Début", render: (slot) => formatTime(slot.start_time) },
-    { key: "end", header: "Fin", render: (slot) => formatTime(slot.end_time) },
-    { key: "subject", header: "Matière", render: (slot) => slot.subject || "Non spécifié" },
-    { key: "teacher", header: "Enseignant", render: (slot) => slot.teacher_id ?? "Non assigné" },
-    { key: "room", header: "Salle", render: (slot) => slot.class_room_id ?? "Non assignée" },
+  const columns: Column<TimetableCourse>[] = [
+    { key: "day", header: "Jour", render: (course) => DAY_LABELS[course.day] ?? course.day },
+    { key: "start", header: "Début", render: (course) => formatTime(course.start_time) },
+    { key: "end", header: "Fin", render: (course) => formatTime(course.end_time) },
+    { key: "subject", header: "Matière", render: (course) => courseSubject(course) },
+    { key: "teacher", header: "Enseignant", render: (course) => courseTeacher(course) },
+    { key: "room", header: "Salle", render: (course) => course.room || "Non spécifiée" },
   ];
 
   return (
     <>
       <PageHeader
-        title={timetable?.title ?? "Emploi du temps"}
-        subtitle={timetable ? classLabel(timetable) : undefined}
+        title={timetable?.name ?? "Emploi du temps"}
+        subtitle={timetable ? `${timetableClassLabel(timetable)} · ${timetable.school_year}` : undefined}
         actions={
           <>
             <LinkButton to="/app/timetables" variant="outline" icon="arrow_back">
               Retour
             </LinkButton>
-            {timetable && user.role === "directeur" && (
-              <Button
-                variant="outline"
-                icon="download"
-                onClick={() => window.open(`/api/timetables/${timetable.id}/export-pdf`, "blank")}
-              >
-                Télécharger le PDF
+            {timetable && user.role === "directeur" && timetable.status !== "published" && (
+              <Button icon="publish" loading={publishing} onClick={publish}>
+                Publier
               </Button>
             )}
           </>
@@ -229,14 +218,12 @@ export default function TimetableViewPage() {
           <Card>
             <div className="flex flex-wrap items-center gap-3">
               <Badge tone={status.tone}>{status.label}</Badge>
-              {timetable.description && <p className="text-sm text-neutral-600">{timetable.description}</p>}
+              <p className="text-sm text-neutral-600">{timetableClassLabel(timetable)}</p>
             </div>
             <dl className="mt-4 grid gap-4 sm:grid-cols-3">
               <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Période</dt>
-                <dd className="mt-1 text-sm font-medium text-ink">
-                  {timetable.period_type === "trimestre" ? "Trimestre" : "Semestre"}
-                </dd>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Année scolaire</dt>
+                <dd className="mt-1 text-sm font-medium text-ink">{timetable.school_year}</dd>
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Créé le</dt>
@@ -250,11 +237,11 @@ export default function TimetableViewPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-4 text-lg font-bold text-ink">Créneaux</h2>
-            {slots.length === 0 ? (
-              <p className="rounded-2xl bg-mist p-6 text-sm text-neutral-500">Aucun créneau enregistré pour cet emploi du temps.</p>
+            <h2 className="mb-4 text-lg font-bold text-ink">Cours</h2>
+            {courses.length === 0 ? (
+              <p className="rounded-2xl bg-mist p-6 text-sm text-neutral-500">Aucun cours enregistré pour cet emploi du temps.</p>
             ) : (
-              <Table columns={columns} rows={slots} rowKey={(slot) => slot.id} caption={`Créneaux de ${timetable.title}`} stagger />
+              <Table columns={columns} rows={courses} rowKey={(course) => course.id} caption={`Cours de ${timetable.name}`} stagger />
             )}
           </Card>
         </div>

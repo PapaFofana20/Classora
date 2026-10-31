@@ -1,6 +1,6 @@
 /**
  * Timetable Management Handler
- * Routes: /api/timetables, /api/timetables/:id, /api/timetables/:id/publish, /api/timetables/:id/slots, /api/timetables/:id/export-pdf
+ * Routes: /api/timetables, /api/timetables/:id, /api/timetables/:id/publish, /api/timetables/:id/courses, /api/timetables/:id/export-pdf
  */
 
 import { SERVICE_KEY, SUPABASE_URL } from "../config.js";
@@ -28,11 +28,10 @@ export default route(async (req, res) => {
         // POST /api/timetables - Create
         const body = expectObject(req.body);
         const { data, error } = await svc.from("timetables").insert({
-          title: body.title,
           school_id: body.schoolId,
           class_id: body.classId,
-          grade_level: body.gradeLevel,
-          period_type: body.periodType,
+          name: body.name,
+          school_year: body.schoolYear,
           status: "draft",
           created_by: req.user.id,
         }).select();
@@ -51,7 +50,12 @@ export default route(async (req, res) => {
       }
       if (req.method === "PATCH") {
         // PATCH /api/timetables/:id - Update
-        const { data, error } = await svc.from("timetables").update({ title: req.body.title }).eq("id", id).single();
+        const body = expectObject(req.body);
+        const { data, error } = await svc
+          .from("timetables")
+          .update({ name: body.name, school_year: body.schoolYear })
+          .eq("id", id)
+          .single();
         if (error) return serverError(res, error.message);
         return ok(res, { timetable: data });
       }
@@ -61,11 +65,25 @@ export default route(async (req, res) => {
         if (error) return serverError(res, error.message);
         return ok(res, { timetable: data });
       }
-      if (req.method === "POST" && req.path.includes("/slots")) {
-        // POST /api/timetables/:id/slots - Add slots
-        const { data, error } = await svc.from("timetable_slots").insert([{ timetable_id: id, day_of_week: 0, start_time: "08:00", end_time: "09:00", subject: "Test" }]).single();
+      if (req.method === "POST" && (req.path.includes("/courses") || req.path.includes("/slots"))) {
+        // POST /api/timetables/:id/courses - Add a course
+        const body = expectObject(req.body);
+        const { data, error } = await svc
+          .from("timetable_courses")
+          .insert({
+            timetable_id: id,
+            subject_id: body.subjectId,
+            teacher_id: body.teacherId,
+            day: body.day,
+            start_time: body.startTime,
+            end_time: body.endTime,
+            room: body.room ?? null,
+            description: body.description ?? null,
+          })
+          .select()
+          .single();
         if (error) return serverError(res, error.message);
-        return ok(res, { slots: data });
+        return ok(res, { course: data }, 201);
       }
       if (req.method === "GET" && req.path.includes("/export-pdf")) {
         // GET /api/timetables/:id/export-pdf - Export PDF

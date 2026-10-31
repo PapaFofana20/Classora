@@ -7,13 +7,19 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
 import { useCurrentUser } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { SCHOOL_YEAR } from "@/data/school";
+import { createTimetable } from "@/services/timetableService";
 import { supabase } from "@/lib/supabase";
 
 interface ClassOption {
   id: string;
   name: string;
-  levels?: { label: string | null }[] | null;
 }
+
+const errorMessage = (e: unknown) =>
+  e && typeof e === "object" && "message" in e && typeof (e as { message?: unknown }).message === "string"
+    ? (e as { message: string }).message
+    : "Création impossible.";
 
 export default function TimetableCreationPage() {
   const user = useCurrentUser();
@@ -21,7 +27,7 @@ export default function TimetableCreationPage() {
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState<ClassOption[]>([]);
-  const [form, setForm] = useState({ title: "", classId: "", periodType: "semestre" });
+  const [form, setForm] = useState({ name: "", classId: "", schoolYear: SCHOOL_YEAR });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -30,13 +36,13 @@ export default function TimetableCreationPage() {
     (async () => {
       const { data, error } = await supabase
         .from("class_rooms")
-        .select("id, name, levels(label)")
+        .select("id, name")
         .eq("school_id", user.schoolId)
         .order("name");
 
       if (cancelled) return;
       if (error) toast(error.message, "error");
-      else setClasses((data ?? []) as ClassOption[]);
+      else setClasses((data ?? []) as unknown as ClassOption[]);
       setLoading(false);
     })();
     return () => {
@@ -47,42 +53,32 @@ export default function TimetableCreationPage() {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!form.title.trim() || !form.classId) {
-      toast("Renseignez un titre et une classe.", "error");
+    if (!form.name.trim() || !form.classId) {
+      toast("Renseignez un nom et une classe.", "error");
       return;
     }
 
-    const room = classes.find((c) => c.id === form.classId);
     setBusy(true);
-    const { data, error } = await supabase
-      .from("timetables")
-      .insert({
-        school_id: user.schoolId,
-        title: form.title.trim(),
-        class_id: form.classId,
-        grade_level: room?.levels?.[0]?.label ?? null,
-        period_type: form.periodType,
-        status: "draft",
-        created_by: user.id,
-      })
-      .select("id")
-      .single();
-    setBusy(false);
-
-    if (error) {
-      toast(error.message, "error");
-      return;
+    try {
+      const id = await createTimetable(
+        { name: form.name.trim(), classId: form.classId, schoolYear: form.schoolYear },
+        user.schoolId,
+        user.id,
+      );
+      toast("Emploi du temps créé.");
+      navigate(`/app/timetables/${id}`);
+    } catch (e) {
+      toast(errorMessage(e), "error");
+    } finally {
+      setBusy(false);
     }
-
-    toast("Emploi du temps créé.");
-    navigate(data?.id ? `/app/timetables/${data.id}` : "/app/timetables");
   };
 
   return (
     <>
       <PageHeader
         title="Nouvel emploi du temps"
-        subtitle="Créez un brouillon, puis ajoutez les créneaux."
+        subtitle="Créez un brouillon, puis ajoutez les cours."
         actions={
           <LinkButton to="/app/timetables" variant="outline" icon="arrow_back">
             Retour
@@ -93,11 +89,11 @@ export default function TimetableCreationPage() {
       <Card className="max-w-3xl">
         <form onSubmit={submit} className="space-y-5">
           <Input
-            label="Titre"
+            label="Nom"
             required
-            placeholder="Ex. Emploi du temps 2026-2027"
-            value={form.title}
-            onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+            placeholder={`Ex. Emploi du temps ${SCHOOL_YEAR}`}
+            value={form.name}
+            onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
           />
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -111,14 +107,12 @@ export default function TimetableCreationPage() {
               onChange={(event) => setForm((prev) => ({ ...prev, classId: event.target.value }))}
             />
 
-            <Select
-              label="Période"
-              options={[
-                { value: "semestre", label: "Semestre" },
-                { value: "trimestre", label: "Trimestre" },
-              ]}
-              value={form.periodType}
-              onChange={(event) => setForm((prev) => ({ ...prev, periodType: event.target.value }))}
+            <Input
+              label="Année scolaire"
+              required
+              placeholder="2026-2027"
+              value={form.schoolYear}
+              onChange={(event) => setForm((prev) => ({ ...prev, schoolYear: event.target.value }))}
             />
           </div>
 
