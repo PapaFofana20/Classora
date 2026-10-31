@@ -7,6 +7,92 @@ export const roleHighlights = [
   { role: "Parent", text: "Un compte, plusieurs élèves, tous cycles confondus : notes, bulletins et paiements." },
 ];
 
+export interface RoleFeature {
+  id: string;
+  /** Libellé affiché au-dessus du titre. */
+  role: string;
+  /** Nom de l'icône Material Symbols. */
+  icon: string;
+  title: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  bullets: string[];
+}
+
+const dashboardImg = "/images/features-dashboard.png";
+const enseignantsImg = "/images/feature-enseignants.jpg";
+const eleveImg = "/images/hero-1.jpg";
+const parentsImg = "/images/feature-paiements.jpg";
+
+/** Fonctionnalités détaillées, rôle par rôle, sur la page Fonctionnalités. */
+export const roleFeatures: RoleFeature[] = [
+  {
+    id: "directeur",
+    role: "Directeur",
+    icon: "space_dashboard",
+    title: "Tout piloter depuis un seul tableau de bord",
+    description:
+      "Effectifs, recouvrement, classes, enseignants, affectations, emploi du temps et paramètres : la direction voit l'état de l'école en temps réel et agit sans changer d'outil.",
+    image: dashboardImg,
+    imageAlt: "Tableau de bord de direction avec les indicateurs de l'école",
+    bullets: [
+      "Vue d'ensemble des effectifs et des encaissements",
+      "Classes, personnel et affectations au même endroit",
+      "Emploi du temps publié aux classes en un clic",
+      "Bulletins et rapports exportables",
+    ],
+  },
+  {
+    id: "professeurs",
+    role: "Professeurs",
+    icon: "school",
+    title: "Enseigner, noter et échanger avec les familles",
+    description:
+      "Chaque enseignant retrouve uniquement ses classes et ses matières. Il saisit les notes, consulte ses affectations et dialogue avec les parents, sans jamais sortir de son périmètre.",
+    image: enseignantsImg,
+    imageAlt: "Enseignants réunis autour d'un ordinateur dans une salle de classe",
+    bullets: [
+      "Accès limité à ses classes et à ses matières",
+      "Saisie des notes par période et par coefficient",
+      "Appréciations et synthèse de sa classe principale",
+      "Messagerie directe avec les parents",
+    ],
+  },
+  {
+    id: "eleves",
+    role: "Élèves",
+    icon: "person",
+    title: "Un espace personnel pour suivre sa scolarité",
+    description:
+      "L'élève consulte ses notes, ses moyennes, son rang, ses absences et son emploi du temps publié. Il sait où il en est, à tout moment, depuis son téléphone.",
+    image: eleveImg,
+    imageAlt: "Élève consultant son emploi du temps sur son téléphone",
+    bullets: [
+      "Notes et moyennes par matière",
+      "Rang et appréciations de chaque période",
+      "Emploi du temps publié et absences",
+      "Bulletins consultables et téléchargeables",
+    ],
+  },
+  {
+    id: "parents",
+    role: "Parents",
+    icon: "family_restroom",
+    title: "Suivre ses enfants, payer et rester informé",
+    description:
+      "Un seul compte pour tous les enfants, quel que soit le cycle. Les parents suivent les notes, règlent les échéances par mobile money et échangent directement avec l'école.",
+    image: parentsImg,
+    imageAlt: "Parent réglant les frais de scolarité par mobile money",
+    bullets: [
+      "Plusieurs élèves rattachés à un même compte",
+      "Notes, bulletins et absences en temps réel",
+      "Paiement Wave, Orange Money ou Free Money",
+      "Reçus, relances et messagerie avec les enseignants",
+    ],
+  },
+];
+
 export const subjectsContact = ["Demande de démonstration", "Tarifs et devis", "Support technique", "Partenariat", "Autre"];
 
 export const timeline = [
