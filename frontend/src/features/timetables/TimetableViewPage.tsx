@@ -1,154 +1,264 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "react-router-dom";
-import { useSupabase } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
+import { Button, LinkButton } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Icon } from "@/components/ui/Icon";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SkeletonCards, SkeletonTable } from "@/components/ui/Skeleton";
+import { Table, type Column } from "@/components/ui/Table";
+import { useCurrentUser } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 
-export const TimetableViewPage = () => {
-  const { id } = useParams();
-  const navigate = useRouter();
-  const { supabase, user } = useSupabase();
-  const [timetable, setTimetable] = useState(null);
-  const [slots, setSlots] = useState([]);
-  const [error, setError] = useState<string | null>(null);
+interface LevelRef {
+  label: string | null;
+}
+
+interface ClassRoomRef {
+  name: string | null;
+  levels?: LevelRef[] | null;
+}
+
+interface TimetableRow {
+  id: string;
+  title: string;
+  description: string | null;
+  class_id: string | null;
+  grade_level: string | null;
+  period_type: string;
+  status: string;
+  created_by: string;
+  created_at: string;
+  published_at: string | null;
+  class_rooms?: ClassRoomRef | null;
+}
+
+interface SlotRow {
+  id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  subject: string;
+  teacher_id: string | null;
+  class_room_id: string | null;
+  notes: string | null;
+}
+
+const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
+  draft: { label: "Brouillon", tone: "warning" },
+  published: { label: "Publié", tone: "success" },
+  archived: { label: "Archivé", tone: "neutral" },
+};
+
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+const formatDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR") : "—");
+const formatTime = (time: string) => time.slice(0, 5);
+
+const classLabel = (timetable: TimetableRow) => {
+  const room = timetable.class_rooms;
+  const level = room?.levels?.[0]?.label ?? timetable.grade_level;
+  if (room?.name && level) return `${room.name} · ${level}`;
+  return room?.name ?? level ?? "Classe non spécifiée";
+};
+
+export default function TimetableViewPage() {
+  const user = useCurrentUser();
+  const { id } = useParams<{ id: string }>();
+
+  const [timetables, setTimetables] = useState<TimetableRow[]>([]);
+  const [timetable, setTimetable] = useState<TimetableRow | null>(null);
+  const [slots, setSlots] = useState<SlotRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id || !user) {
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
 
-    // Fetch the timetable
-    supabase.from("timetables").select(`*, class_rooms!timetables_class_id_fkey(label, level)`).eq("id", id).single().then(({ data, error }) => {
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      setTimetable(null);
+      setSlots([]);
+
+      if (id) {
+        const [{ data: row, error: rowError }, { data: slotRows, error: slotError }] = await Promise.all([
+          supabase.from("timetables").select("*, class_rooms(name, levels(label))").eq("id", id).single(),
+          supabase.from("timetable_slots").select("*").eq("timetable_id", id).order("day_of_week").order("start_time"),
+        ]);
+
+        if (cancelled) return;
+        if (rowError) setError(rowError.message);
+        else setTimetable(row as TimetableRow);
+        if (slotError) setError(slotError.message);
+        else setSlots((slotRows ?? []) as SlotRow[]);
+      } else {
+        const { data, error: listError } = await supabase
+          .from("timetables")
+          .select("*, class_rooms(name, levels(label))")
+          .eq("school_id", user.schoolId)
+          .order("created_at", { ascending: false });
+
+        if (cancelled) return;
+        if (listError) setError(listError.message);
+        else setTimetables((data ?? []) as TimetableRow[]);
       }
 
-      // Check permissions by calling the backend API
-      // We use a simple fetch to our API which has proper RLS checks
-      fetch(`/api/timetables/${id}`, {
-        credentials: "include" // Use include to send the auth cookie/session
-      })
-        .then((response) => {
-          if (response.ok) {
-            // Authorized - set the timetable
-            setTimetable(data);
-          } else {
-            // Not authorized - show access denied
-            toast({
-              title: "Accès refusé",
-              description: "Vous n'avez pas accès à cet emploi du temps.",
-              variant: "destructive",
-            });
-            navigate("/");
+      if (!cancelled) setLoading(false);
+    };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, user.schoolId]);
+
+  /* ----------------------------- Liste ----------------------------- */
+  if (!id) {
+    return (
+      <>
+        <PageHeader
+          title="Emplois du temps"
+          subtitle="Plannings des classes de l'école"
+          actions={
+            user.role === "directeur" ? (
+              <LinkButton to="/app/timetables/nouveau" icon="add">
+                Nouvel emploi du temps
+              </LinkButton>
+            ) : undefined
           }
-        })
-        .catch((_) => {
-          // Error in fetch - deny access
-          toast({
-            title: "Erreur",
-            description: "Impossible de vérifier vos permissions.",
-            variant: "destructive",
-          });
-          navigate("/");
-        });
-    });
+        />
 
-    // Fetch slots
-    supabase.from("timetable_slots").select("*").eq("timetable_id", id).order("day_of_week").order("start_time").then(({ data, error }) => {
-      if (error) setError(error.message);
-      else setSlots(data);
-    });
-
-    setLoading(false);
-  }, [id, user]);
-
-  // Le vérification des permissions est maintenant gérée par l'appel API ci-dessus
-  // La fonction checkPermissions inline a été retirée au profit de l'appel API direct
-
-  if (loading) {
-    return <div className="min-h-screen p-8">Chargement de l'emploi du temps...</div>;
+        {loading ? (
+          <SkeletonCards count={3} className="lg:grid-cols-3" />
+        ) : error ? (
+          <Card>
+            <p className="text-sm text-danger">{error}</p>
+          </Card>
+        ) : timetables.length === 0 ? (
+          <Card>
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <Icon name="calendar_month" className="text-4xl text-neutral-300" />
+              <p className="font-semibold text-ink">Aucun emploi du temps</p>
+              <p className="max-w-sm text-sm text-neutral-500">
+                {user.role === "directeur"
+                  ? "Créez le premier emploi du temps de votre école."
+                  : "Aucun emploi du temps n'a encore été publié pour votre classe."}
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {timetables.map((row) => {
+              const status = STATUS[row.status] ?? STATUS.draft;
+              return (
+                <Link key={row.id} to={`/app/timetables/${row.id}`} className="block">
+                  <Card hover className="h-full">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-lg font-bold text-ink">{row.title}</p>
+                        <p className="mt-1 text-sm text-neutral-500">{classLabel(row)}</p>
+                      </div>
+                      <Badge tone={status.tone}>{status.label}</Badge>
+                    </div>
+                    <p className="mt-4 text-xs text-neutral-500">Créé le {formatDate(row.created_at)}</p>
+                    <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-forest">
+                      Consulter <Icon name="arrow_forward" className="text-[18px]" />
+                    </span>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </>
+    );
   }
 
-  if (error) {
-    return <div className="min-h-screen p-8 text-red-600">Erreur: {error}</div>;
-  }
+  /* ---------------------------- Détail ----------------------------- */
+  const status = timetable ? STATUS[timetable.status] ?? STATUS.draft : STATUS.draft;
 
-  if (!timetable) {
-    return <div className="min-h-screen p-8">Emploi du temps introuvable</div>;
-  }
-
-  const dayNames = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+  const columns: Column<SlotRow>[] = [
+    { key: "day", header: "Jour", render: (slot) => DAYS[slot.day_of_week] ?? "Inconnu" },
+    { key: "start", header: "Début", render: (slot) => formatTime(slot.start_time) },
+    { key: "end", header: "Fin", render: (slot) => formatTime(slot.end_time) },
+    { key: "subject", header: "Matière", render: (slot) => slot.subject || "Non spécifié" },
+    { key: "teacher", header: "Enseignant", render: (slot) => slot.teacher_id ?? "Non assigné" },
+    { key: "room", header: "Salle", render: (slot) => slot.class_room_id ?? "Non assignée" },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <header className="bg-white shadow rounded-lg p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {timetable.title} - {timetable.class_rooms?.label || "Non spécifié"}
-          </h1>
-          <p className="text-gray-500">
-            Niveau: {timetable.class_rooms?.level || "Non spécifié"} | Type: {timetable.period_type}
-          </p>
-        </header>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          {/* Timetable info */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-sm text-gray-500">Créé le</p>
-              <p className="font-medium">{new Date(timetable.created_at).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Publié le</p>
-              <p className="font-medium">{timetable.published_at ? new Date(timetable.published_at).toLocaleDateString() : "Non publié"}</p>
-            </div>
-          </div>
-
-          {/* Slots table */}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-full bg-white rounded-lg shadow">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="p-3 text-left text-xs font-medium text-gray-500">Jour</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500">Début</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500">Fin</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500">Matière</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500">Enseignant</th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-500">Salle</th>
-                </tr>
-              </thead>
-              <tbody>
-                {slots.map((slot) => (
-                  <tr key={slot.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-3">{dayNames[slot.day_of_week] || "Inconnu"}</td>
-                    <td className="p-3">{slot.start_time}</td>
-                    <td className="p-3">{slot.end_time}</td>
-                    <td className="p-3">{slot.subject || "Non spécifié"}</td>
-                    <td className="p-3">{slot.teacher_id || "Non assigné"}</td>
-                    <td className="p-3">{slot.class_room_id || "Non assigné"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* PDF Export Button */}
-          {user.role === "directeur" && (
-            <div className="mt-6 pt-6 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => window.open(`/api/timetables/${id}/export-pdf`, "blank")}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+    <>
+      <PageHeader
+        title={timetable?.title ?? "Emploi du temps"}
+        subtitle={timetable ? classLabel(timetable) : undefined}
+        actions={
+          <>
+            <LinkButton to="/app/timetables" variant="outline" icon="arrow_back">
+              Retour
+            </LinkButton>
+            {timetable && user.role === "directeur" && (
+              <Button
+                variant="outline"
+                icon="download"
+                onClick={() => window.open(`/api/timetables/${timetable.id}/export-pdf`, "blank")}
               >
-                Télécharger PDF
-              </button>
+                Télécharger le PDF
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      {loading ? (
+        <SkeletonTable rows={5} />
+      ) : error ? (
+        <Card>
+          <p className="text-sm text-danger">{error}</p>
+        </Card>
+      ) : !timetable ? (
+        <Card>
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <Icon name="event_busy" className="text-4xl text-neutral-300" />
+            <p className="font-semibold text-ink">Emploi du temps introuvable</p>
+            <p className="text-sm text-neutral-500">Il a peut-être été supprimé ou vous n'y avez pas accès.</p>
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          <Card>
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge tone={status.tone}>{status.label}</Badge>
+              {timetable.description && <p className="text-sm text-neutral-600">{timetable.description}</p>}
             </div>
-          )}
+            <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Période</dt>
+                <dd className="mt-1 text-sm font-medium text-ink">
+                  {timetable.period_type === "trimestre" ? "Trimestre" : "Semestre"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Créé le</dt>
+                <dd className="mt-1 text-sm font-medium text-ink">{formatDate(timetable.created_at)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Publié le</dt>
+                <dd className="mt-1 text-sm font-medium text-ink">{formatDate(timetable.published_at)}</dd>
+              </div>
+            </dl>
+          </Card>
+
+          <Card>
+            <h2 className="mb-4 text-lg font-bold text-ink">Créneaux</h2>
+            {slots.length === 0 ? (
+              <p className="rounded-2xl bg-mist p-6 text-sm text-neutral-500">Aucun créneau enregistré pour cet emploi du temps.</p>
+            ) : (
+              <Table columns={columns} rows={slots} rowKey={(slot) => slot.id} caption={`Créneaux de ${timetable.title}`} stagger />
+            )}
+          </Card>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
-};
+}

@@ -1,102 +1,137 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSupabase } from "@/contexts/AuthContext";
+import { Button, LinkButton } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Select } from "@/components/ui/Select";
+import { useCurrentUser } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import { supabase } from "@/lib/supabase";
 
-export const TimetableCreationPage = () => {
-  const [navigate] = useNavigate();
-  const { supabase, user } = useSupabase();
-  const [timetable, setTimetable] = useState({ title: "", gradeLevel: "", periodType: "semestre", slots: [] });
-  const [error, setError] = useState<string | null>(null);
+interface ClassOption {
+  id: string;
+  name: string;
+  levels?: { label: string | null }[] | null;
+}
+
+export default function TimetableCreationPage() {
+  const user = useCurrentUser();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const [classes, setClasses] = useState<ClassOption[]>([]);
+  const [form, setForm] = useState({ title: "", classId: "", periodType: "semestre" });
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
-    supabase.from("class_rooms").select("id, label, level").order("label").then(({ data, error }) => {
-      if (error) setError(error.message);
-      else setTimetable((prev) => ({ ...prev, availableClasses: data }));
-    });
-  }, [supabase, user]);
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("class_rooms")
+        .select("id, name, levels(label)")
+        .eq("school_id", user.schoolId)
+        .order("name");
 
-  const handleSave = async () => {
-    try {
-      const { error: apiError } = await supabase.from("timetables").insert({
-        title: timetable.title,
-        school_id: user.school_id,
-        grade_level: timetable.gradeLevel,
-        period_type: timetable.periodType,
+      if (cancelled) return;
+      if (error) toast(error.message, "error");
+      else setClasses((data ?? []) as ClassOption[]);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user.schoolId, toast]);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!form.title.trim() || !form.classId) {
+      toast("Renseignez un titre et une classe.", "error");
+      return;
+    }
+
+    const room = classes.find((c) => c.id === form.classId);
+    setBusy(true);
+    const { data, error } = await supabase
+      .from("timetables")
+      .insert({
+        school_id: user.schoolId,
+        title: form.title.trim(),
+        class_id: form.classId,
+        grade_level: room?.levels?.[0]?.label ?? null,
+        period_type: form.periodType,
         status: "draft",
         created_by: user.id,
-      });
-      if (apiError) throw apiError;
-      navigate("/director/timetables");
-    } catch (err: any) {
-      setError(err.message);
+      })
+      .select("id")
+      .single();
+    setBusy(false);
+
+    if (error) {
+      toast(error.message, "error");
+      return;
     }
+
+    toast("Emploi du temps créé.");
+    navigate(data?.id ? `/app/timetables/${data.id}` : "/app/timetables");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="bg-white shadow rounded-lg p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Création d'emploi du temps</h1>
-          <p className="text-gray-600">Interface pour remplir les dates et créneaux</p>
-        </header>
-        <div className="px-4 py-8">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Titre de l'emploi du temps</label>
-                <input
-                  type="text"
-                  value={timetable.title}
-                  onChange={(e) => setTimetable((t) => ({ ...t, title: e.target.value }))}
-                  className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Ex: Emploi du temps 2024-2025"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Niveau</label>
-                <select
-                  value={timetable.gradeLevel}
-                  onChange={(e) => setTimetable((t) => ({ ...t, gradeLevel: e.target.value }))}
-                  className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="6ème">6ème</option>
-                  <option value="5ème">5ème</option>
-                  <option value="4ème">4ème</option>
-                  <option value="3ème">3ème</option>
-                  <option value="seconde">Seconde</option>
-                  <option value="première">Première</option>
-                  <option value="terminale">Terminale</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Type de période</label>
-                <select
-                  value={timetable.periodType}
-                  onChange={(e) => setTimetable((t) => ({ ...t, periodType: e.target.value }))}
-                  className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="semestre">Semestre</option>
-                  <option value="trimestre">Trimestre</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6">
-              <button type="submit" className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">
-                Créer l'emploi du temps
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/director/timetables")}
-                className="ml-2 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
-              >
-                Annuler
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    <>
+      <PageHeader
+        title="Nouvel emploi du temps"
+        subtitle="Créez un brouillon, puis ajoutez les créneaux."
+        actions={
+          <LinkButton to="/app/timetables" variant="outline" icon="arrow_back">
+            Retour
+          </LinkButton>
+        }
+      />
+
+      <Card className="max-w-3xl">
+        <form onSubmit={submit} className="space-y-5">
+          <Input
+            label="Titre"
+            required
+            placeholder="Ex. Emploi du temps 2026-2027"
+            value={form.title}
+            onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+          />
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Select
+              label="Classe"
+              required
+              placeholder={loading ? "Chargement…" : "Sélectionner une classe"}
+              disabled={loading}
+              options={classes.map((c) => ({ value: c.id, label: c.name }))}
+              value={form.classId}
+              onChange={(event) => setForm((prev) => ({ ...prev, classId: event.target.value }))}
+            />
+
+            <Select
+              label="Période"
+              options={[
+                { value: "semestre", label: "Semestre" },
+                { value: "trimestre", label: "Trimestre" },
+              ]}
+              value={form.periodType}
+              onChange={(event) => setForm((prev) => ({ ...prev, periodType: event.target.value }))}
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button type="submit" loading={busy} icon="save">
+              Créer l'emploi du temps
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => navigate("/app/timetables")}>
+              Annuler
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </>
   );
-};
+}

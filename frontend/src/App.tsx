@@ -12,7 +12,6 @@ import { ToastProvider } from "@/context/ToastContext";
 import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop, SubscriptionGuard } from "@/routes/guards";
 import { AdminProtectedRoute } from "@/routes/adminGuards";
 import { ROUTE_ROLES } from "@/routes/navigation";
-import TimetableViewPage from "@/features/timetables/TimetableViewPage";
 import HomePage from "@/pages/public/HomePage";
 
 const FeaturesPage = lazy(() => import("@/pages/public/FeaturesPage"));
@@ -44,6 +43,8 @@ const PaymentsPage = lazy(() => import("@/pages/app/PaymentsPage"));
 const MessagesPage = lazy(() => import("@/pages/app/MessagesPage"));
 const SettingsPage = lazy(() => import("@/pages/app/SettingsPage"));
 const SubscriptionPage = lazy(() => import("@/pages/app/SubscriptionPage"));
+const TimetableViewPage = lazy(() => import("@/features/timetables/TimetableViewPage"));
+const TimetableCreationPage = lazy(() => import("@/features/timetables/TimetableCreationPage"));
 const AdminDashboardPage = lazy(() => import("@/pages/app/AdminDashboardPage"));
 const AdminSchoolsPage = lazy(() => import("@/pages/app/AdminSchoolsPage"));
 const AdminSchoolDetailPage = lazy(() => import("@/pages/app/AdminSchoolDetailPage"));
@@ -172,6 +173,8 @@ export default function App() {
 
                       <Route path="parametres" element={guard("parametres", <SettingsPage />)} />
                       <Route path="timetables" element={guard("timetables", <TimetableViewPage />)} />
+                      <Route path="timetables/nouveau" element={guard("timetable_creation", <TimetableCreationPage />)} />
+                      <Route path="timetables/:id" element={guard("timetables", <TimetableViewPage />)} />
                       <Route path="*" element={<Navigate to="/app" replace />} />
                     </Route>
                   </Route>
