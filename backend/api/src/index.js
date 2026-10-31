@@ -31,6 +31,7 @@ import createStaffAccount from "./routes/createStaffAccount.js";
 import updateStaff from "./routes/updateStaff.js";
 import resetStaffPassword from "./routes/resetStaffPassword.js";
 import setStaffActive from "./routes/setStaffActive.js";
+import schedules from "./routes/schedules.js";
 import adminAuth from "./routes/adminAuth.js";
 import adminLogin from "./routes/adminLogin.js";
 import adminAgents from "./routes/adminAgents.js";
@@ -106,6 +107,7 @@ app.all("/create-staff-account", createStaffAccount);
 app.all("/update-staff", updateStaff);
 app.all("/reset-staff-password", resetStaffPassword);
 app.all("/set-staff-active", setStaffActive);
+app.all("/schedules", schedules);
 
 // Routes administratives Classora (protégées, service_role côté serveur).
 // Une configuration absente provoquerait un 500 opaque : on répond un 503
