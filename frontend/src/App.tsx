@@ -170,6 +170,7 @@ export default function App() {
 
 
                       <Route path="parametres" element={guard("parametres", <SettingsPage />)} />
+                      <Route path="timetables" element={guard("timetables", <TimetableViewPage />)} />
                       <Route path="*" element={<Navigate to="/app" replace />} />
                     </Route>
                   </Route>

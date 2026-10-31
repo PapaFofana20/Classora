@@ -152,6 +152,11 @@ function SidebarContent({ agent, expanded, onNavigate, onLogoClick }: { agent: A
           </div>
         ))}
       </nav>
+      <div className="flex items-center justify-end pt-2">
+        <div className="text-sm text-white/60">
+          Emploi du temps
+        </div>
+      </div>
 
       {expanded ? bottomContent : collapsedContent}
 

@@ -23,6 +23,7 @@ const ADMIN_NAV: AdminNavItem[] = [
   { to: "/admin/supervision/audit", label: "Journal d'audit", icon: "history", section: "Supervision" },
   { to: "/admin/supervision/securite", label: "Sécurité", icon: "security", section: "Supervision" },
   { to: "/admin/parametres", label: "Paramètres généraux", icon: "settings", section: "Configuration" },
+  { to: "/admin/timetables", label: "Emploi du temps", icon: "calendar", section: "Configuration" },
 ];
 
 export function adminNavFor(role: AdminAgentRole): AdminNavItem[] {
