@@ -1,7 +1,6 @@
 import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
-import { features } from "@/data/landing";
 import { pageHeroes } from "@/data/pageHeroes";
 import { roleFeatures } from "@/data/pages";
 import { CtaSection } from "@/features/landing/CtaSection";
@@ -19,30 +18,6 @@ export default function FeaturesPage() {
   return (
     <>
       <PageHero {...pageHeroes.fonctionnalites} />
-
-      <div className="mx-auto w-full max-w-[1280px] space-y-16 px-gutter py-10">
-        {features.map((f, i) => (
-          <Reveal key={f.id}>
-            <article className={cn("grid items-center gap-8 lg:grid-cols-2 lg:gap-16", i % 2 === 1 && "lg:[&>div:first-child]:order-2")}>
-              <div className="rounded-3xl bg-lime p-2 shadow-pop">
-                <img src={f.image} alt={`Illustration : ${f.title}`} loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{f.title}</h2>
-                <p className="mt-3 text-neutral-600">{f.description}</p>
-                <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {f.bullets.map((b) => (
-                    <li key={b} className="flex items-start gap-2 text-sm font-medium">
-                      <Icon name="check_circle" fill className="mt-0.5 text-[20px] text-leaf" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          </Reveal>
-        ))}
-      </div>
 
       <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="roles-title">
         <Reveal>
