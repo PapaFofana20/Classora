@@ -10,7 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 import { ok, route, serverError, forbidden, notFound } from "../lib/http.js";
 import { expectObject } from "../lib/validate.js";
 
-const svc = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } };
+const svc = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
 
 /**
  * GET /api/timetables/:id - Get a specific timetable (with permission check)
