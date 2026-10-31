@@ -12,6 +12,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop, SubscriptionGuard } from "@/routes/guards";
 import { AdminProtectedRoute } from "@/routes/adminGuards";
 import { ROUTE_ROLES } from "@/routes/navigation";
+import TimetableViewPage from "@/features/timetables/TimetableViewPage";
 import HomePage from "@/pages/public/HomePage";
 
 const FeaturesPage = lazy(() => import("@/pages/public/FeaturesPage"));
