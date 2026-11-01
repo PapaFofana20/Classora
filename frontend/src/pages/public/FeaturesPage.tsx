@@ -46,10 +46,12 @@ export default function FeaturesPage() {
                   />
                 </div>
                 <div>
-                  <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-forest">
-                    <Icon name={r.icon} className="text-[18px] shrink-0 overflow-visible" />
-                    {r.role}
-                  </p>
+                  <h4 className="mb-4 text-xl font-extrabold tracking-tight sm:text-2xl">
+                    <span className="text-ink">{r.role.charAt(0)}</span>
+                    <span className="font-serif font-semibold italic text-forest-500">
+                      {r.role.slice(1)}
+                    </span>
+                  </h4>
                   <h3 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{r.title}</h3>
                   <p className="mt-3 text-neutral-600">{r.description}</p>
                   <ul className="mt-6 grid gap-3 sm:grid-cols-2">
