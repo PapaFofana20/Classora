@@ -47,10 +47,8 @@ export default function FeaturesPage() {
                 </div>
                 <div>
                   <h4 className="mb-4 text-xl font-extrabold tracking-tight sm:text-2xl">
-                    <span className="text-ink">{r.role.charAt(0)}</span>
-                    <span className="font-serif font-semibold italic text-forest-500">
-                      {r.role.slice(1)}
-                    </span>
+                    <span className="text-ink">{r.id === "directeur" ? "Pour le " : "Pour les "}</span>
+                    <span className="font-serif font-semibold italic text-forest-500">{r.role}</span>
                   </h4>
                   <h3 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{r.title}</h3>
                   <p className="mt-3 text-neutral-600">{r.description}</p>
