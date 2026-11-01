@@ -102,7 +102,7 @@ export function AssignmentMatrix({ board, cycle, onSetCell, onReplace, onAdd, on
               tone={tone}
               onChange={(v) => (a ? (list.length === 1 ? onSetCell(c.id, s.id, v || null) : onReplace(c.id, s.id, a.teacherId, v || null)) : onSetCell(c.id, s.id, v || null))}
             />
-            {a && i === list.length - 1 && list.length < 2 && (
+            {a && i === list.length - 1 && (
               <button type="button" aria-label={`Ajouter un second enseignant pour ${c.name}, ${s.name}`} title="Ajouter un second enseignant" onClick={() => onAdd(c.id, s.id)} className="grid size-9 shrink-0 place-items-center rounded-full text-neutral-400 hover:bg-lime-soft hover:text-forest">
                 <Icon name="add" className="text-[18px]" />
               </button>
