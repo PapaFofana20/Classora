@@ -22,7 +22,11 @@ interface Loaded {
   teacher: Teacher | null;
   assignments: TeachingAssignment[];
   contexts: TeacherContextItem[];
-  /** Classes dont l'enseignant est titulaire (élémentaire) ou professeur principal. */
+  /**
+   * Classes dont l'enseignant est titulaire :
+   * - Élémentaire (CI → CM2) : un seul instituteur titulaire.
+   * - Moyen / Secondaire (Sixième → Terminale) : professeur principal + affectations par matière.
+   */
   headClasses: ClassRoom[];
   /** Toutes les classes dans lesquelles l'enseignant intervient. */
   classes: ClassRoom[];
@@ -30,7 +34,9 @@ interface Loaded {
 
 const EMPTY: Loaded = { teacher: null, assignments: [], contexts: [], headClasses: [], classes: [] };
 
-/** Charge les affectations de l'enseignant connecté et expose la règle canEditGrades. */
+/** Charge les affectations de l'enseignant connecté.
+ * Règle : CI→CM2 = un seul professeur principal (titulaire) ; Sixième→Terminale = plusieurs professeurs (par matière).
+ * Expose la règle canEditGrades. */
 export function useTeacherAssignments() {
   const { user } = useAuth();
   const teacherId = user?.teacherId;
