@@ -10,7 +10,7 @@ interface IconProps {
 /** Google Material Symbols (Rounded). */
 export function Icon({ name, className, fill, size }: IconProps) {
   return (
-    <span aria-hidden="true" className={cn("material-symbols-rounded", fill && "fill", className)} style={size ? { fontSize: size } : undefined}>
+    <span aria-hidden="true" className={cn("material-symbols-rounded fill overflow-visible", fill && "fill", className)} style={size ? { fontSize: size } : undefined}>
       {name}
     </span>
   );

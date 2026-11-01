@@ -26,7 +26,7 @@ export function StepsBento() {
                 <div className={last ? "max-w-xl" : ""}>
                   <div className="mb-8 flex items-center justify-between md:mb-6">
                     <span className={cn("grid size-14 place-items-center rounded-full", last ? "bg-lime text-forest" : "bg-forest text-lime")}>
-                      <Icon name={s.icon} fill className="text-[28px]" />
+                      <Icon name={s.icon} fill className="text-[28px] shrink-0 overflow-visible" />
                     </span>
                     <span className={cn("text-6xl font-extrabold tracking-tighter opacity-20", last && "md:hidden")}>0{s.id}</span>
                   </div>
@@ -37,7 +37,7 @@ export function StepsBento() {
                   <div className="mt-8 flex flex-wrap gap-3 md:mt-0 md:flex-col" aria-label="Inclus dans Classora">
                     {features.map((m) => (
                       <span key={m} className="inline-flex items-center gap-2 text-sm font-semibold text-white/85">
-                        <Icon name="check_circle" fill className="text-lime" />
+                        <Icon name="check_circle" fill className="text-lime shrink-0 overflow-visible" />
                         {m}
                       </span>
                     ))}

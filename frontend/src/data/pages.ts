@@ -20,10 +20,10 @@ export interface RoleFeature {
   bullets: string[];
 }
 
-const dashboardImg = "/images/features-dashboard.png";
-const enseignantsImg = "/images/feature-enseignants.jpg";
-const eleveImg = "/images/hero-1.jpg";
-const parentsImg = "/images/feature-paiements.jpg";
+const dashboardImg = "/images/role-directeur.jpg"; // remplacé par scène classe (3 rôles)
+const enseignantsImg = "/images/role-professeurs.jpg"; // remplacé par image enseignant
+const eleveImg = "/images/hero-1.jpg"; // CONSERVÉ — image élève non remplacée
+const parentsImg = "/images/role-parents.jpg"; // remplacé par parent téléphone
 
 /** Fonctionnalités détaillées, rôle par rôle, sur la page Fonctionnalités. */
 export const roleFeatures: RoleFeature[] = [
@@ -35,7 +35,7 @@ export const roleFeatures: RoleFeature[] = [
     description:
       "Effectifs, recouvrement, classes, enseignants, affectations, emploi du temps et paramètres : la direction voit l'état de l'école en temps réel et agit sans changer d'outil.",
     image: dashboardImg,
-    imageAlt: "Tableau de bord de direction avec les indicateurs de l'école",
+    imageAlt: "Trois responsables de l'école réunis dans un bureau",
     bullets: [
       "Vue d'ensemble des effectifs et des encaissements",
       "Classes, personnel et affectations au même endroit",
@@ -51,7 +51,7 @@ export const roleFeatures: RoleFeature[] = [
     description:
       "Chaque enseignant retrouve uniquement ses classes et ses matières. Il saisit les notes, consulte ses affectations et dialogue avec les parents, sans jamais sortir de son périmètre.",
     image: enseignantsImg,
-    imageAlt: "Enseignants réunis autour d'un ordinateur dans une salle de classe",
+    imageAlt: "Deux enseignants sénégalais échangeant dans une salle de classe",
     bullets: [
       "Accès limité à ses classes et à ses matières",
       "Saisie des notes par période et par coefficient",
@@ -83,7 +83,7 @@ export const roleFeatures: RoleFeature[] = [
     description:
       "Un seul compte pour tous les enfants, quel que soit le cycle. Les parents suivent les notes, règlent les échéances par mobile money et échangent directement avec l'école.",
     image: parentsImg,
-    imageAlt: "Parent réglant les frais de scolarité par mobile money",
+    imageAlt: "Parent consultant ses paiements sur son téléphone",
     bullets: [
       "Plusieurs élèves rattachés à un même compte",
       "Notes, bulletins et absences en temps réel",

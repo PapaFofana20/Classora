@@ -47,7 +47,7 @@ export default function FeaturesPage() {
                 </div>
                 <div>
                   <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-soft px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-forest">
-                    <Icon name={r.icon} className="text-[18px]" />
+                    <Icon name={r.icon} className="text-[18px] shrink-0 overflow-visible" />
                     {r.role}
                   </p>
                   <h3 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{r.title}</h3>
@@ -55,7 +55,7 @@ export default function FeaturesPage() {
                   <ul className="mt-6 grid gap-3 sm:grid-cols-2">
                     {r.bullets.map((b) => (
                       <li key={b} className="flex items-start gap-2 text-sm font-medium">
-                        <Icon name="check_circle" fill className="mt-0.5 text-[20px] text-leaf" />
+                        <Icon name="check_circle" fill className="mt-0.5 text-[20px] text-leaf shrink-0 overflow-visible" />
                         {b}
                       </li>
                     ))}

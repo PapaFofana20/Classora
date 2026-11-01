@@ -32,7 +32,7 @@ export function RoleChoice({ value, onChange }: { value: Role | null; onChange: 
             className={cn("flex items-start gap-4 rounded-2xl border-2 p-4 text-left transition-all duration-200", active ? "border-forest bg-lime-pale" : "border-neutral-200 hover:bg-lime hover:border-lime hover:text-ink")}
           >
             <span className={cn("grid size-12 shrink-0 place-items-center rounded-2xl", active ? "bg-forest text-lime" : "bg-mist text-forest")}>
-              <Icon name={o.icon} fill className="text-[24px]" />
+              <Icon name={o.icon} fill className="text-[24px] shrink-0 overflow-visible" />
             </span>
             <span className="min-w-0">
               <span className="block font-bold">{o.title}</span>
