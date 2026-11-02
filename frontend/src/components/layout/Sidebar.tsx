@@ -169,7 +169,7 @@ export function Sidebar({ user, drawerOpen, onClose }: Props) {
   // Le tiroir mobile force l'ouverture sans toucher à l'épinglage mémorisé.
   const expanded = sidebar.expanded || drawerOpen;
 
-  useEffect(onClose, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(onClose, [pathname]);
   useModalBehavior(drawerOpen, onClose, drawerRef);
 
   return (

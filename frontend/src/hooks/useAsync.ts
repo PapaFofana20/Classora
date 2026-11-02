@@ -38,7 +38,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: DependencyList): AsyncSt
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [...deps, tick]);
 
   const reload = useCallback(() => setTick((t) => t + 1), []);

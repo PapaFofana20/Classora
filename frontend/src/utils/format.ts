@@ -66,7 +66,8 @@ export function isValidEmail(v: string): boolean {
 
 /** Numéro sénégalais : 7X XXX XX XX */
 export function isValidSnPhone(v: string): boolean {
-  return /^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/.test(v.trim());
+  // Mobiles du Sénégal : Orange (70/76/77/78), Free/Promobile (75).
+  return /^(\+221)?\s?7(?:0|[5-8])\s?\d{3}\s?\d{2}\s?\d{2}$/.test(v.trim());
 }
 
 /** Pluralisation FR : "1 élève", "2 élèves" — utilise Intl.PluralRules */

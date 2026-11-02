@@ -2,8 +2,8 @@ import { PageHero } from "@/components/layout/PageHero";
 import { pageHeroes } from "@/data/pageHeroes";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { FaqSection } from "@/features/landing/FaqSection";
-import { PriceEstimator } from "@/features/landing/PriceEstimator";
 import { PricingSection } from "@/features/landing/PricingSection";
+import { Reveal } from "@/components/ui/Reveal";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 export default function PricingPage() {
@@ -16,8 +16,19 @@ export default function PricingPage() {
   return (
     <>
       <PageHero {...pageHeroes.tarifs} />
+      <section className="mx-auto w-full max-w-[1280px] px-gutter py-14" aria-labelledby="pricing-intro">
+        <Reveal>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 id="pricing-intro" className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+              Des tarifs <span className="font-serif font-semibold italic text-forest-500">adaptés</span> à chaque école
+            </h2>
+            <p className="mt-4 text-neutral-600">
+              Choisissez le plan qui correspond à la taille de votre établissement. Chaque formule inclut l'inscription, la gestion des notes, les bulletins automatiques et le suivi des paiements — sans frais cachés.
+            </p>
+          </div>
+        </Reveal>
+      </section>
       <PricingSection withHeader={false} />
-      <PriceEstimator />
       <FaqSection />
       <CtaSection />
     </>

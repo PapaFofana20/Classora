@@ -245,14 +245,16 @@ begin
         where id = v_req.id;
       end if;
     else
-      -- REFUS : supprimer l'élève créé à l'inscription (si élève)
-      if v_req.role = 'eleve' then
-        delete from public.students
-        where school_id = v_school
-          and first_name = v_req.first_name
-          and last_name = v_req.last_name
-          and (birth_date = v_req.birth_date or (birth_date is null and v_req.birth_date is null));
-      end if;
+      -- REFUS (H3) : suppression UNIQUEMENT de l'élève créé par CETTE
+-- inscription, retrouvé via profiles.student_id. La suppression « par
+-- homonymie » pouvait effacer l'enfant légitime d'une autre famille
+-- (avec cascades notes/paiements/absences/messagerie).
+if v_req.role = 'eleve' then
+  select student_id into v_student_id from public.profiles where id = v_req.user_id limit 1;
+  if v_student_id is not null then
+    delete from public.students where id = v_student_id and school_id = v_school;
+  end if;
+end if;
 
       update public.profiles set status = 'DESACTIVE' where id = v_req.user_id;
       update public.registration_requests

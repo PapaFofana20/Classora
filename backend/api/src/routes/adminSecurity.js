@@ -145,7 +145,7 @@ export default route(async (req, res) => {
         status: a.status,
         firstName: a.first_name,
         lastName: a.last_name,
-        email: a.email,
+        email: caller.role === "superadmin" ? a.email : undefined,
         createdAt: a.created_at,
         lastLoginAt: lastLoginByActor.get(a.auth_user_id) ?? null,
         loginCount30: loginCountByActor.get(a.auth_user_id) ?? 0,
@@ -158,7 +158,7 @@ export default route(async (req, res) => {
         actorRole: r.actor_role,
         actorName: r.actor_id ? agentName.get(r.actor_id) ?? null : null,
         createdAt: r.created_at,
-        payload: r.payload ?? {},
+        payload: caller.role === "superadmin" ? (r.payload ?? {}) : {},
       })),
       sensitiveActions: (sensitiveRows ?? []).map((r) => ({
         id: r.id,
@@ -169,7 +169,7 @@ export default route(async (req, res) => {
         entityId: r.entity_id,
         schoolId: r.school_id,
         createdAt: r.created_at,
-        payload: r.payload ?? {},
+        payload: caller.role === "superadmin" ? (r.payload ?? {}) : {},
       })),
       rateLimits: (rateRows ?? []).map((r) => ({
         key: r.key,

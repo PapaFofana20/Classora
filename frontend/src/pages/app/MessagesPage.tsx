@@ -32,6 +32,26 @@ export default function MessagesPage() {
   // Feature gate: messagerie = Pro+
   const hasMessaging = hasFeatureForSchool(schoolId, "messaging");
 
+  const hasConversations = user.role === "directeur" || user.role === "instituteur" || user.role === "professeur" || user.role === "parent" || user.role === "eleve";
+  const canCompose = user.role === "instituteur" || user.role === "professeur" || user.role === "parent" || user.role === "eleve";
+  const canAnnounce = user.role === "directeur" || user.role === "econome";
+
+  // RÈGLE DES HOOKS (correctif C2 de l'audit) : tous les hooks sont déclarés
+  // AVANT le return du paywall. Si la formule de l'école rétrograde pendant
+  // la navigation (cache rafraîchi, downgrade), React ne doit jamais voir
+  // « fewer hooks rendered » — la page ne doit pas crasher. Les callbacks
+  // restent no-op tant que la messagerie est verrouillée.
+  const convs = useAsync(() => (hasMessaging ? listConversations(user) : Promise.resolve([])), [user.id, hasMessaging]);
+  const anns = useAsync(() => (hasMessaging ? listAnnouncements(user) : Promise.resolve([])), [user.id, hasMessaging]);
+  const contacts = useAsync(() => (hasMessaging && canCompose ? listContacts(user) : Promise.resolve([])), [user.id, hasMessaging]);
+  const [tab, setTab] = useState(hasConversations ? "conv" : "ann");
+  const [sel, setSel] = useState<string | null>(null);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [annOpen, setAnnOpen] = useState(false);
+  const [ann, setAnn] = useState({ title: "", body: "", audience: "all" });
+  const [busy, setBusy] = useState(false);
+
+  // Paywall évalué APRÈS tous les hooks.
   if (!hasMessaging) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-mist px-4 py-10">
@@ -49,19 +69,6 @@ export default function MessagesPage() {
       </div>
     );
   }
-
-  const hasConversations = user.role === "directeur" || user.role === "instituteur" || user.role === "professeur" || user.role === "parent" || user.role === "eleve";
-  const canCompose = user.role === "instituteur" || user.role === "professeur" || user.role === "parent" || user.role === "eleve";
-  const canAnnounce = user.role === "directeur" || user.role === "econome";
-  const convs = useAsync(() => listConversations(user), [user.id]);
-  const anns = useAsync(() => listAnnouncements(user), [user.id]);
-  const contacts = useAsync(() => (canCompose ? listContacts(user) : Promise.resolve([])), [user.id]);
-  const [tab, setTab] = useState(hasConversations ? "conv" : "ann");
-  const [sel, setSel] = useState<string | null>(null);
-  const [composeOpen, setComposeOpen] = useState(false);
-  const [annOpen, setAnnOpen] = useState(false);
-  const [ann, setAnn] = useState({ title: "", body: "", audience: "all" });
-  const [busy, setBusy] = useState(false);
 
   const totalUnread = (convs.data ?? []).reduce((a, c) => a + c.unread, 0);
   const selected = (convs.data ?? []).find((c) => c.id === sel) ?? null;

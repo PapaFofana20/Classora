@@ -1,14 +1,8 @@
-import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Icon } from "@/components/ui/Icon";
-import { Switch } from "@/components/ui/Switch";
 import { useToast } from "@/context/ToastContext";
-import { toggleRegistration } from "@/services/schoolService";
-import { useSchool } from "@/context/SchoolContext";
 import type { School } from "@/types";
-import { MATRICULE_ALPHABET, MATRICULE_LENGTH } from "@/utils/matricule";
 
 /** Lien d'inscription pré-rempli avec le matricule. */
 export function signupLink(matricule: string): string {
@@ -39,11 +33,8 @@ interface Props {
  * bord du directeur, copiable en un clic.
  * (QR code volontairement omis : aucune dépendance ajoutée — voir SUPABASE_NOTES.md)
  */
-export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
+export function MatriculeCard({ school }: Props) {
   const { toast } = useToast();
-  const { reload } = useSchool();
-  const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(!school.matricule);
 
   const copy = async (value: string, message: string) => {
     try {
@@ -68,30 +59,8 @@ export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
     await copy(`${text}\n${url}`, "Lien et message copiés : collez-les dans WhatsApp.");
   };
 
-  const toggle = async (open: boolean) => {
-    setBusy(true);
-    try {
-      await toggleRegistration(school.id, open);
-      toast(open ? "Inscriptions ouvertes." : "Inscriptions fermées : le matricule est désactivé temporairement.");
-      onChanged?.();
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Modification impossible.", "error");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const refresh = async () => {
-    setLoading(true);
-    try {
-      await reload();
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Si pas de matricule encore, afficher un état d'attente
-  if (loading || !school.matricule) {
+  if (!school.matricule) {
     return (
       <Card>
         <CardHeader
@@ -102,9 +71,6 @@ export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-10 w-10 border-3 border-forest border-t-transparent" />
             <p className="text-sm text-neutral-600">Génération du matricule sécurisé…</p>
-            <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
-              Actualiser
-            </Button>
           </div>
         </div>
       </Card>
@@ -129,42 +95,8 @@ export function MatriculeCard({ school, canManage = false, onChanged }: Props) {
           <Button icon="share" variant="dark" onClick={() => void share()}>
             Partager
           </Button>
-          <Button variant="outline" size="sm" onClick={refresh} disabled={loading} aria-label="Recharger le matricule">
-            <Icon name="refresh" className={loading ? "animate-spin" : ""} />
-          </Button>
         </div>
       </div>
-      <div className="mt-5 space-y-4 rounded-2xl bg-mist p-4">
-        <div className="flex items-start gap-3 text-sm text-neutral-700">
-          <Icon name="link" className="text-[20px] text-forest" />
-          <span className="min-w-0">
-            <span className="block font-semibold">Lien d'inscription pré-rempli</span>
-            <span className="block truncate text-neutral-500">{signupLink(school.matricule)}</span>
-          </span>
-        </div>
-        <div className="flex items-start gap-3 text-sm text-neutral-700">
-          <Icon name="chat" className="text-[20px] text-leaf" />
-          <span className="min-w-0">
-            <span className="block font-semibold">Message WhatsApp prêt à envoyer</span>
-            <span className="block text-xs text-neutral-500">Bouton « Partager » → il ouvre WhatsApp avec ce message.</span>
-          </span>
-        </div>
-        {canManage && (
-          <div className="border-t border-neutral-200 pt-4">
-            <Switch
-              id="registration-open"
-              checked={school.registrationOpen}
-              disabled={busy}
-              onChange={(v) => void toggle(v)}
-              label="Inscriptions en ligne"
-              description={`Désactiver : les élèves et parents verront « ${school.name} n'accepte pas de nouvelles inscriptions ». Le matricule est conservé.`}
-            />
-          </div>
-        )}
-      </div>
-      <p className="mt-3 text-xs text-neutral-500">
-        {MATRICULE_LENGTH} caractères parmi {MATRICULE_ALPHABET} (sans 0, O, 1 ni I pour éviter les confusions).
-      </p>
     </Card>
   );
 }

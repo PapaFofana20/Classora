@@ -15,13 +15,18 @@ export { RATE_LIMIT_RE };
  * repli ; null si aucun (appel direct en développement local).
  */
 export function clientIp(req) {
+  // Express (trust proxy) résout déjà la bonne IP côté proxy ; en appel direct,
+  // req.ip vaut l'adresse socket. On évite ainsi la clé partagée "sans-adresse".
+  if (typeof req?.ip === "string" && req.ip.trim()) return req.ip.trim();
   const xff = req.headers["x-forwarded-for"];
   if (typeof xff === "string") {
     const parts = xff.split(",").map((v) => v.trim()).filter(Boolean);
     if (parts.length) return parts[parts.length - 1];
   }
   const real = typeof req.headers["x-real-ip"] === "string" ? req.headers["x-real-ip"].trim() : null;
-  return real || null;
+  if (real) return real;
+  const sock = req?.socket?.remoteAddress;
+  return typeof sock === "string" && sock.trim() ? sock.trim() : null;
 }
 
 /** Lève une erreur métier si la limite est atteinte pour (key) sur la fenêtre. */

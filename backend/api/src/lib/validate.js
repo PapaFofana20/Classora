@@ -75,7 +75,7 @@ export function requireEmail(obj, field = "email") {
 /** Tél. sénégalais : format 7X XXX XX XX (validation identique au front). */
 export function requireSnPhone(obj, field, label) {
   const raw = requireString(obj, field, label, { max: 20, trim: true });
-  if (!/^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw)) {
+  if (!/^(\+221)?\s?7(?:0|[5-8])\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw)) {
     throw new ValidationError(`${label} est invalide.`);
   }
   return raw;

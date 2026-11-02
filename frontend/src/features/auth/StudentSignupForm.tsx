@@ -35,7 +35,7 @@ export function StudentSignupForm({ school, onBack }: Props) {
   useEffect(() => {
     const list = classes.data;
     if (list && list.length && !form.classId) setForm((f) => ({ ...f, classId: list[0].id }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [classes.data]);
 
   const errors = {

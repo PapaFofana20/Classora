@@ -6,14 +6,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { ConfirmDialog, Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/utils/cn";
-import {
-  courseSubject,
-  courseTeacher,
-  type CourseInput,
-  type TimetableCourse,
-  type TimetableSubjectOption,
-  type TimetableTeacherOption,
-} from "@/services/timetableService";
+import { courseSubject, type CourseInput, type TimetableCourse, type TimetableSubjectOption, type TimetableTeacherOption } from "@/services/timetableService";
 
 /** Jours utilisés par la base (contrainte : minuscules, lundi → samedi). */
 export const TIMETABLE_DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"] as const;
@@ -253,9 +246,6 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
         <table className="w-full min-w-[860px] table-fixed border-collapse">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 w-16 border-b border-neutral-200 bg-mist px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-neutral-500">
-                Heure
-              </th>
               {TIMETABLE_DAYS.map((day) => (
                 <th
                   key={day}
@@ -272,16 +262,6 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
               const isHour = slotStart % 60 === 0;
               return (
                 <tr key={slotStart}>
-                  <th
-                    scope="row"
-                    className={cn(
-                      "sticky left-0 z-10 w-16 bg-white px-2 text-right align-top text-[11px] font-semibold text-neutral-500",
-                      isHour ? "border-t border-neutral-200 pt-1" : "text-transparent",
-                    )}
-                  >
-                    {isHour ? toTime(slotStart) : ""}
-                  </th>
-
                   {TIMETABLE_DAYS.map((day, dayIndex) => {
                     const cell = grid[dayIndex][row];
                     if (cell === "occupied") return null;
@@ -302,11 +282,6 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
                             )}
                           >
                             <span className="line-clamp-2 text-xs font-bold leading-tight">{courseSubject(course)}</span>
-                            <span className="text-[10px] font-medium opacity-80">
-                              {formatTime(course.start_time)} – {formatTime(course.end_time)}
-                            </span>
-                            <span className="truncate text-[10px] opacity-70">{courseTeacher(course)}</span>
-                            {course.room && <span className="truncate text-[10px] opacity-70">{course.room}</span>}
                           </button>
                         </td>
                       );

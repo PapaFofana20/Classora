@@ -24,6 +24,7 @@ const PrivacyPage = lazy(() => import("@/pages/public/PrivacyPage"));
 const NotFoundPage = lazy(() => import("@/pages/public/NotFoundPage"));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
+const PremiumRegisterPage = lazy(() => import("@/pages/auth/PremiumRegisterPage"));
 const SignupSentPage = lazy(() => import("@/pages/auth/SignupSentPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"));
@@ -115,6 +116,7 @@ export default function App() {
             <Route element={<PublicOnlyRoute />}>
               <Route path="connexion" element={<LoginPage />} />
               <Route path="inscription" element={<RegisterPage />} />
+              <Route path="inscription/premium" element={<PremiumRegisterPage />} />
               <Route path="inscription-envoyee" element={<SignupSentPage />} />
               <Route path="mot-de-passe-oublie" element={<ForgotPasswordPage />} />
             </Route>

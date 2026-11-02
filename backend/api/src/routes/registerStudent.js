@@ -25,7 +25,7 @@ export default route(async (req, res) => {
     const gender = body["gender"] === "M" ? "M" : body["gender"] === "F" ? "F" : undefined;
     const birthDate = optionalIsoDate(body, "birthDate", "La date de naissance");
     const classId = optionalUuid(body, "classId", "La classe");
-    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
+    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 72, trim: false });
 
     if (gender === undefined && body["gender"] !== undefined && body["gender"] !== "") {
       return badRequest(res, "Le sexe est invalide.");
@@ -44,6 +44,19 @@ export default route(async (req, res) => {
     }
     if (!resolvedSchool) return badRequest(res, "École introuvable.");
     if (!classId) return badRequest(res, "Sélectionnez une classe.");
+
+    // Vérifier que l'école est writable (abonnement actif)
+    const { data: writable } = await svc.rpc("school_is_writable", { p_school_id: resolvedSchool });
+    if (writable === false) return badRequest(res, "L'abonnement de cette école n'est pas actif.");
+
+    // Vérifier le plafond de demandes EN_ATTENTE (max 100 par école)
+    const { count, error: countError } = await svc
+      .from("registration_requests")
+      .select("*", { count: "exact", head: true })
+      .eq("school_id", resolvedSchool)
+      .eq("status", "EN_ATTENTE");
+    if (countError) console.error("[register-student] error counting requests:", countError);
+    if (count && count >= 100) return badRequest(res, "Trop de demandes en attente pour cette école (limite 100).");
 
     const pwError = passwordError(password);
     if (pwError) return badRequest(res, pwError);

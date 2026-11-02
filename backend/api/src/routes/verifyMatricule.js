@@ -23,6 +23,7 @@ export default route(async (req, res) => {
     if (typeof raw !== "string" || raw.trim() === "") {
       return ok(res, { error: "Saisissez le matricule communiqué par votre école." }, 400);
     }
+    await enforceRateLimit(svc, `verify-matricule:id:${raw.trim().toUpperCase()}`, 10, 600);
 
     const { data: result, error } = await svc.rpc("verify_matricule", { p_matricule: raw });
     if (error || !result) {

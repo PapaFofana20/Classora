@@ -35,7 +35,7 @@ export default route(async (req, res) => {
       const rawPageSize = parseInt(req.query.pageSize ?? "20", 10);
       const page = Number.isInteger(rawPage) ? Math.max(1, rawPage) : 1;
       const pageSize = Number.isInteger(rawPageSize) ? Math.min(100, Math.max(1, rawPageSize)) : 20;
-      const search = (req.query.search ?? "").toString().trim();
+      const search = (req.query.search ?? "").toString().trim().replace(/[%_]/g, (c) => `\\${c}`);
       const rawStatus = req.query.status ? String(req.query.status) : null;
       if (rawStatus !== null && !["ACTIF", "SUSPENDUE", "TOUTES"].includes(rawStatus)) {
         return badRequest(res, "Statut de filtre invalide.");
@@ -161,7 +161,7 @@ export default route(async (req, res) => {
       }
 
       const body = expectObject(req.body);
-      const schoolId = requireString(body, "schoolId", "L'identifiant de l'établissement", { max: 64 });
+      const schoolId = requireUuid(body, "schoolId", "L'identifiant de l'établissement");
       const newStatus = requireString(body, "status", "Le statut", { max: 20 });
       if (!["ACTIF", "SUSPENDUE"].includes(newStatus)) {
         return badRequest(res, "Statut invalide.");
@@ -199,7 +199,7 @@ export default route(async (req, res) => {
       await enforceRateLimit(svc, `admin-schools-delete:${caller.id}`, 5, 300);
 
       const body = expectObject(req.body);
-      const schoolId = requireString(body, "schoolId", "L'identifiant de l'établissement", { max: 64 });
+      const schoolId = requireUuid(body, "schoolId", "L'identifiant de l'établissement");
       // Matricule de confirmation (5 caractères) — ou nom de l'établissement
       // en repli : la matricule scolaire reste NULL tant qu'aucun paiement
       // d'abonnement n'a été confirmé.
@@ -218,45 +218,26 @@ export default route(async (req, res) => {
         return badRequest(res, "La confirmation saisie ne correspond pas à cet établissement.");
       }
 
-      // Les comptes Auth (profiles.id) partent en cascade côté profiles mais
-      // PAS côté auth.users : collecte AVANT la suppression pour nettoyage.
-      const { data: profiles, error: profilesError } = await svc
-        .from("profiles")
-        .select("id")
-        .eq("school_id", schoolId);
-      if (profilesError) throw new Error("Impossible de lire les comptes de l'établissement.");
-
-      // Effectifs pour le journal d'audit (avant la cascade).
-      const { count: studentCount } = await svc
-        .from("students")
-        .select("*", { count: "exact", head: true })
-        .eq("school_id", schoolId);
-
-      // Les élèves sont supprimés EXPLICITEMENT avant l'école : le trigger
-      // guard_class_delete refuse la suppression d'une classe qui contient
-      // encore des élèves, ce qui ferait échouer la cascade sur class_rooms.
-      const { error: studentsDeleteError } = await svc
-        .from("students")
-        .delete()
-        .eq("school_id", schoolId);
-      if (studentsDeleteError) {
-        console.error("[admin-schools] delete students", studentsDeleteError);
+      // (H5) Suppression TRANSACTIONNELLE via RPC security definer :
+      // les élèves et l'école partagent UNE transaction Postgres. Si une
+      // étape échoue, rien n'est supprimé (avant : les élèves partaient
+      // d'abord, un échec suivant perdait les élèves sans supprimer l'école).
+      // La RPC collecte aussi les ids des comptes Auth à nettoyer après coup.
+      const { data: purge, error: purgeError } = await svc.rpc("admin_purge_school", {
+        p_school_id: schoolId,
+      });
+      if (purgeError || !purge) {
+        console.error("[admin-schools] purge", purgeError);
         return serverError(res);
       }
 
-      // Suppression de l'école : cascade sur classes, enseignants, parents,
-      // abonnements, messages, notes…
-      const { error: deleteError } = await svc.from("schools").delete().eq("id", schoolId);
-      if (deleteError) {
-        console.error("[admin-schools] delete", deleteError);
-        return serverError(res);
-      }
+      const authUserIds = purge.auth_user_ids ?? [];
 
       // Suppression des comptes Auth devenus orphelins (best-effort : les
       // données sont déjà supprimées, un échec ne fait pas échouer l'opération).
       let authUsersRemoved = 0;
-      for (const profile of profiles ?? []) {
-        const { error: userDeleteError } = await svc.auth.admin.deleteUser(profile.id);
+      for (const userId of authUserIds) {
+        const { error: userDeleteError } = await svc.auth.admin.deleteUser(userId);
         if (!userDeleteError) authUsersRemoved += 1;
       }
 
@@ -268,16 +249,16 @@ export default route(async (req, res) => {
         entity: "schools",
         entityId: schoolId,
         payload: {
-          matricule: school.matricule,
-          name: school.name,
-          students: studentCount ?? 0,
-          accounts: (profiles ?? []).length,
+          matricule: purge.matricule,
+          name: purge.school_name,
+          students: purge.students ?? 0,
+          accounts: authUserIds.length,
           authUsersRemoved,
         },
       });
 
       return ok(res, {
-        message: `Établissement ${school.name} supprimé définitivement.`,
+        message: `Établissement ${purge.school_name} supprimé définitivement.`,
         authUsersRemoved,
       });
     }

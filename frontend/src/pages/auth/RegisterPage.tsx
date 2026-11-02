@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Icon } from "@/components/ui/Icon";
 import { DirectorSignupForm } from "@/features/auth/DirectorSignupForm";
@@ -13,14 +13,18 @@ import type { Role, School } from "@/types";
 /**
  * /inscription — trois parcours : directeur (direct), élève et parent (matricule d'abord).
  * Le lien partagé par l'école (?matricule=X7K9Q) pré-remplit le champ.
- * Le directeur s'inscrit toujours sur le plan Découverte (gratuit) : il n'y a
- * plus de choix de formule à l'inscription. L'upgrade vers Premium se fait
- * depuis l'onglet Abonnement du tableau de bord.
+ * Le directeur s'inscrit sur le plan Découverte (gratuit), UN SEUL cycle : il
+ * n'y a plus de choix de formule à l'inscription. Le parcours Premium (multi-
+ * cycles, 600 élèves) a sa page dédiée : /inscription/premium — l'ancien lien
+ * /inscription?plan=premium (page tarifs) y redirige.
  */
 export default function RegisterPage() {
   const [params] = useSearchParams();
   const [role, setRole] = useState<Role | null>(null);
   const [school, setSchool] = useState<School | null>(null);
+
+  // Ancien lien Premium de la page tarifs : redirige vers le formulaire dédié.
+  if (params.get("plan") === "premium") return <Navigate to="/inscription/premium" replace />;
 
   const prefill = formatMatriculeInput(params.get("matricule") ?? "");
   const isParent = role === "parent";

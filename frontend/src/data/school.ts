@@ -6,6 +6,7 @@ import type { Cycle, Level, LevelFees, Period, PeriodType } from "@/types";
  * jours restants d'abonnement, date affichée dans la barre supérieure).
  */
 export function todayIso(): string {
+  // Calculated at each call to avoid stale date issues
   return new Date().toISOString().slice(0, 10);
 }
 export const SCHOOL_YEAR = "2026-2027";

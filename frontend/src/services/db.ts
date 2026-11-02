@@ -527,20 +527,62 @@ export function respond<T>(fn: () => T): Promise<T> {
 /* Requêtes de base, systématiquement filtrées par école                */
 /* ------------------------------------------------------------------ */
 
-export const classesOf = (schoolId: string): ClassRoom[] => db.classes.filter((c) => c.schoolId === schoolId);
-export const studentsOf = (schoolId: string): Student[] => db.students.filter((s) => s.schoolId === schoolId);
-export const teachersOf = (schoolId: string): Teacher[] => db.teachers.filter((t) => t.schoolId === schoolId);
-export const parentsOf = (schoolId: string): Parent[] => db.parents.filter((p) => p.schoolId === schoolId);
-export const subjectsOf = (schoolId: string): Subject[] => db.subjects.filter((s) => s.schoolId === schoolId);
-export const classSubjectsOf = (schoolId: string): ClassSubject[] => db.classSubjects.filter((x) => x.schoolId === schoolId);
-export const assignmentsOf = (schoolId: string): TeachingAssignment[] => db.assignments.filter((a) => a.schoolId === schoolId);
-export const gradesOf = (schoolId: string): Grade[] => db.grades.filter((g) => g.schoolId === schoolId);
-export const reportMetasOf = (schoolId: string): ReportMeta[] => db.reportMetas.filter((m) => m.schoolId === schoolId);
-export const paymentsOf = (schoolId: string): Payment[] => db.payments.filter((p) => p.schoolId === schoolId);
-export const conversationsOf = (schoolId: string): Conversation[] => db.conversations.filter((c) => c.schoolId === schoolId);
-export const announcementsOf = (schoolId: string): Announcement[] => db.announcements.filter((a) => a.schoolId === schoolId);
-export const absencesOf = (schoolId: string): AbsenceRecord[] => db.absences.filter((a) => a.schoolId === schoolId);
-export const usersOf = (schoolId: string): User[] => db.users.filter((u) => u.schoolId === schoolId);
+export const classesOf = (schoolId: string, limit?: number): ClassRoom[] => {
+  const filtered = db.classes.filter((c) => c.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const studentsOf = (schoolId: string, limit?: number): Student[] => {
+  const filtered = db.students.filter((s) => s.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const teachersOf = (schoolId: string, limit?: number): Teacher[] => {
+  const filtered = db.teachers.filter((t) => t.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const parentsOf = (schoolId: string, limit?: number): Parent[] => {
+  const filtered = db.parents.filter((p) => p.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const subjectsOf = (schoolId: string, limit?: number): Subject[] => {
+  const filtered = db.subjects.filter((s) => s.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const classSubjectsOf = (schoolId: string, limit?: number): ClassSubject[] => {
+  const filtered = db.classSubjects.filter((x) => x.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const assignmentsOf = (schoolId: string, limit?: number): TeachingAssignment[] => {
+  const filtered = db.assignments.filter((a) => a.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const gradesOf = (schoolId: string, limit?: number): Grade[] => {
+  const filtered = db.grades.filter((g) => g.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const reportMetasOf = (schoolId: string, limit?: number): ReportMeta[] => {
+  const filtered = db.reportMetas.filter((m) => m.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const paymentsOf = (schoolId: string, limit?: number): Payment[] => {
+  const filtered = db.payments.filter((p) => p.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const conversationsOf = (schoolId: string, limit?: number): Conversation[] => {
+  const filtered = db.conversations.filter((c) => c.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const announcementsOf = (schoolId: string, limit?: number): Announcement[] => {
+  const filtered = db.announcements.filter((a) => a.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const absencesOf = (schoolId: string, limit?: number): AbsenceRecord[] => {
+  const filtered = db.absences.filter((a) => a.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
+export const usersOf = (schoolId: string, limit?: number): User[] => {
+  const filtered = db.users.filter((u) => u.schoolId === schoolId);
+  return limit ? filtered.slice(0, limit) : filtered;
+};
 export const schoolOf = (schoolId: string): School | undefined => db.schools.find((s) => s.id === schoolId);
 export const settingsOf = (schoolId: string): SchoolSettings =>
   db.settings.find((s) => s.schoolId === schoolId) ?? {

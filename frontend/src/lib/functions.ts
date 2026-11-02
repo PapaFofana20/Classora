@@ -11,13 +11,12 @@ export async function callFunction<T>(
   body?: unknown,
   method: "POST" | "GET" | "PATCH" | "DELETE" = "POST",
 ): Promise<T> {
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
   const base = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/+$/, "");
   if (!base) {
     throw new Error("API non configurée : définissez VITE_API_URL pour ce build.");
   }
   const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token ?? anonKey;
+  const token = data.session?.access_token;
 
   let res: Response;
   try {
@@ -25,7 +24,7 @@ export async function callFunction<T>(
       method,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });

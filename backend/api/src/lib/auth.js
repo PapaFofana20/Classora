@@ -11,19 +11,23 @@ import { SUPABASE_URL, SERVICE_KEY } from "../config.js";
  * Instance unique (singleton) réutilisée par toutes les routes, afin d'éviter
  * de recréer un client à chaque requête HTTP. Le pooling de connexions
  * PostgreSQL lui-même est géré côté infrastructure par Supabase / PgBouncer. */
-let _svc = null;
+const _svcBySchema = new Map();
 
 export function serviceClient(options = {}) {
   if (!SERVICE_KEY) {
     throw new Error("Configuration serveur incomplète (SUPABASE_SERVICE_ROLE_KEY).");
   }
-  if (!_svc || (options.dbSchema && _svc.db && _svc.db.schema !== options.dbSchema)) {
-    _svc = createClient(SUPABASE_URL, SERVICE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-      db: { schema: options.dbSchema ?? "public" },
-    });
+  const schema = options.dbSchema ?? "public";
+  if (!_svcBySchema.has(schema)) {
+    _svcBySchema.set(
+      schema,
+      createClient(SUPABASE_URL, SERVICE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        db: { schema },
+      }),
+    );
   }
-  return _svc;
+  return _svcBySchema.get(schema);
 }
 
 /** Vérifie le JWT d'un utilisateur connecté auprès de Supabase Auth. */
@@ -148,4 +152,4 @@ export function generateTempPassword() {
 }
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-export const SN_PHONE_RE = /^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/;
+export const SN_PHONE_RE = /^(\+221)?\s?7(?:0|[5-8])\s?\d{3}\s?\d{2}\s?\d{2}$/;

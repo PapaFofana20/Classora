@@ -65,7 +65,7 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
     return { overview, info };
   }, [schoolId]);
 
-  const reload = useCallback(() => state.reload(), [state.reload]); // eslint-disable-line react-hooks/exhaustive-deps
+  const reload = useCallback(() => state.reload(), [state.reload]);
 
   // Écouter l'événement de rechargement après inscription directeur
   useEffect(() => {

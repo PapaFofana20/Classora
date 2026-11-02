@@ -2,9 +2,12 @@
  * Inscription publique d'un DIRECTEUR (3 étapes atomiques) :
  *  1. création du compte Auth (échec rapide si l'e-mail est déjà pris) ;
  *  2. une seule RPC security definer transactionnelle : école, paramètres,
- *     frais par niveau, matières par défaut, profil ACTIF ;
+ *     frais par niveau, matières par défaut, profil ACTIF + abonnement de la
+ *     formule choisie activé immédiatement pour un an (migration 00035 : pas
+ *     encore de passerelle de paiement, TOUTES les formules sont accordées
+ *     365 jours sans encaissement, la limite d'élèves restant appliquée) ;
  *  3. nettoyage du compte Auth si l'étape 2 échoue (pas d'état fantôme).
- * Pas d'abonnement, pas de matricule : l'écran suivant est /app/abonnement.
+ * Pas de matricule manuel : l'écran suivant est le tableau de bord.
  */
 
 import { passwordError, serviceClient } from "../lib/auth.js";
@@ -38,7 +41,7 @@ export default route(async (req, res) => {
     const lastName = requireString(body, "lastName", "Le nom", { min: 1, max: 60 });
     const email = requireEmail(body);
     const phone = requireSnPhone(body, "phone", "Le téléphone");
-    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
+    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 72, trim: false });
     const schoolName = requireString(body, "schoolName", "Le nom de l'école", { min: 2, max: 120 });
     const city = requireString(body, "city", "La ville", { min: 1, max: 80 });
     // p_address (migration 00023) : l'Edge Function la transmettait, la route
@@ -46,9 +49,14 @@ export default route(async (req, res) => {
     // enregistrée à l'inscription.
     const address = optionalString(body, "address", "L'adresse", 200) ?? "";
     const cycles = requireCycles(body);
-    // Formule choisie sur la page d'inscription (indicative : l'activation
-    // reste manuelle). Transmise à la RPC à partir de la migration 00032.
-    const plan = optionalString(body, "plan", "Le plan d'abonnement", 50) ?? "essentiel";
+    // Formule choisie sur la page d'inscription (Découverte ou Premium) et
+    // activée immédiatement par la RPC pour un an (migration 00035).
+    const rawPlan = optionalString(body, "plan", "Le plan d'abonnement", 50) ?? "essentiel";
+    const ALLOWED_PLANS = new Set(["essentiel", "premium"]);
+    if (!ALLOWED_PLANS.has(rawPlan)) {
+      return badRequest(res, "Formule d'abonnement invalide.");
+    }
+    const plan = rawPlan;
 
     const pwError = passwordError(password);
     if (pwError) return badRequest(res, pwError);

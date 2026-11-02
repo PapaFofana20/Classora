@@ -108,11 +108,13 @@ app.all("/update-staff", updateStaff);
 app.all("/reset-staff-password", resetStaffPassword);
 app.all("/set-staff-active", setStaffActive);
 
-// Routes de gestion d'emploi du temps
+// Routes de gestion d'emploi du temps — SÉCURISÉES : JWT vérifié + rôle +
+// school_id du profil jamais du client + validations + rate limit
+// (voir routes/timetables.js — vagues 1 de l'audit). Les ids sont des UUID.
 app.all("/api/timetables", timetables);
-app.all("/api/timetables/:id(\\d+)", timetables);
-app.all("/api/timetables/:id(\\d+)/slots", timetables);
-app.all("/api/timetables/:id(\\d+)/export-pdf", timetables);
+app.all("/api/timetables/:id", timetables);
+app.all("/api/timetables/:id/publish", timetables);
+app.all("/api/timetables/:id/slots", timetables);
 
 // Routes administratives Classora (protégées, service_role côté serveur).
 // Une configuration absente provoquerait un 500 opaque : on répond un 503

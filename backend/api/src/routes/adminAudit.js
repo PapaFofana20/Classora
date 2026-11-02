@@ -14,7 +14,7 @@ function sanitizeSearch(value) {
   return String(value ?? "")
     .trim()
     .slice(0, 60)
-    .replace(/[,()\\%]/g, " ");
+    .replace(/[,()\\%_]/g, " ");
 }
 
 export default route(async (req, res) => {

@@ -28,17 +28,30 @@ const SENEGAL_CITIES = [
   "Sedhiou", "Goudomp", "Marsassoum",
 ];
 
+export type SignupVariant = "decouverte" | "premium";
+
 /**
- * Inscription du directeur : école + compte + abonnement Découverte activé,
- * puis accès direct au tableau de bord. Il n'y a plus de choix de formule à
- * l'inscription : l'école démarre gratuitement sur le plan Découverte. L'upgrade
- * vers Premium se fait depuis l'onglet Abonnement du tableau de bord.
+ * Inscription du directeur : école + compte + abonnement activé immédiatement
+ * (migration 00033), puis accès direct au tableau de bord.
+ *
+ * Deux variantes, pour un même formulaire :
+ *  - « decouverte » (par défaut) : plan gratuit, l'école démarre sur UN SEUL
+ *    cycle (radio). L'upgrade vers Premium se fait ensuite depuis l'onglet
+ *    Abonnement du tableau de bord ;
+ *  - « premium » (page /inscription/premium, bouton Premium de la page tarifs) :
+ *    plan Premium, MULTIPLES cycles (cases à cocher, aucune restriction), limite
+ *    portée à 600 élèves et abonnement accordé pour un an (pas de passerelle
+ *    de paiement à ce jour).
  */
-export function DirectorSignupForm() {
+export function DirectorSignupForm({ variant = "decouverte" }: { variant?: SignupVariant }) {
+  const premium = variant === "premium";
   const { registerDirector } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  // Plan découverte : un seul cycle (radio, préselectionné) ; Premium :
+  // sélection libre d'un ou plusieurs cycles (aucune restriction).
   const [cycle, setCycle] = useState<Cycle>("elementaire");
+  const [cycles, setCycles] = useState<Cycle[]>(premium ? [] : ["elementaire"]);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", schoolName: "", city: "Dakar", address: "", password: "", confirm: "" });
   const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -55,7 +68,7 @@ export function DirectorSignupForm() {
     address: form.address.trim().length < 3 ? "Indiquez l'adresse de l'école." : null,
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
-    cycle: null,
+    cycle: premium && cycles.length === 0 ? "Sélectionnez au moins un cycle." : null,
     terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
   };
   const valid = Object.values(errors).every((e) => e === null);
@@ -70,7 +83,10 @@ export function DirectorSignupForm() {
     setError(null);
     try {
       // Payload explicite : sans "confirm" (le mot de passe de confirmation
-      // n'a pas à voyager jusqu'à l'API).
+      // n'a pas à voyager jusqu'à l'API). La variante Premium transmet la
+      // formule « premium » : la RPC finish_director_registration active
+      // l'abonnement immédiatement pour un an (migration 00035) et la
+      // validation backend accepte toujours 1 à 3 cycles.
       await registerDirector({
         firstName: form.firstName,
         lastName: form.lastName,
@@ -80,10 +96,10 @@ export function DirectorSignupForm() {
         city: form.city,
         address: form.address,
         password: form.password,
-        plan: "essentiel",
-        cycles: [cycle],
+        plan: premium ? "premium" : "essentiel",
+        cycles: premium ? cycles : [cycle],
       });
-      toast("Compte créé. Bienvenue sur Classora !");
+      toast(premium ? "Compte Premium créé. Bienvenue sur Classora !" : "Compte créé. Bienvenue sur Classora !");
       navigate("/app", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Création du compte impossible.");
@@ -111,23 +127,31 @@ export function DirectorSignupForm() {
         <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" autoComplete="tel" hint="Numéro sénégalais à 9 chiffres." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
       </div>
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold text-ink">Cycle de votre école</legend>
+        <legend className="mb-2 text-sm font-semibold text-ink">Cycle{premium ? "s" : ""} de votre école</legend>
         <p className="text-xs text-neutral-600 mb-3">
-          Sur le plan Découverte (gratuit), votre école démarre sur un seul cycle. Vous pourrez en ajouter d’autres depuis votre tableau de bord.
+          {premium
+            ? "Sur le plan Premium, sélectionnez un ou plusieurs cycles — aucune restriction."
+            : "Sur le plan Découverte (gratuit), votre école démarre sur un seul cycle. Vous pourrez en ajouter d’autres depuis votre tableau de bord."}
         </p>
+        {show("cycle") && (
+          <p role="alert" className="mb-2 text-xs font-medium text-danger">
+            {show("cycle")}
+          </p>
+        )}
         <div className="grid gap-2 sm:grid-cols-3">
           {CYCLES.map((c) => {
-            const selected = cycle === c;
+            const selected = premium ? cycles.includes(c) : cycle === c;
             return (
               <label key={c} className={cn("flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium transition-colors", selected ? "border-forest bg-lime text-forest" : "border-neutral-200 text-neutral-700 hover:border-forest/40")}>
                 <input
-                  type="radio"
+                  type={premium ? "checkbox" : "radio"}
                   name="cycle"
                   className="sr-only"
                   checked={selected}
-                  onChange={() => setCycle(c)}
+                  onChange={() => (premium ? setCycles((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c])) : setCycle(c))}
                   aria-label={CYCLE_LABELS[c]}
                 />
+                {premium && <Icon name={selected ? "check_box" : "check_box_outline_blank"} className="shrink-0 text-[20px] text-forest" />}
                 {CYCLE_LABELS[c]}
               </label>
             );
@@ -135,23 +159,37 @@ export function DirectorSignupForm() {
         </div>
       </fieldset>
       <div className="grid gap-4">
-        <div className="flex items-center gap-3 rounded-2xl bg-lime-soft p-4">
-          <div className="shrink-0">
+        {premium ? (
+          <div className="flex items-center gap-3 rounded-2xl bg-lime p-4">
+            <div className="shrink-0">
               <Icon name="workspace_premium" className="text-[22px] text-forest" />
             </div>
-          <div className="text-sm min-w-0">
-            <p className="font-bold text-forest">Plan Découverte — gratuit</p>
-            <p className="text-neutral-600">
-              Votre école démarre gratuitement, avec les fonctionnalités essentielles. Vous pourrez passer à Premium depuis l'onglet Abonnement de votre tableau de bord.
-            </p>
+            <div className="text-sm min-w-0">
+              <p className="font-bold text-forest">Plan Premium — jusqu'à 600 élèves</p>
+              <p className="text-neutral-600">
+                Tous les modules débloqués : emploi du temps, messagerie, paiements mobile money, comptes du personnel, exports et accompagnement dédié. Votre abonnement Premium est activé immédiatement pour un an.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3 rounded-2xl bg-lime-soft p-4">
+            <div className="shrink-0">
+              <Icon name="workspace_premium" className="text-[22px] text-forest" />
+            </div>
+            <div className="text-sm min-w-0">
+              <p className="font-bold text-forest">Plan Découverte — gratuit</p>
+              <p className="text-neutral-600">
+                Votre école démarre gratuitement, avec les fonctionnalités essentielles. Vous pourrez passer à Premium depuis l'onglet Abonnement de votre tableau de bord.
+              </p>
+            </div>
+          </div>
+        )}
         <PasswordField value={form.password} placeholder="••••••••" onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
         <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." placeholder="••••••••" value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
       </div>
       <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
-        Créer mon école sur Classora
+        {premium ? "Créer mon école Premium" : "Créer mon école sur Classora"}
       </Button>
     </form>
   );

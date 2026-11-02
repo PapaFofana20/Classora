@@ -31,7 +31,7 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
     const refresh = () => unread.reload();
     window.addEventListener("ec:messages", refresh);
     return () => window.removeEventListener("ec:messages", refresh);
-  }, [unread.reload]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [unread.reload]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {

@@ -117,7 +117,7 @@ function Sheet({ sheet, period }: { sheet: GradeSheet; period: string }) {
   };
 
   const averages = sheet.students.map((s) => ({ id: s.id, value: subjectAverage(gradeOf(s.id), cycle) }));
-  const ranks = useMemo(() => computeRanks(averages), [averages]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ranks = useMemo(() => computeRanks(averages), [averages]);
   const valid = averages.map((a) => a.value).filter((v): v is number => v !== null);
   const classAvg = valid.length ? round2(valid.reduce((a, b) => a + b, 0) / valid.length) : null;
   const completion = gradeCompletion(grades, sheet.students.length, cycle);

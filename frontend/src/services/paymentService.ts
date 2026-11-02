@@ -49,7 +49,7 @@ export function sendReminders(studentIds: string[]): Promise<number> {
     const { data, error } = await supabase.rpc("send_reminders", {
       p_student_ids: studentIds,
     });
-    if (error) throw new Error(/Seuls l/i.test(error.message) ? "Seuls l'économe et la direction envoient les relances." : error.message);
+    if (error) throw new Error("Impossible d'envoyer les relances. Réessayez.");
     await hydrate("announcements");
     return Number(data ?? studentIds.length);
   })();

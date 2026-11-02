@@ -70,7 +70,7 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
       setSchool(null);
     }
     return () => window.clearTimeout(timer.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [value]);
 
   return (

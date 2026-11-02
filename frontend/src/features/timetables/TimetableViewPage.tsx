@@ -134,7 +134,7 @@ export default function TimetableViewPage() {
     if (!timetable) return;
     setPublishing(true);
     try {
-      await publishTimetable(timetable.id);
+      await publishTimetable(timetable.id, user.schoolId);
       setTimetable({ ...timetable, status: "published", published_at: new Date().toISOString() });
       toast("Emploi du temps publié : les classes concernées peuvent maintenant le consulter.");
     } catch (e) {
@@ -148,7 +148,7 @@ export default function TimetableViewPage() {
     if (!timetable) return;
     setPublishing(true);
     try {
-      await unpublishTimetable(timetable.id);
+      await unpublishTimetable(timetable.id, user.schoolId);
       setTimetable({ ...timetable, status: "draft", published_at: null });
       toast("Emploi du temps repassé en brouillon : il n'est plus visible par les classes.");
     } catch (e) {
@@ -160,19 +160,21 @@ export default function TimetableViewPage() {
 
   const handleCreateCourse = async (input: CourseInput) => {
     if (!id) return;
-    await createCourse(id, await resolveTeacher(input));
+    const resolved = await resolveTeacher(input);
+    await createCourse(id, user.schoolId, resolved);
     await refresh();
     toast("Cours ajouté à l'emploi du temps.");
   };
 
   const handleUpdateCourse = async (courseId: string, input: CourseInput) => {
-    await updateCourse(courseId, await resolveTeacher(input));
+    const resolved = await resolveTeacher(input);
+    await updateCourse(courseId, user.schoolId, resolved);
     await refresh();
     toast("Cours modifié.");
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    await deleteCourse(courseId);
+    await deleteCourse(courseId, user.schoolId);
     await refresh();
     toast("Cours supprimé.");
   };

@@ -24,7 +24,7 @@ export default route(async (req, res) => {
     const email = requireEmail(body);
     const phone = requireSnPhone(body, "phone", "Le téléphone");
     const childCode = requireString(body, "childCode", "Le code élève", { min: 6, max: 8 }).toUpperCase();
-    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
+    const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 72, trim: false });
 
     let resolvedSchool = null;
     if (schoolId) {

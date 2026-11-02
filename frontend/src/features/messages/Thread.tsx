@@ -31,7 +31,7 @@ export function Thread({ conversation: c, onBack, onChanged }: Props) {
 
   useEffect(() => {
     if (c.unread > 0) void markRead(user, c.id).then(onChanged);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [c.id, c.unread]);
   useEffect(() => end.current?.scrollIntoView({ block: "end" }), [c.messages.length, c.id]);
 

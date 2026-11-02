@@ -54,18 +54,14 @@ export default route(async (req, res) => {
     }
 
     if (email && email !== (target.email ?? "").toLowerCase()) {
-      const { count } = await svc
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("email", email);
-      if (count && count > 0) {
-        return badRequest(res, "Un compte existe déjà avec cet e-mail.");
-      }
       const { error: emailError } = await svc.auth.admin.updateUserById(userId, {
         email,
         email_confirm: true,
       });
       if (emailError) {
+        if (/already|exists|registered|duplicate/i.test(emailError.message ?? "")) {
+          return badRequest(res, "Un compte existe déjà avec cet e-mail.");
+        }
         return badRequest(res, "Impossible de changer l'e-mail de ce compte. Vérifiez qu'il n'est pas déjà utilisé.");
       }
     }

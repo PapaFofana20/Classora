@@ -37,7 +37,14 @@ export function PricingSection({ withHeader = true }: { withHeader?: boolean }) 
                     </li>
                   ))}
                 </ul>
-                <ArrowButton to={isGroup ? "/contact" : `/inscription?plan=${p.id}`} tone={p.highlight ? "lime" : "forest"} className="w-full justify-between">
+                <ArrowButton
+                  to={
+                    isGroup
+                      ? "/contact"
+                      : p.id === "premium"
+                        ? "/inscription/premium"
+                        : `/inscription?plan=${p.id}`
+                  } tone={p.highlight ? "lime" : "forest"} className="w-full justify-between">
                   {isGroup ? "Demander un devis" : "Choisir " + p.name}
                 </ArrowButton>
               </article>

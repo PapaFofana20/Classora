@@ -8,7 +8,7 @@ import { passwordError } from "../lib/auth.js";
 import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
 import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
-import { expectObject, requireEmail, requireString, ValidationError } from "../lib/validate.js";
+import { expectObject, requireEmail, requireString, requireUuid, ValidationError } from "../lib/validate.js";
 
 const ADMIN_ROLES = Object.freeze(["superadmin", "admin", "agent_suivi"]);
 
@@ -147,7 +147,7 @@ export default route(async (req, res) => {
       // Modification d'un agent (rôle, statut, informations).
       await enforceRateLimit(svc, `admin-agents-patch:${caller.id}`, 30, 300);
       const body = expectObject(req.body);
-      const agentId = requireString(body, "agentId", "L'identifiant de l'agent", { max: 64 });
+      const agentId = requireUuid(body, "agentId", "L'identifiant de l'agent");
 
       const { data: target, error: targetError } = await svc
         .from("admin_agents")
@@ -228,10 +228,19 @@ export default route(async (req, res) => {
         }
       }
 
-      const { error: updateError } = await svc.from("admin_agents").update(patch).eq("id", agentId);
+      // Mise à jour atomique (garde « dernier superadmin » incluse) via RPC.
+      const { data: updatedOk, error: updateError } = await svc.rpc("admin_update_agent", {
+        p_agent_id: agentId,
+        p_patch: patch,
+        p_downgrades: downgradesTarget,
+      });
       if (updateError) {
         if (/unique|duplicate/i.test(updateError.message)) return badRequest(res, "Cet e-mail ou matricule est déjà utilisé.");
+        console.error("[admin-agents] update", updateError);
         return serverError(res);
+      }
+      if (updatedOk === false) {
+        return forbidden(res, "Impossible de modifier le dernier superadministrateur actif.");
       }
 
       await auditAdmin(svc, {
