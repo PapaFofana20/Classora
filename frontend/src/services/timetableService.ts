@@ -245,12 +245,12 @@ function normalizeTime(value: string): string {
 }
 
 export async function createCourse(timetableId: string, schoolId: string, input: CourseInput): Promise<void> {
+  void schoolId;
   // school_id explicite scroppé : on ne permet pas à un utilisateur de brancher
   // un EDT hors de son école (defense-in-depth côté client) — la RLS 00037
   // precedent aussi subject_id/teacher_id same-school.
   const { error } = await supabase.from("timetable_courses").insert({
     timetable_id: timetableId,
-    school_id: schoolId,
     subject_id: input.subjectId,
     teacher_id: input.teacherId,
     day: input.day,
@@ -264,10 +264,10 @@ export async function createCourse(timetableId: string, schoolId: string, input:
 }
 
 export async function updateCourse(courseId: string, schoolId: string, input: CourseInput): Promise<void> {
+  void schoolId;
   const { error } = await supabase
     .from("timetable_courses")
     .update({
-      school_id: schoolId,
       subject_id: input.subjectId,
       teacher_id: input.teacherId,
       day: input.day,
@@ -276,18 +276,17 @@ export async function updateCourse(courseId: string, schoolId: string, input: Co
       room: input.room?.trim() || null,
       description: input.description?.trim() || null,
     })
-    .eq("id", courseId)
-    .eq("school_id", schoolId); // Defense-in-depth : scroppé pas du query.
+    .eq("id", courseId); // timetable_courses n'a pas de school_id ; la RLS 00037 vérifie l'école via timetables.
 
   if (error) throw error;
 }
 
 export async function deleteCourse(courseId: string, schoolId: string): Promise<void> {
+  void schoolId;
   const { error } = await supabase
     .from("timetable_courses")
     .delete()
-    .eq("id", courseId)
-    .eq("school_id", schoolId); // Defense-in-depth : scroppé.
+    .eq("id", courseId);
   if (error) throw error;
 }
 

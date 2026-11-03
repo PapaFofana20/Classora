@@ -42,14 +42,13 @@ export function TeacherSelect({ label, value, onChange, teachers, subjectId, ton
 interface MatrixProps {
   board: AssignmentBoard;
   cycle: Cycle;
-  onSetCell: (classId: string, subjectId: string, teacherId: string | null) => void;
   onReplace: (classId: string, subjectId: string, oldId: string, newId: string | null) => void;
-  onAdd: (classId: string, subjectId: string) => void;
+  onAdd: (classId: string, subjectId: string, teacherId?: string) => void;
   onSetHead: (classId: string, teacherId: string | null) => void;
   onSetTitular: (classId: string, teacherId: string | null) => void;
 }
 
-export function AssignmentMatrix({ board, cycle, onSetCell, onReplace, onAdd, onSetHead, onSetTitular }: MatrixProps) {
+export function AssignmentMatrix({ board, cycle, onReplace, onAdd, onSetHead, onSetTitular }: MatrixProps) {
   const classes = board.classes.filter((c) => c.cycle === cycle);
   const professors = board.teachers.filter((t) => t.kind === "professeur");
   const instituteurs = board.teachers.filter((t) => t.kind === "instituteur");
@@ -92,23 +91,32 @@ export function AssignmentMatrix({ board, cycle, onSetCell, onReplace, onAdd, on
     const tone = list.length === 0 ? "error" : list.length > 1 ? "warning" : "ok";
     return (
       <div className="flex flex-col gap-1">
-        {(list.length ? list : [null]).map((a, i) => (
-          <div key={a ? a.teacherId : `none-${i}`} className="flex items-center gap-1">
+        {list.map((a) => (
+          <div key={a.teacherId} className="flex items-center gap-1">
             <TeacherSelect
               label={`${c.name}, ${s.name} : enseignant`}
-              value={a?.teacherId ?? ""}
+              value={a.teacherId}
               subjectId={s.id}
               teachers={professors}
               tone={tone}
-              onChange={(v) => (a ? (list.length === 1 ? onSetCell(c.id, s.id, v || null) : onReplace(c.id, s.id, a.teacherId, v || null)) : onSetCell(c.id, s.id, v || null))}
+              onChange={(v) => (v ? onReplace(c.id, s.id, a.teacherId, v) : onReplace(c.id, s.id, a.teacherId, null))}
             />
-            {a && i === list.length - 1 && (
-              <button type="button" aria-label={`Ajouter un second enseignant pour ${c.name}, ${s.name}`} title="Ajouter un second enseignant" onClick={() => onAdd(c.id, s.id)} className="grid size-9 shrink-0 place-items-center rounded-full text-neutral-400 hover:bg-lime-soft hover:text-forest">
-                <Icon name="add" className="text-[18px]" />
-              </button>
-            )}
+            <button type="button" aria-label={`Retirer cet enseignant de ${c.name}, ${s.name}`} title="Retirer" onClick={() => onReplace(c.id, s.id, a.teacherId, null)} className="grid size-9 shrink-0 place-items-center rounded-full text-neutral-400 hover:bg-red-50 hover:text-danger">
+              <Icon name="close" className="text-[16px]" />
+            </button>
           </div>
         ))}
+        <div className="flex items-center gap-1">
+          <TeacherSelect
+            label={`${c.name}, ${s.name} : ajouter un enseignant`}
+            value=""
+            subjectId={s.id}
+            teachers={professors}
+            tone="ok"
+            emptyLabel="+ Ajouter un enseignant"
+            onChange={(v) => { if (v) onAdd(c.id, s.id, v); }}
+          />
+        </div>
       </div>
     );
   };

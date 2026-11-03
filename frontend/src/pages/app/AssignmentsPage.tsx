@@ -11,7 +11,7 @@ import { useToast } from "@/context/ToastContext";
 import { CYCLES, CYCLE_LABELS } from "@/data/school";
 import { AssignmentMatrix } from "@/features/assignments/AssignmentMatrix";
 import { useAsync } from "@/hooks/useAsync";
-import { addCellTeacher, getAssignmentBoard, removeCellTeacher, setCellTeacher, setHeadTeacher, setTitular, type AssignmentBoard } from "@/services/assignmentService";
+import { addCellTeacher, getAssignmentBoard, removeCellTeacher, setHeadTeacher, setTitular, type AssignmentBoard } from "@/services/assignmentService";
 import { useCurrentUser } from "@/context/AuthContext";
 import type { Cycle } from "@/types";
 import { MAX_ASSIGNMENTS_PER_TEACHER } from "@/utils/permissions";
@@ -60,12 +60,11 @@ export default function AssignmentsPage() {
               <AssignmentMatrix
                 board={board}
                 cycle={cycle}
-                onSetCell={(c, s, t) => void run(() => setCellTeacher(user, c, s, t), "Affectation mise à jour.")}
                 onReplace={(c, s, oldId, newId) => void run(async () => { await removeCellTeacher(user, c, s, oldId); return newId ? addCellTeacher(user, c, s, newId) : getAssignmentBoard(user.schoolId); }, "Affectation mise à jour.")}
-                onAdd={(c, s) => {
+                onAdd={(c, s, teacherId) => {
                   const taken = board.assignments.filter((a) => a.classId === c && a.subjectId === s).map((a) => a.teacherId);
-                  const candidate = profs.find((t) => t.specialties.includes(s) && !taken.includes(t.id)) ?? profs.find((t) => !taken.includes(t.id));
-                  if (candidate) void run(() => addCellTeacher(user, c, s, candidate.id), "Second enseignant ajouté : conflit à résoudre.");
+                  const id = teacherId ?? (profs.find((t) => t.specialties.includes(s) && !taken.includes(t.id)) ?? profs.find((t) => !taken.includes(t.id)))?.id;
+                  if (id) void run(() => addCellTeacher(user, c, s, id), "Enseignant ajouté : conflit à résoudre si nécessaire.");
                 }}
                 onSetHead={(c, t) => void run(() => setHeadTeacher(user, c, t), "Professeur principal mis à jour.")}
                 onSetTitular={(c, t) => {
