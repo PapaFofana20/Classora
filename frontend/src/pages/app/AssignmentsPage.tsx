@@ -56,6 +56,14 @@ export default function AssignmentsPage() {
                   </ul>
                 )}
               </Card>
+              {board.classSubjects.length === 0 && (
+                <Card className="!bg-amber-50">
+                  <p className="text-sm text-amber-900">
+                    <strong>Aucune matière n'est rattachée à une classe.</strong> Configurez d'abord les matières par classe dans{" "}
+                    <a href="/app/parametres" className="font-semibold underline">Paramètres → Coefficients</a>, puis revenez ici pour affecter les enseignants.
+                  </p>
+                </Card>
+              )}
               <Tabs label="Cycle" value={cycle} onChange={(v) => setCycle(v as Cycle)} items={CYCLES.map((c) => ({ id: c, label: CYCLE_LABELS[c], badge: board.classes.filter((x) => x.cycle === c).length }))} />
               <AssignmentMatrix
                 board={board}
