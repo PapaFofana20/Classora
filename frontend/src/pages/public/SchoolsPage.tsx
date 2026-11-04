@@ -17,12 +17,11 @@ export default function SchoolsPage() {
   return (
     <>
       <PageHero {...pageHeroes.ecoles} />
-      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-10" aria-label="Liste des écoles partenaires">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-10 bg-[radial-gradient(#c6f068_2px,transparent_2px)] bg-[background-size:24px_24px] opacity-15" aria-label="Liste des écoles partenaires">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
             <Reveal key={s.id} delay={i * 60}>
               <article className="relative h-full rounded-3xl border-2 border-forest/10 shadow-pop bg-lime-pale p-6">
-                <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
                 <div className="relative z-10 flex items-center gap-4">
                   <div>
                     <h2 className="font-bold leading-snug">{s.name}</h2>

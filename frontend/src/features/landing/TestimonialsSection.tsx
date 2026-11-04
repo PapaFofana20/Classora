@@ -4,7 +4,7 @@ import { testimonials } from "@/data/landing";
 
 export function TestimonialsSection() {
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="testi-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16 bg-[radial-gradient(#c6f068_2px,transparent_2px)] bg-[background-size:24px_24px] opacity-15" aria-labelledby="testi-title">
       <Reveal>
         <div className="mb-12 text-center">
           <h2 id="testi-title" className="mx-auto max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
@@ -17,7 +17,6 @@ export function TestimonialsSection() {
           <Reveal key={t.id} delay={i * 100}>
             <figure className="relative flex h-full flex-col overflow-hidden rounded-3xl border-2 border-forest/10 shadow-pop bg-lime-pale text-forest">
               {/* Dégradé radial en arrière-plan, comme la section « 4 étapes » */}
-              <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
               <div className="aspect-[4/5] w-full overflow-hidden bg-neutral-200 relative z-10">
                 <img
                   src={t.photo}
