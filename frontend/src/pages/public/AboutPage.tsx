@@ -2,7 +2,6 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
 import { aboutValues, aboutStats } from "@/data/landing";
-const aboutTeamImg = "/images/about-team.jpg";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { Counter } from "@/components/ui/Counter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -17,7 +16,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero {...pageHeroes.apropos} />
-      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-14 md:pb-16" aria-labelledby="about-team-title">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-14 md:pb-16" aria-labelledby="mission-title">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 text-center sm:pt-14 md:pt-16">
             <div
@@ -29,24 +28,21 @@ export default function AboutPage() {
               className="absolute bottom-0 left-1/2 size-[420px] -translate-x-1/2 translate-y-1/3 rounded-full bg-lime/40 blur-2xl md:size-[560px]"
             />
             <div className="relative">
-              <h2
-                id="about-team-title"
-                className="text-balance text-3xl font-extrabold tracking-tight text-forest sm:text-4xl md:text-5xl"
-              >
-                Notre équipe <em className="font-serif font-semibold italic">à votre écoute</em>
+              <h2 id="mission-title" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl max-w-3xl mx-auto text-center">
+                <span className="text-lime">Classora</span> : pensé pour <span className="font-serif font-semibold italic text-forest-500">les réalités de nos écoles</span>
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 md:text-lg">
-                Basée à Dakar, notre équipe vous accompagne pour la mise en place de Classora dans votre établissement et répond à toutes vos questions.
-              </p>
+              <div className="mt-8 max-w-3xl mx-auto space-y-4 text-lg leading-relaxed text-neutral-700 text-center">
+                <p>
+                  <strong className="text-ink">Tout est parti d'un constat simple :</strong> dans de nombreuses écoles privées sénégalaises, la gestion scolaire repose encore sur des piles de cahiers, des reçus papier et des bulletins laborieusement préparés à la main. Un fonctionnement chronophage qui complique le quotidien des équipes et freine l'efficacité des établissements.
+                </p>
+                <p>
+                  <strong className="text-ink">Nous avons imaginé Classora pour changer cela.</strong> Une solution conçue autour de la réalité de nos écoles : un instituteur titulaire pour une classe à l'élémentaire, plusieurs professeurs au moyen et au secondaire, des coefficients adaptés à chaque série et un suivi des échéances de scolarité en temps réel.
+                </p>
+                <p>
+                  Parce que gérer une école ne devrait pas être une succession de tâches administratives, mais un moyen de mieux accompagner chaque élève et de faire grandir son établissement.
+                </p>
+              </div>
             </div>
-            <img
-              src={aboutTeamImg}
-              alt="L'équipe pédagogique Classora"
-              width={1028}
-              height={941}
-              decoding="async"
-              className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-80 lg:h-96"
-            />
           </div>
         </Reveal>
       </section>
