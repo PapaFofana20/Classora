@@ -1,7 +1,6 @@
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { testimonials } from "@/data/landing";
-import { cn } from "@/utils/cn";
 
 export function TestimonialsSection() {
   return (
@@ -16,8 +15,10 @@ export function TestimonialsSection() {
       <div className="grid gap-5 md:grid-cols-3">
         {testimonials.map((t, i) => (
           <Reveal key={t.id} delay={i * 100}>
-            <figure className={cn("group flex h-full flex-col overflow-hidden rounded-3xl transition-transform duration-300 hover:-translate-y-1", i === 1 ? "bg-forest text-white" : "bg-lime-soft")}>
-              <div className="aspect-[4/5] w-full overflow-hidden bg-neutral-200">
+            <figure className="relative flex h-full flex-col overflow-hidden rounded-3xl border-2 border-forest/10 shadow-pop bg-lime-pale text-forest">
+              {/* Dégradé radial en arrière-plan, comme la section « 4 étapes » */}
+              <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
+              <div className="aspect-[4/5] w-full overflow-hidden bg-neutral-200 relative z-10">
                 <img
                   src={t.photo}
                   alt={t.photoAlt}
@@ -25,15 +26,15 @@ export function TestimonialsSection() {
                   height={1000}
                   loading="lazy"
                   decoding="async"
-                  className="size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  className="size-full object-cover object-center"
                 />
               </div>
-              <div className="flex flex-1 flex-col p-7">
-                <Icon name="format_quote" fill className={cn("text-[44px]", i === 1 ? "text-lime" : "text-leaf")} />
+              <div className="relative z-10 flex flex-1 flex-col p-7">
+                <Icon name="format_quote" fill className="text-[44px] text-forest" />
                 <blockquote className="mt-3 flex-1 text-base leading-relaxed">« {t.quote} »</blockquote>
                 <figcaption className="mt-6">
                   <p className="text-sm font-bold">{t.name}</p>
-                  <p className={cn("text-xs", i === 1 ? "text-white/70" : "text-neutral-600")}>
+                  <p className="text-xs text-neutral-600">
                     {t.role} · {t.school}
                   </p>
                 </figcaption>
