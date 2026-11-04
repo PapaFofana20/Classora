@@ -49,7 +49,7 @@ export default function AboutPage() {
               width={1672}
               height={941}
               decoding="async"
-              className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-80 lg:h-96"
+              className="relative -mx-[30%] mt-8 block h-auto w-[160%] max-w-none sm:mx-auto sm:h-72 sm:w-auto md:h-80 lg:h-96"
             />
           </div>
         </Reveal>
@@ -64,10 +64,15 @@ export default function AboutPage() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {aboutValues.map((v, i) => (
             <Reveal key={v.title} delay={i * 80}>
-              <div className="h-full rounded-3xl bg-mist p-6 transition-transform duration-300 hover:-translate-y-1 hover:bg-lime-soft">
-                <h3 className="text-lg font-bold">{v.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">{v.text}</p>
-              </div>
+              <article className="group relative flex h-full min-h-[300px] flex-col justify-between overflow-hidden rounded-3xl border-2 border-forest/10 bg-lime p-7 text-forest shadow-pop transition-transform duration-300 hover:-translate-y-1">
+                <div className="relative z-10">
+                  <div className="mb-8 flex items-center justify-between md:mb-6">
+                    <span className="text-6xl font-extrabold tracking-tighter opacity-20">0{i + 1}</span>
+                  </div>
+                  <h3 className="text-2xl font-bold">{v.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-neutral-700">{v.text}</p>
+                </div>
+              </article>
             </Reveal>
           ))}
         </div>
