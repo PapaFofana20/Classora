@@ -9,7 +9,7 @@ const features = ["Bulletins", "Échéancier", "Messagerie"];
 /** Grille bento « Comment ça marche » : la dernière carte, large, est en vert foncé. */
 export function StepsBento() {
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-gutter pb-20 bg-[radial-gradient(#c6f068_2px,transparent_2px)] bg-[background-size:24px_24px] opacity-15" aria-labelledby="steps-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter pb-20 bg-[radial-gradient(#c6f068_2px,transparent_2px)] bg-[background-size:24px_24px]" aria-labelledby="steps-title">
       <Reveal>
         <div className="mb-10 text-center">
           <h2 id="steps-title" className="mx-auto max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">

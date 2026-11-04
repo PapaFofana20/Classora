@@ -4,7 +4,7 @@ import { testimonials } from "@/data/landing";
 
 export function TestimonialsSection() {
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16 bg-[radial-gradient(#c6f068_2px,transparent_2px)] bg-[background-size:24px_24px] opacity-15" aria-labelledby="testi-title">
+    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16 bg-[radial-gradient(#c6f068_2px,transparent_2px)] bg-[background-size:24px_24px]" aria-labelledby="testi-title">
       <Reveal>
         <div className="mb-12 text-center">
           <h2 id="testi-title" className="mx-auto max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
