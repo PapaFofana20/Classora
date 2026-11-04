@@ -6,7 +6,6 @@ import { aboutStats, schoolPartners } from "@/data/landing";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { TestimonialsSection } from "@/features/landing/TestimonialsSection";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { initials } from "@/utils/format";
 
 export default function SchoolsPage() {
   usePageMeta({
@@ -22,9 +21,9 @@ export default function SchoolsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
             <Reveal key={s.id} delay={i * 60}>
-              <article className="h-full rounded-3xl bg-mist p-6 transition-transform duration-300 hover:-translate-y-1 hover:bg-lime-soft">
-                <div className="flex items-center gap-4">
-                  <span className="grid size-14 place-items-center rounded-2xl bg-forest text-lg font-extrabold text-lime">{initials(s.name.split(" ")[0], s.name.split(" ").slice(-1)[0])}</span>
+              <article className="relative h-full rounded-3xl border-2 border-forest/10 shadow-pop bg-lime-pale p-6">
+                <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
+                <div className="relative z-10 flex items-center gap-4">
                   <div>
                     <h2 className="font-bold leading-snug">{s.name}</h2>
                     <p className="flex items-center gap-1 text-sm text-neutral-600">
@@ -33,8 +32,8 @@ export default function SchoolsPage() {
                     </p>
                   </div>
                 </div>
-                <p className="mt-5 text-sm font-semibold text-forest">{s.cycles.join(" · ")}</p>
-                <p className="mt-4 text-sm text-neutral-600">
+                <p className="relative z-10 mt-5 text-sm font-semibold text-forest">{s.cycles.join(" · ")}</p>
+                <p className="relative z-10 mt-4 text-sm text-neutral-600">
                   <strong className="text-forest">{s.students}</strong> élèves suivis
                 </p>
               </article>
