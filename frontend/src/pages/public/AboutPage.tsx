@@ -2,7 +2,6 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
 import { aboutValues, aboutStats } from "@/data/landing";
-const aboutTeamImg = "/images/about-team.jpg";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { Counter } from "@/components/ui/Counter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -40,19 +39,6 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-          </div>
-        </Reveal>
-      </section>
-
-      <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-hidden="true">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-lime p-2 shadow-pop">
-            <img
-              src={aboutTeamImg}
-              alt="L'équipe pédagogique d'une école partenaire"
-              className="aspect-[16/8] w-full rounded-[1.25rem] object-cover"
-              loading="lazy"
-            />
           </div>
         </Reveal>
       </section>
