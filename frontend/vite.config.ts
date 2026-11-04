@@ -13,7 +13,15 @@ const __dirname = path.dirname(__filename);
 const isDev = process.env.NODE_ENV === "development";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), isDev ? [] : [viteSingleFile()]],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // base "/" : les ressources publiques (favicons, images, manifest) restent
+    // accessibles depuis toutes les routes profondes de la SPA. Le plugin
+    // singlefile force sinon base "./", ce qui cassait /favicon.svg dès qu'on
+    // ouvrait /app/... (l'URL relative pointait vers /app/favicon.svg).
+    isDev ? [] : [viteSingleFile({ overrideConfig: { base: "/" } })],
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

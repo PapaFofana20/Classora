@@ -1,0 +1,32 @@
+{
+  "name": "Classora — Gestion scolaire pour les écoles privées au Sénégal",
+  "short_name": "Classora",
+  "description": "Inscriptions, bulletins automatiques, suivi des paiements et messagerie parents-enseignants, du CI à la Terminale.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#B8FB54",
+  "theme_color": "#B8FB54",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

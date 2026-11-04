@@ -68,11 +68,19 @@
       }
     </script>
 
-    <link rel="icon" type="image/png" sizes="64x64" href="/images/favicon.png" />
+    <!-- Icônes de l'onglet et des raccourcis (toutes les pages de la SPA).
+         Le SVG est prioritaire sur les navigateurs récents ; l'ICO et les PNG
+         couvrent les navigateurs plus anciens, iOS et Android/PWA. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+    <link rel="icon" href="/favicon.ico?v=2" sizes="16x16 32x32 48x48 64x64" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=2" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=2" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

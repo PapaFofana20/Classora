@@ -16,6 +16,22 @@ export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?
   );
 }
 
+/**
+ * Marque seule (emblème lime sur fond transparent), utilisée là où le
+ * logotype complet ne tient pas : sidebar repliée sur ordinateur.
+ */
+export function LogoMark({ className, alt = "" }: { className?: string; alt?: string }) {
+  return (
+    <img
+      src="/images/logo-mark-lime.svg"
+      alt={alt}
+      width={40}
+      height={40}
+      className={cn("h-10 w-10 object-contain", className)}
+    />
+  );
+}
+
 export function Avatar({ name, size = 40, className }: { name: string; size?: number; className?: string }) {
   const [first, last] = name.trim().split(" ").filter(Boolean);
   const letters = initialsGrapheme(first ?? "", last ?? "");

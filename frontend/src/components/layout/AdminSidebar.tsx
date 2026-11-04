@@ -4,7 +4,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { SIDEBAR_COLLAPSED, SIDEBAR_EXPANDED, useSidebar } from "@/context/SidebarContext";
 import { Icon } from "@/components/ui/Icon";
-import { Logo } from "@/components/ui/Brand";
+import { Logo, LogoMark } from "@/components/ui/Brand";
 import { cn } from "@/utils/cn";
 import type { AdminAgent } from "@/types";
 import { adminNavFor } from "@/routes/adminNavigation";
@@ -128,8 +128,8 @@ function SidebarContent({ agent, expanded, onNavigate, onLogoClick }: { agent: A
             </span>
           </>
         ) : (
-          <button type="button" onClick={onLogoClick} aria-label="Déplier le menu" className="grid size-10 place-items-center rounded-xl bg-lime text-forest">
-            <Icon name="school" fill className="text-[24px]" />
+          <button type="button" onClick={onLogoClick} aria-label="Déplier le menu" className="grid size-11 place-items-center rounded-xl transition-colors hover:bg-white/10">
+            <LogoMark className="h-9 w-9" />
           </button>
         )}
       </div>

@@ -9,7 +9,7 @@ import { countPendingFor } from "@/services/registrationService";
 import { navFor, type NavItem } from "@/routes/navigation";
 import type { SessionUser } from "@/types";
 import { cn } from "@/utils/cn";
-import { Logo } from "@/components/ui/Brand";
+import { Logo, LogoMark } from "@/components/ui/Brand";
 import { Icon } from "@/components/ui/Icon";
 import { useAsync } from "@/hooks/useAsync";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
@@ -106,8 +106,8 @@ function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { 
         {expanded ? (
           <Logo dark to="/" />
         ) : (
-          <button type="button" onClick={onLogoClick} aria-label={onLogoClick ? "Déplier le menu" : "Classora, retour à l'accueil"} className="grid size-10 place-items-center rounded-xl bg-lime text-forest">
-            <Icon name="school" fill className="text-[24px]" />
+          <button type="button" onClick={onLogoClick} aria-label={onLogoClick ? "Déplier le menu" : "Classora, retour à l'accueil"} className="grid size-11 place-items-center rounded-xl transition-colors hover:bg-white/10">
+            <LogoMark className="h-9 w-9" />
           </button>
         )}
       </div>

@@ -24,6 +24,41 @@ export default function ContactPage() {
   return (
     <>
       <PageHero {...pageHeroes.contact} />
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-14 md:pb-16" aria-labelledby="contact-support-title">
+        <Reveal>
+          <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 text-center sm:pt-14 md:pt-16">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute bottom-0 left-1/2 size-[420px] -translate-x-1/2 translate-y-1/3 rounded-full bg-lime/40 blur-2xl md:size-[560px]"
+            />
+            <div className="relative">
+              <h2
+                id="contact-support-title"
+                className="text-balance text-3xl font-extrabold tracking-tight text-forest sm:text-4xl md:text-5xl"
+              >
+                Une équipe <em className="font-serif font-semibold italic">à votre écoute</em>
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 md:text-lg">
+                Une question sur Classora, la mise en place dans votre établissement ou les tarifs ?
+                Notre support basé à Dakar vous répond en moins de 24 h, du lundi au vendredi, 8 h – 18 h.
+              </p>
+            </div>
+            <img
+              src="/images/contact-support.webp"
+              alt="Assistante technique Classora portant un casque et tenant un ordinateur portable"
+              width={1028}
+              height={941}
+              loading="lazy"
+              decoding="async"
+              className="relative mx-auto mt-8 block h-52 w-auto sm:h-64 md:h-80 lg:h-96"
+            />
+          </div>
+        </Reveal>
+      </section>
       <section className="mx-auto grid w-full max-w-[1280px] gap-8 px-gutter pb-20 lg:grid-cols-[1.4fr_1fr]">
         <Reveal>
           <h2 className="sr-only">Formulaire de contact</h2>
