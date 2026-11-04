@@ -66,9 +66,6 @@ export default function AboutPage() {
             <Reveal key={v.title} delay={i * 80}>
               <article className="group relative flex h-full min-h-[300px] flex-col justify-between overflow-hidden rounded-3xl border-2 border-forest/10 bg-lime p-7 text-forest shadow-pop transition-transform duration-300 hover:-translate-y-1">
                 <div className="relative z-10">
-                  <div className="mb-8 flex items-center justify-between md:mb-6">
-                    <span className="text-6xl font-extrabold tracking-tighter opacity-20">0{i + 1}</span>
-                  </div>
                   <h3 className="text-2xl font-bold">{v.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-neutral-700">{v.text}</p>
                 </div>
