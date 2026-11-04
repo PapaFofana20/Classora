@@ -30,8 +30,16 @@ function actionTone(action: string): BadgeTone {
   return "neutral";
 }
 
+/**
+ * Cellule CSV : guillemets doublés + neutralisation de l'injection de
+ * formule (=, +, -, @ en début de cellule) — les données viennent de
+ * l'audit et peuvent être saisies par des tiers ; Excel/LibreOffice
+ * exécuteraient une formule sinon.
+ */
 function csvCell(value: unknown): string {
-  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+  let text = String(value ?? "");
+  if (/^[=+\-@]/.test(text.trimStart())) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
 }
 
 export default function AdminAuditPage() {

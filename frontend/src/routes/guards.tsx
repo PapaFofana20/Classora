@@ -32,10 +32,11 @@ export function ProtectedRoute() {
 /** /connexion, /inscription : redirige vers /app si déjà connecté. */
 export function PublicOnlyRoute() {
   const { user, loadingSession } = useAuth();
+  // Hooks AVANT tout return conditionnel (ordre stable des hooks).
+  usePageMeta({ noindex: true });
   // Attendre la restauration pour éviter le flash « formulaire de connexion »
   // puis rebond vers /app au rechargement d'une page publique.
   if (loadingSession) return <div className="min-h-screen bg-mist" aria-hidden="true" />;
-  usePageMeta({ noindex: true });
   if (user) return <Navigate to="/app" replace />;
   return <Outlet />;
 }

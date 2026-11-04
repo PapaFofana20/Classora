@@ -16,7 +16,14 @@ interface Props {
   onClose: () => void;
 }
 
-/** Message WhatsApp pré-rempli : lien de connexion, e-mail, mot de passe, matricule. */
+/** Lien "Mot de passe oublié" — le personnel définit son propre mot de passe. */
+export const forgotPasswordLink = (): string => `${window.location.origin}${import.meta.env.BASE_URL}mot-de-passe-oublie`;
+
+/**
+ * Message WhatsApp pré-rempli : lien de connexion, e-mail, lien de définition
+ * du mot de passe, matricule. JAMAIS de mot de passe (l'URL `wa.me/?text=`
+ * fuiterait dans l'historique et les serveurs WhatsApp).
+ */
 export function credentialsMessage(credentials: StaffCredentials, school: School | null): string {
   const link = connexionLink();
   return [
@@ -26,7 +33,7 @@ export function credentialsMessage(credentials: StaffCredentials, school: School
     ``,
     `🔑 Lien de connexion : ${link}`,
     `✉️ E-mail : ${credentials.email}`,
-    `🔒 Mot de passe : ${credentials.password}`,
+    `🔐 Définissez votre mot de passe via « Mot de passe oublié » : ${forgotPasswordLink()}`,
     school?.matricule ? `🏫 Matricule de l'école : ${school.matricule}` : "",
     ``,
   ]
@@ -81,7 +88,8 @@ export function StaffCredentialsModal({ open, credentials, school, kind = "creat
     >
       <div className="space-y-4">
         <p className="rounded-2xl bg-lime-soft p-4 text-sm font-medium text-forest">
-          Transmettez ces identifiants à {credentials.firstName}. Ce mot de passe définitif ne sera plus jamais affiché après la fermeture de cette fenêtre. L'utilisateur pourra le modifier plus tard depuis son profil.
+          Remettez ces identifiants en mains propres. Ce mot de passe ne sera plus jamais affiché après la fermeture.
+          Le message WhatsApp ne contient <strong>aucun mot de passe</strong> : la personne définit le sien via « Mot de passe oublié ».
         </p>
         <dl className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-mist p-4">

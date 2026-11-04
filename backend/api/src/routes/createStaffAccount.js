@@ -80,7 +80,9 @@ export default route(async (req, res) => {
       return ok(res, {
         userId: created.user.id,
         email,
-        password,
+        // Le mot de passe vient de la requête (saisi par la direction) : on ne
+        // le renvoie pas — le front l'a déjà et aucun intermédiaire ne doit le
+        // réémettre.
         firstName,
         lastName,
         role,

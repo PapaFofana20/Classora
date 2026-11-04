@@ -7,18 +7,34 @@ import { serviceClient } from "../lib/authAdmin.js";
 import { ok, route } from "../lib/http.js";
 import { DEFAULT_PLATFORM_SETTINGS, publicPlatformStatus, readPlatformSettings } from "../lib/platformSettings.js";
 
+// Cache mémoire partagé par les requêtes de ce processus (TTL 30 s).
+const CACHE_TTL_MS = 30_000;
+let cache = null;
+
 export default route(async (req, res) => {
   if (req.method !== "GET") return ok(res, { error: "Méthode non autorisée." }, 405);
+
+  // Cache mémoire (TTL 30 s) : /platform-status est public et non borné — sans
+  // cache, chaque requête scriptee coûte 1 lecture SQL (amplification DoS).
+  const now = Date.now();
+  if (cache && now - cache.at < CACHE_TTL_MS) {
+    res.setHeader("Cache-Control", "public, max-age=30");
+    res.setHeader("X-Cache", "HIT");
+    return ok(res, cache.body);
+  }
+  const respond = (body) => {
+    cache = { at: now, body };
+    res.setHeader("Cache-Control", "public, max-age=30");
+    return ok(res, body);
+  };
 
   try {
     const svc = serviceClient();
     const { settings, migrationApplied } = await readPlatformSettings(svc);
-    res.setHeader("Cache-Control", "public, max-age=30");
-    return ok(res, { ...publicPlatformStatus(settings), migrationApplied });
+    return respond({ ...publicPlatformStatus(settings), migrationApplied });
   } catch (e) {
     // La page publique ne doit jamais tomber à cause de la configuration.
     console.warn("[platform-status] repli sur les valeurs par défaut :", e?.message ?? e);
-    res.setHeader("Cache-Control", "public, max-age=30");
-    return ok(res, { ...publicPlatformStatus(DEFAULT_PLATFORM_SETTINGS), migrationApplied: false });
+    return respond({ ...publicPlatformStatus(DEFAULT_PLATFORM_SETTINGS), migrationApplied: false });
   }
 });

@@ -53,19 +53,26 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
   );
 }
 
-// Fail-open CORS : sans FRONTEND_ORIGIN, toutes les origines sont admises —
-// acceptable en développement, à corriger absolument en production.
+// Render ajoute EXACTEMENT un hop de proxy de confiance. Avec `trust proxy:
+// true`, Express accepterait TOUTE la chaîne X-Forwarded-For, y compris une
+// entrée falsifiée par le client (req.ip = maillon le plus à gauche), ce qui
+// annulerait tout le rate limiting par IP. On fait donc confiance à un seul
+// hop ; clientIp() (lib/rateLimit.js) dérive du DERNIER maillon XFF.
 if (process.env.NODE_ENV === "production" && !process.env.FRONTEND_ORIGIN) {
   console.warn(
-    "[scolia-api] FRONTEND_ORIGIN absente en production : le CORS est actuellement OUVERT à toute origine.",
+    "[scolia-api] FRONTEND_ORIGIN absente en production : démarrage refusé (CORS fail-closed).",
   );
+  process.exit(1);
 }
 
 const app = express();
 
 // Rejets déguisés en réponses 400 { error } (jamais d'HTML d'erreur Express).
 app.disable("x-powered-by");
-app.set("trust proxy", true); // passerelle Render : X-Forwarded-For fiable
+// Render ajoute EXACTEMENT un hop de proxy de confiance : on ignore le reste
+// de la chaîne X-Forwarded-For (falsifiable) via `trust proxy: 1`, et
+// lib/rateLimit.js dérive l'IP du dernier maillon / du socket.
+app.set("trust proxy", 1);
 
 // CORS AVANT le parseur JSON : un corps invalide doit aussi renvoyer les
 // en-têtes CORS, sinon le front sur une autre origine ne peut pas lire le
@@ -83,10 +90,18 @@ app.use((err, _req, res, next) => {
   return next(err);
 });
 
-// Durcissement minimal des réponses (l'API ne sert que du JSON).
-app.use((_req, res, next) => {
+// Durcissement des réponses (l'API ne sert que du JSON). HSTS : le site est
+// en HTTPS sur Render ; X-Frame-Options : l'API ne doit jamais être en
+// iframe ; no-store sur tout ce qui est authentifié ou admin.
+app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Strict-Transport-Security", "max-age=15552000; includeSubDomains");
+  res.setHeader("X-Frame-Options", "DENY");
+  // Routes authentifiées/admin : jamais en cache (plateforme, proxies, navigateur).
+  if (req.path.startsWith("/admin") || req.path === "/login-guard") {
+    res.setHeader("Cache-Control", "no-store");
+  }
   next();
 });
 

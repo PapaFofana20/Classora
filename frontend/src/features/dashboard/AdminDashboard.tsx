@@ -52,6 +52,7 @@ function Content({ s, finance }: { s: AdminStats; finance: boolean }) {
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const isBlocked = settings?.blockStudentBulletins ?? false;
+  const currentUser = useCurrentUser();
 
   const toggle = async (checked: boolean) => {
     setBusy(true);
@@ -70,7 +71,7 @@ function Content({ s, finance }: { s: AdminStats; finance: boolean }) {
     <div className="space-y-4">
       {!finance && (
         <>
-          <OnboardingChecklist user={useCurrentUser()} />
+          <OnboardingChecklist user={currentUser} />
           {school && <MatriculeCard school={school} canManage onChanged={() => window.location.reload()} />}
           {!finance && (
             <Card>

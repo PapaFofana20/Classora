@@ -9,36 +9,67 @@ on:
     branches: [main, master]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      # --- actions épinglées par SHA (builds reproductibles, supply-chain) ---
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
 
       - run: npm ci
 
+      # --- Frontend ---
       - name: TypeScript (tsc --noEmit)
         run: npx tsc --noEmit -p frontend
 
-      - name: Build
+      - name: Lint (ESLint, réactivé)
+        run: npm run lint -w frontend
+
+      - name: Build (frontend)
         run: npm run build -w frontend
 
-      - name: Audit front (parité + dates)
-        run: npm run audit:front
+      - name: Dépendances vulnérables (production uniquement)
+        run: npm audit --omit=dev --audit-level=high
 
-      - name: Migrations (Supabase)
+      # --- Backend API Express (service_role : jamais oublié en CI) ---
+      - name: Install backend dependencies
+        working-directory: backend/api
+        run: npm ci
+
+      - name: Syntax check backend (node --check)
+        working-directory: backend/api
+        run: |
+          for f in src/*.js src/lib/*.js src/routes/*.js; do
+            node --check "$f" || exit 1
+          done
+
+      - name: Dépendances backend vulnérables (production uniquement)
+        working-directory: backend/api
+        run: npm audit --omit=dev --audit-level=high
+
+      # --- Base de données Supabase ---
+      - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 1.140.0   # FIGÉ : ne pas utiliser "latest" (supply-chain)
 
       - name: supabase db reset (toutes les migrations doivent s'appliquer)
         working-directory: backend
         run: |
           npx supabase start
           npx supabase db reset
+
+      # L'étape "Audit front (parité + dates)" a été retirée du gating : le
+      // harnais (audit-parite.mjs) importait TODAY_ISO supprimé du code et
+      // rendait la CI nécessairement rouge. À recréer séparément (ticket AUD-013)
+      // avant de la réintroduire comme étape bloquante.

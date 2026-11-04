@@ -4,7 +4,7 @@
  * modification de rôle, désactivation). L'identité et le rôle viennent du
  * profil admin_agents, jamais du client.
  */
-import { passwordError } from "../lib/auth.js";
+import { passwordError, revokeUserSessions } from "../lib/auth.js";
 import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
 import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
@@ -242,6 +242,8 @@ export default route(async (req, res) => {
       if (updatedOk === false) {
         return forbidden(res, "Impossible de modifier le dernier superadministrateur actif.");
       }
+      // Désactivation : révocation des sessions de l'agent (refresh tokens).
+      if (patch.status === "DESACTIVE") await revokeUserSessions(svc, target.auth_user_id);
 
       await auditAdmin(svc, {
         schoolId: null,

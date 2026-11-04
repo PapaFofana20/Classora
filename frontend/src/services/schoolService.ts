@@ -1,6 +1,7 @@
 import type { ClassRoom, ClassSubject, Cycle, Level, School, SchoolSettings, Subject } from "@/types";
 import { levels } from "@/data/school";
 import { supabase } from "@/lib/supabase";
+import { callFunction } from "@/lib/functions";
 import { classSubjectsOf, classesOf, db, hydrate, respond, schoolOf, settingsOf, studentsOf } from "./db";
 
 export interface SchoolOverview {
@@ -90,12 +91,17 @@ interface MatriculeServerSchool {
   auto_approve_students?: boolean;
 }
 
-/** Vérification côté serveur (formule publique : RPC appelable par anon). */
+/** Vérification via l'API (rate-limitée par IP) — le RPC n'est plus exposé à anon. */
 export async function verifyMatricule(raw: string): Promise<MatriculeCheck> {
   const code = raw.trim().toUpperCase().replace(/[\s-]/g, "").replace(/[01OI]/g, "");
-  const { data, error } = await supabase.rpc("verify_matricule", { p_matricule: code });
-  if (error) throw new Error("Vérification impossible, réessayez.");
-  const result = (data ?? {}) as { ok: boolean; reason: string | null; message: string | null; school?: MatriculeServerSchool };
+  let result: { ok: boolean; reason: string | null; message: string | null; school?: MatriculeServerSchool };
+  try {
+    result = await callFunction<typeof result>("verify-matricule", { matricule: code }, "POST");
+  } catch (e) {
+    const err = new Error(e instanceof Error ? e.message : "Vérification impossible, réessayez.");
+    (err as Error & { cause?: unknown }).cause = e;
+    throw err;
+  }
   if (result.school) {
     const s = result.school;
     const school: School = {

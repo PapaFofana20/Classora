@@ -5,7 +5,7 @@
  * Limité en débit par compte appelant.
  */
 
-import { audit, generateTempPassword, isStaffRole, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
+import { audit, generateTempPassword, isStaffRole, requireDirecteur, revokeUserSessions, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid } from "../lib/validate.js";
@@ -49,6 +49,9 @@ export default route(async (req, res) => {
       console.error("[reset-staff-password] auth", pwError);
       return serverError(res);
     }
+    // Le nouveau mot de passe invalide les usages futurs ; on révoque aussi
+    // les refresh tokens existants (l'ancienne session ne prolonge plus rien).
+    await revokeUserSessions(svc, userId);
 
     const { error: flagError } = await svc
       .from("profiles")
@@ -68,6 +71,7 @@ export default route(async (req, res) => {
       entityId: userId,
     });
 
+    res.setHeader("Cache-Control", "no-store");
     return ok(res, {
       userId,
       email: target.email,

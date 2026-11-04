@@ -5,21 +5,18 @@
  */
 
 import { serviceClient } from "../lib/auth.js";
-import { methodNotAllowed, ok, route, serverError } from "../lib/http.js";
+import { methodNotAllowed, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 
 export default route(async (req, res) => {
-  if (req.method !== "GET" && req.method !== "POST") return methodNotAllowed(res);
+  // POST uniquement : le matricule ne doit pas transiter en query string
+  // (historique navigateur, logs d'accès, Referer).
+  if (req.method !== "POST") return methodNotAllowed(res);
   const svc = serviceClient();
   try {
     await enforceRateLimit(svc, `verify-matricule:${clientIp(req) ?? "sans-adresse"}`, 20, 600);
 
-    let raw = null;
-    if (req.method === "GET") {
-      raw = req.query.matricule ?? req.query.m ?? null;
-    } else {
-      raw = req.body?.matricule ?? null;
-    }
+    const raw = req.body?.matricule ?? null;
     if (typeof raw !== "string" || raw.trim() === "") {
       return ok(res, { error: "Saisissez le matricule communiqué par votre école." }, 400);
     }
@@ -31,10 +28,14 @@ export default route(async (req, res) => {
       return serverError(res);
     }
 
-    const status = result.ok === true ? 200 : (result.reason === "format" ? 400 : 404);
-    return ok(res, result, status);
+    // Le résultat de la vérification est un payload métier (ok/reason/school),
+    // pas une erreur HTTP : on renvoie toujours 200 — le front lit `ok` dans
+    // le corps. (404/400 renverraient le front sur un throw générique et
+    // perdraient le message métier affiché à l'utilisateur.)
+    return ok(res, result, 200);
   } catch (e) {
     if (e?.name === "ValidationError") return ok(res, { error: e.message }, 400);
+    if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
     console.error("[verify-matricule]", e);
     return serverError(res);
   }

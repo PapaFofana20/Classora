@@ -35,7 +35,9 @@ export default route(async (req, res) => {
       const rawPageSize = parseInt(req.query.pageSize ?? "20", 10);
       const page = Number.isInteger(rawPage) ? Math.max(1, rawPage) : 1;
       const pageSize = Number.isInteger(rawPageSize) ? Math.min(100, Math.max(1, rawPageSize)) : 20;
-      const search = (req.query.search ?? "").toString().trim().replace(/[%_]/g, (c) => `\\${c}`);
+      const search = (req.query.search ?? "").toString().trim()
+        .replace(/\\/g, "\\\\")   // échapper le backslash EN PREMIER (B8)
+        .replace(/[%_]/g, (c) => `\\${c}`);
       const rawStatus = req.query.status ? String(req.query.status) : null;
       if (rawStatus !== null && !["ACTIF", "SUSPENDUE", "TOUTES"].includes(rawStatus)) {
         return badRequest(res, "Statut de filtre invalide.");
@@ -92,6 +94,10 @@ export default route(async (req, res) => {
 
     if (req.method === "PATCH") {
       // Modification d'une école (informations administratives).
+      // Réservée aux rôles admin+ : agent_suivi est en lecture seule.
+      if (!["admin", "superadmin"].includes(caller.role)) {
+        return forbidden(res, "Votre rôle ne permet pas de modifier un établissement.");
+      }
       await enforceRateLimit(svc, `admin-schools-patch:${caller.id}`, 30, 300);
       const body = expectObject(req.body);
       const schoolId = requireUuid(body, "schoolId", "L'identifiant de l'établissement");
@@ -213,8 +219,12 @@ export default route(async (req, res) => {
       if (findError || !school) {
         return notFound(res, "Établissement introuvable.");
       }
-      const expectedConfirmation = school.matricule ?? school.name;
-      if (confirmation !== expectedConfirmation) {
+      // H-4 : la confirmation EXIGE la matricule (le nom, public et devinable,
+      // ne peut plus servir de confirmation pour une suppression irréversible).
+      if (!school.matricule) {
+        return badRequest(res, "Cet établissement n'a pas de matricule : la suppression est bloquée. Contactez le support.");
+      }
+      if (confirmation !== school.matricule) {
         return badRequest(res, "La confirmation saisie ne correspond pas à cet établissement.");
       }
 

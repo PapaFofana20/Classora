@@ -1,15 +1,25 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 
-/** /inscription-envoyee : confirmation après une inscription élève ou parent. */
+interface SignupSentState {
+  role?: "eleve" | "parent";
+  eleve?: string;
+  childCode?: string | null;
+  autoApprove?: boolean;
+}
+
+/** /inscription-envoyee : confirmation après une inscription élève ou parent.
+ *  Les données sensibles (child_code, nom de l'élève) arrivent via
+ *  location.state — JAMAIS via l'URL (historique, logs, Referer). */
 export default function SignupSentPage() {
-  const [params] = useSearchParams();
-  const role = params.get("role");
-  const eleve = params.get("eleve");
-  const childCode = params.get("code");
-  const autoApprove = params.get("auto") === "1";
+  const location = useLocation();
+  const state = (location.state as SignupSentState | null) ?? {};
+  const role = state.role ?? null;
+  const eleve = state.eleve ?? null;
+  const childCode = state.childCode ?? null;
+  const autoApprove = state.autoApprove === true;
   const isParent = role === "parent";
   const isStudent = role === "eleve";
 

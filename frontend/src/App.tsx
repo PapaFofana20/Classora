@@ -10,7 +10,7 @@ import { PlatformProvider } from "@/context/PlatformContext";
 import { SchoolProvider } from "@/context/SchoolContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { MustChangePasswordGuard, ProtectedRoute, PublicOnlyRoute, RoleRoute, ScrollToTop, SubscriptionGuard } from "@/routes/guards";
-import { AdminProtectedRoute } from "@/routes/adminGuards";
+import { AdminProtectedRoute, adminGuard } from "@/routes/adminGuards";
 import { ROUTE_ROLES } from "@/routes/navigation";
 import HomePage from "@/pages/public/HomePage";
 
@@ -130,19 +130,19 @@ export default function App() {
                   au lieu de rediriger vers /admin/connexion. */}
               <Route element={<AdminProtectedRoute />}>
                 <Route element={<AdminLayout />}>
-                  <Route index element={<AdminDashboardPage />} />
-                  <Route path="ecoles" element={<AdminSchoolsPage />} />
-                  <Route path="ecoles/:id" element={<AdminSchoolDetailPage />} />
-                  <Route path="agents" element={<AdminAgentsPage />} />
-                  <Route path="abonnements" element={<AdminSubscriptionsPage />} />
-                  <Route path="abonnements/offres" element={<AdminSubscriptionsPage />} />
-                  <Route path="finances" element={<AdminFinancesPage />} />
-                  <Route path="finances/transactions" element={<AdminFinancesPage />} />
-                  <Route path="finances/factures" element={<AdminFinancesPage />} />
-                  <Route path="analyses" element={<AdminAnalyticsPage />} />
-                  <Route path="supervision/audit" element={<AdminAuditPage />} />
-                  <Route path="supervision/securite" element={<AdminSecurityPage />} />
-                  <Route path="parametres" element={<AdminSettingsPage />} />
+                  <Route index element={adminGuard("dashboard", <AdminDashboardPage />)} />
+                  <Route path="ecoles" element={adminGuard("ecoles", <AdminSchoolsPage />)} />
+                  <Route path="ecoles/:id" element={adminGuard("ecoles", <AdminSchoolDetailPage />)} />
+                  <Route path="agents" element={adminGuard("agents", <AdminAgentsPage />)} />
+                  <Route path="abonnements" element={adminGuard("abonnements", <AdminSubscriptionsPage />)} />
+                  <Route path="abonnements/offres" element={adminGuard("abonnements", <AdminSubscriptionsPage />)} />
+                  <Route path="finances" element={adminGuard("finances", <AdminFinancesPage />)} />
+                  <Route path="finances/transactions" element={adminGuard("finances", <AdminFinancesPage />)} />
+                  <Route path="finances/factures" element={adminGuard("finances", <AdminFinancesPage />)} />
+                  <Route path="analyses" element={adminGuard("analyses", <AdminAnalyticsPage />)} />
+                  <Route path="supervision/audit" element={adminGuard("audit", <AdminAuditPage />)} />
+                  <Route path="supervision/securite" element={adminGuard("securite", <AdminSecurityPage />)} />
+                  <Route path="parametres" element={adminGuard("parametres", <AdminSettingsPage />)} />
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Route>
               </Route>

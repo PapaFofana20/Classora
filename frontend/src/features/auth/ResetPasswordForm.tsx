@@ -30,6 +30,7 @@ export function ResetPasswordForm() {
     const checkLink = async () => {
       const url = new URL(window.location.href);
       if (url.searchParams.get("error") || url.searchParams.get("error_code")) {
+        window.history.replaceState(null, "", "/reinitialiser-mot-de-passe");
         if (!cancelled) setStatus("invalid");
         return;
       }
@@ -37,6 +38,9 @@ export function ResetPasswordForm() {
       const tokenHash = url.searchParams.get("token_hash");
       if (tokenHash && url.searchParams.get("type") === "recovery") {
         const { error: otpError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+        // Nettoyer l'URL : le token_hash ne doit pas rester dans l'historique
+        // ni dans le Referer des liens qui suivraient.
+        window.history.replaceState(null, "", "/reinitialiser-mot-de-passe");
         if (!cancelled) setStatus(otpError ? "invalid" : "ready");
         return;
       }

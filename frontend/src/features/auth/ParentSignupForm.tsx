@@ -64,7 +64,7 @@ export function ParentSignupForm({ school, onBack }: Props) {
       });
       logout();
       toast("Demande envoyée à l'école.");
-      navigate(`/inscription-envoyee?role=parent&eleve=${encodeURIComponent(childName)}`, { replace: true });
+      navigate("/inscription-envoyee", { replace: true, state: { role: "parent", eleve: childName } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Inscription impossible.");
       setBusy(false);

@@ -115,7 +115,8 @@ function Content({
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState("");
 
-  const expectedConfirmation = (school: AdminSchool) => school.matricule || school.name;
+  // H-4 : confirmation par matricule uniquement (le nom est public et devinable).
+  const expectedConfirmation = (school: AdminSchool) => school.matricule ?? "";
 
   const toggleStatus = async () => {
     if (!statusTarget) return;
@@ -314,14 +315,9 @@ function Content({
             autoComplete="off"
           />
         ) : (
-          <Input
-            label="Cet établissement n'a pas encore de matricule : tapez son nom exact pour confirmer"
-            hint={`Nom attendu : ${deleteTarget?.name}`}
-            value={deleteConfirm}
-            onChange={(e) => setDeleteConfirm(e.target.value)}
-            placeholder={deleteTarget?.name}
-            autoComplete="off"
-          />
+          <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            Cet établissement n'a pas de matricule : la suppression est bloquée. Attribuez d'abord une matricule.
+          </p>
         )}
         <div className="flex justify-end gap-3" slot="footer">
           <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={busy}>

@@ -10,13 +10,12 @@ import { RATE_LIMIT_RE } from "./http.js";
 export { RATE_LIMIT_RE };
 
 /**
- * Adresse client : le DERNIER maillon de X-Forwarded-For (celui ajouté par
- * le proxy de la plateforme, non falsifiable par le client) ; X-Real-IP en
- * repli ; null si aucun (appel direct en développement local).
+ * Adresse client. Avec `trust proxy: 1` (index.js), Express résout req.ip à
+ * partir du DERNIER maillon X-Forwarded-For — celui ajouté par Render — et
+ * non d'une entrée falsifiée. Repli : dernier maillon XFF explicite, puis
+ * X-Real-IP, puis l'adresse socket. null seulement en appel direct (dev).
  */
 export function clientIp(req) {
-  // Express (trust proxy) résout déjà la bonne IP côté proxy ; en appel direct,
-  // req.ip vaut l'adresse socket. On évite ainsi la clé partagée "sans-adresse".
   if (typeof req?.ip === "string" && req.ip.trim()) return req.ip.trim();
   const xff = req.headers["x-forwarded-for"];
   if (typeof xff === "string") {

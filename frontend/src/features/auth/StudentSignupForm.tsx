@@ -73,10 +73,11 @@ export function StudentSignupForm({ school, onBack }: Props) {
       });
       logout();
       toast("Demande envoyée à l'école.");
-      // Passer le child_code et l'info d'auto-approbation dans l'URL
-      const childCode = result.childCode ? `&code=${encodeURIComponent(result.childCode)}` : "";
-      const autoApprove = school.autoApproveStudents ? "&auto=1" : "";
-      navigate(`/inscription-envoyee?role=eleve${childCode}${autoApprove}`, { replace: true });
+      // child_code transmis par location.state (jamais dans l'URL : historique, logs, Referer)
+      navigate("/inscription-envoyee", {
+        replace: true,
+        state: { role: "eleve", childCode: result.childCode ?? null, autoApprove: school.autoApproveStudents },
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Inscription impossible.");
       setBusy(false);

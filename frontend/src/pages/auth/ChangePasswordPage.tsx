@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
@@ -18,16 +18,20 @@ export default function ChangePasswordPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   usePageMeta({ title: "Changement de mot de passe", noindex: true });
+  // Redirection en rendu déclaratif (jamais de navigate() pendant le render).
+  const mustChange = Boolean(user?.mustChangePassword);
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!user?.mustChangePassword) {
-    navigate("/app", { replace: true });
-    return null;
+  if (!mustChange) {
+    return <Navigate to="/app" replace />;
   }
 
-  const currentErr = form.current ? "Mot de passe incorrect (utilisez celui reçu de la direction)." : null;
+  // N'afficher l'erreur du mot de passe actuel QU'APRÈS une tentative — sinon
+  // le message s'affiche dès la première frappe, avant toute soumission.
+  const afterSubmitFail = error !== null;
+  const currentErr = afterSubmitFail && !form.current ? "Saisissez le mot de passe reçu de la direction." : null;
   const nextErr = form.next ? passwordError(form.next, form.confirm) : null;
   const confirmErr = form.confirm && form.confirm !== form.next ? "Les mots de passe ne correspondent pas." : null;
   const valid = form.current.length > 0 && passwordError(form.next, form.confirm) === null;

@@ -27,12 +27,17 @@ import { Table } from "@/components/ui/Table";
 export default function AdminSchoolDetailPage() {
   // La route est « ecoles/:id » : lire « id » (l'ancien code lisait
   // « schoolId », toujours undefined → « École introuvable » systématique).
-  const { id: schoolId } = useParams();
+  const { id: schoolIdParam } = useParams();
   const { agent } = useAdminAuth();
   const isSuperAdmin = agent?.role === "superadmin";
 
-  if (!schoolId) return <div>École introuvable.</div>;
-
+  if (!schoolIdParam) {
+    // useAsync doit rester appelé (même avec un no-op) pour préserver l'ordre
+    // stable des hooks entre les rendus (rules-of-hooks).
+    useAsync(() => Promise.resolve(null), []);
+    return <div>École introuvable.</div>;
+  }
+  const schoolId = schoolIdParam;
   const state = useAsync(() => getAdminSchoolDetail(schoolId), [schoolId]);
 
   return (
@@ -495,14 +500,9 @@ function Content({ detail, isSuperAdmin }: { detail: AdminSchoolDetail; isSuperA
             autoComplete="off"
           />
         ) : (
-          <Input
-            label="Cet établissement n'a pas encore de matricule : tapez son nom exact pour confirmer"
-            hint={`Nom attendu : ${school.name}`}
-            value={deleteConfirm}
-            onChange={(e) => setDeleteConfirm(e.target.value)}
-            placeholder={school.name}
-            autoComplete="off"
-          />
+          <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            Cet établissement n'a pas de matricule : la suppression est bloquée. Attribuez d'abord une matricule.
+          </p>
         )}
         <div className="flex justify-end gap-3" slot="footer">
           <Button variant="outline" onClick={() => setDeleteModal(false)} disabled={deleting}>
@@ -512,7 +512,7 @@ function Content({ detail, isSuperAdmin }: { detail: AdminSchoolDetail; isSuperA
             variant="danger"
             onClick={confirmDelete}
             loading={deleting}
-            disabled={deleteConfirm !== (school.matricule || school.name)}
+            disabled={!school.matricule || deleteConfirm !== school.matricule}
           >
             Supprimer définitivement
           </Button>

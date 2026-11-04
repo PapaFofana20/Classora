@@ -292,7 +292,6 @@ export async function createStaffAccount(actor: SessionUser, input: StaffAccount
   const credentials = await callFunction<{
     userId: string;
     email: string;
-    password: string;
     firstName: string;
     lastName: string;
     role: Role;
@@ -306,7 +305,9 @@ export async function createStaffAccount(actor: SessionUser, input: StaffAccount
     password: input.password.trim(),
   });
   await Promise.all([hydrate("users"), hydrate("teachers")]);
-  return credentials;
+  // Le mot de passe affiché une seule fois est celui saisi par la direction
+  // (l'API ne le renvoie plus).
+  return { ...credentials, password: input.password.trim() };
 }
 
 export async function updateStaff(

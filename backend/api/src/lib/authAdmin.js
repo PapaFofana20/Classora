@@ -71,10 +71,12 @@ export async function getCallerAdminAgent(svc, req) {
 }
 
 /**
- * Exige un agent admin ACTIF. Renvoie { caller } ou une réponse d'erreur.
- * Les rôles autorisés : superadmin, admin, agent_suivi.
+ * Exige un agent admin ACTIF, avec granularité de rôle optionnelle.
+ * Par défaut : superadmin, admin, agent_suivi. Les routes exposant des
+ * données personnelles ou sensibles passent `roles` pour restreindre
+ * (ex. ["admin", "superadmin"]) — agent_suivi est limité aux agrégats.
  */
-export async function requireAdminRole(svc, req, res) {
+export async function requireAdminRole(svc, req, res, roles = ["superadmin", "admin", "agent_suivi"]) {
   const result = await getCallerAdminAgent(svc, req);
   if (!result) {
     unauthorized(res, "Aucun profil administrateur associé à ce compte.");
@@ -83,6 +85,10 @@ export async function requireAdminRole(svc, req, res) {
   const { caller, agent } = result;
   if (agent.status !== "ACTIF") {
     forbidden(res, `Ce compte administratif est ${agent.status === "DESACTIVE" ? "désactivé" : "en attente de validation"}.`);
+    return null;
+  }
+  if (!roles.includes(agent.role)) {
+    forbidden(res, "Votre rôle ne permet pas d'accéder à cette ressource.");
     return null;
   }
   return { caller, agent };

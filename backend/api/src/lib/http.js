@@ -14,29 +14,24 @@ const ALLOWED_HEADERS = "authorization, apikey, content-type, x-client-info";
 /**
  * Origines admises : FRONTEND_ORIGIN (déploiement, liste séparée par des
  * virgules). Sans cette variable, le CORS est FERMÉ par défaut — sauf pour
- * les origines locales habituelles du développement (Vite 5173/4173), qui
- * restent utiles en atelier mais ne servent jamais en production.
- * (Correction C3 de l'audit : avant, l'absence de FRONTEND_ORIGIN + un
- * NODE_ENV non défini à l'exécution laissait le CORS ouvert à toutes les
- * origines sur le déploiement de production.)
+ * les origines locales habituelles du développement (Vite 5173/4173), et
+ * UNIQUEMENT hors production : en production, ces origines ne passent jamais.
  */
 const DEV_ORIGINS = new Set([
   "http://localhost:5173", "http://127.0.0.1:5173",
   "http://localhost:4173", "http://127.0.0.1:4173",
   "http://localhost:3000", "http://127.0.0.1:3000",
 ]);
-
-/** Inévitable : productionhéberge Render sans FRONTEND_ORIGIN → promoteur d'avertissement au démarrage (fail-closed garanti). */
-if (process.env.NODE_ENV === "production" && !process.env.FRONTEND_ORIGIN) {
-  console.warn("[scolia-api] FRONTEND_ORIGIN absent en production : le CORS est fermé à toutes les origines. Renseignez l'environnement Render.");
-}
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 function allowedOrigin(origin) {
   if (!origin) return false;
   if (FRONTEND_ORIGIN) {
     return FRONTEND_ORIGIN.split(",").map((o) => o.trim().replace(/\/$/, "")).includes(origin.replace(/\/$/, ""));
   }
-  // Fail-closed : seule la configuration locale de développement passe.
+  // Fail-closed : en production, seule FRONTEND_ORIGIN passe ; les origines
+  // de développement ne sont acceptées que hors production.
+  if (IS_PRODUCTION) return false;
   return process.env.NODE_ENV === "development" || DEV_ORIGINS.has(origin.replace(/\/$/, ""));
 }
 

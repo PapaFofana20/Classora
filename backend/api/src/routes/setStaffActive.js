@@ -2,14 +2,12 @@
  * Activation / désactivation d'un accès du personnel (direction).
  * Impossible sur son propre compte. À la désactivation : statut = DESACTIVE,
  * les politiques RLS fondées sur is_active_user() ferment tout accès aux
- * données immédiatement. Aucune révocation de session n'est invoquée :
- * l'API admin n'offre pas cette opération par utilisateur ; le JWT émis
- * reste techniquement valable, mais currentSession() côté application
- * (statut DESACTIVE) et les politiques RLS ferment l'accès réel.
+ * données immédiatement, ET les sessions (refresh tokens) sont révoquées via
+ * la RPC admin_revoke_user_sessions (migration 00043, best-effort journalisé).
  * Limité en débit par compte appelant.
  */
 
-import { audit, isStaffRole, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
+import { audit, isStaffRole, requireDirecteur, revokeUserSessions, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid } from "../lib/validate.js";
@@ -64,6 +62,8 @@ export default route(async (req, res) => {
       console.error("[set-staff-active] update", statusError);
       return serverError(res);
     }
+
+    if (!active) await revokeUserSessions(svc, userId);
 
     await audit(svc, {
       schoolId: caller.schoolId,

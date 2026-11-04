@@ -34,7 +34,8 @@ class ErrorBoundary extends React.Component<
             </div>
             <h2 className="text-lg font-bold text-ink mb-2">Une erreur est survenue</h2>
             <p className="text-sm text-neutral-600 mb-4">
-              {this.state.error.message}
+              Un problème inattendu est survenu. Rechargez la page ; si le problème persiste, contactez le support{" "}
+              en précisant l'heure de l'erreur.
             </p>
             <button
               onClick={() => {

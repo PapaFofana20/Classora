@@ -39,6 +39,21 @@ export async function getAuthenticatedUser(svc, req) {
   return data.user;
 }
 
+/**
+ * Révoque les sessions (refresh tokens) d'un utilisateur via la RPC
+ * admin_revoke_user_sessions (migration 00043), réservée au service_role.
+ * Best-effort : un échec ne bloque jamais l'opération métier, mais il est
+ * journalisé (la RLS is_active_user() reste la barrière de fond).
+ */
+export async function revokeUserSessions(svc, userId) {
+  try {
+    const { error } = await svc.rpc("admin_revoke_user_sessions", { p_user_id: userId });
+    if (error) console.warn("[revoke-sessions]", error.message ?? error);
+  } catch (e) {
+    console.warn("[revoke-sessions]", e?.message ?? e);
+  }
+}
+
 export async function getCallerProfile(svc, req) {
   const user = await getAuthenticatedUser(svc, req);
   if (!user) return null;
@@ -129,6 +144,19 @@ const LOWER = "abcdefghijkmnopqrstuvwxyz";
 const UPPER = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 const DIGITS = "23456789";
 
+/** Tirage uniforme sans biais modulo (rejet d'échantillonnage). */
+function randomBelow(limit) {
+  const limit32 = 0x100000000;
+  const range = Math.floor(limit32 / limit) * limit;
+  const buf = new Uint32Array(1);
+  let b;
+  do {
+    crypto.getRandomValues(buf);
+    b = buf[0];
+  } while (b >= range);
+  return b % limit;
+}
+
 export function passwordError(value) {
   if (!value) return "Le mot de passe est obligatoire.";
   if (value.length < PASSWORD_MIN) return `Au moins ${PASSWORD_MIN} caractères.`;
@@ -141,13 +169,11 @@ export function passwordError(value) {
 }
 
 export function generateTempPassword() {
-  const bytes = new Uint32Array(12);
-  crypto.getRandomValues(bytes);
-  const chars = Array.from(bytes, (b) => READABLE[b % READABLE.length]);
-  chars[0] = LOWER[bytes[0] % LOWER.length];
-  chars[1] = UPPER[bytes[1] % UPPER.length];
-  chars[2] = DIGITS[bytes[2] % DIGITS.length];
-  chars[3] = LOWER[bytes[3] % LOWER.length];
+  const chars = Array.from({ length: 12 }, () => READABLE[randomBelow(READABLE.length)]);
+  chars[0] = LOWER[randomBelow(LOWER.length)];
+  chars[1] = UPPER[randomBelow(UPPER.length)];
+  chars[2] = DIGITS[randomBelow(DIGITS.length)];
+  chars[3] = LOWER[randomBelow(LOWER.length)];
   return chars.join("");
 }
 
