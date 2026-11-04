@@ -38,6 +38,14 @@ export default function AboutPage() {
                   Parce que gérer une école ne devrait pas être une succession de tâches administratives, mais un moyen de mieux accompagner chaque élève et de faire grandir son établissement.
                 </p>
               </div>
+              <img
+                src="/images/about-team.png"
+                alt="L'équipe pédagogique Classora"
+                width={1028}
+                height={941}
+                decoding="async"
+                className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-80 lg:h-96"
+              />
             </div>
           </div>
         </Reveal>
