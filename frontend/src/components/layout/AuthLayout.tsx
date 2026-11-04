@@ -35,7 +35,15 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
       {/* Image d'arrière-plan pour les pages d'authentification */}
       {hasImageBackground && (
         <div className="absolute inset-0" aria-hidden="true">
-          <img src={images.authBackground} alt="" className="size-full object-cover object-center" loading="eager" />
+          <div
+            className="size-full"
+            style={{
+              backgroundImage: `url(${images.authBackground})`,
+              backgroundRepeat: "repeat",
+              backgroundSize: "auto",
+              backgroundPosition: "top left",
+            }}
+          />
           <div className="absolute inset-0 bg-white/10" />
         </div>
       )}
@@ -87,9 +95,9 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
         <div className={showVisual ? "flex flex-col px-5 py-6 sm:px-10 lg:px-16" : hasImageBackground ? "flex w-full max-w-3xl flex-col self-start rounded-[28px] border border-forest/10 bg-white/95 px-5 py-6 shadow-soft backdrop-blur-sm sm:px-8 sm:py-8 lg:px-10" : "flex flex-col px-5 py-6 sm:px-10 lg:px-16 w-full max-w-3xl pt-10"}>
           <div className="flex items-center justify-between">
             <Logo />
-            <Link to="/" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-forest hover:underline">
+            <Link to="/" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-forest">
               <Icon name="arrow_back" className="text-[18px]" />
-              Retour
+              <span className="underline-offset-4 hover:underline">Retour</span>
             </Link>
           </div>
           {/* Marge au-dessus du titre : sépare nettement le logo du formulaire. */}
