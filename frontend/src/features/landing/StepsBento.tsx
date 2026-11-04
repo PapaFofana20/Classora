@@ -26,9 +26,6 @@ export function StepsBento() {
                 <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
                 <div className={last ? "relative z-10 max-w-xl" : "relative z-10"}>
                   <div className="mb-8 flex items-center justify-between md:mb-6">
-                    <span className={cn("grid size-14 place-items-center rounded-full", last ? "bg-lime text-forest" : "bg-forest text-lime")}>
-                      <Icon name={s.icon} fill className="text-[28px] shrink-0 overflow-visible" />
-                    </span>
                     <span className={cn("text-6xl font-extrabold tracking-tighter opacity-20", last && "md:hidden")}>0{s.id}</span>
                   </div>
                   <h3 className="text-2xl font-bold">{s.title}</h3>
