@@ -26,7 +26,7 @@ export function StepsBento() {
                 <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
                 <div className={last ? "relative z-10 max-w-xl" : "relative z-10"}>
                   <div className="mb-8 flex items-center justify-between md:mb-6">
-                    <span className={cn("text-6xl font-extrabold tracking-tighter opacity-20", last && "md:hidden")}>0{s.id}</span>
+                    <span className="text-6xl font-extrabold tracking-tighter opacity-20">0{s.id}</span>
                   </div>
                   <h3 className="text-2xl font-bold">{s.title}</h3>
                   <p className={cn("mt-3 text-sm leading-relaxed", last ? "text-forest" : "text-neutral-700")}>{s.text}</p>
