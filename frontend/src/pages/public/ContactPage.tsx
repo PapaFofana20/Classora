@@ -53,7 +53,7 @@ export default function ContactPage() {
               width={1028}
               height={941}
               decoding="async"
-              className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-80 lg:h-96"
+              className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-[380px] lg:h-[520px]"
             />
           </div>
         </Reveal>

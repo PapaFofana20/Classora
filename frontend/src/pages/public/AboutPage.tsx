@@ -49,7 +49,7 @@ export default function AboutPage() {
               width={1672}
               height={941}
               decoding="async"
-              className="relative -mx-[30%] mt-8 block h-auto w-[160%] max-w-none sm:mx-auto sm:h-72 sm:w-auto md:h-80 lg:h-96"
+              className="relative -mx-[30%] mt-8 block h-auto w-[160%] max-w-none sm:mx-auto sm:h-72 sm:w-auto md:h-[380px] lg:h-[520px]"
             />
           </div>
         </Reveal>
