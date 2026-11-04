@@ -22,7 +22,7 @@ export default function AboutPage() {
           <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 pb-10 text-center sm:pt-14 sm:pb-14 md:pt-16 md:pb-16">
             <div
               aria-hidden="true"
-              className="absolute bottom-0 left-1/2 size-[420px] -translate-x-1/2 translate-y-1/3 rounded-full bg-lime/40 blur-2xl md:size-[560px]"
+              className="absolute inset-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]"
             />
             <div className="relative">
               <h2 id="mission-title" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl max-w-3xl mx-auto text-center">
