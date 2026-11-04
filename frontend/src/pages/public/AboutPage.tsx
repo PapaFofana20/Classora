@@ -2,6 +2,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
 import { aboutValues, aboutStats } from "@/data/landing";
+const aboutTeamImg = "/images/about-team.jpg";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { Counter } from "@/components/ui/Counter";
 import { usePageMeta } from "@/hooks/usePageMeta";
