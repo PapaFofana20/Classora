@@ -18,16 +18,20 @@ export default function AboutPage() {
       <PageHero {...pageHeroes.apropos} />
       <section className="mx-auto w-full max-w-[1280px] px-gutter pb-14 md:pb-16" aria-labelledby="mission-title">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 pb-10 text-center sm:pt-14 sm:pb-14 md:pt-16 md:pb-16">
+          <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 text-center sm:pt-14 md:pt-16">
             <div
               aria-hidden="true"
               className="absolute inset-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute bottom-0 left-1/2 size-[420px] -translate-x-1/2 translate-y-1/3 rounded-full bg-lime/40 blur-2xl md:size-[560px]"
             />
             <div className="relative">
               <h2 id="mission-title" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl max-w-3xl mx-auto text-center">
                 <span className="text-lime">Classora</span> : pensé pour <span className="font-serif font-semibold italic text-forest-500">les réalités de nos écoles</span>
               </h2>
-              <div className="mt-8 mb-10 max-w-3xl mx-auto space-y-4 text-lg leading-relaxed text-neutral-700 text-center sm:mt-10 sm:mb-12 md:mt-12 md:mb-14">
+              <div className="mt-8 max-w-3xl mx-auto space-y-4 text-lg leading-relaxed text-neutral-700 text-center sm:mt-10 md:mt-12">
                 <p>
                   <strong className="text-ink">Tout est parti d'un constat simple :</strong> dans de nombreuses écoles privées sénégalaises, la gestion scolaire repose encore sur des piles de cahiers, des reçus papier et des bulletins laborieusement préparés à la main. Un fonctionnement chronophage qui complique le quotidien des équipes et freine l'efficacité des établissements.
                 </p>
@@ -38,15 +42,15 @@ export default function AboutPage() {
                   Parce que gérer une école ne devrait pas être une succession de tâches administratives, mais un moyen de mieux accompagner chaque élève et de faire grandir son établissement.
                 </p>
               </div>
-              <img
-                src="/images/about-team.png"
-                alt="L'équipe pédagogique Classora"
-                width={1028}
-                height={941}
-                decoding="async"
-                className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-80 lg:h-96"
-              />
             </div>
+            <img
+              src="/images/about-team.png"
+              alt="L'équipe Classora : deux collaborateurs en polo vert Classora et un responsable, avec un ordinateur portable et une tablette"
+              width={1672}
+              height={941}
+              decoding="async"
+              className="relative mx-auto mt-8 block h-60 w-auto sm:h-72 md:h-80 lg:h-96"
+            />
           </div>
         </Reveal>
       </section>
