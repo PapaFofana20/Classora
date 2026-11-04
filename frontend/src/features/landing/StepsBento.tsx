@@ -23,8 +23,8 @@ export function StepsBento() {
           return (
             <Reveal key={s.id} delay={i * 90} className={last ? "md:col-span-3" : ""}>
               <article className={cn("group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl p-7 border-2 border-forest/10 shadow-pop transition-transform duration-300 hover:-translate-y-1", last ? "min-h-[260px] bg-lime-pale text-forest md:flex-row md:items-center md:gap-10 md:p-10" : cn("min-h-[300px]", tones[i]))}>
-                <div aria-hidden="true" className="absolute inset-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
-                <div className={last ? "max-w-xl" : ""}>
+                <div aria-hidden="true" className="absolute inset-0 z-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
+                <div className={last ? "relative z-10 max-w-xl" : "relative z-10"}>
                   <div className="mb-8 flex items-center justify-between md:mb-6">
                     <span className={cn("grid size-14 place-items-center rounded-full", last ? "bg-lime text-forest" : "bg-forest text-lime")}>
                       <Icon name={s.icon} fill className="text-[28px] shrink-0 overflow-visible" />
@@ -35,7 +35,7 @@ export function StepsBento() {
                   <p className={cn("mt-3 text-sm leading-relaxed", last ? "text-forest" : "text-neutral-700")}>{s.text}</p>
                 </div>
                 {last && (
-                  <div className="mt-8 flex flex-wrap gap-3 md:mt-0 md:flex-col" aria-label="Inclus dans Classora">
+                  <div className="relative z-10 mt-8 flex flex-wrap gap-3 md:mt-0 md:flex-col" aria-label="Inclus dans Classora">
                     {features.map((m) => (
                       <span key={m} className="inline-flex items-center gap-2 text-sm font-semibold text-forest/85">
                         <Icon name="check_circle" fill className="text-lime shrink-0 overflow-visible" />
