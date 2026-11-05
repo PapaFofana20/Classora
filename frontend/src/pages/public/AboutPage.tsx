@@ -29,7 +29,7 @@ export default function AboutPage() {
             />
             <div className="relative">
               <h2 id="mission-title" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl max-w-3xl mx-auto text-center">
-                <span className="text-lime">Classora</span> : pensé pour <span className="font-serif font-semibold italic text-forest-500">les réalités de nos écoles</span>
+                <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" /> : pensé pour <span className="font-serif font-semibold italic text-forest-500">les réalités de nos écoles</span>
               </h2>
               <div className="mt-8 max-w-3xl mx-auto space-y-4 text-lg leading-relaxed text-neutral-700 text-center sm:mt-10 md:mt-12">
                 <p>
