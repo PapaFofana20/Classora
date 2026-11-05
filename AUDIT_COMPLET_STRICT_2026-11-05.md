@@ -331,4 +331,32 @@ Les risques résiduels sont de **niveau moyen à faible** et tiennent principale
 
 ---
 
-*Rapport généré le 05 novembre 2026. Cet audit est une analyse statique du code source ; il ne remplace pas un test d'intrusion dynamique (pentest) sur l'environnement déployé.*
+## 8. VULNÉRABILITÉS NPM FRONT-END (npm audit)
+
+Lors du déploiement du front-end sur Render, `npm audit` a signalé **12 vulnérabilités** (1 low, 10 moderate, 1 high). Toutes sont dans les **dépendances de développement** (vite, esbuild, minimatch via eslint/typescript-eslint) — aucune dans les dépendances de production (react, @supabase/supabase-js, recharts, clsx, tailwind-merge).
+
+### 8.1 Vulnérabilités identifiées
+
+| # | Paquet | Sévérité | Advisory | Impact |
+|---|--------|----------|----------|--------|
+| 1 | `vite` | **High** | GHSA-v6wh-96g9-6wx3, GHSA-698v-4r3x-3vcv, GHSA-r825-w8mm-5pxw, GHSA-587h-7wmj-h5pm, GHSA-9jrq-w75r-8gcw, GHSA-rq7h-c2jc-7f22, GHSA-fx2h-pf6j-xcff | launch-editor (NTLMv2 hash disclosure, escapeCmdArgs omission, Editor CLI flag misinterpretation), `fs.existsSync()` contournement, XSS inter-origine via middleware Vite, lecture de fichiers hors `server.fs.allow`, bypass `server.fs.deny` sur chemins alternés Windows |
+| 2 | `esbuild` | Low | GHSA-g7r4-m6w7-qqqr | Lecture de fichier arbitraire via le serveur de dev sur Windows |
+| 3–12 | `minimatch` (via `@typescript-eslint/typescript-estree` → eslint) | Moderate (×10) | GHSA-g3hv-75wg-m249 | Déni de service par amplification de globparts |
+
+### 8.2 Corrections apportées
+
+| # | Correction | Fichier | Résultat |
+|---|------------|---------|----------|
+| F-01 | Mise à jour `vite` de `7.3.2` → `7.3.7` | `frontend/package.json` | ✅ Vulnérabilité **high** corrigée. Build de production vérifié (871 modules, vite-plugin-singlefile OK). |
+| F-02 | `esbuild` (low) | — | ✅ Corrigé indirectement par la mise à jour de vite (dépendance transitive). |
+| F-03 | `minimatch` (moderate, ×9 restantes) | — | ⏳ Non corrigé : nécessite `npm audit fix --force` qui installe eslint@9.39.5 (breaking change majeure, incompatible avec @typescript-eslint 6 et crée des conflits de peer dependencies). Ces vulnérabilités ne concernent que les outils de développement (ESLint, type-checker) — **elles ne sont pas exploitables en production** sur Render (vite/esbuild/esbuild ne tournent pas en production, vite-plugin-singlefile bundle tout). |
+
+### 8.3 État résiduel
+
+Après correction : **9 vulnérabilités, toutes modérées** (0 low, 0 high).
+
+Ces 9 vulnérabilités minimatch restantes sont confinées aux outils de développement et n'ont aucun impact sur la sécurité du front-end déployé sur Render. Elles pourront être traitées lors d'une future mise à jour majeure de `@typescript-eslint` et `eslint`.
+
+---
+
+## 7. CONCLUSION
