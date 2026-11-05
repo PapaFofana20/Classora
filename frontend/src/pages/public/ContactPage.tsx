@@ -58,32 +58,6 @@ export default function ContactPage() {
           </div>
         </Reveal>
       </section>
-      <section className="mx-auto grid w-full max-w-[1280px] gap-8 px-gutter pb-20 lg:grid-cols-[1.4fr_1fr]">
-        <Reveal>
-          <h2 className="sr-only">Formulaire de contact</h2>
-          <ContactForm />
-        </Reveal>
-        <Reveal delay={120}>
-          <div className="space-y-4">
-            <h2 className="sr-only">Coordonnées de Classora</h2>
-            {infos.map((i) => (
-              <div key={i.label} className="flex items-center gap-4 rounded-3xl bg-lime-soft p-5">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">{i.label}</p>
-                  <p className="font-semibold text-forest">{i.value}</p>
-                </div>
-              </div>
-            ))}
-            <div className="relative grid h-48 place-items-center overflow-hidden rounded-3xl bg-forest text-white" role="img" aria-label="Carte de localisation, Dakar">
-              <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
-              <div className="relative text-center">
-                <Icon name="location_on" fill className="text-[44px] text-lime" />
-                <p className="font-bold">Dakar, Sénégal</p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </section>
       <section className="mx-auto w-full max-w-[1280px] px-gutter pb-20" aria-labelledby="contact-more-title">
         <Reveal>
           <h2 id="contact-more-title" className="text-2xl font-extrabold tracking-tight">
@@ -120,6 +94,32 @@ export default function ContactPage() {
               </Link>
             </li>
           </ul>
+        </Reveal>
+      </section>
+      <section className="mx-auto grid w-full max-w-[1280px] gap-8 px-gutter pb-20 lg:grid-cols-[1.4fr_1fr]">
+        <Reveal>
+          <h2 className="sr-only">Formulaire de contact</h2>
+          <ContactForm />
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="space-y-4">
+            <h2 className="sr-only">Coordonnées de Classora</h2>
+            {infos.map((i) => (
+              <div key={i.label} className="flex items-center gap-4 rounded-3xl bg-lime-soft p-5">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">{i.label}</p>
+                  <p className="font-semibold text-forest">{i.value}</p>
+                </div>
+              </div>
+            ))}
+            <div className="relative grid h-48 place-items-center overflow-hidden rounded-3xl bg-forest text-white" role="img" aria-label="Carte de localisation, Dakar">
+              <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]" />
+              <div className="relative text-center">
+                <Icon name="location_on" fill className="text-[44px] text-lime" />
+                <p className="font-bold">Dakar, Sénégal</p>
+              </div>
+            </div>
+          </div>
         </Reveal>
       </section>
     </>
