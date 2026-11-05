@@ -165,7 +165,13 @@ app.all("/admin/security", adminConfigGuard, adminSecurity);
 app.all("/admin/settings", adminConfigGuard, adminSettings);
 
 // MFA / TOTP console d'administration (protégé par adminConfigGuard).
-app.all("/admin/mfa*", adminConfigGuard, adminMfa);
+// Chaque route est enregistre individuellement car Express ne supporte pas
+// le joker '*' dans app.all sur cette version.
+app.all("/admin/mfa/status", adminConfigGuard, adminMfa);
+app.all("/admin/mfa/setup", adminConfigGuard, adminMfa);
+app.all("/admin/mfa/verify-setup", adminConfigGuard, adminMfa);
+app.all("/admin/mfa/verify", adminConfigGuard, adminMfa);
+app.all("/admin/mfa/disable", adminConfigGuard, adminMfa);
 
 // État public (bandeau maintenance, inscription ouverte), sans authentification.
 app.all("/platform-status", platformStatus);
