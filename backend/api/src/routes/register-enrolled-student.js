@@ -1,35 +1,25 @@
 /**
  * Création du compte d'un élève DÉJÀ INSCRIT par la direction, à partir de
- * son matricule d'élève unique (ex. EC260001, généré par enroll_student).
+ * son matricule d'élève unique (ex. EC260001).
  * Le compte est rattaché à la fiche inscrite (ACTIF immédiatement) : le
  * matricule ne sert qu'à cette identification à la création. La connexion
  * reste matricule d'école + e-mail + mot de passe.
  * school_id peut être transmis en uuid ou via le matricule public de l'école.
+ * Route publique, rate limitée par IP.
  */
 
-import { serviceClient } from "../_shared/auth.ts";
-import { handleOptions, methodNotAllowed, badRequest, ok, serverError } from "../_shared/http.ts";
-import { clientIp, enforceRateLimit } from "../_shared/rateLimit.ts";
-import {
-  expectObject,
-  optionalString,
-  optionalUuid,
-  requireEmail,
-  requireSnPhone,
-  requireString,
-  ValidationError,
-} from "../_shared/validate.ts";
+import { passwordError, serviceClient } from "../lib/auth.js";
+import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
+import { expectObject, optionalString, optionalUuid, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
-Deno.serve(async (req) => {
-  const origin = req.headers.get("Origin");
-  const options = handleOptions(req);
-  if (options) return options;
-  if (req.method !== "POST") return methodNotAllowed(origin);
+export default route(async (req, res) => {
+  if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();
   try {
     await enforceRateLimit(svc, `register-enrolled-student:${clientIp(req) ?? "sans-adresse"}`, 10, 300);
 
-    const body = expectObject(await req.json());
+    const body = expectObject(req.body);
     const schoolId = optionalUuid(body, "schoolId", "L'école");
     const matricule = optionalString(body, "matricule", "Le matricule de l'école", 10)?.toUpperCase();
     const studentMatricule = requireString(body, "studentMatricule", "Le matricule de l'élève", { min: 4, max: 20 });
@@ -37,8 +27,11 @@ Deno.serve(async (req) => {
     const phone = requireSnPhone(body, "phone", "Le téléphone");
     const password = requireString(body, "password", "Le mot de passe", { min: 8, max: 128, trim: false });
 
+    const pwError = passwordError(password);
+    if (pwError) return badRequest(res, pwError);
+
     // Résolution de l'école : uuid fourni OU matricule public.
-    let resolvedSchool: string | null = null;
+    let resolvedSchool = null;
     if (schoolId) {
       const { data } = await svc.from("schools").select("id").eq("id", schoolId).maybeSingle();
       resolvedSchool = data?.id ?? null;
@@ -46,7 +39,7 @@ Deno.serve(async (req) => {
       const { data } = await svc.from("schools").select("id").eq("matricule", matricule).maybeSingle();
       resolvedSchool = data?.id ?? null;
     }
-    if (!resolvedSchool) return badRequest(origin, "École introuvable.");
+    if (!resolvedSchool) return badRequest(res, "École introuvable.");
 
     const { data: created, error: createError } = await svc.auth.admin.createUser({
       email,
@@ -56,7 +49,8 @@ Deno.serve(async (req) => {
     });
     if (createError || !created?.user) {
       const duplicate = /already|duplicate|registered/i.test(createError?.message ?? "");
-      return badRequest(origin,
+      return badRequest(
+        res,
         duplicate ? "Un compte existe déjà avec cet e-mail." : "Impossible de créer le compte. Réessayez.",
       );
     }
@@ -70,23 +64,33 @@ Deno.serve(async (req) => {
         p_phone: phone,
       });
       if (error || !data) throw new Error(error?.message ?? "Création incomplète.");
-      const result = data as { student_id: string; first_name: string; last_name: string; student_matricule: string };
-      return ok(origin, {
-        user: { id: created.user.id, email, firstName: result.first_name, lastName: result.last_name, role: "eleve", status: "ACTIF" },
+      const result = data;
+      return ok(res, {
+        user: {
+          id: created.user.id,
+          email,
+          firstName: result.first_name,
+          lastName: result.last_name,
+          role: "eleve",
+          status: "ACTIF",
+        },
         studentId: result.student_id,
         studentMatricule: result.student_matricule,
       });
     } catch (sqlError) {
+      // Le compte Auth ne doit pas survivre sans fiche élève.
       await svc.auth.admin.deleteUser(created.user.id);
       const message = sqlError instanceof Error ? sqlError.message : undefined;
       if (message && /matricule|compte|école/i.test(message)) {
-        return badRequest(origin, message);
+        return badRequest(res, message);
       }
-      return serverError(origin);
+      console.error("[register-enrolled-student] rpc", sqlError);
+      return serverError(res);
     }
   } catch (e) {
-    if (e instanceof ValidationError) return badRequest(origin, e.message);
-    if (e instanceof Error && /trop de tentatives/i.test(e.message)) return badRequest(origin, e.message);
-    return serverError(origin);
+    if (e?.name === "ValidationError") return badRequest(res, e.message);
+    if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
+    console.error("[register-enrolled-student]", e);
+    return serverError(res);
   }
 });

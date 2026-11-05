@@ -116,11 +116,19 @@ function mapSettings(r: any): SchoolSettings {
 }
 
 function mapSubscription(r: any): Subscription {
+  const endsAt = r.ends_at ? String(r.ends_at).slice(0, 10) : null;
+  const today = new Date().toISOString().slice(0, 10);
+  let status: Subscription["status"] = "AUCUN";
+  if (endsAt) {
+    // EXPIRE si l'échéance est passée, EXPIRE_BIENTOT dans les 7 jours, sinon ACTIF.
+    const diffDays = Math.ceil((new Date(endsAt).getTime() - new Date(today).getTime()) / 86_400_000);
+    status = endsAt < today ? "EXPIRE" : diffDays <= 7 ? "EXPIRE_BIENTOT" : "ACTIF";
+  }
   return {
     id: r.id,
     schoolId: r.school_id,
     plan: r.plan_id,
-    status: "ACTIF",
+    status,
     startsAt: date(r.starts_at),
     endsAt: date(r.ends_at),
     studentLimit: r.student_limit ?? null,

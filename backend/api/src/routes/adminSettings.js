@@ -10,7 +10,7 @@ import { enforceRateLimit } from "../lib/rateLimit.js";
 import { bool, expectObject, optionalString, requireEmail, requireString, ValidationError } from "../lib/validate.js";
 
 const SCHOOL_YEAR_RE = /^\d{4}-\d{4}$/;
-const SN_PHONE_RE = /^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/;
+const SN_PHONE_RE = /^(\+221)?\s?7(?:0|[5-8])\s?\d{3}\s?\d{2}\s?\d{2}$/;
 
 function requireInt(body, field, label, min, max) {
   const raw = body[field];

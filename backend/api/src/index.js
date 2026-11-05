@@ -27,10 +27,12 @@ import verifyMatricule from "./routes/verifyMatricule.js";
 import registerDirector from "./routes/registerDirector.js";
 import registerStudent from "./routes/registerStudent.js";
 import registerParent from "./routes/registerParent.js";
+import registerEnrolledStudent from "./routes/register-enrolled-student.js";
 import createStaffAccount from "./routes/createStaffAccount.js";
 import updateStaff from "./routes/updateStaff.js";
 import resetStaffPassword from "./routes/resetStaffPassword.js";
 import setStaffActive from "./routes/setStaffActive.js";
+import deleteStaffAccount from "./routes/delete-staff-account.js";
 import timetables from "./routes/timetables.js";
 import adminAuth from "./routes/adminAuth.js";
 import adminLogin from "./routes/adminLogin.js";
@@ -118,10 +120,12 @@ app.all("/verify-matricule", verifyMatricule);
 app.all("/register-director", registerDirector);
 app.all("/register-student", registerStudent);
 app.all("/register-parent", registerParent);
+app.all("/register-enrolled-student", registerEnrolledStudent);
 app.all("/create-staff-account", createStaffAccount);
 app.all("/update-staff", updateStaff);
 app.all("/reset-staff-password", resetStaffPassword);
 app.all("/set-staff-active", setStaffActive);
+app.all("/delete-staff-account", deleteStaffAccount);
 
 // Routes de gestion d'emploi du temps — SÉCURISÉES : JWT vérifié + rôle +
 // school_id du profil jamais du client + validations + rate limit

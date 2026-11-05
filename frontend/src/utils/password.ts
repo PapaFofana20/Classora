@@ -24,6 +24,22 @@ export interface StrengthResult {
 }
 
 const READABLE = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+const LOWER = "abcdefghijkmnopqrstuvwxyz";
+const UPPER = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+const DIGITS = "23456789";
+
+/** Tirage uniforme sans biais modulo (échantillonnage avec rejet). */
+function randomBelow(limit: number): number {
+  const limit32 = 0x100000000;
+  const range = Math.floor(limit32 / limit) * limit;
+  const buf = new Uint32Array(1);
+  let b: number;
+  do {
+    crypto.getRandomValues(buf);
+    b = buf[0];
+  } while (b >= range);
+  return b % limit;
+}
 
 export function passwordStrength(value: string): StrengthResult {
   const satisfied = PASSWORD_RULES.filter((r) => r.test(value)).map((r) => r.id);
@@ -46,15 +62,10 @@ export function passwordError(value: string, confirm?: string): string | null {
  * Garantit au moins une minuscule, une majuscule et un chiffre.
  */
 export function generateTempPassword(): string {
-  const bytes = new Uint32Array(12);
-  crypto.getRandomValues(bytes);
-  const chars = Array.from(bytes, (b) => READABLE[b % READABLE.length]);
-  const lower = "abcdefghijkmnopqrstuvwxyz";
-  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const digits = "23456789";
-  chars[0] = lower[bytes[0] % lower.length];
-  chars[1] = upper[bytes[1] % upper.length];
-  chars[2] = digits[bytes[2] % digits.length];
-  chars[3] = lower[bytes[3] % lower.length];
+  const chars = Array.from({ length: 12 }, () => READABLE[randomBelow(READABLE.length)]);
+  chars[0] = LOWER[randomBelow(LOWER.length)];
+  chars[1] = UPPER[randomBelow(UPPER.length)];
+  chars[2] = DIGITS[randomBelow(DIGITS.length)];
+  chars[3] = LOWER[randomBelow(LOWER.length)];
   return chars.join("");
 }

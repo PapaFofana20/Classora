@@ -271,7 +271,7 @@ function optionalPhone(body) {
   const raw = body["phone"];
   if (raw === undefined || raw === null || raw === "") return undefined;
   if (typeof raw !== "string") throw new ValidationError("Le téléphone est invalide.");
-  if (!/^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw.trim())) {
+  if (!/^(\+221)?\s?7(?:0|[5-8])\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw.trim())) {
     throw new ValidationError("Le téléphone est invalide.");
   }
   return raw.trim();
@@ -281,7 +281,7 @@ function optionalSnPhoneField(body) {
   const raw = body["phone"];
   if (raw === undefined || raw === null || raw === "") return "";
   if (typeof raw !== "string") throw new ValidationError("Le téléphone est invalide.");
-  if (!/^(\+221)?\s?7[0678]\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw.trim())) {
+  if (!/^(\+221)?\s?7(?:0|[5-8])\s?\d{3}\s?\d{2}\s?\d{2}$/.test(raw.trim())) {
     throw new ValidationError("Le téléphone est invalide.");
   }
   return raw.trim();

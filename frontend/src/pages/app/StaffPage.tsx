@@ -85,11 +85,25 @@ export default function StaffPage() {
   };
 
   const reset = async (row: StaffRow) => {
+    const next = window.prompt(
+      `Nouveau mot de passe pour ${row.firstName} ${row.lastName}\n(min. 8 caractères, une majuscule, une minuscule, un chiffre) :`
+    );
+    if (!next) return; // annulé par le directeur
+    // Validation rapide côté client avant d'appeler l'API.
+    const missing: string[] = [];
+    if (next.length < 8) missing.push("8 caractères minimum");
+    if (!/[a-z]/.test(next)) missing.push("une minuscule");
+    if (!/[A-Z]/.test(next)) missing.push("une majuscule");
+    if (!/\d/.test(next)) missing.push("un chiffre");
+    if (missing.length) {
+      toast(`Mot de passe invalide : il manque ${missing.join(", ")}.`, "error");
+      return;
+    }
     setBusy(true);
     try {
-      const creds = await resetStaffPassword(user, row.userId);
+      const creds = await resetStaffPassword(user, row.userId, next);
       setCredentials(creds);
-      toast("Nouveau mot de passe temporaire généré.");
+      toast("Mot de passe réinitialisé. Communiquez-le à l'intéressé hors ligne.");
       state.reload();
     } catch (e) {
       toast(e instanceof Error ? e.message : "Réinitialisation impossible.", "error");

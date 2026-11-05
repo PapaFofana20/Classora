@@ -366,23 +366,26 @@ export async function updateStaff(
   return account;
 }
 
-/** Réinitialisation : nouveau mot de passe temporaire, affiché une seule fois. */
-export async function resetStaffPassword(actor: SessionUser, userId: string): Promise<StaffCredentials> {
+/** Réinitialisation : le directeur fournit le nouveau mot de passe. Aucun secret n'est généré ni transmis par le serveur. */
+export async function resetStaffPassword(
+  actor: SessionUser,
+  userId: string,
+  newPassword: string
+): Promise<StaffCredentials> {
   void actor;
   const credentials = await callFunction<{
     userId: string;
     email: string;
-    tempPassword: string;
     firstName: string;
     lastName: string;
     role: Role;
-  }>("reset-staff-password", { userId });
+  }>("reset-staff-password", { userId, newPassword });
   await hydrate("users");
-  // Le backend renvoie tempPassword pour la réinitialisation, on le mappe vers password
+  // Le mot de passe vient de la saisie du directeur : aucun secret serveur→client.
   return {
     userId: credentials.userId,
     email: credentials.email,
-    password: credentials.tempPassword,
+    password: newPassword,
     firstName: credentials.firstName,
     lastName: credentials.lastName,
     role: credentials.role,

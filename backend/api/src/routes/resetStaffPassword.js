@@ -5,7 +5,7 @@
  * Limité en débit par compte appelant.
  */
 
-import { audit, generateTempPassword, isStaffRole, requireDirecteur, revokeUserSessions, schoolIsWritable, serviceClient } from "../lib/auth.js";
+import { audit, isStaffRole, passwordError, requireDirecteur, revokeUserSessions, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid } from "../lib/validate.js";
@@ -25,6 +25,16 @@ export default route(async (req, res) => {
 
     const body = expectObject(req.body);
     const userId = requireUuid(body, "userId", "Le compte");
+    // Le directeur fournit le nouveau mot de passe : aucun secret n'est généré
+    // ni transmis par le serveur. Le mot de passe est validé avant écriture.
+    const newPassword = requireString(
+      body,
+      "newPassword",
+      "Le nouveau mot de passe",
+      { min: 8, max: 72, trim: false }
+    );
+    const pwError = passwordError(newPassword);
+    if (pwError) return badRequest(res, `Mot de passe invalide : ${pwError}`);
 
     const { data: target, error } = await svc
       .from("profiles")
@@ -41,21 +51,22 @@ export default route(async (req, res) => {
       return badRequest(res, "Seuls les comptes du personnel peuvent être réinitialisés ici.");
     }
 
-    const tempPassword = generateTempPassword();
-    const { error: pwError } = await svc.auth.admin.updateUserById(userId, {
-      password: tempPassword,
+    const { error: authError } = await svc.auth.admin.updateUserById(userId, {
+      password: newPassword,
     });
-    if (pwError) {
-      console.error("[reset-staff-password] auth", pwError);
+    if (authError) {
+      console.error("[reset-staff-password] auth", authError);
       return serverError(res);
     }
     // Le nouveau mot de passe invalide les usages futurs ; on révoque aussi
     // les refresh tokens existants (l'ancienne session ne prolonge plus rien).
     await revokeUserSessions(svc, userId);
 
+    // Le mot de passe vient du directeur (saisi côté client) : pas besoin de
+    // forcer un changement à la prochaine connexion.
     const { error: flagError } = await svc
       .from("profiles")
-      .update({ must_change_password: true })
+      .update({ must_change_password: false })
       .eq("id", userId);
     if (flagError) {
       console.error("[reset-staff-password] flag", flagError);
@@ -75,7 +86,6 @@ export default route(async (req, res) => {
     return ok(res, {
       userId,
       email: target.email,
-      tempPassword,
       firstName: target.first_name,
       lastName: target.last_name,
       role: target.role,
