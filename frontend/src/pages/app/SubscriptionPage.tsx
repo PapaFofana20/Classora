@@ -52,7 +52,11 @@ export default function SubscriptionPage() {
           </div>
           {school.settings && (
             <p className="mt-3 text-sm text-neutral-600">
-              {info === "AUCUN" ? "Aucun abonnement actif pour le moment." : `Échéance le ${formatDate(school.endsAt ?? undefined)}`}
+              {info === "AUCUN"
+                ? school.inTrial
+                  ? `Essai gratuit de 14 jours — ${school.trialDaysLeft} jour(s) restant(s), fin le ${formatDate(school.trialEndsAt ?? undefined)}. Aucun paiement requis pendant les tests.`
+                  : "Aucun abonnement actif pour le moment."
+                : `Échéance le ${formatDate(school.endsAt ?? undefined)}`}
             </p>
           )}
           {school.studentLimit !== null && info !== "AUCUN" && (

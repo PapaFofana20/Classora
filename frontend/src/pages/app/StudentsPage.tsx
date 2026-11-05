@@ -104,7 +104,12 @@ export default function StudentsPage() {
       <PageHeader
         title={isTeacher ? "Mes élèves" : "Élèves"}
         subtitle={`${rows.length} ${pluralize(rows.length, "élève", "élèves")} · année scolaire 2026-2027`}
-        actions={user.role === "directeur" && <LinkButton to="/app/inscription-eleve" icon="person_add">Inscrire un élève</LinkButton>}
+        actions={user.role === "directeur" ? (
+          <div className="flex flex-wrap gap-2">
+            <LinkButton to="/app/inscription-eleve" variant="outline" icon="upload_file">Importer</LinkButton>
+            <LinkButton to="/app/inscription-eleve" icon="person_add">Inscrire un élève</LinkButton>
+          </div>
+        ) : undefined}
       />
       <Card className="mb-4">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

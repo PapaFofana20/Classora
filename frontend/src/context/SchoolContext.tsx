@@ -24,6 +24,10 @@ export interface SchoolState {
   studentLimit: number | null;
   activeStudents: number;
   limitReached: boolean;
+  /** Essai gratuit en cours (aucun abonnement, école créée depuis < 14 j). */
+  inTrial: boolean;
+  trialDaysLeft: number;
+  trialEndsAt: string | null;
   loading: boolean;
   reload: () => void;
 }
@@ -42,6 +46,9 @@ const EMPTY: SchoolState = {
   studentLimit: null,
   activeStudents: 0,
   limitReached: false,
+  inTrial: false,
+  trialDaysLeft: 0,
+  trialEndsAt: null,
   loading: true,
   reload: () => {},
 };
@@ -91,6 +98,9 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
       studentLimit: info.studentLimit,
       activeStudents: info.activeStudents,
       limitReached: info.limitReached,
+      inTrial: info.inTrial,
+      trialDaysLeft: info.trialDaysLeft,
+      trialEndsAt: info.trialEndsAt,
       loading: state.loading,
       reload,
       schoolName: overview.school?.name ?? overview.settings.name,

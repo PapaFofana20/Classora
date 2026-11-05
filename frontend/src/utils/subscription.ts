@@ -1,12 +1,15 @@
 import type { Plan, School, Subscription, SubscriptionStatus } from "@/types";
 import { planById } from "@/data/plans";
-import { daysUntil } from "./dates";
+import { addDaysIso, daysUntil } from "./dates";
 
 /** Nombre de jours pendant lesquels l'école reste en lecture seule après l'échéance. */
 export const READ_ONLY_DAYS = 7;
 
 /** Nombre de jours d'alerte avant l'échéance. */
 export const EXPIRY_WARNING_DAYS = 7;
+
+/** Durée de l'essai gratuit (jours) pour une école sans abonnement — calculée depuis sa création. */
+export const TRIAL_DAYS = 14;
 
 export interface SubscriptionInfo {
   status: SubscriptionStatus;
@@ -22,6 +25,12 @@ export interface SubscriptionInfo {
   activeStudents: number;
   /** La limite d'élèves de la formule est atteinte. */
   limitReached: boolean;
+  /** Essai gratuit : true si aucune subscription et école créée il y a moins de TRIAL_DAYS jours. */
+  inTrial: boolean;
+  /** Jours restants d'essai (0 si hors essai ou abonnement actif). */
+  trialDaysLeft: number;
+  /** Date ISO de fin d'essai, null si non applicable. */
+  trialEndsAt: string | null;
 }
 
 /**
@@ -35,7 +44,11 @@ export function computeSubscriptionInfo(
   todayIso: string,
 ): SubscriptionInfo {
   if (!subscription) {
-    return { status: "AUCUN", subscription: null, plan: null, daysLeft: 0, readOnly: false, blocked: false, studentLimit: null, activeStudents, limitReached: false };
+    const created = _school?.createdAt ? _school.createdAt.slice(0, 10) : null;
+    const trialEndsAt = created ? addDaysIso(created, TRIAL_DAYS) : null;
+    const trialDaysLeft = trialEndsAt ? Math.max(0, daysUntil(trialEndsAt, todayIso)) : 0;
+    const inTrial = trialEndsAt ? daysUntil(trialEndsAt, todayIso) >= 0 : false;
+    return { status: "AUCUN", subscription: null, plan: null, daysLeft: 0, readOnly: false, blocked: false, studentLimit: null, activeStudents, limitReached: false, inTrial, trialDaysLeft, trialEndsAt };
   }
   const plan = planById(subscription.plan);
   const studentLimit = subscription.studentLimit ?? plan.studentLimit;
@@ -51,6 +64,9 @@ export function computeSubscriptionInfo(
     studentLimit,
     activeStudents,
     limitReached: studentLimit !== null && activeStudents >= studentLimit,
+    inTrial: false,
+    trialDaysLeft: 0,
+    trialEndsAt: null,
   };
 }
 

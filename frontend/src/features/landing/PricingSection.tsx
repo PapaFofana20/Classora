@@ -16,6 +16,7 @@ export function PricingSection({ withHeader = true }: { withHeader?: boolean }) 
               Un prix simple, <span className="font-serif font-semibold italic text-forest-500">par élève</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-neutral-600">Pas de frais d'installation. Vous ne payez que pour les élèves inscrits dans votre école.</p>
+            <p className="mx-auto mt-2 max-w-xl text-sm font-semibold text-forest">Essai gratuit de 14 jours pour chaque nouvelle école — aucun paiement requis.</p>
           </div>
         </Reveal>
       )}

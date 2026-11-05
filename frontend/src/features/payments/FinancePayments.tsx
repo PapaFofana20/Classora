@@ -23,6 +23,7 @@ import { listPaymentRows, recordCashPayment, sendReminders } from "@/services/pa
 import type { PaymentRow } from "@/services/paymentRows";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { PAY_METHOD_LABELS, PAY_STATUS_LABELS, remaining, sum } from "@/utils/payments";
+import { buildReminderMessage, downloadDebtorsCsv, maxOverdueDays, reminderSubject, reminderLevelOf, whatsappReminderLink, type ReminderLine } from "@/utils/reminders";
 import { PAY_TONE } from "./ParentPayments";
 import { Receipt } from "./Receipt";
 
@@ -33,9 +34,12 @@ interface Debtor {
   studentName: string;
   className: string;
   parentName: string;
+  parentFirstName: string;
   parentPhone: string;
   count: number;
   total: number;
+  lines: ReminderLine[];
+  maxOverdueDays: number;
 }
 
 export function FinancePayments({ schoolName, canAct }: { schoolName: string; canAct: boolean }) {
@@ -74,9 +78,11 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
   const debtors = useMemo<Debtor[]>(() => {
     const map = new Map<string, Debtor>();
     rows.filter((p) => p.dueDate <= todayIso() && remaining(p) > 0).forEach((p) => {
-      const d = map.get(p.studentId) ?? { studentId: p.studentId, studentName: p.studentName, className: p.className, parentName: p.parentName, parentPhone: p.parentPhone, count: 0, total: 0 };
+      const d = map.get(p.studentId) ?? { studentId: p.studentId, studentName: p.studentName, className: p.className, parentName: p.parentName, parentFirstName: p.parentName.split(" ")[0] ?? p.parentName, parentPhone: p.parentPhone, count: 0, total: 0, lines: [], maxOverdueDays: 0 };
       d.count += 1;
       d.total += remaining(p);
+      d.lines.push({ label: p.label, dueDate: p.dueDate, amount: p.amount, paidAmount: p.paidAmount });
+      d.maxOverdueDays = maxOverdueDays(d.lines.map((l) => l.dueDate), todayIso());
       map.set(p.studentId, d);
     });
     return Array.from(map.values()).filter((d) => (!cls || d.className === cls) && (!dq || `${d.studentName} ${d.parentName}`.toLowerCase().includes(dq.toLowerCase()))).sort((a, b) => b.total - a.total);
@@ -105,12 +111,25 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
     setBusy(true);
     try {
       const n = await sendReminders(picked);
-      toast(`Relance envoyée à ${n} famille${n > 1 ? "s" : ""}.`);
+      toast(`Relance tracée pour ${n} famille${n > 1 ? "s" : ""}. Pensez à ouvrir WhatsApp pour chaque famille sélectionnée.`);
       setPicked([]);
     } catch {
       toast("Envoi impossible.", "error");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const messageOf = (d: Debtor) => buildReminderMessage({ schoolName, studentName: d.studentName, className: d.className, parentFirstName: d.parentFirstName, total: d.total, lines: d.lines, maxOverdueDays: d.maxOverdueDays });
+  const waLinkOf = (d: Debtor) => whatsappReminderLink(d.parentPhone, messageOf(d));
+  const [preview, setPreview] = useState<Debtor | null>(null);
+
+  const copyMessage = async (d: Debtor) => {
+    try {
+      await navigator.clipboard.writeText(messageOf(d));
+      toast("Message de relance copié.");
+    } catch {
+      toast("Copie impossible sur cet appareil.", "error");
     }
   };
 
@@ -135,6 +154,17 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
     { key: "p", header: "Parent", render: (d) => <span>{d.parentName}<span className="block text-xs text-neutral-500">{d.parentPhone}</span></span>, noTruncate: true },
     { key: "n", header: "Échéances", align: "center", render: (d) => d.count, numeric: true },
     { key: "t", header: "Total dû", align: "right", render: (d) => <strong className="text-danger">{formatCurrency(d.total)}</strong>, numeric: true },
+    { key: "ac", header: "Relance", align: "right", render: (d) => (
+        <div className="flex justify-end gap-2">
+          {waLinkOf(d) ? (
+            <a href={waLinkOf(d)!} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-leaf px-3 text-sm font-semibold text-white hover:opacity-90" aria-label={`Relancer ${d.parentName} sur WhatsApp`}>
+              <Icon name="forum" className="text-[18px]" /> WhatsApp
+            </a>
+          ) : <span className="text-xs text-neutral-500">Nº invalide</span>}
+          <Button size="sm" variant="outline" icon="content_copy" aria-label={`Copier le message pour ${d.parentName}`} onClick={() => void copyMessage(d)} />
+          <Button size="sm" variant="outline" icon="visibility" aria-label={`Aperçu de la relance pour ${d.parentName}`} onClick={() => setPreview(d)} />
+        </div>
+      ), shrink: 0 },
   ];
   const receiptRows = filtered.filter((p) => p.paidAmount > 0 && p.paidAt).sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""));
   const receiptCols: Column<PaymentRow>[] = [
@@ -195,8 +225,10 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
             <>
               <div className="flex flex-wrap items-center gap-3">
                 <Button variant="outline" onClick={() => setPicked(picked.length === debtors.length ? [] : debtors.map((d) => d.studentId))}>{picked.length === debtors.length && debtors.length ? "Tout désélectionner" : "Tout sélectionner"}</Button>
-                {canAct && <Button icon="send" disabled={picked.length === 0} loading={busy} onClick={() => void remind()}>Envoyer une relance ({picked.length})</Button>}
+                {canAct && <Button icon="send" disabled={picked.length === 0} loading={busy} onClick={() => void remind()}>Tracer la relance ({picked.length})</Button>}
+                <Button variant="outline" icon="download" disabled={debtors.length === 0} onClick={() => downloadDebtorsCsv(debtors)}>Exporter la liste</Button>
               </div>
+              <p className="text-xs text-neutral-500">Chaque ligne ouvre WhatsApp avec un message personnalisé (montant + échéances). « Tracer la relance » enregistre l'envoi dans le journal d'audit.</p>
               {debtors.length === 0 ? <EmptyState icon="verified" title="Aucun impayé" text="Toutes les échéances échues sont réglées." /> : <Card padded={false} className="p-2"><Table caption="Élèves avec échéances impayées" columns={debtorCols} rows={debtors} rowKey={(d) => d.studentId} stagger /></Card>}
             </>
           ) : list.length === 0 ? (
@@ -217,6 +249,14 @@ export function FinancePayments({ schoolName, canAct }: { schoolName: string; ca
           </Modal>
           <Modal open={!!receipt} onClose={() => setReceipt(null)} title="Reçu de paiement" footer={<><Button variant="outline" icon="print" onClick={() => window.print()}>Imprimer</Button><Button variant="dark" onClick={() => setReceipt(null)}>Fermer</Button></>}>
             {receipt && <Receipt payments={[receipt]} schoolName={schoolName} />}
+          </Modal>
+          <Modal open={!!preview} onClose={() => setPreview(null)} title={preview ? reminderSubject(reminderLevelOf(preview.maxOverdueDays)) : "Aperçu"} footer={<>{preview && waLinkOf(preview) && <a href={waLinkOf(preview)!} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-leaf px-5 text-sm font-semibold text-white">Ouvrir WhatsApp</a>}<Button variant="outline" onClick={() => setPreview(null)}>Fermer</Button></>}>
+            {preview && (
+              <div className="space-y-3">
+                <p className="text-sm text-neutral-600">{preview.maxOverdueDays} j de retard · {preview.count} échéance(s) · niveau <strong>{reminderLevelOf(preview.maxOverdueDays)}</strong></p>
+                <pre className="whitespace-pre-wrap rounded-2xl bg-mist p-4 text-sm">{messageOf(preview)}</pre>
+              </div>
+            )}
           </Modal>
         </div>
       )}
