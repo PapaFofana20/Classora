@@ -253,7 +253,7 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
               const slotStart = START_MINUTES + row * SLOT_MINUTES;
               const isHour = slotStart % 60 === 0;
               return (
-                <tr key={slotStart}>
+                <tr key={slotStart} className="h-14">
                   {TIMETABLE_DAYS.map((day, dayIndex) => {
                     const cell = grid[dayIndex][row];
                     if (cell === "occupied") return null;
@@ -261,14 +261,14 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
                     if (cell) {
                       const { course, span } = cell;
                       return (
-                        <td key={day} rowSpan={span} className={cn("p-0.5 align-top", isHour && "border-t border-neutral-200")}>
+                        <td key={day} rowSpan={span} className={cn("h-14 p-0.5 align-top", isHour && "border-t border-neutral-200")}>
                           <button
                             type="button"
                             disabled={!editable}
                             onClick={() => openEdit(course)}
                             title={`${courseSubject(course)} · ${formatTime(course.start_time)} – ${formatTime(course.end_time)}`}
                             className={cn(
-                              "flex h-full min-h-[52px] w-full flex-col gap-0.5 rounded-xl border px-2 py-1.5 text-left transition",
+                              "flex h-full w-full flex-col gap-0.5 overflow-hidden rounded-xl border px-2 py-1.5 text-left transition",
                               paletteFor(course.subject_id),
                               editable ? "hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40" : "cursor-default",
                             )}
@@ -285,18 +285,18 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
                     }
 
                     return (
-                      <td key={day} className={cn("p-0.5 align-top", isHour && "border-t border-neutral-200")}>
+                      <td key={day} className={cn("h-14 p-0.5 align-top", isHour && "border-t border-neutral-200")}>
                         {canEdit ? (
                           <button
                             type="button"
                             onClick={() => openCreate(day, toTime(slotStart))}
                             aria-label={`Ajouter un cours ${DAY_LABELS[day]} à ${toTime(slotStart)}`}
-                            className="group flex min-h-[43px] w-full items-center justify-center rounded-lg border border-dashed border-transparent text-transparent transition hover:border-forest/25 hover:bg-lime-pale hover:text-forest/50 focus-visible:border-forest/40 focus-visible:text-forest/60 focus-visible:outline-none"
+                            className="group flex h-full w-full items-center justify-center rounded-lg border border-dashed border-transparent text-transparent transition hover:border-forest/25 hover:bg-lime-pale hover:text-forest/50 focus-visible:border-forest/40 focus-visible:text-forest/60 focus-visible:outline-none"
                           >
                             <Icon name="add" className="text-[18px]" />
                           </button>
                         ) : (
-                          <div className="min-h-[43px]" />
+                          <div className="h-full" />
                         )}
                       </td>
                     );
