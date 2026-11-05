@@ -6,7 +6,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { ConfirmDialog, Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/utils/cn";
-import { courseSubject, type CourseInput, type TimetableCourse, type TimetableSubjectOption, type TimetableTeacherOption } from "@/services/timetableService";
+import { courseSubject, courseTeacher, type CourseInput, type TimetableCourse, type TimetableSubjectOption, type TimetableTeacherOption } from "@/services/timetableService";
 
 /** Jours utilisés par la base (contrainte : minuscules, lundi → samedi). */
 export const TIMETABLE_DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"] as const;
@@ -282,6 +282,11 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
                             )}
                           >
                             <span className="line-clamp-2 text-xs font-bold leading-tight">{courseSubject(course)}</span>
+                            <span className="text-[10px] font-semibold leading-tight">
+                              {formatTime(course.start_time)} – {formatTime(course.end_time)}
+                            </span>
+                            <span className="line-clamp-1 text-[10px] leading-tight opacity-90">{courseTeacher(course)}</span>
+                            {course.room && <span className="line-clamp-1 text-[10px] leading-tight opacity-70">{course.room}</span>}
                           </button>
                         </td>
                       );
