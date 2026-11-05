@@ -95,7 +95,7 @@ export function EnrollmentWizard({ overview, parents, childrenByParent }: Props)
         options,
         parent: mode === "existing" ? { mode: "existing", parentId } : { mode: "new", firstName: v.pFirst, lastName: v.pLast, phone: v.pPhone, email: v.pEmail, address: v.pAddress },
       });
-      toast(`${s.firstName} ${s.lastName} est inscrit(e) en ${s.className}.`);
+      toast(`${s.firstName} ${s.lastName} est inscrit(e) en ${s.className}. Matricule de l'élève : ${s.matricule} — à lui communiquer pour créer son compte.`);
       navigate(`/app/eleves/${s.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Inscription impossible.");

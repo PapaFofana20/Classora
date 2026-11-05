@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { SessionUser } from "@/types";
 import * as authService from "@/services/authService";
 import { clearCache } from "@/services/db";
-import type { DirectorInput, ParentSignupInput, StaffAccountInput, StaffCredentials, StudentSignupInput } from "@/services/authService";
+import type { DirectorInput, EnrolledStudentSignupInput, ParentSignupInput, StaffAccountInput, StaffCredentials, StudentSignupInput } from "@/services/authService";
 
 interface AuthContextValue {
   user: SessionUser | null;
@@ -15,6 +15,7 @@ interface AuthContextValue {
   login: (email: string, password: string, matricule?: string) => Promise<SessionUser>;
   registerDirector: (input: DirectorInput) => Promise<SessionUser>;
   registerStudent: (input: StudentSignupInput) => Promise<{ user: SessionUser; childCode?: string }>;
+  registerEnrolledStudent: (input: EnrolledStudentSignupInput) => Promise<{ user: SessionUser; studentId: string; studentMatricule: string }>;
   registerParent: (input: ParentSignupInput) => Promise<{ user: SessionUser; childName: string }>;
   changePassword: (current: string, next: string) => Promise<void>;
   createStaffAccount: (input: StaffAccountInput) => Promise<StaffCredentials>;
@@ -69,6 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { user: u, childCode };
   }, []);
 
+  const registerEnrolledStudent = useCallback(async (input: EnrolledStudentSignupInput) => {
+    const { user: u, studentId, studentMatricule } = await authService.registerEnrolledStudent(input);
+    setUser(u);
+    setJustLoggedOut(false);
+    return { user: u, studentId, studentMatricule };
+  }, []);
+
   const registerParent = useCallback(async (input: ParentSignupInput) => {
     const { user: u, childName } = await authService.registerParent(input);
     setUser(u);
@@ -111,8 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loadingSession, schoolId: user?.schoolId ?? "", justLoggedOut, login, registerDirector, registerStudent, registerParent, changePassword, createStaffAccount, refresh, logout }),
-    [user, loadingSession, justLoggedOut, login, registerDirector, registerStudent, registerParent, changePassword, createStaffAccount, refresh, logout],
+    () => ({ user, loadingSession, schoolId: user?.schoolId ?? "", justLoggedOut, login, registerDirector, registerStudent, registerEnrolledStudent, registerParent, changePassword, createStaffAccount, refresh, logout }),
+    [user, loadingSession, justLoggedOut, login, registerDirector, registerStudent, registerEnrolledStudent, registerParent, changePassword, createStaffAccount, refresh, logout],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

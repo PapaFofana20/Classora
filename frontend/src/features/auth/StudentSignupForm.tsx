@@ -1,16 +1,13 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
 import { SchoolMark } from "@/components/ui/Brand";
 import { LegalConsent } from "@/features/auth/LegalConsent";
 import { PasswordField } from "@/features/auth/PasswordField";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
-import { useAsync } from "@/hooks/useAsync";
-import { openClassesFor } from "@/services/schoolService";
 import type { School } from "@/types";
 import { isValidEmail, isValidSnPhone } from "@/utils/format";
 import { passwordError } from "@/utils/password";
@@ -20,31 +17,26 @@ interface Props {
   onBack: () => void;
 }
 
-/** ÉTAPE 2 élève : informations personnelles + classe de CETTE école. */
+/** ÉTAPE 2 élève : création du compte à partir du matricule d'élève unique
+ *  (généré à l'inscription par la direction, ex. EC260001). Le compte est
+ *  rattaché à la fiche déjà inscrite ; il ne sert ensuite plus qu'à se
+ *  connecter avec matricule d'école + e-mail + mot de passe. */
 export function StudentSignupForm({ school, onBack }: Props) {
-  const { registerStudent, logout } = useAuth();
+  const { registerEnrolledStudent, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const classes = useAsync(() => openClassesFor(school.id), [school.id]);
-  const [form, setForm] = useState({ firstName: "", lastName: "", gender: "F", birthDate: "", classId: "", email: "", phone: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ studentMatricule: "", email: "", phone: "", password: "", confirm: "" });
   const [terms, setTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const list = classes.data;
-    if (list && list.length && !form.classId) setForm((f) => ({ ...f, classId: list[0].id }));
-
-  }, [classes.data]);
+  const cleanMatricule = (raw: string) => raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20);
 
   const errors = {
-    firstName: form.firstName.trim().length < 2 ? "Le prénom est obligatoire." : null,
-    lastName: form.lastName.trim().length < 2 ? "Le nom est obligatoire." : null,
-    birthDate: !form.birthDate ? "Date de naissance obligatoire." : null,
-    classId: !form.classId ? "Choisissez la classe demandée." : null,
+    studentMatricule: form.studentMatricule.trim().length < 4 ? "Saisissez votre matricule d'élève (ex. EC260001)." : null,
     email: !isValidEmail(form.email) ? "Saisissez une adresse e-mail valide." : null,
-    phone: form.phone && !isValidSnPhone(form.phone) ? "Format attendu : 77 123 45 67." : null,
+    phone: !isValidSnPhone(form.phone) ? "Format attendu : 77 123 45 67." : null,
     password: passwordError(form.password, form.confirm),
     confirm: form.confirm !== form.password ? "Les mots de passe ne correspondent pas." : null,
     terms: terms ? null : "Vous devez accepter les CGU et la politique de confidentialité.",
@@ -60,32 +52,24 @@ export function StudentSignupForm({ school, onBack }: Props) {
     setBusy(true);
     setError(null);
     try {
-      const result = await registerStudent({
+      const { user } = await registerEnrolledStudent({
         schoolId: school.id,
-        firstName: form.firstName,
-        lastName: form.lastName,
-        gender: form.gender === "M" ? "M" : "F",
-        birthDate: form.birthDate,
-        classId: form.classId,
+        studentMatricule: form.studentMatricule.trim().toUpperCase(),
         email: form.email,
         phone: form.phone,
         password: form.password,
       });
       logout();
-      toast("Demande envoyée à l'école.");
-      // child_code transmis par location.state (jamais dans l'URL : historique, logs, Referer)
-      navigate("/inscription-envoyee", {
-        replace: true,
-        state: { role: "eleve", childCode: result.childCode ?? null, autoApprove: school.autoApproveStudents },
-      });
+      toast(`Compte créé pour ${user.firstName} ${user.lastName} : connectez-vous avec le matricule de l'école, votre e-mail et votre mot de passe.`);
+      navigate("/connexion", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Inscription impossible.");
+      setError(err instanceof Error ? err.message : "Création du compte impossible.");
       setBusy(false);
     }
   };
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-4" aria-label="Inscription de l'élève">
+    <form onSubmit={submit} noValidate className="space-y-4" aria-label="Création du compte élève">
       <div className="flex items-center gap-3 rounded-2xl bg-lime-soft p-4">
         <SchoolMark name={school.name} size={40} />
         <span className="text-sm font-semibold text-forest">Inscription à {school.name}</span>
@@ -96,33 +80,29 @@ export function StudentSignupForm({ school, onBack }: Props) {
           {error}
         </div>
       )}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Prénom" required autoComplete="given-name" placeholder="Ex. Aminata" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} onBlur={() => touch("firstName")} error={show("firstName")} />
-        <Input label="Nom" required autoComplete="family-name" placeholder="Ex. Diop" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} onBlur={() => touch("lastName")} error={show("lastName")} />
-      </div>
       <div className="grid gap-4">
-        <Select label="Genre" options={[{ value: "F", label: "Fille" }, { value: "M", label: "Garçon" }]} value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} />
-        <Input label="Date de naissance" required type="date" hint="Sélectionnez la date de naissance de l'élève." value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} onBlur={() => touch("birthDate")} error={show("birthDate")} />
-        <Select
-          label="Classe demandée"
+        <Input
+          label="Matricule de l'élève"
           required
-          placeholder={classes.loading ? "Chargement des classes…" : "Choisir une classe"}
-          disabled={classes.loading}
-          value={form.classId}
-          onChange={(e) => setForm({ ...form, classId: e.target.value })}
-          error={show("classId")}
-          options={(classes.data ?? []).map((c) => ({ value: c.id, label: `${c.name} · ${c.filled}/${c.capacity} places` }))}
+          icon="confirmation_number"
+          inputMode="text"
+          autoCapitalize="characters"
+          spellCheck={false}
+          placeholder="EC260001"
+          hint="Matricule unique donné par l'école lors de votre inscription. Il ne sert qu'à créer votre compte."
+          value={form.studentMatricule}
+          onChange={(e) => setForm((f) => ({ ...f, studentMatricule: cleanMatricule(e.target.value) }))}
+          onBlur={() => touch("studentMatricule")}
+          error={show("studentMatricule")}
         />
         <Input label="Adresse e-mail" type="email" required autoComplete="email" placeholder="vous@exemple.sn" hint="Cette adresse servira à vous connecter." value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onBlur={() => touch("email")} error={show("email")} />
-        <Input label="Téléphone (facultatif)" type="tel" placeholder="77 123 45 67" hint="Numéro sénégalais à 9 chiffres." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
-        <PasswordField value={form.password} placeholder="••••••••" onChange={(v) => setForm({ ...form, password: v })} error={show("password")} />
-        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." placeholder="••••••••" value={form.confirm} onChange={(v) => setForm({ ...form, confirm: v })} error={show("confirm")} />
+        <Input label="Téléphone" type="tel" required placeholder="77 123 45 67" hint="Numéro sénégalais à 9 chiffres." value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={() => touch("phone")} error={show("phone")} />
+        <PasswordField value={form.password} placeholder="••••••••" onChange={(v) => setForm((f) => ({ ...f, password: v }))} error={show("password")} />
+        <PasswordField label="Confirmer" showStrength={false} hint="Ressaisissez le même mot de passe." placeholder="••••••••" value={form.confirm} onChange={(v) => setForm((f) => ({ ...f, confirm: v }))} error={show("confirm")} />
       </div>
       <p className="flex items-start gap-2 rounded-2xl bg-mist p-4 text-xs text-neutral-600">
         <Icon name="info" className="text-[18px]" />
-        {school.autoApproveStudents
-          ? "Votre compte sera activé immédiatement après l'inscription (approbation automatique activée par la direction)."
-          : "Votre compte est créé immédiatement, mais l'accès à l'espace de l'école est ouvert après validation par la direction."}
+        Votre compte est rattaché à votre fiche d'inscription : vos matières, notes et emplois du temps apparaîtront directement dans votre espace. Pour vous connecter, utilisez ensuite le matricule de l'école, votre e-mail et votre mot de passe.
       </p>
       <LegalConsent checked={terms} onChange={setTerms} error={show("terms")} />
       <div className="flex gap-3">
@@ -130,7 +110,7 @@ export function StudentSignupForm({ school, onBack }: Props) {
           Retour
         </Button>
         <Button type="submit" size="lg" variant="dark" className="flex-1" loading={busy}>
-          Envoyer ma demande
+          Créer mon compte
         </Button>
       </div>
     </form>

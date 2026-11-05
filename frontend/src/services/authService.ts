@@ -202,6 +202,42 @@ export async function registerStudent(
   return { user: toSession(user), requestId: result.requestId, childCode: result.child_code };
 }
 
+export interface EnrolledStudentSignupInput {
+  schoolId: string;
+  /** Matricule unique de l'élève, généré à son inscription par la direction (ex. EC260001). */
+  studentMatricule: string;
+  email: string;
+  phone: string;
+  password: string;
+}
+
+/** Création du compte d'un élève déjà inscrit, via son matricule : le compte
+ *  est rattaché à sa fiche (ACTIF immédiatement). Le matricule ne sert qu'à
+ *  cette création ; la connexion reste matricule d'école + e-mail + mot de passe. */
+export async function registerEnrolledStudent(
+  input: EnrolledStudentSignupInput,
+): Promise<{ user: SessionUser; studentId: string; studentMatricule: string }> {
+  const result = await callFunction<{
+    user: { id: string; email: string; firstName: string; lastName: string; role: string; status: string };
+    studentId: string;
+    studentMatricule: string;
+  }>("register-enrolled-student", input);
+  const user: User = {
+    id: result.user.id,
+    schoolId: input.schoolId,
+    email: result.user.email,
+    passwordHash: "",
+    firstName: result.user.firstName,
+    lastName: result.user.lastName,
+    phone: input.phone.trim(),
+    role: "eleve",
+    status: result.user.status as User["status"],
+    mustChangePassword: false,
+    createdAt: new Date().toISOString(),
+  };
+  return { user: toSession(user), studentId: result.studentId, studentMatricule: result.studentMatricule };
+}
+
 export interface ParentSignupInput {
   schoolId: string;
   childCode: string;
