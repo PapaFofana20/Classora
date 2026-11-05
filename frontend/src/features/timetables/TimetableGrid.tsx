@@ -159,10 +159,7 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
       setFormError("Choisissez une matière.");
       return;
     }
-    if (hasTeachers && !form.teacherId) {
-      setFormError("Choisissez un enseignant.");
-      return;
-    }
+    // L'enseignant est optionnel : le cours peut être enregistré sans lui.
     if (toMinutes(form.endTime) <= toMinutes(form.startTime)) {
       setFormError("L'heure de fin doit être postérieure à l'heure de début.");
       return;
@@ -384,10 +381,9 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
 
             {hasTeachers ? (
               <Select
-                label="Enseignant"
-                required
+                label="Enseignant (optionnel)"
                 searchable
-                placeholder="Sélectionner un enseignant"
+                placeholder="Sélectionner un enseignant (optionnel)"
                 options={teacherOptions}
                 value={form.teacherId}
                 onChange={(event) => setForm((prev) => (prev ? { ...prev, teacherId: event.target.value } : prev))}
