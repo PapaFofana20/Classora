@@ -32,6 +32,9 @@ export function getTeacherAssignments(schoolId: string, teacherId: string): Prom
 
 async function replaceCell(actor: SessionUser, classId: string, subjectId: string, teacherIds: string[]): Promise<void> {
   ensureWritable(actor);
+  if (teacherIds.length > 1) {
+    throw new Error("Un seul enseignant par matière : remplacez l'enseignant actuel au lieu d'en ajouter un autre.");
+  }
   const { error } = await supabase.rpc("replace_cell_teachers", {
     p_class_id: classId,
     p_subject_id: subjectId,
@@ -53,8 +56,7 @@ export function setCellTeacher(actor: SessionUser, classId: string, subjectId: s
 
 export function addCellTeacher(actor: SessionUser, classId: string, subjectId: string, teacherId: string): Promise<AssignmentBoard> {
   return (async () => {
-    const current = assignmentsOf(actor.schoolId).filter((a) => a.classId === classId && a.subjectId === subjectId).map((a) => a.teacherId);
-    await replaceCell(actor, classId, subjectId, current.includes(teacherId) ? current : [...current, teacherId]);
+    await replaceCell(actor, classId, subjectId, [teacherId]);
     return board(actor.schoolId);
   })();
 }

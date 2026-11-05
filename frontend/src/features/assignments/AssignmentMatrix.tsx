@@ -42,12 +42,11 @@ interface MatrixProps {
   board: AssignmentBoard;
   cycle: Cycle;
   onReplace: (classId: string, subjectId: string, oldId: string, newId: string | null) => void;
-  onAdd: (classId: string, subjectId: string, teacherId?: string) => void;
   onSetHead: (classId: string, teacherId: string | null) => void;
   onSetTitular: (classId: string, teacherId: string | null) => void;
 }
 
-export function AssignmentMatrix({ board, cycle, onReplace, onAdd, onSetHead, onSetTitular }: MatrixProps) {
+export function AssignmentMatrix({ board, cycle, onReplace, onSetHead, onSetTitular }: MatrixProps) {
   const classes = board.classes.filter((c) => c.cycle === cycle);
   const professors = board.teachers.filter((t) => t.kind === "professeur");
   const instituteurs = board.teachers.filter((t) => t.kind === "instituteur");
@@ -108,7 +107,8 @@ export function AssignmentMatrix({ board, cycle, onReplace, onAdd, onSetHead, on
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {subjects.map((s) => {
                   const list = board.assignments.filter((a) => a.classId === c.id && a.subjectId === s.id);
-                  const tone = list.length === 0 ? "error" : list.length > 1 ? "warning" : "ok";
+                  const current = list[0];
+                  const tone = list.length === 0 ? "error" : list.length > 1 ? "error" : "ok";
                   return (
                     <div
                       key={s.id}
@@ -124,30 +124,20 @@ export function AssignmentMatrix({ board, cycle, onReplace, onAdd, onSetHead, on
                         {tone === "ok" && <Icon name="check_circle" className="text-lime text-[16px]" fill />}
                       </div>
 
-                      {list.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {list.map((a) => {
-                            const t = professors.find((p) => p.id === a.teacherId);
-                            return (
-                              <span key={a.teacherId} className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2.5 py-1 text-[11px] font-semibold text-forest">
-                                {t ? `${t.firstName} ${t.lastName}` : "Inconnu"}
-                                <button type="button" aria-label="Retirer cet enseignant" onClick={() => onReplace(c.id, s.id, a.teacherId, null)} className="grid size-4 place-items-center rounded-full hover:bg-red-100 hover:text-danger">
-                                  <Icon name="close" className="text-[12px]" />
-                                </button>
-                              </span>
-                            );
-                          })}
-                        </div>
+                      {list.length > 1 && (
+                        <p className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-900">
+                          {list.length} professeurs affectés — un seul est autorisé, choisissez-en un pour corriger.
+                        </p>
                       )}
 
                       <TeacherSelect
                         label={`${c.name}, ${s.name} : enseignant`}
-                        value=""
+                        value={current?.teacherId ?? ""}
                         subjectId={s.id}
                         teachers={professors}
-                        tone="ok"
-                        emptyLabel={list.length === 0 ? "+ Affecter un enseignant" : "+ Ajouter un enseignant"}
-                        onChange={(v) => { if (v) onAdd(c.id, s.id, v); }}
+                        tone={tone === "ok" ? "ok" : current ? "warning" : "error"}
+                        emptyLabel={list.length === 0 ? "+ Affecter un enseignant" : "— Non affecté —"}
+                        onChange={(v) => onReplace(c.id, s.id, current?.teacherId ?? "", v || null)}
                       />
                     </div>
                   );

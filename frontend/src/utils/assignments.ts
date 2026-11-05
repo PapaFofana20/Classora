@@ -28,10 +28,10 @@ export function detectConflicts(
       } else if (list.length > 1) {
         out.push({
           id: `dup-${c.id}-${cs.subjectId}`,
-          severity: "warning",
+          severity: "error",
           classId: c.id,
           subjectId: cs.subjectId,
-          message: `${c.name} · ${sName(cs.subjectId)} : ${list.length} professeurs affectés (${list.map((a) => tName(a.teacherId)).join(", ")}).`,
+          message: `${c.name} · ${sName(cs.subjectId)} : ${list.length} professeurs affectés (${list.map((a) => tName(a.teacherId)).join(", ")}). Un seul enseignant par matière est autorisé.`,
         });
       }
     }

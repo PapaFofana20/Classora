@@ -34,7 +34,7 @@ export function Footer() {
           <p>© 2026 Classora. Tous droits réservés.</p>
           <p className="flex items-center gap-2">
             <Icon name="verified_user" className="text-[18px] text-lime" />
-            Données hébergées de manière sécurisée
+            Développé par <span className="text-lime">BluePixel</span>
           </p>
         </div>
         </div>

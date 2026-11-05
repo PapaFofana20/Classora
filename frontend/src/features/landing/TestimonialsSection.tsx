@@ -33,7 +33,7 @@ export function TestimonialsSection() {
                 <blockquote className="mt-3 flex-1 text-base leading-relaxed">« {t.quote} »</blockquote>
                 <figcaption className="mt-6">
                   <p className="text-sm font-bold">{t.name}</p>
-                  <p className="text-xs text-neutral-600">
+                  <p className="text-xs font-bold text-neutral-600">
                     {t.role} · {t.school}
                   </p>
                 </figcaption>
