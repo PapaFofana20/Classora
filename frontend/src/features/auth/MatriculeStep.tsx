@@ -34,8 +34,9 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
   const check = async (raw: string) => {
     const code = formatMatriculeInput(raw);
     if (!isValidMatricule(code)) {
-      setState(code ? "error" : "idle");
-      setError(code ? `Il manque ${MATRICULE_LENGTH - code.length} caractère(s).` : null);
+      // Saisie incomplète : aucun message d'erreur pendant la frappe.
+      setState("idle");
+      setError(null);
       return;
     }
     const seq = ++checkSeq.current;
@@ -66,7 +67,10 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
     window.clearTimeout(timer.current);
     if (isValidMatricule(value)) timer.current = window.setTimeout(() => void check(value), 400);
     else {
-      setState(value ? "error" : "idle");
+      // Pendant la frappe (code incomplet), le champ reste neutre : l'erreur
+      // ne s'affiche que si la vérification d'un code complet échoue.
+      setState("idle");
+      setError(null);
       setSchool(null);
     }
     return () => window.clearTimeout(timer.current);
