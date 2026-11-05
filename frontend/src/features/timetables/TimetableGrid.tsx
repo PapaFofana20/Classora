@@ -59,7 +59,7 @@ const TIME_OPTIONS = Array.from({ length: (END_MINUTES - START_MINUTES) / SLOT_M
 type PlacedCourse = { course: TimetableCourse; span: number };
 type GridCell = PlacedCourse | "occupied" | null;
 
-/** Place chaque cours sur la grille (tranches de 30 min, fusion des lignes). */
+/** Place chaque cours sur la grille : un cours occupe toujours une seule case prédéfinie. */
 function buildGrid(courses: TimetableCourse[]): GridCell[][] {
   return TIMETABLE_DAYS.map((day) => {
     const cells: GridCell[] = Array.from({ length: SLOT_COUNT }, () => null);
@@ -71,15 +71,10 @@ function buildGrid(courses: TimetableCourse[]): GridCell[][] {
       if (end <= start) continue;
 
       const startRow = Math.max(0, Math.min(SLOT_COUNT - 1, Math.floor((start - START_MINUTES) / SLOT_MINUTES)));
-      const endRow = Math.max(startRow + 1, Math.min(SLOT_COUNT, Math.ceil((end - START_MINUTES) / SLOT_MINUTES)));
-
-      // En cas de chevauchement, on réduit la hauteur pour ne jamais écraser la case suivante.
-      let span = endRow - startRow;
-      while (span > 1 && cells[startRow + span - 1] !== null) span -= 1;
       if (cells[startRow] !== null) continue;
 
-      cells[startRow] = { course, span };
-      for (let offset = 1; offset < span; offset += 1) cells[startRow + offset] = "occupied";
+      // Un cours = une seule case, quelle que soit sa durée (début–fin indiqués à l'intérieur).
+      cells[startRow] = { course, span: 1 };
     }
 
     return cells;
@@ -173,16 +168,16 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
       return;
     }
 
+    // Un cours occupe une seule case : seul un autre cours commençant dans la même case est un conflit.
     const overlap = courses.find(
       (course) =>
         course.id !== editingId &&
         course.day === form.day &&
-        toMinutes(form.startTime) < toMinutes(course.end_time) &&
-        toMinutes(form.endTime) > toMinutes(course.start_time),
+        formatTime(course.start_time) === form.startTime,
     );
     if (overlap) {
       setFormError(
-        `Ce créneau chevauche « ${courseSubject(overlap)} » (${formatTime(overlap.start_time)} – ${formatTime(overlap.end_time)}).`,
+        `Cette case est déjà occupée par « ${courseSubject(overlap)} » (${formatTime(overlap.start_time)} – ${formatTime(overlap.end_time)}).`,
       );
       return;
     }
