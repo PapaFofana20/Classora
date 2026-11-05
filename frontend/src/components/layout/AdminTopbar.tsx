@@ -28,7 +28,7 @@ export function AdminTopbar({ agent, onMenu, onLogout }: { agent: AdminAgent; on
             </span>
             <div>
               <p className="text-sm font-bold text-ink">{status.platformName} Admin</p>
-              <p className="text-xs text-neutral-500">{formatDate(new Date().toISOString())}</p>
+              <p className="text-sm font-semibold text-neutral-600">{formatDate(new Date().toISOString())}</p>
             </div>
           </div>
         </div>

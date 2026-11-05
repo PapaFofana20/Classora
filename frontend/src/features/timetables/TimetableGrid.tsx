@@ -27,12 +27,12 @@ const SLOT_MINUTES = 30;
 const SLOT_COUNT = (END_MINUTES - START_MINUTES) / SLOT_MINUTES;
 
 const PALETTE = [
-  "border-lime-300 bg-lime-soft text-forest",
-  "border-sky-200 bg-sky-50 text-sky-900",
-  "border-amber-200 bg-amber-50 text-amber-900",
-  "border-rose-200 bg-rose-50 text-rose-900",
-  "border-violet-200 bg-violet-50 text-violet-900",
-  "border-emerald-200 bg-emerald-50 text-emerald-900",
+  "bg-lime-soft text-forest",
+  "bg-sky-50 text-sky-900",
+  "bg-amber-50 text-amber-900",
+  "bg-rose-50 text-rose-900",
+  "bg-violet-50 text-violet-900",
+  "bg-emerald-50 text-emerald-900",
 ];
 
 const toMinutes = (value: string): number => {
@@ -261,16 +261,16 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
                     if (cell) {
                       const { course, span } = cell;
                       return (
-                        <td key={day} rowSpan={span} className={cn("h-14 p-0.5 align-top", isHour && "border-t border-neutral-200")}>
+                        <td key={day} rowSpan={span} className={cn("h-14 border-l border-neutral-200 p-0 align-top", isHour && "border-t")}>
                           <button
                             type="button"
                             disabled={!editable}
                             onClick={() => openEdit(course)}
                             title={`${courseSubject(course)} · ${formatTime(course.start_time)} – ${formatTime(course.end_time)}`}
                             className={cn(
-                              "flex h-full w-full flex-col gap-0.5 overflow-hidden rounded-xl border px-2 py-1.5 text-left transition",
+                              "timetable-cell flex h-full w-full flex-col gap-0.5 overflow-hidden px-2 py-1.5 text-left transition",
                               paletteFor(course.subject_id),
-                              editable ? "hover:brightness-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40" : "cursor-default",
+                              editable ? "hover:brightness-[0.98] focus-visible:bg-lime-pale focus-visible:outline-none" : "cursor-default",
                             )}
                           >
                             <span className="line-clamp-2 text-xs font-bold leading-tight">{courseSubject(course)}</span>
@@ -285,13 +285,13 @@ export function TimetableGrid({ courses, editable, subjects, teachers, onCreate,
                     }
 
                     return (
-                      <td key={day} className={cn("h-14 p-0.5 align-top", isHour && "border-t border-neutral-200")}>
+                      <td key={day} className={cn("h-14 border-l border-neutral-200 p-0 align-top", isHour && "border-t")}>
                         {canEdit ? (
                           <button
                             type="button"
                             onClick={() => openCreate(day, toTime(slotStart))}
                             aria-label={`Ajouter un cours ${DAY_LABELS[day]} à ${toTime(slotStart)}`}
-                            className="group flex h-full w-full items-center justify-center rounded-lg border border-dashed border-transparent text-transparent transition hover:border-forest/25 hover:bg-lime-pale hover:text-forest/50 focus-visible:border-forest/40 focus-visible:text-forest/60 focus-visible:outline-none"
+                            className="timetable-cell flex h-full w-full items-center justify-center text-transparent transition hover:bg-lime-pale hover:text-forest/50 focus-visible:bg-lime-pale focus-visible:text-forest/60 focus-visible:outline-none"
                           >
                             <Icon name="add" className="text-[18px]" />
                           </button>

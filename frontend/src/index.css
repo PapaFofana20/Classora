@@ -198,6 +198,11 @@ button:active, a:active, [role="button"]:active {
 
 :focus-visible { outline: 3px solid var(--color-leaf); outline-offset: 2px; }
 
+/* Grille d'emploi du temps : une seule boîte par case. Le contour de focus
+   global créerait un deuxième rectangle autour du bouton (déjà cadré par la
+   case elle-même) ; seul le fond change au focus, comme au survol. */
+.timetable-cell:focus-visible { outline: none; }
+
 .material-symbols-rounded {
   font-family: "Material Symbols Rounded";
   font-weight: normal;

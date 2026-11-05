@@ -363,6 +363,14 @@ export async function setStaffActive(actor: SessionUser, userId: string, active:
   return account;
 }
 
+/** Suppression définitive d'un accès : le compte ne peut plus se connecter.
+ *  La fiche enseignant éventuellement liée est conservée (« Sans accès »). */
+export async function deleteStaffAccount(actor: SessionUser, userId: string): Promise<void> {
+  if (userId === actor.id) throw new Error("Vous ne pouvez pas supprimer votre propre compte.");
+  await callFunction("delete-staff-account", { userId });
+  await hydrate("users");
+}
+
 /** Changement de mot de passe (première connexion d'un accès créé par la direction). */
 export async function changePassword(actor: SessionUser, currentPassword: string, nextPassword: string): Promise<void> {
   void actor;

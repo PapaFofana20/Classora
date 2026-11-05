@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterSheet } from "@/components/ui/FilterSheet";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
+import { ConfirmDialog, Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
 import { SkeletonTable } from "@/components/ui/Skeleton";
@@ -21,9 +21,9 @@ import { useSchool } from "@/context/SchoolContext";
 import { useToast } from "@/context/ToastContext";
 import { useAsync } from "@/hooks/useAsync";
 import { useDebounce } from "@/hooks/useDebounce";
-import { createStaffAccount, listStaff, resetStaffPassword, setStaffActive, updateStaff, type StaffCredentials, type StaffRow } from "@/services/authService";
+import { createStaffAccount, deleteStaffAccount, listStaff, resetStaffPassword, setStaffActive, updateStaff, type StaffCredentials, type StaffRow } from "@/services/authService";
 import { getSchoolOverview } from "@/services/schoolService";
-import { listTeacherRows } from "@/services/teacherService";
+import { deleteTeacher, listTeacherRows, type TeacherRow } from "@/services/teacherService";
 import { STAFF_ROLE_LABELS, STAFF_ROLES } from "@/utils/permissions";
 import { cn } from "@/utils/cn";
 import { isValidEmail } from "@/utils/format";
@@ -44,6 +44,8 @@ export default function StaffPage() {
   const [editing, setEditing] = useState<StaffRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [credentials, setCredentials] = useState<StaffCredentials | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ kind: "staff"; row: StaffRow } | { kind: "teacher"; row: TeacherRow } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const state = useAsync(async () => ({ staff: await listStaff(schoolId), overview: await getSchoolOverview(schoolId), teachers: await listTeacherRows(schoolId) }), [schoolId]);
 
@@ -109,6 +111,34 @@ export default function StaffPage() {
     }
   };
 
+  const removeStaffAccount = async (row: StaffRow) => {
+    setDeleting(true);
+    try {
+      await deleteStaffAccount(user, row.userId);
+      setConfirmDelete(null);
+      toast(`Accès de ${row.firstName} ${row.lastName} supprimé : il ne peut plus se connecter.`);
+      state.reload();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Suppression impossible.", "error");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const removeTeacher = async (row: TeacherRow) => {
+    setDeleting(true);
+    try {
+      await deleteTeacher(user, row.id);
+      setConfirmDelete(null);
+      toast(`Enseignant ${row.firstName} ${row.lastName} supprimé.`);
+      state.reload();
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Suppression impossible.", "error");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const roleFilter = <Select compact aria-label="Filtrer par rôle" placeholder="Tous les rôles" value={role} onChange={(e) => setRole(e.target.value)} options={Object.entries(STAFF_ROLE_LABELS).map(([value, label]) => ({ value, label }))} />;
 
   const staffCols: Column<StaffRow>[] = [
@@ -131,6 +161,9 @@ export default function StaffPage() {
           <Button size="sm" variant={s.status === "ACTIF" ? "ghost" : "outline"} onClick={() => void toggleActive(s)}>
             {s.status === "ACTIF" ? "Désactiver" : "Réactiver"}
           </Button>
+          <Button size="sm" variant="ghost" aria-label={`Supprimer l'accès de ${s.firstName} ${s.lastName}`} title="Supprimer cet accès" className="text-danger hover:bg-red-50" onClick={() => setConfirmDelete({ kind: "staff", row: s })}>
+            <Icon name="delete" className="text-[18px]" />
+          </Button>
         </div>
       ),
     },
@@ -143,6 +176,18 @@ export default function StaffPage() {
     { key: "subjects", header: "Matières", render: (t) => (t.kind === "instituteur" ? "Toutes les matières" : t.subjectNames.join(", ") || "—") },
     { key: "head", header: "Responsabilité", render: (t) => (t.headOf.length ? <Badge tone="dark">{t.kind === "instituteur" ? "Titulaire" : "Principal"} · {t.headOf.join(", ")}</Badge> : "—") },
     { key: "account", header: "Accès", render: (t) => (t.userId ? <Badge tone="success">Compte actif</Badge> : <Badge tone="neutral">Sans accès</Badge>) },
+    {
+      key: "actions",
+      align: "right",
+      header: <span className="sr-only">Actions</span>,
+      render: (t) => (
+        <div className="flex justify-end gap-1">
+          <Button size="sm" variant="ghost" aria-label={`Supprimer ${t.firstName} ${t.lastName}`} title="Supprimer cet enseignant" className="text-danger hover:bg-red-50" onClick={() => setConfirmDelete({ kind: "teacher", row: t })}>
+            <Icon name="delete" className="text-[18px]" />
+          </Button>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -218,6 +263,25 @@ export default function StaffPage() {
           allowedRoles={allowedRoles}
         />
       </Modal>
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title={confirmDelete?.kind === "teacher" ? "Supprimer cet enseignant ?" : "Supprimer cet accès ?"}
+        message={
+          confirmDelete?.kind === "teacher"
+            ? `Voulez-vous vraiment supprimer l'enseignant ${confirmDelete.row.firstName} ${confirmDelete.row.lastName} ? Ses affectations aux classes et aux matières seront retirées. Cette action est irréversible.`
+            : confirmDelete
+              ? `Voulez-vous vraiment supprimer l'accès de ${confirmDelete.row.firstName} ${confirmDelete.row.lastName} (${confirmDelete.row.email}) ? Cette personne ne pourra plus se connecter. Cette action est irréversible.`
+              : ""
+        }
+        confirmLabel="Oui, supprimer"
+        loading={deleting}
+        onConfirm={() => {
+          if (!confirmDelete) return;
+          void (confirmDelete.kind === "teacher" ? removeTeacher(confirmDelete.row) : removeStaffAccount(confirmDelete.row));
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
 
       <StaffCredentialsModal open={!!credentials} credentials={credentials} school={school} onClose={() => setCredentials(null)} />
 

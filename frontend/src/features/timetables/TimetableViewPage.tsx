@@ -4,6 +4,7 @@ import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { ConfirmDialog } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SkeletonCards, SkeletonTable } from "@/components/ui/Skeleton";
 import { useCurrentUser } from "@/context/AuthContext";
@@ -12,6 +13,7 @@ import { TimetableGrid } from "@/features/timetables/TimetableGrid";
 import {
   createCourse,
   deleteCourse,
+  deleteTimetable,
   ensurePlaceholderTeacher,
   getTimetable,
   listTimetableSubjects,
@@ -56,6 +58,8 @@ export default function TimetableViewPage() {
   const [teachers, setTeachers] = useState<TimetableTeacherOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Timetable | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isDirector = user.role === "directeur";
@@ -179,6 +183,21 @@ export default function TimetableViewPage() {
     toast("Cours supprimé.");
   };
 
+  const handleDeleteTimetable = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteTimetable(deleteTarget.id, user.schoolId);
+      setTimetables((prev) => prev.filter((row) => row.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      toast("Emploi du temps supprimé.");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Suppression impossible.", "error");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   /* ----------------------------- Liste ----------------------------- */
   if (!id) {
     const visibleTimetables = isDirector ? timetables : timetables.filter((row) => row.status === "published");
@@ -216,31 +235,62 @@ export default function TimetableViewPage() {
             </div>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {visibleTimetables.map((row) => {
-              const status = STATUS[row.status] ?? STATUS.draft;
-              return (
-                <Link key={row.id} to={`/app/timetables/${row.id}`} className="block">
-                  <Card hover className="h-full">
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleTimetables.map((row) => {
+                const status = STATUS[row.status] ?? STATUS.draft;
+                return (
+                  <Card key={row.id} hover className="flex h-full flex-col">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-lg font-bold text-ink">{row.name}</p>
+                        <Link to={`/app/timetables/${row.id}`} className="text-lg font-bold text-ink hover:text-forest">
+                          {row.name}
+                        </Link>
                         <p className="mt-1 text-sm text-neutral-500">{timetableClassLabel(row)}</p>
                       </div>
-                      <Badge tone={status.tone}>{status.label}</Badge>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <Badge tone={status.tone}>{status.label}</Badge>
+                        {isDirector && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(row)}
+                            aria-label={`Supprimer l'emploi du temps ${row.name}`}
+                            title="Supprimer cet emploi du temps"
+                            className="grid size-9 place-items-center rounded-full text-danger transition hover:bg-red-50"
+                          >
+                            <Icon name="delete" className="text-[20px]" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <p className="mt-3 text-xs text-neutral-500">
                       {row.school_year} · {timetableCourseCount(row)} cours
                     </p>
                     <p className="mt-1 text-xs text-neutral-500">Créé le {formatDate(row.created_at)}</p>
-                    <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-forest">
+                    <Link
+                      to={`/app/timetables/${row.id}`}
+                      className="mt-3 inline-flex w-fit items-center gap-1 text-sm font-semibold text-forest"
+                    >
                       Consulter <Icon name="arrow_forward" className="text-[18px]" />
-                    </span>
+                    </Link>
                   </Card>
-                </Link>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+
+            <ConfirmDialog
+              open={!!deleteTarget}
+              title="Supprimer cet emploi du temps ?"
+              message={
+                deleteTarget
+                  ? `« ${deleteTarget.name} » (${timetableClassLabel(deleteTarget)}, ${timetableCourseCount(deleteTarget)} cours) sera définitivement supprimé, ainsi que tous ses cours. Cette action est irréversible.`
+                  : ""
+              }
+              loading={deleting}
+              onConfirm={() => void handleDeleteTimetable()}
+              onCancel={() => setDeleteTarget(null)}
+            />
+          </>
         )}
       </>
     );
