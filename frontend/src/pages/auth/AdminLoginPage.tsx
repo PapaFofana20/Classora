@@ -6,10 +6,12 @@ import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { supabase } from "@/lib/supabase";
-import { adminResolveLogin } from "@/services/admin";
+import { adminResolveLogin, adminVerifyMFA, type AdminLoginResult } from "@/services/admin";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
-const MATRICULE_RE = /^CLA-ADM-\d{6}$/i;
+const TOTP_CODE_RE = /^\d{6}$/;
+
+type MfaStep = "idle" | "waitingTotp";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -20,21 +22,33 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaStep, setMfaStep] = useState<MfaStep>("idle");
+  const [preAuthToken, setPreAuthToken] = useState("");
+  const [totpCode, setTotpCode] = useState("");
 
   const doLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      // 1. Résout la matricule en e-mail via l'API (le mot de passe est
-      // vérifié côté serveur : aucune information sans secret valide).
-      // Un e-mail est utilisé tel quel.
+      // 1. Résout la matricule/e-mail via l'API (mot de passe vérifié côté
+      // serveur). Si le MFA est activé, l'API retourne mfaRequired + un
+      // jeton pré-authentifié à usage unique : le client doit d'abord valider
+      // le second facteur avant de demander le jeton Supabase.
       const trimmed = identifier.trim();
-      let email = trimmed.toLowerCase();
-      if (MATRICULE_RE.test(trimmed)) {
-        const { email: resolved } = await adminResolveLogin({ identifier: trimmed, password });
-        email = resolved;
+      const result: AdminLoginResult = await adminResolveLogin({
+        identifier: trimmed,
+        password,
+      });
+
+      if ("mfaRequired" in result) {
+        setPreAuthToken(result.preAuthToken);
+        setMfaStep("waitingTotp");
+        setBusy(false);
+        return;
       }
+
+      const email = result.email;
 
       // 2. Connexion via Supabase Auth (identique à la connexion scolaire).
       const { error: authError } = await supabase.auth.signInWithPassword({
@@ -47,19 +61,61 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // 3. Vérifie le profil administrateur via l'API backend. On affiche le
-      // message exact (profil absent, compte désactivé, API indisponible) au
-      // lieu de le masquer derrière « aucun accès ».
-      const result = await verify();
-      if (result.ok) {
+      // 3. Vérifie le profil administrateur via l'API backend.
+      const verification = await verify();
+      if (verification.ok) {
         navigate("/admin", { replace: true });
       } else {
         await logout();
-        setError(result.error ?? "Aucun accès administratif associé à ce compte.");
+        setError(verification.error ?? "Aucun accès administratif associé à ce compte.");
         setBusy(false);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Connexion impossible. Réessayez.");
+      setBusy(false);
+    }
+  };
+
+  const doVerifyMFA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      if (!TOTP_CODE_RE.test(totpCode)) {
+        setError("Code TOTP invalide (6 chiffres).");
+        setBusy(false);
+        return;
+      }
+
+      // Valide le second facteur via l'API backend. Retourne l'email de
+      // l'agent (nécessaire pour le signInWithPassword Supabase).
+      const { email } = await adminVerifyMFA({ preAuthToken, token: totpCode });
+
+      // 2. Connexion via Supabase Auth.
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (authError) {
+        setError("Matricule/e-mail ou mot de passe incorrect.");
+        setBusy(false);
+        return;
+      }
+
+      // 3. Vérifie le profil administrateur (l'API vérifiera la session MFA).
+      const verification = await verify();
+      if (verification.ok) {
+        setMfaStep("idle");
+        setTotpCode("");
+        setPreAuthToken("");
+        navigate("/admin", { replace: true });
+      } else {
+        await logout();
+        setError(verification.error ?? "Aucun accès administratif associé à ce compte.");
+        setBusy(false);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Échec de la validation du second facteur.");
       setBusy(false);
     }
   };
@@ -71,62 +127,98 @@ export default function AdminLoginPage() {
       showVisual={false}
       backgroundImage
     >
-      <form onSubmit={doLogin} noValidate className="space-y-4" aria-label="Formulaire de connexion administrative">
-        {error && (
-          <div role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger">
-            <Icon name="error" className="text-[20px]" />
-            <span>
-              {error}
-              {error.includes("compte scolaire") && (
-                <>
-                  {" "}
-                  <Link to="/connexion" className="font-bold underline underline-offset-4">
-                    Se connecter à l'espace école
-                  </Link>
-                </>
-              )}
-            </span>
+      {mfaStep === "waitingTotp" ? (
+        <form onSubmit={doVerifyMFA} noValidate className="space-y-4" aria-label="Validation du second facteur">
+          {error && (
+            <div role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger">
+              <Icon name="error" className="text-[20px]" />
+              <span>{error}</span>
+            </div>
+          )}
+          <div className="rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
+            <Icon name="shield" className="text-[20px]" />
+            <p className="mt-1 font-medium">
+              Second facteur requis — saisissez le code de votre application d’authentification.
+            </p>
           </div>
-        )}
-        <Input
-          label="Matricule ou e-mail administratif"
-          type="text"
-          icon="badge"
-          autoComplete="username"
-          placeholder="CLA-ADM-000001 ou admin@classora.sn"
-          required
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-        />
-        <div className="relative">
           <Input
-            label="Mot de passe"
-            type={show ? "text" : "password"}
+            label="Code TOTP (6 chiffres)"
+            type="text"
             icon="lock"
-            autoComplete="current-password"
-            placeholder="••••••••"
+            autoComplete="one-time-code"
+            placeholder="123456"
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            maxLength={6}
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
           />
-          <button
-            type="button"
-            onClick={() => setShow((s) => !s)}
-            aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-            className="absolute right-1 top-[29px] grid size-11 place-items-center rounded-full text-forest/70 hover:bg-mist"
-          >
-            <Icon name={show ? "visibility_off" : "visibility"} className="text-[20px]" />
-          </button>
-        </div>
-        <div className="flex justify-end">
-          <Link to="/" className="inline-flex min-h-11 items-center text-sm font-semibold text-forest underline-offset-4 hover:underline">
-            Retour au site public
-          </Link>
-        </div>
-        <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
-          Se connecter
-        </Button>
-      </form>
+          <div className="flex justify-end">
+            <Link to="/" className="inline-flex min-h-11 items-center text-sm font-semibold text-forest underline-offset-4 hover:underline">
+              Retour au site public
+            </Link>
+          </div>
+          <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
+            Valider le code
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={doLogin} noValidate className="space-y-4" aria-label="Formulaire de connexion administrative">
+          {error && (
+            <div role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger">
+              <Icon name="error" className="text-[20px]" />
+              <span>
+                {error}
+                {error.includes("compte scolaire") && (
+                  <>
+                    {" "}
+                    <Link to="/connexion" className="font-bold underline underline-offset-4">
+                      Se connecter à l’espace école
+                    </Link>
+                  </>
+                )}
+              </span>
+            </div>
+          )}
+          <Input
+            label="Matricule ou e-mail administratif"
+            type="text"
+            icon="badge"
+            autoComplete="username"
+            placeholder="CLA-ADM-000001 ou admin@classora.sn"
+            required
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+          <div className="relative">
+            <Input
+              label="Mot de passe"
+              type={show ? "text" : "password"}
+              icon="lock"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShow((s) => !s)}
+              aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              className="absolute right-1 top-[29px] grid size-11 place-items-center rounded-full text-forest/70 hover:bg-mist"
+            >
+              <Icon name={show ? "visibility_off" : "visibility"} className="text-[20px]" />
+            </button>
+          </div>
+          <div className="flex justify-end">
+            <Link to="/" className="inline-flex min-h-11 items-center text-sm font-semibold text-forest underline-offset-4 hover:underline">
+              Retour au site public
+            </Link>
+          </div>
+          <Button type="submit" size="lg" variant="dark" className="w-full" loading={busy} disabled={busy}>
+            Se connecter
+          </Button>
+        </form>
+      )}
     </AuthLayout>
   );
 }

@@ -79,6 +79,15 @@ export const serverError = (res, message = "Une erreur inattendue est survenue. 
  */
 export const RATE_LIMIT_RE = /trop de tentatives/i;
 
+/** Log sanitisé d'une erreur : ne consigne jamais l'objet complet (évite de
+ * fuiter des fragments de requête, du schéma ou des stack traces dans les
+ * logs d'infrastructure). N'affiche que le message et, optionnellement, un
+ * préfixe de contexte. */
+export function logError(context, e) {
+  const msg = e instanceof Error ? e.message : String(e);
+  console.error(`[${context}]`, msg);
+}
+
 /** enveloppe un handler async et traduit ValidationError / crash. */
 export function route(handler) {
   return (req, res) => {
@@ -86,8 +95,24 @@ export function route(handler) {
       .then(() => handler(req, res))
       .catch((e) => {
         if (e?.name === "ValidationError") return badRequest(res, e.message);
-        console.error("[api] erreur non gérée sur", req.method, req.originalUrl, e);
+        logError("api", new Error(`Non géré sur ${req.method} ${req.originalUrl}: ${e?.message ?? String(e)}`));
         return serverError(res);
       });
   };
+}
+
+/** Exécute une promesse avec un timeout. Rejette avec une erreur TimeoutError
+ * si la promesse ne se résout pas dans le délai imparti (ms). Utilisé pour
+ * éviter qu'un appel Supabase bloquant n'épuise les workers Render. */
+export function withTimeout(promise, ms, context = "appel Supabase") {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Timeout : ${context} (${ms} ms)`));
+    }, ms);
+  });
+  return Promise.race([promise, timeoutPromise]).then((result) => {
+    clearTimeout(timeoutId);
+    return result;
+  });
 }

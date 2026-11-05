@@ -7,7 +7,7 @@
  */
 
 import { audit, isStaffRole, passwordError, requireDirecteur, schoolIsWritable, serviceClient } from "../lib/auth.js";
-import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../lib/validate.js";
 
@@ -91,13 +91,13 @@ export default route(async (req, res) => {
       await svc.auth.admin.deleteUser(created.user.id);
       const message = sqlError instanceof Error ? sqlError.message : undefined;
       if (message && /un compte existe déjà|rôle invalide/i.test(message)) return badRequest(res, message);
-      console.error("[create-staff-account] rpc", sqlError);
+      logError("create-staff-account", sqlError);
       return serverError(res);
     }
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[create-staff-account]", e);
+    logError("create-staff-account", e);
     return serverError(res);
   }
 });

@@ -6,6 +6,7 @@
 import { serviceClient } from "../lib/authAdmin.js";
 import { ok, route } from "../lib/http.js";
 import { DEFAULT_PLATFORM_SETTINGS, publicPlatformStatus, readPlatformSettings } from "../lib/platformSettings.js";
+import { clientIp, enforceRateLimit } from "../lib/rateLimit.js";
 
 // Cache mémoire partagé par les requêtes de ce processus (TTL 30 s).
 const CACHE_TTL_MS = 30_000;
@@ -30,6 +31,8 @@ export default route(async (req, res) => {
 
   try {
     const svc = serviceClient();
+    // Rate limiting léger par IP sur l'endpoint public (M-01 de l'audit).
+    await enforceRateLimit(svc, `platform-status:${clientIp(req) ?? "sans-adresse"}`, 60, 300);
     const { settings, migrationApplied } = await readPlatformSettings(svc);
     return respond({ ...publicPlatformStatus(settings), migrationApplied });
   } catch (e) {

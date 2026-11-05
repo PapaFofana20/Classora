@@ -4,7 +4,7 @@
  * Uniquement des faits observÃ©s dans audit_log / rate_limits / admin_agents.
  */
 import { requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
 const BLOCKED_ACTIONS = [
@@ -179,7 +179,7 @@ export default route(async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-security]", e);
+    logError("admin-security", e);
     return serverError(res);
   }
 });

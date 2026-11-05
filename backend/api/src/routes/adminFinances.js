@@ -7,7 +7,7 @@
  * Aucun montant n'est estimÃ© Ã  partir d'un prix forfaitaire inventÃ©.
  */
 import { requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { daysBetween, lastMonths, monthKey, monthStartIso, todayIso } from "../lib/periods.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
@@ -192,7 +192,7 @@ export default route(async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-finances]", e);
+    logError("admin-finances", e);
     return serverError(res);
   }
 });

@@ -34,16 +34,38 @@ export async function verifyAdminSession(): Promise<{
 }
 
 /**
+ * Résultat de la résolution de login admin.
+ *   - { email } : MFA non activé, le client enchaîne avec signInWithPassword.
+ *   - { mfaRequired, preAuthToken } : MFA activé, le client doit d'abord
+ *     valider le second facteur via adminVerifyMFA() avant signInWithPassword.
+ */
+export type AdminLoginResult =
+  | { email: string }
+  | { mfaRequired: true; preAuthToken: string };
+
+/**
  * Résout une matricule (ou un e-mail) administratif en e-mail de connexion,
  * après vérification du mot de passe côté serveur. Le client enchaîne ensuite
  * avec signInWithPassword(email, password) : les jetons restent gérés par
- * Supabase côté navigateur.
+ * Supabase côté navigateur. Si le MFA est activé, retourne mfaRequired + un
+ * jeton pré-authentifié à usage unique (validité 5 min).
  */
 export async function adminResolveLogin(input: {
   identifier: string;
   password: string;
-}): Promise<{ email: string }> {
-  return callFunction<{ email: string }>("admin/login", input, "POST");
+}): Promise<AdminLoginResult> {
+  return callFunction<AdminLoginResult>("admin/login", input, "POST");
+}
+
+/**
+ * Valide le second facteur (TOTP) après un preAuthToken émis par
+ * adminResolveLogin. À usage unique. Retourne l'e-mail de l'agent si succès.
+ */
+export async function adminVerifyMFA(input: {
+  preAuthToken: string;
+  token: string;
+}): Promise<{ email: string; role: string }> {
+  return callFunction<{ email: string; role: string }>("admin/mfa/verify", input, "POST");
 }
 
 /* ------------------------------------------------------------------ */

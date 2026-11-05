@@ -5,7 +5,7 @@
  * du profil admin_agents, jamais du client.
  */
 import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireUuid, ValidationError } from "../lib/validate.js";
 
@@ -18,6 +18,12 @@ export default route(async (req, res) => {
 
     if (req.method === "GET") {
       // Liste des écoles avec recherche, filtres, tri, pagination.
+      // Réservée à admin+superadmin : agent_suivi ne doit pas avoir accès
+      // à l'exhaustivité des établissements (données personnelles, effectifs,
+      // abonnements…). Voir H-01 de l'audit.
+      if (!["admin", "superadmin"].includes(caller.role)) {
+        return forbidden(res, "Votre rôle ne permet pas de consulter la liste des établissements.");
+      }
       await enforceRateLimit(svc, `admin-schools-list:${caller.id}`, 30, 300);
 
       // Fiche complète d'un établissement (direction, effectifs, classes,
@@ -136,7 +142,7 @@ export default route(async (req, res) => {
         .maybeSingle();
       if (updateError) {
         if (/duplicate|unique/i.test(updateError.message)) return badRequest(res, "Un établissement existe déjà avec ces informations.");
-        console.error("[admin-schools] patch", updateError);
+        logError("admin-schools", updateError);
         return serverError(res);
       }
       if (!updated) {
@@ -237,7 +243,7 @@ export default route(async (req, res) => {
         p_school_id: schoolId,
       });
       if (purgeError || !purge) {
-        console.error("[admin-schools] purge", purgeError);
+        logError("admin-schools", purgeError);
         return serverError(res);
       }
 
@@ -282,7 +288,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e instanceof Error && e.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-schools]", e);
+    logError("admin-schools", e);
     return serverError(res);
   }
 });

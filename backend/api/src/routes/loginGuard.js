@@ -9,7 +9,7 @@
  */
 
 import { audit, getAuthenticatedUser, serviceClient } from "../lib/auth.js";
-import { methodNotAllowed, ok, route, serverError, unauthorized, RATE_LIMIT_RE } from "../lib/http.js";
+import { methodNotAllowed, ok, route, serverError, unauthorized, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
 export default route(async (req, res) => {
@@ -120,7 +120,7 @@ export default route(async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[login-guard]", e);
+    logError("login-guard", e);
     return serverError(res);
   }
 });

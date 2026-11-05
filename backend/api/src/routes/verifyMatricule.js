@@ -5,7 +5,7 @@
  */
 
 import { serviceClient } from "../lib/auth.js";
-import { methodNotAllowed, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { methodNotAllowed, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 
 export default route(async (req, res) => {
@@ -24,7 +24,7 @@ export default route(async (req, res) => {
 
     const { data: result, error } = await svc.rpc("verify_matricule", { p_matricule: raw });
     if (error || !result) {
-      console.error("[verify-matricule] rpc", error);
+      logError("verify-matricule", error);
       return serverError(res);
     }
 
@@ -36,7 +36,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e?.name === "ValidationError") return ok(res, { error: e.message }, 400);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[verify-matricule]", e);
+    logError("verify-matricule", e);
     return serverError(res);
   }
 });

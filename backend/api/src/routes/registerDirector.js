@@ -11,7 +11,7 @@
  */
 
 import { passwordError, serviceClient } from "../lib/auth.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, ok, route, serverError, RATE_LIMIT_RE, logError, withTimeout } from "../lib/http.js";
 import { readPlatformSettings } from "../lib/platformSettings.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 import { expectObject, optionalString, requireCycles, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
@@ -89,7 +89,11 @@ export default route(async (req, res) => {
         p_address: address,
         p_cycles: cycles,
       };
-      let { data, error } = await svc.rpc("finish_director_registration", { ...args, p_plan_id: plan });
+      let { data, error } = await withTimeout(
+        svc.rpc("finish_director_registration", { ...args, p_plan_id: plan }),
+        15_000,
+        "finish_director_registration"
+      );
       // Compatibilité descendante : avant la migration 00032, la fonction
       // n'exposait que 9 arguments et PostgREST renvoyait PGRST202/PGRST203
       // (« function not found »), ce qui faisait échouer toute inscription en
@@ -124,13 +128,13 @@ export default route(async (req, res) => {
       await svc.auth.admin.deleteUser(created.user.id);
       const message = sqlError instanceof Error ? sqlError.message : undefined;
       if (message && /un compte existe déjà/i.test(message)) return badRequest(res, message);
-      console.error("[register-director] rpc", sqlError);
+      logError("register-director", sqlError);
       return serverError(res);
     }
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[register-director]", e);
+    logError("register-director", e);
     return serverError(res);
   }
 });

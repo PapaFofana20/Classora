@@ -36,6 +36,7 @@ import deleteStaffAccount from "./routes/delete-staff-account.js";
 import timetables from "./routes/timetables.js";
 import adminAuth from "./routes/adminAuth.js";
 import adminLogin from "./routes/adminLogin.js";
+import adminMfa from "./routes/adminMfa.js";
 import adminAgents from "./routes/adminAgents.js";
 import adminSchools from "./routes/adminSchools.js";
 import adminStats from "./routes/adminStats.js";
@@ -100,6 +101,9 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Strict-Transport-Security", "max-age=15552000; includeSubDomains");
   res.setHeader("X-Frame-Options", "DENY");
+  // Content-Security-Policy restrictive : l'API ne sert que du JSON, aucun
+  // script n'est exécuté côté client depuis cette origine.
+  res.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none';");
   // Routes authentifiées/admin : jamais en cache (plateforme, proxies, navigateur).
   if (req.path.startsWith("/admin") || req.path === "/login-guard") {
     res.setHeader("Cache-Control", "no-store");
@@ -160,6 +164,9 @@ app.all("/admin/audit", adminConfigGuard, adminAudit);
 app.all("/admin/security", adminConfigGuard, adminSecurity);
 app.all("/admin/settings", adminConfigGuard, adminSettings);
 
+// MFA / TOTP console d'administration (protégé par adminConfigGuard).
+app.all("/admin/mfa*", adminConfigGuard, adminMfa);
+
 // État public (bandeau maintenance, inscription ouverte), sans authentification.
 app.all("/platform-status", platformStatus);
 
@@ -171,7 +178,9 @@ app.use((_req, res) => {
 
 // Dernière barrière : enveloppe { error } même sur une exception imprévue.
 app.use((err, _req, res, _next) => {
-  console.error("[api] erreur non gérée :", err);
+  // Log sanitisé : on ne consigne que le message, jamais l'objet d'erreur
+  // complet (évite de fuiter des fragments de requête ou du schéma dans les logs).
+  console.error("[api] erreur non gérée :", err?.message ?? String(err));
   if (res.headersSent) return; // réponse déjà partielle : ne pas relancer ERR_HTTP_HEADERS_SENT
   res.status(500).json({ error: "Une erreur inattendue est survenue. Réessayez dans un instant." });
 });

@@ -8,7 +8,7 @@
  */
 
 import { audit, isStaffRole, requireDirecteur, revokeUserSessions, schoolIsWritable, serviceClient } from "../lib/auth.js";
-import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid } from "../lib/validate.js";
 
@@ -59,7 +59,7 @@ export default route(async (req, res) => {
       .update({ status: active ? "ACTIF" : "DESACTIVE" })
       .eq("id", userId);
     if (statusError) {
-      console.error("[set-staff-active] update", statusError);
+      logError("set-staff-active", statusError);
       return serverError(res);
     }
 
@@ -78,7 +78,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[set-staff-active]", e);
+    logError("set-staff-active", e);
     return serverError(res);
   }
 });

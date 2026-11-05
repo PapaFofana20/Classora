@@ -5,7 +5,7 @@
  */
 
 import { passwordError, serviceClient } from "../lib/auth.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, ok, route, serverError, RATE_LIMIT_RE, logError, withTimeout } from "../lib/http.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 import { expectObject, optionalIsoDate, optionalString, optionalUuid, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
@@ -55,7 +55,7 @@ export default route(async (req, res) => {
       .select("*", { count: "exact", head: true })
       .eq("school_id", resolvedSchool)
       .eq("status", "EN_ATTENTE");
-    if (countError) console.error("[register-student] error counting requests:", countError);
+    if (countError) logError("register-student", countError);
     if (count && count >= 100) return badRequest(res, "Trop de demandes en attente pour cette école (limite 100).");
 
     const pwError = passwordError(password);
@@ -76,17 +76,21 @@ export default route(async (req, res) => {
     }
 
     try {
-      const { data, error } = await svc.rpc("finish_student_registration", {
-        p_user_id: created.user.id,
-        p_school_id: resolvedSchool,
-        p_first_name: firstName,
-        p_last_name: lastName,
-        p_phone: phone,
-        p_email: email,
-        p_gender: gender ?? null,
-        p_birth_date: birthDate ?? null,
-        p_class_id: classId,
-      });
+      const { data, error } = await withTimeout(
+        svc.rpc("finish_student_registration", {
+          p_user_id: created.user.id,
+          p_school_id: resolvedSchool,
+          p_first_name: firstName,
+          p_last_name: lastName,
+          p_phone: phone,
+          p_email: email,
+          p_gender: gender ?? null,
+          p_birth_date: birthDate ?? null,
+          p_class_id: classId,
+        }),
+        15_000,
+        "finish_student_registration"
+      );
       if (error || !data) throw new Error(error?.message ?? "Inscription incomplète.");
       const result = data;
       return ok(res, {
@@ -108,13 +112,13 @@ export default route(async (req, res) => {
       if (message && /un compte existe déjà|classe|école|inscriptions/i.test(message)) {
         return badRequest(res, message);
       }
-      console.error("[register-student] rpc", sqlError);
+      logError("register-student", sqlError);
       return serverError(res);
     }
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[register-student]", e);
+    logError("register-student", e);
     return serverError(res);
   }
 });

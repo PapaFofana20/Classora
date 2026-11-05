@@ -4,7 +4,8 @@
  * par Supabase Auth — jamais décodée sans signature.
  */
 import { audit, getAuthenticatedUser, serviceClient } from "../lib/auth.js";
-import { ok, RATE_LIMIT_RE, route, serverError, unauthorized } from "../lib/http.js";
+import { auditAdmin } from "../lib/authAdmin.js";
+import { ok, RATE_LIMIT_RE, route, serverError, unauthorized, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
 export default route(async (req, res) => {
@@ -42,7 +43,7 @@ export default route(async (req, res) => {
     // Cherche le profil admin_agent de l'utilisateur connecté.
     const { data: agent, error } = await svc
       .from("admin_agents")
-      .select("id, matricule, role, status, first_name, last_name, email, phone, created_at")
+      .select("id, matricule, role, status, first_name, last_name, email, phone, created_at, totp_enabled")
       .eq("auth_user_id", user.id)
       .maybeSingle();
 
@@ -63,6 +64,28 @@ export default route(async (req, res) => {
       return ok(res, {
         error: `Ce compte administratif est ${agent.status === "DESACTIVE" ? "désactivé" : "en attente de validation"}. Contactez le superadministrateur.`,
       }, 403);
+    }
+
+    // Si le MFA est activé pour cet agent, exiger une session MFA vérifiée
+    // (créée via POST /admin/mfa/verify après validation du second facteur).
+    if (agent.totpEnabled === true) {
+      const { data: mfaSession } = await svc
+        .from("admin_mfa_sessions")
+        .select("id")
+        .eq("agent_id", agent.id)
+        .gt("expires_at", new Date().toISOString())
+        .maybeSingle();
+      if (!mfaSession) {
+        await auditAdmin(svc, {
+          actorId: user.id,
+          actorRole: agent.role,
+          action: "admin_auth_mfa_required",
+          entity: "admin_agents",
+          entityId: agent.id,
+          payload: { matricule: agent.matricule },
+        });
+        return ok(res, { error: "Second facteur requis.", mfaRequired: true }, 403);
+      }
     }
 
     await audit(svc, {
@@ -91,7 +114,7 @@ export default route(async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-auth]", e);
+    logError("admin-auth", e);
     return serverError(res);
   }
 });

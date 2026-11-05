@@ -8,6 +8,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { isAlwaysAllowed } from "./navigation";
 import { ContactSchoolScreen, RenewScreen, SubscriptionRequiredScreen } from "@/features/subscription/SubscriptionScreens";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { logout } from "@/services/authService";
+import { useIdleLogout } from "@/hooks/useIdleLogout";
 
 /** /app/* : redirige vers /connexion si non connecté. */
 export function ProtectedRoute() {
@@ -98,6 +100,13 @@ export function SubscriptionGuard() {
   const { pathname } = useLocation();
   const { user } = useAuth();
   const school = useSchool();
+
+  // Déconnexion automatique après 30 minutes d'inactivité (M-07 de l'audit).
+  // Délai par défaut : 30 min — à rendre configurable via settings.session_timeout_minutes.
+  useIdleLogout(30, () => {
+    logout();
+    window.location.replace("/connexion");
+  });
 
   if (!PAIEMENTS_CONFIGURES) return <Outlet />;
   if (isAlwaysAllowed(pathname)) return <Outlet />;

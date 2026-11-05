@@ -10,7 +10,7 @@
  * seuls admin et superadmin peuvent activer.
  */
 import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { daysBetween, todayIso } from "../lib/periods.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, optionalString, requireString, requireUuid, ValidationError } from "../lib/validate.js";
@@ -89,7 +89,7 @@ export default route(async (req, res) => {
           p_method: method,
         });
         if (error) {
-          console.error("[admin-subscriptions] activate", error);
+          logError("admin-subscriptions", error);
           return badRequest(res, error.message || "Impossible d'activer cet abonnement.");
         }
 
@@ -153,7 +153,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e instanceof ValidationError) return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-subscriptions]", e);
+    logError("admin-subscriptions", e);
     return serverError(res);
   }
 });

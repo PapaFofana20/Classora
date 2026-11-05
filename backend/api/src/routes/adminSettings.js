@@ -4,7 +4,7 @@
  * journalisée dans audit_log.
  */
 import { auditAdmin, requireAdminRole, requireSuperAdmin, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { readPlatformSettings } from "../lib/platformSettings.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { bool, expectObject, optionalString, requireEmail, requireString, ValidationError } from "../lib/validate.js";
@@ -129,7 +129,7 @@ export default route(async (req, res) => {
 
     const { error } = await svc.from("platform_settings").upsert({ id: 1, ...patch }, { onConflict: "id" });
     if (error) {
-      console.error("[admin-settings] update", error);
+      logError("admin-settings", error);
       return serverError(res);
     }
 

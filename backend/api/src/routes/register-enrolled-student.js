@@ -9,7 +9,7 @@
  */
 
 import { passwordError, serviceClient } from "../lib/auth.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 import { expectObject, optionalString, optionalUuid, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
@@ -84,13 +84,13 @@ export default route(async (req, res) => {
       if (message && /matricule|compte|école/i.test(message)) {
         return badRequest(res, message);
       }
-      console.error("[register-enrolled-student] rpc", sqlError);
+      logError("register-enrolled-student", sqlError);
       return serverError(res);
     }
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[register-enrolled-student]", e);
+    logError("register-enrolled-student", e);
     return serverError(res);
   }
 });

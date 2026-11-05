@@ -6,7 +6,7 @@
  */
 
 import { audit, isStaffRole, passwordError, requireDirecteur, revokeUserSessions, schoolIsWritable, serviceClient } from "../lib/auth.js";
-import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid } from "../lib/validate.js";
 
@@ -55,7 +55,7 @@ export default route(async (req, res) => {
       password: newPassword,
     });
     if (authError) {
-      console.error("[reset-staff-password] auth", authError);
+      logError("reset-staff-password", authError);
       return serverError(res);
     }
     // Le nouveau mot de passe invalide les usages futurs ; on révoque aussi
@@ -69,7 +69,7 @@ export default route(async (req, res) => {
       .update({ must_change_password: false })
       .eq("id", userId);
     if (flagError) {
-      console.error("[reset-staff-password] flag", flagError);
+      logError("reset-staff-password", flagError);
       return serverError(res);
     }
 
@@ -93,7 +93,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[reset-staff-password]", e);
+    logError("reset-staff-password", e);
     return serverError(res);
   }
 });

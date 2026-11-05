@@ -10,7 +10,7 @@
  */
 
 import { audit, isStaffRole, requireDirecteur, serviceClient } from "../lib/auth.js";
-import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid, ValidationError } from "../lib/validate.js";
 
@@ -62,7 +62,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e?.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return badRequest(res, e.message);
-    console.error("[delete-staff-account]", e);
+    logError("delete-staff-account", e);
     return serverError(res);
   }
 });

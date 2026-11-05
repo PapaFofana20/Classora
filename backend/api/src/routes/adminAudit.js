@@ -3,7 +3,7 @@
  * Lecture pour tous les agents, purge rÃ©servÃ©e au superadministrateur.
  */
 import { auditAdmin, requireAdminRole, requireSuperAdmin, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { readPlatformSettings } from "../lib/platformSettings.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, ValidationError } from "../lib/validate.js";
@@ -139,7 +139,7 @@ export default route(async (req, res) => {
         .delete({ count: "exact" })
         .lt("created_at", cutoff);
       if (error) {
-        console.error("[admin-audit] purge", error);
+        logError("admin-audit", error);
         return serverError(res);
       }
 
@@ -163,7 +163,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e instanceof ValidationError) return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-audit]", e);
+    logError("admin-audit", e);
     return serverError(res);
   }
 });

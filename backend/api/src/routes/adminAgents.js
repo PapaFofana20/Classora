@@ -6,7 +6,7 @@
  */
 import { passwordError, revokeUserSessions } from "../lib/auth.js";
 import { auditAdmin, requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireString, requireUuid, ValidationError } from "../lib/validate.js";
 
@@ -138,7 +138,7 @@ export default route(async (req, res) => {
         await svc.auth.admin.deleteUser(created.user.id);
         const message = sqlError instanceof Error ? sqlError.message : undefined;
         if (message && /un compte existe déjà|unique|duplicate/i.test(message)) return badRequest(res, message);
-        console.error("[admin-agents] profile insert", sqlError);
+        logError("admin-agents", sqlError);
         return serverError(res);
       }
     }
@@ -223,7 +223,7 @@ export default route(async (req, res) => {
           if (/already|exists|registered/i.test(authEmailError.message)) {
             return badRequest(res, "Un compte existe déjà avec cet e-mail.");
           }
-          console.error("[admin-agents] auth email update", authEmailError);
+          logError("admin-agents", authEmailError);
           return serverError(res);
         }
       }
@@ -236,7 +236,7 @@ export default route(async (req, res) => {
       });
       if (updateError) {
         if (/unique|duplicate/i.test(updateError.message)) return badRequest(res, "Cet e-mail ou matricule est déjà utilisé.");
-        console.error("[admin-agents] update", updateError);
+        logError("admin-agents", updateError);
         return serverError(res);
       }
       if (updatedOk === false) {
@@ -262,7 +262,7 @@ export default route(async (req, res) => {
   } catch (e) {
     if (e instanceof Error && e.name === "ValidationError") return badRequest(res, e.message);
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-agents]", e);
+    logError("admin-agents", e);
     return serverError(res);
   }
 });

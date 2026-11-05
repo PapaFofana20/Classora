@@ -21,7 +21,7 @@
  */
 
 import { expectObject, optionalString, requireString, requireUuid } from "../lib/validate.js";
-import { badRequest, forbidden, notFound, ok, route, unauthorized, serverError } from "../lib/http.js";
+import { badRequest, forbidden, notFound, ok, route, unauthorized, serverError, logError } from "../lib/http.js";
 import { getCallerProfile, schoolIsWritable, serviceClient } from "../lib/auth.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
@@ -80,7 +80,7 @@ export default route(async (req, res) => {
         .eq("school_id", caller.schoolId)
         .order("created_at", { ascending: false });
       if (error) {
-        console.error("[timetables:GET list]", error.message);
+        logError("timetables:GET list", error);
         return serverError(res);
       }
       return ok(res, { timetables: data });
@@ -118,7 +118,7 @@ export default route(async (req, res) => {
         .select()
         .single();
       if (error) {
-        console.error("[timetables:POST]", error.message);
+        logError("timetables:POST", error);
         return serverError(res);
       }
       return ok(res, { timetable: data }, 201);
@@ -179,7 +179,7 @@ export default route(async (req, res) => {
       .eq("id", id)
       .eq("school_id", caller.schoolId);
     if (error) {
-      console.error("[timetables:DELETE]", error.message);
+      logError("timetables:DELETE", error);
       return serverError(res);
     }
     return ok(res, { deleted: true });
@@ -264,7 +264,7 @@ export default route(async (req, res) => {
       .select()
       .single();
     if (error) {
-      console.error("[timetables:POST slots]", error.message);
+      logError("timetables:POST slots", error);
       return serverError(res);
     }
     return ok(res, { course: data }, 201);

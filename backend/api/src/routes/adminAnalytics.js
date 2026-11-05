@@ -4,7 +4,7 @@
  * Toutes les valeurs sont calculées à partir des tables de production.
  */
 import { requireAdminRole, serviceClient } from "../lib/authAdmin.js";
-import { ok, route, serverError, RATE_LIMIT_RE } from "../lib/http.js";
+import { ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { lastMonths, todayIso } from "../lib/periods.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
@@ -197,7 +197,7 @@ export default route(async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error && RATE_LIMIT_RE.test(e.message)) return ok(res, { error: e.message }, 429);
-    console.error("[admin-analytics]", e);
+    logError("admin-analytics", e);
     return serverError(res);
   }
 });
