@@ -13,7 +13,7 @@ export default function PremiumRegisterPage() {
   return (
     <AuthLayout
       title="Créer votre école — Premium"
-      subtitle="Le formulaire complet de votre établissement : tous les cycles, jusqu'à 600 élèves, toutes les fonctionnalités activées pendant un an."
+      subtitle="Le formulaire complet de votre établissement : tous les cycles, élèves illimités, toutes les fonctionnalités activées pendant un an."
       showVisual={false}
       backgroundImage
     >

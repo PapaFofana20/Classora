@@ -28,7 +28,7 @@ export function PricingSection({ withHeader = true }: { withHeader?: boolean }) 
                 <h3 className="text-lg font-bold">{p.name}</h3>
                 <p className={cn("mt-1 text-sm", p.highlight ? "text-white/70" : isGroup ? "text-forest/70" : "text-neutral-600")}>{p.description}</p>
                 <p className="mt-6 text-4xl font-extrabold tracking-tight">{p.price}</p>
-                <p className={cn("text-sm", p.highlight ? "text-white/70" : isGroup ? "text-forest/70" : "text-neutral-500")}>{p.unit}</p>
+                <p className={cn("text-sm", p.id === "premium" ? "text-base font-bold" : "", p.highlight ? "text-white/70" : isGroup ? "text-forest/70" : "text-neutral-500")}>{p.unit}</p>
                 <ul className="my-7 flex-1 space-y-3 text-sm">
                   {p.items.map((it) => (
                     <li key={it} className="flex items-start gap-3">

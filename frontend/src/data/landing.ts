@@ -124,10 +124,10 @@ export const plans: Plan[] = [
     id: "premium",
     name: "Premium",
     price: "500 FCFA",
-    unit: "/ élève / mois",
+    unit: "par élève / mois",
     description: "Tous les modules Pro + comptes du personnel, export et accompagnement dédié.",
     highlight: true,
-    items: ["Jusqu'à 600 élèves", "Tous les modules du plan Découverte", "Messagerie parents-enseignants", "Paiements Wave / Orange Money / Free Money", "Affectations et emplois du temps", "Rappels automatiques des impayés", "Comptes économe, secrétaire et surveillant inclus", "Export des données et rapports", "Accompagnement dédié"],
+    items: ["Élèves illimités", "Tous les modules du plan Découverte", "Messagerie parents-enseignants", "Paiements Wave / Orange Money / Free Money", "Affectations et emplois du temps", "Rappels automatiques des impayés", "Comptes économe, secrétaire et surveillant inclus", "Export des données et rapports", "Accompagnement dédié"],
   },
   {
     id: "reseau",

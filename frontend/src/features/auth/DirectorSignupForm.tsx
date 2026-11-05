@@ -165,7 +165,7 @@ export function DirectorSignupForm({ variant = "decouverte" }: { variant?: Signu
               <Icon name="workspace_premium" className="text-[22px] text-forest" />
             </div>
             <div className="text-sm min-w-0">
-              <p className="font-bold text-forest">Plan Premium — jusqu'à 600 élèves</p>
+              <p className="font-bold text-forest">Plan Premium — élèves illimités</p>
               <p className="text-neutral-600">
                 Tous les modules débloqués : emploi du temps, messagerie, paiements mobile money, comptes du personnel, exports et accompagnement dédié. Votre abonnement Premium est activé immédiatement pour un an.
               </p>

@@ -35,11 +35,11 @@ export const plans: Plan[] = [
     id: "premium",
     name: "Premium",
     tagline: "Grands établissements",
-    studentLimit: 600,
+    studentLimit: null,
     monthlyPrice: 50000,
     yearlyPrice: 500000,
     features: [
-      "Jusqu'à 600 élèves",
+      "Élèves illimités",
       "Tous les modules Pro",
       "Comptes économe, secrétaire et surveillant inclus",
       "Export des données et rapports",
