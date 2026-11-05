@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { footerColumns } from "@/data/landing";
-import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Brand";
 import { Container } from "./Container";
 
@@ -32,9 +31,8 @@ export function Footer() {
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/15 pt-6 text-xs text-white/60 sm:flex-row sm:items-center">
           <p>© 2026 Classora. Tous droits réservés.</p>
-          <p className="flex items-center gap-2">
-            <Icon name="verified_user" className="text-[18px] text-lime" />
-            Développé par <span className="text-lime">BluePixel</span>
+          <p className="flex items-center gap-1 text-[11px]">
+            Développé par <span className="font-semibold text-lime">BluePixel</span>
           </p>
         </div>
         </div>

@@ -39,8 +39,10 @@ export function AuthLayout({ title, subtitle, children, visualTitle, visualText,
             className="size-full"
             style={{
               backgroundImage: `url(${images.authBackground})`,
+              // Tuiles répétées à taille fixe (côte à côte + en dessous),
+              // jamais étirées ni zoomées : l'image garde son échelle d'origine.
               backgroundRepeat: "repeat",
-              backgroundSize: "auto",
+              backgroundSize: "600px auto",
               backgroundPosition: "top left",
             }}
           />

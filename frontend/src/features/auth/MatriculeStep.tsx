@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { SchoolMark } from "@/components/ui/Brand";
 import type { School } from "@/types";
@@ -124,12 +123,8 @@ export function MatriculeStep({ initial = "", onFound, onBack }: Props) {
           </div>
         </div>
       )}
-      {state === "error" && !school && (
-        <p className="flex items-start gap-2 rounded-2xl bg-red-50 p-4 text-sm font-medium text-danger">
-          <Icon name="error" className="text-[20px]" />
-          {error}
-        </p>
-      )}
+      {/* L'erreur (ex. « Matricule introuvable… ») s'affiche une seule fois,
+          sous le champ via la prop error de Input — pas de second encadré. */}
       {onBack && (
         <Button variant="ghost" icon="arrow_back" onClick={onBack}>
           Changer de rôle
