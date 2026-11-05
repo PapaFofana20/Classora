@@ -41,11 +41,11 @@ export default function SchoolsPage() {
         </div>
       </section>
       <section className="mx-auto w-full max-w-[1280px] px-gutter" aria-label="Chiffres clés">
-        <div className="grid gap-4 rounded-3xl bg-forest p-8 text-center text-white sm:grid-cols-3 sm:p-12">
+        <div className="grid gap-4 rounded-3xl bg-forest p-6 text-center text-white sm:grid-cols-3 sm:p-10">
           {aboutStats.map((s) => (
             <div key={s.label}>
-              <p className="text-5xl font-extrabold tracking-tight text-lime">{s.value}</p>
-              <p className="mt-1 text-sm text-white/80">{s.label}</p>
+              <p className="text-6xl font-extrabold tracking-tight text-lime">{s.value}</p>
+              <p className="mt-0 text-sm text-white/80">{s.label}</p>
             </div>
           ))}
         </div>

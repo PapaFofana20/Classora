@@ -37,9 +37,9 @@ export function AboutSection() {
               </div>
               <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 rounded-3xl bg-lime p-2">
                 {aboutStats.map((s) => (
-                  <div key={s.label} className="grid place-items-center rounded-2xl bg-white px-2 py-6 text-center text-forest">
-                    <p className="text-3xl font-extrabold tracking-tight sm:text-4xl">{s.value}</p>
-                    <p className="mt-1 text-xs font-medium text-neutral-600 sm:text-sm">{s.label}</p>
+                  <div key={s.label} className="grid place-items-center rounded-2xl bg-white px-2 py-4 text-center text-forest">
+                    <p className="text-4xl font-extrabold tracking-tight sm:text-5xl">{s.value}</p>
+                    <p className="mt-0 text-xs font-medium text-neutral-600 sm:text-sm">{s.label}</p>
                   </div>
                 ))}
               </div>

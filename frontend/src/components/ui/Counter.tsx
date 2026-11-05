@@ -62,9 +62,9 @@ export function Counter({ value, label, duration = 1500, delay = 0 }: CounterPro
   }, [target, duration, delay, hasAnimated, value]);
 
   return (
-    <div ref={elementRef} className="rounded-2xl bg-lime p-4 text-forest text-center">
-      <p className="text-3xl font-extrabold tracking-tight sm:text-4xl">{displayValue}</p>
-      <p className="mt-1 text-xs sm:text-sm font-medium text-neutral-600">{label}</p>
+    <div ref={elementRef} className="rounded-2xl bg-lime p-3 text-forest text-center">
+      <p className="text-4xl font-extrabold tracking-tight sm:text-5xl">{displayValue}</p>
+      <p className="mt-0 text-xs sm:text-sm font-medium text-neutral-600">{label}</p>
     </div>
   );
 }

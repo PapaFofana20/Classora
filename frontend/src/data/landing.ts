@@ -187,7 +187,7 @@ export const aboutValues = [
 
 export const aboutStats = [
   { value: "320+", label: "Élèves suivis" },
-  { value: "6", label: "Écoles partenaires" },
+  { value: "12", label: "Écoles partenaires" },
   { value: "2,4M", label: "FCFA encaissés" },
 ];
 
