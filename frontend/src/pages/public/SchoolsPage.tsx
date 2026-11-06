@@ -29,14 +29,14 @@ export default function SchoolsPage() {
               className="absolute bottom-0 left-1/2 size-[420px] -translate-x-1/2 translate-y-1/3 rounded-full bg-lime/40 blur-2xl md:size-[560px]"
             />
             <div className="relative">
-              <h2 id="schools-partners-title" className="text-balance text-3xl font-extrabold tracking-tight text-forest sm:text-4xl md:text-5xl">
-                Des <span className="font-serif font-semibold italic">établissements</span> qui avancent avec <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" />
+              <h2 id="schools-partners-title" className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
+                Des <span className="font-serif font-semibold italic text-forest-500">établissements</span> qui avancent avec <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" />
               </h2>
               <div className="mx-auto mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-neutral-700 sm:mt-10">
-                <p className="font-bold text-ink">
+                <p>
                   Classora accompagne les établissements scolaires dans leur transformation numérique, en leur offrant un environnement de gestion moderne, structuré et adapté à leurs réalités. De Dakar à Thiès, en passant par Mbour, Saint-Louis, Rufisque et Kaolack, notre présence s'étend progressivement à travers plusieurs villes du Sénégal.
                 </p>
-                <p className="font-bold text-ink">
+                <p>
                   De l'enseignement élémentaire au secondaire, chaque établissement possède ses propres méthodes de fonctionnement et ses exigences pédagogiques. Classora respecte cette diversité en s'adaptant à l'organisation de chaque école : gestion des instituteurs titulaires, suivi des professeurs spécialisés, coefficients propres aux différentes séries et spécificités de chaque niveau d'enseignement.
                 </p>
                 <p>
