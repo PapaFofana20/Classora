@@ -21,6 +21,10 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://classora-gsay.onrender.com/" />
 
+    <!-- Préchargement de l'image de fond des pages d'authentification
+         pour qu'elle soit disponible instantanément (pas de flash blanc). -->
+    <link rel="preload" as="image" href="/images/auth-background.svg" fetchpriority="high" />
+
     <!-- Open Graph / Twitter : aperçu de partage du site (la SPA affine
          og:url/og:title par page via usePageMeta). -->
     <meta property="og:type" content="website" />
