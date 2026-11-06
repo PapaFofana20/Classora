@@ -26,7 +26,7 @@ export function LogoStrip() {
                 <img
                   src={logo.src}
                   alt={logo.alt}
-                  loading="lazy"
+                  loading="eager"
                   decoding="async"
                   className="h-10 w-auto sm:h-14"
                 />
