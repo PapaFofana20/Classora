@@ -33,11 +33,11 @@ export default function SchoolsPage() {
                 Des <span className="font-serif font-semibold italic">établissements</span> qui avancent avec <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" />
               </h2>
               <div className="mx-auto mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-neutral-700 sm:mt-10">
-                <p>
-                  <strong className="text-ink">Classora accompagne les établissements scolaires dans leur transformation numérique, en leur offrant un environnement de gestion moderne, structuré et adapté à leurs réalités.</strong> De Dakar à Thiès, en passant par Mbour, Saint-Louis, Rufisque et Kaolack, notre présence s'étend progressivement à travers plusieurs villes du Sénégal.
+                <p className="font-bold text-ink">
+                  Classora accompagne les établissements scolaires dans leur transformation numérique, en leur offrant un environnement de gestion moderne, structuré et adapté à leurs réalités. De Dakar à Thiès, en passant par Mbour, Saint-Louis, Rufisque et Kaolack, notre présence s'étend progressivement à travers plusieurs villes du Sénégal.
                 </p>
-                <p>
-                  <strong className="text-ink">De l'enseignement élémentaire au secondaire, chaque établissement possède ses propres méthodes de fonctionnement et ses exigences pédagogiques.</strong> Classora respecte cette diversité en s'adaptant à l'organisation de chaque école : gestion des instituteurs titulaires, suivi des professeurs spécialisés, coefficients propres aux différentes séries et spécificités de chaque niveau d'enseignement.
+                <p className="font-bold text-ink">
+                  De l'enseignement élémentaire au secondaire, chaque établissement possède ses propres méthodes de fonctionnement et ses exigences pédagogiques. Classora respecte cette diversité en s'adaptant à l'organisation de chaque école : gestion des instituteurs titulaires, suivi des professeurs spécialisés, coefficients propres aux différentes séries et spécificités de chaque niveau d'enseignement.
                 </p>
                 <p>
                   <em className="font-semibold">Notre ambition est de simplifier durablement le quotidien de toute la communauté éducative.</em> En centralisant les informations et en fluidifiant les processus administratifs et pédagogiques, Classora permet aux directions de mieux piloter leurs établissements, aux enseignants de se concentrer sur l'essentiel et aux familles de suivre plus facilement la scolarité de leurs enfants.
