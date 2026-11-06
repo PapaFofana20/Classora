@@ -8,15 +8,14 @@ export function PricingSection({ withHeader = true }: { withHeader?: boolean }) 
   // Sans en-tête (page /tarifs), le H2 #pricing-title n'est pas rendu : ne pas
   // référencer un identifiant absent (aria-labelledby cassé).
   return (
-    <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby={withHeader ? "pricing-title" : undefined}>
+    <section className={cn("mx-auto w-full max-w-[1280px] px-gutter", withHeader ? "py-16" : "pt-8 pb-16")} aria-labelledby={withHeader ? "pricing-title" : undefined}>
       {withHeader && (
         <Reveal>
           <div className="mb-12 text-center">
             <h2 id="pricing-title" className="mx-auto max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
               Un prix simple, <span className="font-serif font-semibold italic text-forest-500">par élève</span>
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-neutral-600">Pas de frais d'installation. Vous ne payez que pour les élèves inscrits dans votre école.</p>
-            <p className="mx-auto mt-2 max-w-xl text-sm font-semibold text-forest">Essai gratuit de 14 jours pour chaque nouvelle école — aucun paiement requis.</p>
+            <p className="mx-auto mt-4 max-w-2xl text-neutral-600">Pas de frais d'installation ni d'engagement. Vous ne payez que pour les élèves inscrits dans votre école : votre tarif s'ajuste automatiquement à vos effectifs, mois après mois, avec toutes les fonctionnalités incluses dès le départ.</p>
           </div>
         </Reveal>
       )}

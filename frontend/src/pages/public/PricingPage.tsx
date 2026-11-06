@@ -16,7 +16,7 @@ export default function PricingPage() {
   return (
     <>
       <PageHero {...pageHeroes.tarifs} />
-      <section className="mx-auto w-full max-w-[1280px] px-gutter py-14" aria-labelledby="pricing-intro">
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pt-2 pb-8" aria-labelledby="pricing-intro">
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
             <h2 id="pricing-intro" className="text-3xl font-extrabold tracking-tight sm:text-5xl">

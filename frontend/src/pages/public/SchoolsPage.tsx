@@ -17,6 +17,36 @@ export default function SchoolsPage() {
   return (
     <>
       <PageHero {...pageHeroes.ecoles} />
+      <section className="mx-auto w-full max-w-[1280px] px-gutter pb-14 md:pb-16" aria-labelledby="schools-partners-title">
+        <Reveal>
+          <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 text-center sm:pt-14 md:pt-16 pb-12 sm:pb-14 md:pb-16">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute bottom-0 left-1/2 size-[420px] -translate-x-1/2 translate-y-1/3 rounded-full bg-lime/40 blur-2xl md:size-[560px]"
+            />
+            <div className="relative">
+              <h2 id="schools-partners-title" className="text-balance text-3xl font-extrabold tracking-tight text-forest sm:text-4xl md:text-5xl">
+                Des <span className="font-serif font-semibold italic">établissements</span> qui avancent avec <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" />
+              </h2>
+              <div className="mx-auto mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-neutral-700 sm:mt-10">
+                <p>
+                  <strong className="text-ink">Classora accompagne les établissements scolaires dans leur transformation numérique, en leur offrant un environnement de gestion moderne, structuré et adapté à leurs réalités.</strong> De Dakar à Thiès, en passant par Mbour, Saint-Louis, Rufisque et Kaolack, notre présence s'étend progressivement à travers plusieurs villes du Sénégal.
+                </p>
+                <p>
+                  <strong className="text-ink">De l'enseignement élémentaire au secondaire, chaque établissement possède ses propres méthodes de fonctionnement et ses exigences pédagogiques.</strong> Classora respecte cette diversité en s'adaptant à l'organisation de chaque école : gestion des instituteurs titulaires, suivi des professeurs spécialisés, coefficients propres aux différentes séries et spécificités de chaque niveau d'enseignement.
+                </p>
+                <p>
+                  <em className="font-semibold">Notre ambition est de simplifier durablement le quotidien de toute la communauté éducative.</em> En centralisant les informations et en fluidifiant les processus administratifs et pédagogiques, Classora permet aux directions de mieux piloter leurs établissements, aux enseignants de se concentrer sur l'essentiel et aux familles de suivre plus facilement la scolarité de leurs enfants.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
       <section className="mx-auto w-full max-w-[1280px] px-gutter pb-10" aria-label="Liste des écoles partenaires">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
