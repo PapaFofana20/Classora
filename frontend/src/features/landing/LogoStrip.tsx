@@ -15,7 +15,15 @@ export function LogoStrip() {
           Nos partenaires : acteurs de notre excellence
           <span className="mt-1 block">À nos côtés pour construire l'avenir.</span>
         </p>
-        <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+        <div className="relative overflow-hidden [contain:paint]">
+          <div
+            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent sm:w-28"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent sm:w-28"
+            aria-hidden="true"
+          />
           <div className="animate-marquee flex w-max items-center">
             {[...partnerLogos, ...partnerLogos].map((logo, i) => (
               <span
