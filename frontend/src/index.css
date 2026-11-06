@@ -259,12 +259,9 @@ button:active, a:active, [role="button"]:active {
    lisible, le track déborde simplement dans son conteneur masqué).
    Le track étant très large sur petit écran, on raccourcit la durée pour
    conserver une vitesse perçue correcte, sans tomber dans le trop rapide.
-   will-change/translate3d confient le mouvement au compositeur GPU. */
-.animate-marquee {
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
+   Le mouvement passe par translate3d (couche composite) sans will-change
+   permanent : sur mobile, réserver une couche aussi large dès le chargement
+   provoquait des à-coups. */
 @media (max-width: 639px) {
   .animate-marquee { animation-duration: 17s; }
 }
@@ -276,7 +273,10 @@ button:active, a:active, [role="button"]:active {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-marquee { animation: none !important; overflow-x: auto; }
+  .animate-marquee { animation: none !important; }
+  /* Les deux copies restent accessibles : on rend le bandeau défilable à la
+     main au lieu de laisser les derniers logos hors d'atteinte. */
+  .logo-strip-viewport { overflow-x: auto; }
 }
 
 .no-scrollbar { scrollbar-width: none; }

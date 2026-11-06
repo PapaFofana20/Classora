@@ -49,18 +49,21 @@ export const navLinks = [
 export interface PartnerLogo {
   src: string;
   alt: string;
+  /** Dimensions intrinsèques : réservent la place avant le chargement du SVG. */
+  width: number;
+  height: number;
 }
 
 export const partnerLogos: PartnerLogo[] = [
-  { src: "/images/partners/partner-1.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-2.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-3.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-4.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-5.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-6.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-7.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-8.svg", alt: "Logo d'un partenaire de Classora" },
-  { src: "/images/partners/partner-9.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-1.svg", alt: "Logo d'un partenaire de Classora", width: 182, height: 42 },
+  { src: "/images/partners/partner-2.svg", alt: "Logo d'un partenaire de Classora", width: 441, height: 41 },
+  { src: "/images/partners/partner-3.svg", alt: "Logo d'un partenaire de Classora", width: 317, height: 48 },
+  { src: "/images/partners/partner-4.svg", alt: "Logo d'un partenaire de Classora", width: 253, height: 42 },
+  { src: "/images/partners/partner-5.svg", alt: "Logo d'un partenaire de Classora", width: 215, height: 91 },
+  { src: "/images/partners/partner-6.svg", alt: "Logo d'un partenaire de Classora", width: 252, height: 71 },
+  { src: "/images/partners/partner-7.svg", alt: "Logo d'un partenaire de Classora", width: 407, height: 42 },
+  { src: "/images/partners/partner-8.svg", alt: "Logo d'un partenaire de Classora", width: 288, height: 80 },
+  { src: "/images/partners/partner-9.svg", alt: "Logo d'un partenaire de Classora", width: 432, height: 42 },
 ];
 
 export interface Feature {

@@ -15,7 +15,7 @@ export function LogoStrip() {
           Nos partenaires : acteurs de notre excellence
           <span className="mt-1 block">À nos côtés pour construire l'avenir.</span>
         </p>
-        <div className="relative overflow-hidden [contain:paint]">
+        <div className="logo-strip-viewport relative overflow-hidden [contain:paint]">
           <div
             className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent sm:w-28"
             aria-hidden="true"
@@ -34,6 +34,8 @@ export function LogoStrip() {
                 <img
                   src={logo.src}
                   alt={logo.alt}
+                  width={logo.width}
+                  height={logo.height}
                   loading="eager"
                   decoding="async"
                   className="h-10 w-auto sm:h-14"
