@@ -257,15 +257,21 @@ button:active, a:active, [role="button"]:active {
 /* Bandeau défilant (LogoStrip) : défilement continu, même au survol. Arrêt
    complet si l'utilisateur préfère moins d'animations (le contenu reste
    lisible, le track déborde simplement dans son conteneur masqué).
-   Sur mobile, le track est très large : on accélère la durée pour garder une
-   vitesse perçue correcte. will-change/translate3d confient le mouvement au
-   compositeur GPU et évitent les saccades. */
+   Le track étant très large sur petit écran, on raccourcit fortement la durée
+   pour conserver une vitesse perçue correcte. will-change/translate3d confient
+   le mouvement au compositeur GPU et évitent les saccades. */
 .animate-marquee {
   will-change: transform;
   backface-visibility: hidden;
 }
 
 @media (max-width: 639px) {
+  .animate-marquee { animation-duration: 14s; }
+}
+
+/* Grands téléphones / petites tablettes : logos un peu plus hauts, donc track
+   plus long — durée intermédiaire pour garder la même vitesse perçue. */
+@media (min-width: 640px) and (max-width: 767px) {
   .animate-marquee { animation-duration: 20s; }
 }
 
