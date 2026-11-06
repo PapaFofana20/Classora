@@ -46,7 +46,22 @@ export const navLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
-export const logoStrip = ["Wave", "Orange Money", "Free Money", "Groupe Les Baobabs", "Institut Horizon", "Complexe Teranga", "Collège Kocc Barma"];
+export interface PartnerLogo {
+  src: string;
+  alt: string;
+}
+
+export const partnerLogos: PartnerLogo[] = [
+  { src: "/images/partners/partner-1.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-2.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-3.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-4.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-5.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-6.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-7.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-8.svg", alt: "Logo d'un partenaire de Classora" },
+  { src: "/images/partners/partner-9.svg", alt: "Logo d'un partenaire de Classora" },
+];
 
 export interface Feature {
   id: string;

@@ -254,10 +254,9 @@ button:active, a:active, [role="button"]:active {
   }
 }
 
-/* Bandeau défilant (LogoStrip) : pause au survol, arrêt complet si
-   l'utilisateur préfère moins d'animations (le contenu reste lisible,
-   le track déborde simplement dans son conteneur masqué). */
-.animate-marquee:hover { animation-play-state: paused; }
+/* Bandeau défilant (LogoStrip) : défilement continu, même au survol. Arrêt
+   complet si l'utilisateur préfère moins d'animations (le contenu reste
+   lisible, le track déborde simplement dans son conteneur masqué). */
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee { animation: none !important; overflow-x: auto; }
 }
