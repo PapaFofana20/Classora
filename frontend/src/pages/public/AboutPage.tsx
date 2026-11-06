@@ -82,15 +82,9 @@ export default function AboutPage() {
               <h2 id="vision-title" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-tight">
                 En <span className="text-lime">2030</span>, la gestion scolaire doit être plus simple.
               </h2>
-              <div className="mt-8 space-y-6 text-lg leading-relaxed text-white/85">
+              <div className="mt-8 text-lg leading-relaxed text-white/85">
                 <p>
-                  Nous imaginons un avenir où les établissements scolaires passent moins de temps à gérer la complexité administrative et disposent de meilleurs outils pour organiser leur quotidien, suivre leurs élèves et coordonner leurs équipes. C'est cette vision qui guide le développement de Classora.
-                </p>
-                <p>
-                  D'ici 2030, Classora ambitionne de devenir le système nerveux des écoles privées sénégalaises : une plateforme qui centralise la vie administrative, pédagogique et financière de l'établissement, tout en s'adaptant aux spécificités de chaque cycle — de l'instituteur titulaire à l'élémentaire aux professeurs spécialisés par matière au secondaire. L'objectif n'est pas de standardiser à outrance, mais d'offrir un socle commun fiable sur lequel chaque école construit sa propre organisation.
-                </p>
-                <p>
-                  Cette vision passe aussi par une relation transformée avec les familles : des paiements mobiles fluides et sécurisés, un accès transparent aux bulletins et aux échéances, une communication directe avec les enseignants. Et par des outils d'aide à la décision pour les directions — tableaux de bord financiers en temps réel, alertes automatiques sur les impayés, projection de trésorerie — pour que la gestion ne soit plus une charge réactive, mais un levier stratégique.
+                  D'ici 2030, nous imaginons des écoles privées sénégalaises qui consacrent moins de temps à la complexité administrative et disposent d'outils simples pour organiser leur quotidien, suivre leurs élèves et coordonner leurs équipes, avec Classora comme système nerveux centralisant la vie administrative, pédagogique et financière de l'établissement. Cette plateforme s'adapte à chaque cycle — de l'instituteur titulaire à l'élémentaire aux professeurs spécialisés au secondaire — sans imposer une standardisation excessive, mais en offrant un socle commun fiable sur lequel chaque école construit sa propre organisation. Elle transforme aussi la relation aux familles, grâce à des paiements mobiles fluides et sécurisés, un accès transparent aux bulletins et aux échéances, et une communication directe avec les enseignants, tout en équipant les directions de tableaux de bord financiers en temps réel, d'alertes automatiques sur les impayés et de projections de trésorerie, pour faire de la gestion un levier stratégique plutôt qu'une charge réactive.
                 </p>
               </div>
             </header>
