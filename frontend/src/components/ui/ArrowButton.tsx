@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
+import { preloadRoute } from "@/lib/routePrefetch";
 import { Icon } from "./Icon";
 
 type Tone = "lime" | "forest" | "white";
@@ -27,7 +28,7 @@ interface Props extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className
 /** Bouton principal : pilule + cercle vert foncé avec flèche ↗. */
 export function ArrowButton({ tone = "lime", to, className, children, icon = "arrow_outward", type = "button", ...rest }: Props) {
   const classes = cn(
-    "group inline-flex min-h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-sm font-semibold shadow-card active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+    "group inline-flex min-h-12 cursor-pointer items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-sm font-semibold shadow-card transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
     shell[tone],
     className,
   );
@@ -41,7 +42,7 @@ export function ArrowButton({ tone = "lime", to, className, children, icon = "ar
   );
   if (to) {
     return (
-      <Link to={to} className={classes}>
+      <Link to={to} className={classes} onMouseEnter={() => preloadRoute(to)} onFocus={() => preloadRoute(to)}>
         {inner}
       </Link>
     );

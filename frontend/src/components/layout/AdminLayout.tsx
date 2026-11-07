@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminTopbar } from "./AdminTopbar";
@@ -8,11 +8,11 @@ import { useAdminAuth } from "@/context/AdminAuthContext";
 import { usePlatformStatus } from "@/context/PlatformContext";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { SuspenseOutlet } from "@/components/ui/PageSuspense";
 
 function Shell() {
   const { agent, logout } = useAdminAuth();
   const { status } = usePlatformStatus();
-  const { pathname } = useLocation();
   const navigate = useNavigate();
   const [drawer, setDrawer] = useState(false);
 
@@ -32,8 +32,11 @@ function Shell() {
         <div className="min-w-0 flex-1 overflow-x-clip px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10">
           <AdminTopbar agent={agent} onMenu={() => setDrawer(true)} onLogout={logout} />
           <MaintenanceBanner />
-          <main id="contenu-admin" tabIndex={-1} key={pathname} className="min-w-0 focus:outline-none">
-            <Outlet />
+          {/* Pas de key={pathname} : il remontait toute la page à chaque clic
+              (perte d'état, skeletons et refetch systématiques). Le défilement
+              en haut de page est déjà géré par ScrollToTop dans App.tsx. */}
+          <main id="contenu-admin" tabIndex={-1} className="min-w-0 focus:outline-none">
+            <SuspenseOutlet />
           </main>
         </div>
       </div>

@@ -47,7 +47,12 @@ export default function StaffPage() {
   const [confirmDelete, setConfirmDelete] = useState<{ kind: "staff"; row: StaffRow } | { kind: "teacher"; row: TeacherRow } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const state = useAsync(async () => ({ staff: await listStaff(schoolId), overview: await getSchoolOverview(schoolId), teachers: await listTeacherRows(schoolId) }), [schoolId]);
+  // Trois sources indépendantes : chargées en parallèle (et non en
+  // séquence ×3) pour afficher la page beaucoup plus vite.
+  const state = useAsync(async () => {
+    const [staff, overview, teachers] = await Promise.all([listStaff(schoolId), getSchoolOverview(schoolId), listTeacherRows(schoolId)]);
+    return { staff, overview, teachers };
+  }, [schoolId]);
 
   const staff = state.data?.staff ?? [];
   const teachers = state.data?.teachers ?? [];
@@ -169,10 +174,10 @@ export default function StaffPage() {
           <Button size="sm" variant="ghost" aria-label={`Modifier ${s.firstName}`} onClick={() => { setEditing(s); setOpen(true); }}>
             <Icon name="edit" className="text-[18px]" />
           </Button>
-          <Button size="sm" variant="ghost" aria-label={`Réinitialiser le mot de passe de ${s.firstName}`} onClick={() => void reset(s)}>
+          <Button size="sm" variant="ghost" aria-label={`Réinitialiser le mot de passe de ${s.firstName}`} loading={busy} disabled={busy} onClick={() => void reset(s)}>
             <Icon name="key" className="text-[18px]" />
           </Button>
-          <Button size="sm" variant={s.status === "ACTIF" ? "ghost" : "outline"} onClick={() => void toggleActive(s)}>
+          <Button size="sm" variant={s.status === "ACTIF" ? "ghost" : "outline"} loading={busy} disabled={busy} onClick={() => void toggleActive(s)}>
             {s.status === "ACTIF" ? "Désactiver" : "Réactiver"}
           </Button>
           <Button size="sm" variant="ghost" aria-label={`Supprimer l'accès de ${s.firstName} ${s.lastName}`} title="Supprimer cet accès" className="text-danger hover:bg-red-50" onClick={() => setConfirmDelete({ kind: "staff", row: s })}>

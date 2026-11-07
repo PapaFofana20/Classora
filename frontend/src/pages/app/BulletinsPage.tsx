@@ -70,7 +70,11 @@ export default function BulletinsPage() {
   const isParent = user.role === "parent";
   const isStudent = user.role === "eleve";
   const isRestricted = (isParent || isStudent) && (settings?.blockStudentBulletins ?? false);
-  const classes = useAsync(async () => ({ list: await bulletinClasses(user), overview: await getSchoolOverview(user.schoolId) }), [user.id]);
+  // Sources indépendantes : requêtes en parallèle (et non en séquence).
+  const classes = useAsync(async () => {
+    const [list, overview] = await Promise.all([bulletinClasses(user), getSchoolOverview(user.schoolId)]);
+    return { list, overview };
+  }, [user.id]);
   const [classId, setClassId] = useState("");
   const [idx, setIdx] = useState(0);
 

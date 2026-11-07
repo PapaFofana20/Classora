@@ -12,6 +12,7 @@ import { cn } from "@/utils/cn";
 import { Logo, LogoMark } from "@/components/ui/Brand";
 import { Icon } from "@/components/ui/Icon";
 import { useAsync } from "@/hooks/useAsync";
+import { preloadRoute } from "@/lib/routePrefetch";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { ConfirmDialog } from "@/components/ui/Modal";
 
@@ -49,13 +50,13 @@ function MenuItem({ item, expanded, onNavigate }: { item: NavItem; expanded: boo
         end={item.to === "/app" || item.to === "/app/eleves"}
         onClick={onNavigate}
         aria-label={expanded ? undefined : item.label}
-        onPointerEnter={() => showTip(TOOLTIP_DELAY)}
+        onPointerEnter={() => { preloadRoute(item.to); showTip(TOOLTIP_DELAY); }}
         onPointerLeave={hideTip}
-        onFocus={() => showTip(0)}
+        onFocus={() => { preloadRoute(item.to); showTip(0); }}
         onBlur={hideTip}
         className={({ isActive }) =>
           cn(
-            "group relative flex min-h-11 items-center rounded-full transition-colors duration-200",
+            "group relative flex min-h-11 items-center rounded-full transition active:scale-[0.98] duration-200",
             expanded ? "gap-3 px-4" : "mx-auto size-11 justify-center",
             isActive ? "bg-lime text-forest shadow-lg shadow-black/20" : "text-white/85 hover:bg-white/10",
           )

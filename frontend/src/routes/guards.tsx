@@ -11,6 +11,18 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { logout } from "@/services/authService";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
 
+/** Chargement de session : spinner + libellé (au lieu d'un écran blanc). */
+export function SessionLoading() {
+  return (
+    <div className="grid min-h-screen place-items-center bg-mist p-4" role="status" aria-label="Chargement de votre session">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <span className="size-10 animate-spin rounded-full border-4 border-forest/15 border-t-forest" aria-hidden="true" />
+        <p className="text-sm font-semibold text-forest">Chargement de votre session…</p>
+      </div>
+    </div>
+  );
+}
+
 /** /app/* : redirige vers /connexion si non connecté. */
 export function ProtectedRoute() {
   const { user, justLoggedOut, loadingSession } = useAuth();
@@ -18,7 +30,9 @@ export function ProtectedRoute() {
   // Restauration de session en cours : ne PAS rediriger — au rechargement
   // direct d'un lien profond, user est encore null et la redirection vers
   // /connexion détruisait l'URL d'origine.
-  if (loadingSession) return <div className="min-h-screen bg-mist" aria-hidden="true" />;
+  // Écran de chargement explicite (et non une page blanche) : l'utilisateur
+  // doit voir que la session se restaure, surtout au premier chargement.
+  if (loadingSession) return <SessionLoading />;
   if (!user) return <Navigate to={justLoggedOut ? "/" : "/connexion"} replace state={{ from: location.pathname }} />;
   if (user.status === "DESACTIVE") {
     // Ceinture et bretelles : currentSession() fermant déjà la session d'un
@@ -38,7 +52,7 @@ export function PublicOnlyRoute() {
   usePageMeta({ noindex: true });
   // Attendre la restauration pour éviter le flash « formulaire de connexion »
   // puis rebond vers /app au rechargement d'une page publique.
-  if (loadingSession) return <div className="min-h-screen bg-mist" aria-hidden="true" />;
+  if (loadingSession) return <SessionLoading />;
   if (user) return <Navigate to="/app" replace />;
   return <Outlet />;
 }

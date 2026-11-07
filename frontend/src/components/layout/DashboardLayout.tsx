@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
 import { ChildProvider } from "@/context/ChildContext";
 import { useCurrentUser } from "@/context/AuthContext";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
@@ -10,12 +9,12 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { SuspenseOutlet } from "@/components/ui/PageSuspense";
 
 function Shell() {
   const user = useCurrentUser();
   const { registerContent } = useSidebar();
   const [drawer, setDrawer] = useState(false);
-  const { pathname } = useLocation();
   return (
     <div className="min-h-screen bg-mist">
       <button type="button" onClick={() => document.getElementById("contenu")?.focus()} className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-lime focus:px-4 focus:py-2">
@@ -26,10 +25,13 @@ function Shell() {
         <Sidebar user={user} drawerOpen={drawer} onClose={() => setDrawer(false)} />
         <div ref={registerContent} className="@container min-w-0 flex-1 overflow-x-clip px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:pb-10">
           <Topbar user={user} onMenu={() => setDrawer(true)} />
-          <main id="contenu" tabIndex={-1} key={pathname} className="min-w-0 focus:outline-none">
+          {/* Pas de key={pathname} : il remontait toute la page à chaque clic
+              (perte d'état, skeletons et refetch systématiques). Le défilement
+              en haut de page est déjà géré par ScrollToTop dans App.tsx. */}
+          <main id="contenu" tabIndex={-1} className="min-w-0 focus:outline-none">
             <MaintenanceBanner />
             <SubscriptionBanner />
-            <Outlet />
+            <SuspenseOutlet />
           </main>
         </div>
       </div>

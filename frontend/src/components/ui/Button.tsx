@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
+import { preloadRoute } from "@/lib/routePrefetch";
 import { Icon } from "./Icon";
 
 export type ButtonVariant = "primary" | "dark" | "outline" | "ghost" | "danger";
@@ -21,7 +22,7 @@ const sizes: Record<ButtonSize, string> = {
 
 export function buttonClasses(variant: ButtonVariant = "primary", size: ButtonSize = "md", className?: string) {
   return cn(
-    "inline-flex select-none items-center justify-center gap-2 rounded-full font-semibold active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
+    "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-full font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
     variants[variant],
     sizes[size],
     className,
@@ -56,7 +57,13 @@ interface LinkButtonProps extends CommonProps {
 
 export function LinkButton({ to, variant, size, icon, className, children, ...rest }: LinkButtonProps) {
   return (
-    <Link to={to} className={buttonClasses(variant, size, className)} {...rest}>
+    <Link
+      to={to}
+      className={buttonClasses(variant, size, className)}
+      onMouseEnter={() => preloadRoute(to)}
+      onFocus={() => preloadRoute(to)}
+      {...rest}
+    >
       {icon && <Icon name={icon} className="text-[20px]" />}
       {children}
     </Link>

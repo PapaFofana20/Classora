@@ -14,7 +14,12 @@ export default function PendingStudentsPage() {
   const user = useCurrentUser();
   const school = useSchool();
   const { toast } = useToast();
-  const state = useAsync(async () => ({ pending: await listPending(user), history: await listAll(user) }), [user.id]);
+  // Les deux listes sont indépendantes : requêtes en parallèle (et non
+  // en séquence) pour diviser par deux le temps d'affichage de la page.
+  const state = useAsync(async () => {
+    const [pending, history] = await Promise.all([listPending(user), listAll(user)]);
+    return { pending, history };
+  }, [user.id]);
   const [busy, setBusy] = useState(false);
 
   const run = async (ids: string[], kind: "approve" | "reject") => {

@@ -6,6 +6,7 @@ import { SIDEBAR_COLLAPSED, SIDEBAR_EXPANDED, useSidebar } from "@/context/Sideb
 import { Icon } from "@/components/ui/Icon";
 import { Logo, LogoMark } from "@/components/ui/Brand";
 import { cn } from "@/utils/cn";
+import { preloadRoute } from "@/lib/routePrefetch";
 import type { AdminAgent } from "@/types";
 import { adminNavFor } from "@/routes/adminNavigation";
 import { ConfirmDialog } from "@/components/ui/Modal";
@@ -52,9 +53,9 @@ function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean
         end={toPath === "/admin" && !toSearch}
         onClick={onNavigate}
         aria-label={expanded ? undefined : item.label}
-        onPointerEnter={() => showTip(TOOLTIP_DELAY)}
+        onPointerEnter={() => { preloadRoute(item.to); showTip(TOOLTIP_DELAY); }}
         onPointerLeave={hideTip}
-        onFocus={() => showTip(0)}
+        onFocus={() => { preloadRoute(item.to); showTip(0); }}
         onBlur={hideTip}
         className={cn(
           "group relative flex min-h-11 items-center rounded-full transition-colors duration-200",

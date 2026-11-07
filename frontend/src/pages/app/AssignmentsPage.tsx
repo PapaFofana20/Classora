@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/Brand";
@@ -21,13 +22,20 @@ export default function AssignmentsPage() {
   const state = useAsync(() => getAssignmentBoard(user.schoolId), [user.schoolId]);
   const { toast } = useToast();
   const [cycle, setCycle] = useState<Cycle>("moyen");
+  // Verrou anti double-clic : une écriture en cours bloque les suivantes
+  // (avant : aucun état busy, deux clics rapides = écritures concurrentes).
+  const runningRef = useRef(false);
 
   const run = async (op: () => Promise<AssignmentBoard>, success: string) => {
+    if (runningRef.current) return;
+    runningRef.current = true;
     try {
       state.setData(await op());
       toast(success);
     } catch (e) {
       toast(e instanceof Error ? e.message : "Modification impossible.", "error");
+    } finally {
+      runningRef.current = false;
     }
   };
 
@@ -60,7 +68,9 @@ export default function AssignmentsPage() {
                 <Card className="!bg-amber-50">
                   <p className="text-sm text-amber-900">
                     <strong>Aucune matière n'est rattachée à une classe.</strong> Configurez d'abord les matières par classe dans{" "}
-                    <a href="/app/parametres" className="font-semibold underline">Paramètres → Coefficients</a>, puis revenez ici pour affecter les enseignants.
+                    {/* <Link> et non <a href> : un <a> interne rechargeait toute
+                        l'application (re-boot + hydrateAll) au lieu de naviguer instantanément. */}
+                    <Link to="/app/parametres" className="font-semibold underline">Paramètres → Coefficients</Link>, puis revenez ici pour affecter les enseignants.
                   </p>
                 </Card>
               )}

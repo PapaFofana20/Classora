@@ -1,9 +1,9 @@
-import { lazy, Suspense, type ReactElement } from "react";
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { lazy, type ReactElement } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { Skeleton } from "@/components/ui/Skeleton";
+import { SuspenseOutlet } from "@/components/ui/PageSuspense";
 import { AuthProvider } from "@/context/AuthContext";
 import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { PlatformProvider } from "@/context/PlatformContext";
@@ -61,7 +61,7 @@ const AdminSettingsPage = lazy(() => import("@/pages/app/AdminSettingsPage"));
 function SchoolAuthWrapper() {
   return (
     <SchoolProvider>
-      <Outlet />
+      <SuspenseOutlet />
     </SchoolProvider>
   );
 }
@@ -70,17 +70,8 @@ function SchoolAuthWrapper() {
 function AdminAuthWrapper() {
   return (
     <AdminAuthProvider>
-      <Outlet />
+      <SuspenseOutlet />
     </AdminAuthProvider>
-  );
-}
-
-function Fallback() {
-  return (
-    <div className="p-8" role="status" aria-label="Chargement de la page">
-      <Skeleton className="mb-4 h-10 w-64" />
-      <Skeleton className="h-72 w-full" />
-    </div>
   );
 }
 
@@ -95,7 +86,11 @@ export default function App() {
         <AuthProvider>
           <PlatformProvider>
             <ScrollToTop />
-            <Suspense fallback={<Fallback />}>
+            {/* Pas de Suspense global autour de <Routes> : il remplaçait
+                toute l'application (layouts compris) par des skeletons
+                pendant le chargement du chunk d'une page. Chaque layout
+                et chaque wrapper ci-dessous a désormais son propre
+                Suspense local autour de son <Outlet /> (PageSuspense). */}
               <Routes>
             {/* PARTIE 1 : site public */}
             <Route element={<PublicLayout />}>
@@ -113,6 +108,7 @@ export default function App() {
             </Route>
 
             {/* PARTIE 2 : authentification scolaire (pas de session requise)} */}
+            <Route element={<SuspenseOutlet />}>
             <Route element={<PublicOnlyRoute />}>
               <Route path="connexion" element={<LoginPage />} />
               <Route path="inscription" element={<RegisterPage />} />
@@ -120,8 +116,11 @@ export default function App() {
               <Route path="inscription-envoyee" element={<SignupSentPage />} />
               <Route path="mot-de-passe-oublie" element={<ForgotPasswordPage />} />
             </Route>
+            </Route>
 
-            <Route path="reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
+            <Route element={<SuspenseOutlet />}>
+              <Route path="reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
+            </Route>
 
             {/* PARTIE 3 : authentification administrative (isolée de l'auth scolaire) */}
             <Route path="admin" element={<AdminAuthWrapper />}>
@@ -185,7 +184,6 @@ export default function App() {
             </Route>
             {/* Le 404 racine est géré dans PublicLayout (catch-all ci-dessus). */}
             </Routes>
-            </Suspense>
           </PlatformProvider>
         </AuthProvider>
       </ToastProvider>

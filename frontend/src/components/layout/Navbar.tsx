@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { CONTACT, navLinks } from "@/data/landing";
 import { useScrolled } from "@/hooks/useScrolled";
 import { cn } from "@/utils/cn";
+import { preloadRoute } from "@/lib/routePrefetch";
 import { ArrowButton } from "@/components/ui/ArrowButton";
 import { Logo } from "@/components/ui/Brand";
 import { Icon } from "@/components/ui/Icon";
@@ -78,7 +79,7 @@ export function Navbar() {
                 du Container de 1280 px max. En dessous, barre compacte + menu. */}
             <div className="hidden items-center gap-1 lg:flex">
               {navLinks.map((l) => (
-                <NavLink key={l.to} to={l.to} end={l.to === "/"} className={link}>
+                <NavLink key={l.to} to={l.to} end={l.to === "/"} className={link} onMouseEnter={() => preloadRoute(l.to)} onFocus={() => preloadRoute(l.to)}>
                   {l.label}
                 </NavLink>
               ))}
@@ -122,7 +123,7 @@ export function Navbar() {
               <div id="menu-mobile" onClick={closeMenu} className="drawer-enter mx-nav-inset mt-2 rounded-3xl bg-white p-4 shadow-soft ring-1 ring-forest/5 xl:hidden">
                 <div className="grid gap-1">
                   {navLinks.map((l) => (
-                    <NavLink key={l.to} to={l.to} end={l.to === "/"} className={({ isActive }) => cn("flex min-h-12 items-center rounded-2xl px-4 text-sm font-semibold", isActive ? "bg-lime text-forest" : "text-ink hover:bg-lime-soft")}>
+                    <NavLink key={l.to} to={l.to} end={l.to === "/"} onMouseEnter={() => preloadRoute(l.to)} onFocus={() => preloadRoute(l.to)} className={({ isActive }) => cn("flex min-h-12 items-center rounded-2xl px-4 text-sm font-semibold", isActive ? "bg-lime text-forest" : "text-ink hover:bg-lime-soft")}>
                       {l.label}
                     </NavLink>
                   ))}

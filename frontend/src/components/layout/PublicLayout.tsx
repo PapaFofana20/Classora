@@ -1,6 +1,6 @@
-import { Outlet, useLocation } from "react-router-dom";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
+import { SuspenseOutlet } from "@/components/ui/PageSuspense";
 
 /**
  * Site public : fond blanc, une seule navbar fixe rendue ici, puis le contenu.
@@ -10,15 +10,17 @@ import { Navbar } from "./Navbar";
  * donc aucune bande blanche ni boîte vide au-dessus du hero.
  */
 export function PublicLayout() {
-  const { pathname } = useLocation();
   return (
     // `relative` : ancre la sentinelle de la navbar sur le haut de page.
     // `flow-root` : la marge du hero ne remonte plus sur <body> (décalage au chargement).
     // `overflow-x-clip` : aucun défilement horizontal, sans conteneur de défilement.
     <div className="page-bg relative min-h-svh flow-root overflow-x-clip bg-white">
       <Navbar />
-      <main key={pathname}>
-        <Outlet />
+      {/* Pas de key={pathname} : il remontait toute la page à chaque clic
+          (perte d'état, skeletons et refetch systématiques). Le défilement
+          en haut de page est déjà géré par ScrollToTop dans App.tsx. */}
+      <main>
+        <SuspenseOutlet />
       </main>
       <Footer />
     </div>

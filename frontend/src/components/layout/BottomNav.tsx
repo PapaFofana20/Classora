@@ -5,6 +5,7 @@ import { useTeaching } from "@/context/TeachingContext";
 import { navFor, type NavItem } from "@/routes/navigation";
 import type { Role, SessionUser } from "@/types";
 import { cn } from "@/utils/cn";
+import { preloadRoute } from "@/lib/routePrefetch";
 import { Icon } from "@/components/ui/Icon";
 import { MoreSheet } from "./MoreSheet";
 
@@ -64,6 +65,8 @@ export function BottomNav({ user }: { user: SessionUser }) {
             to={item.to}
             end={item.to === "/app"}
             aria-label={item.label}
+            onMouseEnter={() => preloadRoute(item.to)}
+            onFocus={() => preloadRoute(item.to)}
             className={({ isActive }) =>
               cn(
                 "flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[11px] font-semibold leading-none transition",
