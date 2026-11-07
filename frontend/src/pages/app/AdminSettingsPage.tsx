@@ -1,3 +1,4 @@
+// Paramètres généraux de la plateforme côté admin.
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -18,6 +19,7 @@ import { cn } from "@/utils/cn";
 
 const SQL_FILE = "backend/supabase/migrations/20260101000031_platform_settings.sql";
 
+// Composant principal de la page.
 export default function AdminSettingsPage() {
   const state = useAsync(() => getAdminSettings(), []);
   return (

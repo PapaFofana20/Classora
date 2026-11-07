@@ -1,3 +1,4 @@
+// Page publique de contact avec le formulaire et les coordonnées.
 import { Link } from "react-router-dom";
 import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
@@ -14,6 +15,7 @@ const infos = [
   { label: "Horaires", value: CONTACT.hours },
 ];
 
+// Composant principal de la page.
 export default function ContactPage() {
   usePageMeta({
     title: "Contactez Classora",
@@ -38,9 +40,9 @@ export default function ContactPage() {
             <div className="relative">
               <h2
                 id="contact-support-title"
-                className="text-balance text-3xl font-extrabold tracking-tight text-forest sm:text-4xl md:text-5xl"
+                className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl"
               >
-                Une équipe <em className="font-serif font-semibold italic">à votre écoute</em>
+                Une équipe à votre <span className="font-serif font-semibold italic text-forest-500">écoute</span>
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 md:text-lg">
                 Une question sur Classora, la mise en place dans votre établissement ou les tarifs ?
@@ -60,8 +62,8 @@ export default function ContactPage() {
       </section>
       <section className="mx-auto w-full max-w-[1280px] px-gutter pb-20" aria-labelledby="contact-more-title">
         <Reveal>
-          <h2 id="contact-more-title" className="text-2xl font-extrabold tracking-tight">
-            Avant de nous écrire
+          <h2 id="contact-more-title" className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
+            Avant de nous <span className="font-serif font-semibold italic text-forest-500">écrire</span>
           </h2>
           <p className="mt-3 max-w-2xl text-neutral-600">
             Vous vous demandez combien coûte Classora pour votre établissement, ou ce que la plateforme

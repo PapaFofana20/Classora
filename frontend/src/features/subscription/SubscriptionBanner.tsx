@@ -1,3 +1,5 @@
+// Bandeau d'information sur l'essai ou l'etat de l'abonnement.
+
 import { Link } from "react-router-dom";
 import { Icon } from "@/components/ui/Icon";
 import { useSchool } from "@/context/SchoolContext";

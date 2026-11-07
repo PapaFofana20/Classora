@@ -63,8 +63,11 @@ export const plans: Plan[] = [
   },
 ];
 
+// Retrouve une formule par son id, avec repli sur la formule découverte.
 export const planById = (id: Plan["id"]): Plan => plans.find((p) => p.id === id) ?? plans[0];
 
+// Prix de la formule selon la facturation mensuelle ou annuelle.
 export const priceFor = (plan: Plan, cycle: "monthly" | "yearly"): number => (cycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice);
 
+// Libellé du plafond d'élèves d'une formule, pour les cartes tarifaires.
 export const planLimitLabel = (plan: Plan): string => (plan.studentLimit === null ? "Élèves illimités" : `Jusqu'à ${plan.studentLimit} élèves`);

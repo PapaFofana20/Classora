@@ -1,3 +1,4 @@
+// Données de base de l'école : cycles, niveaux, périodes et frais de référence.
 import type { Cycle, Level, LevelFees, Period, PeriodType } from "@/types";
 
 /**
@@ -82,12 +83,14 @@ export const DEFAULT_SIBLING_DISCOUNT = 10;
 /** Arrondi à 500 FCFA (usage interne aux données de démonstration). */
 export const roundFee = (value: number): number => Math.round(value / 500) * 500;
 
+// Applique un facteur d'école aux frais de référence, arrondis à 500 FCFA.
 export function scaleFees(factor: number): Record<string, LevelFees> {
   return Object.fromEntries(
     Object.entries(DEFAULT_FEES).map(([id, f]) => [id, { inscription: roundFee(f.inscription * factor), mensualite: roundFee(f.mensualite * factor) }]),
   );
 }
 
+// Liste des périodes selon le découpage choisi : semestres ou trimestres.
 export function getPeriods(type: PeriodType): Period[] {
   return type === "semestre"
     ? [

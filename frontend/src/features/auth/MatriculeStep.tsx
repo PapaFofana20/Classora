@@ -1,3 +1,5 @@
+// Verification du matricule d'ecole avant l'inscription eleve ou parent.
+
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";

@@ -1,9 +1,11 @@
+// Formatage des montants, dates, noms et validations simples du site.
 export function formatCurrency(amount: number): string {
   const n = Math.round(amount);
   const sign = n < 0 ? "-" : "";
   return `${sign}${Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0")}\u00A0FCFA`;
 }
 
+// Nombre en français, avec séparateur d'espaces et décimales limitées.
 export function formatNumber(n: number, digits = 2): string {
   return n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: digits });
 }
@@ -17,11 +19,13 @@ export function formatDate(iso: string | undefined | null): string {
   return `${d}/${m}/${y}`;
 }
 
+// Date ISO en date + heure lisible (« 12/03/2026 · 14 h 30 »).
 export function formatDateTime(iso: string): string {
   const time = iso.length > 10 ? iso.slice(11, 16).replace(":", " h ") : "";
   return `${formatDate(iso)}${time ? " · " + time : ""}`;
 }
 
+// Date ISO en toutes lettres (« Mercredi 12 mars 2026 »).
 export function formatLongDate(iso: string): string {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
   const text = new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("fr-FR", {
@@ -44,14 +48,17 @@ export function parseFrDate(value: string): string | null {
   return `${y}-${mo}-${d}`;
 }
 
+// Initiales d'un prénom et d'un nom, pour les avatars.
 export function initials(first: string, last: string): string {
   return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 }
 
+// Nom complet « prénom nom » pour les cartes et listes.
 export function fullName(p: { firstName: string; lastName: string }): string {
   return `${p.firstName} ${p.lastName}`;
 }
 
+// Âge en années révolues à partir d'une date de naissance.
 export function ageFrom(iso: string, todayIso: string): number {
   const b = new Date(iso);
   const t = new Date(todayIso);
@@ -60,6 +67,7 @@ export function ageFrom(iso: string, todayIso: string): number {
   return age;
 }
 
+// Contrôle rapide d'une adresse e-mail.
 export function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
 }
@@ -77,6 +85,7 @@ export function pluralize(count: number, singular: string, plural: string): stri
 }
 
 /** Initiales à partir de graphèmes (supporte emoji, noms composés) */
+// Initiales qui gèrent les emoji et noms composés, avec repli simple.
 export function initialsGrapheme(first: string, last: string): string {
   // @ts-ignore - Intl.Segmenter not in TS lib yet but exists at runtime
   if (typeof Intl !== "undefined" && (Intl as any).Segmenter) {

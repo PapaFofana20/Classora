@@ -1,3 +1,4 @@
+// Page de connexion à l'espace Classora.
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { LoginForm } from "@/features/auth/LoginForm";
 

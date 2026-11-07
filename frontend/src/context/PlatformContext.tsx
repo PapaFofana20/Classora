@@ -1,3 +1,4 @@
+// Réglages globaux de la plateforme : maintenance, support, nom affiché.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { DEFAULT_PLATFORM_STATUS, getPlatformStatus } from "@/services/platform";
 import type { PlatformStatus } from "@/types";
@@ -11,6 +12,7 @@ interface PlatformContextValue {
 
 const PlatformContext = createContext<PlatformContextValue | null>(null);
 
+// Charge les réglages une fois au démarrage, rechargeables à la demande.
 export function PlatformProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<PlatformStatus>(DEFAULT_PLATFORM_STATUS);
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
   return <PlatformContext.Provider value={value}>{children}</PlatformContext.Provider>;
 }
 
+// Lit le statut de la plateforme (maintenance, contacts…) depuis n'importe quel composant.
 export function usePlatformStatus(): PlatformContextValue {
   const ctx = useContext(PlatformContext);
   if (!ctx) throw new Error("usePlatformStatus doit être utilisé dans <PlatformProvider>.");

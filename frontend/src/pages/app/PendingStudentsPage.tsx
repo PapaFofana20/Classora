@@ -1,3 +1,4 @@
+// Validation des demandes d'inscription d'élèves et de parents.
 import { useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SkeletonTable } from "@/components/ui/Skeleton";

@@ -1,3 +1,5 @@
+// Bandeau defilant des logos des ecoles partenaires.
+
 import { Container } from "@/components/layout/Container";
 import { partnerLogos } from "@/data/landing";
 

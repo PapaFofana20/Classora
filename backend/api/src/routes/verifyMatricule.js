@@ -8,6 +8,7 @@ import { serviceClient } from "../lib/auth.js";
 import { methodNotAllowed, ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 
+// Handler principal : POST /verify-matricule — vérifie un matricule d'école avant inscription.
 export default route(async (req, res) => {
   // POST uniquement : le matricule ne doit pas transiter en query string
   // (historique navigateur, logs d'accès, Referer).

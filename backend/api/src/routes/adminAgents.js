@@ -12,6 +12,7 @@ import { expectObject, requireEmail, requireString, requireUuid, ValidationError
 
 const ADMIN_ROLES = Object.freeze(["superadmin", "admin", "agent_suivi"]);
 
+// Handler principal : GET/POST/PATCH /admin/agents — gestion des agents (superadmin).
 export default route(async (req, res) => {
   const svc = serviceClient();
   try {
@@ -267,6 +268,7 @@ export default route(async (req, res) => {
   }
 });
 
+/** Valide un téléphone optionnel à la création d'un agent. Entrée : corps. Sortie : téléphone ou undefined. */
 function optionalPhone(body) {
   const raw = body["phone"];
   if (raw === undefined || raw === null || raw === "") return undefined;
@@ -277,6 +279,7 @@ function optionalPhone(body) {
   return raw.trim();
 }
 
+/** Même contrôle téléphone qu'à la création, mais chaîne vide si absent (mise à jour PATCH). */
 function optionalSnPhoneField(body) {
   const raw = body["phone"];
   if (raw === undefined || raw === null || raw === "") return "";

@@ -1,3 +1,4 @@
+// Liste des enfants d'un parent et enfant actif, gardés en session.
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useAsync } from "@/hooks/useAsync";
 import { useAuth } from "./AuthContext";
@@ -35,6 +36,7 @@ export function ChildProvider({ children }: { children: ReactNode }) {
   return <ChildContext.Provider value={value}>{children}</ChildContext.Provider>;
 }
 
+// Lit l'enfant sélectionné depuis n'importe quel composant.
 export function useChild(): ChildContextValue {
   const ctx = useContext(ChildContext);
   if (!ctx) throw new Error("useChild doit être utilisé dans <ChildProvider>.");

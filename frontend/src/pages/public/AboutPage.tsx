@@ -1,3 +1,4 @@
+// Page publique de présentation de l'équipe et de la mission Classora.
 import { PageHero } from "@/components/layout/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
@@ -6,6 +7,7 @@ import { CtaSection } from "@/features/landing/CtaSection";
 import { Counter } from "@/components/ui/Counter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
+// Composant principal de la page.
 export default function AboutPage() {
   usePageMeta({
     title: "À propos",
@@ -80,11 +82,14 @@ export default function AboutPage() {
           <Reveal>
             <header className="lg:max-w-none">
               <h2 id="vision-title" className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-tight">
-                En <span className="text-lime">2030</span>, la gestion scolaire doit être plus simple.
+                En <span className="text-lime">2030</span>, l'école mérite une gestion plus intelligente.
               </h2>
-              <div className="mt-8 text-lg leading-relaxed text-white/85">
+              <div className="mt-8 space-y-4 text-lg leading-relaxed text-white/85">
                 <p>
-                  D'ici 2030, nous imaginons des écoles privées sénégalaises qui consacrent moins de temps à la complexité administrative et disposent d'outils simples pour organiser leur quotidien, suivre leurs élèves et coordonner leurs équipes, avec Classora comme système nerveux centralisant la vie administrative, pédagogique et financière de l'établissement. Cette plateforme s'adapte à chaque cycle, de l'instituteur titulaire à l'élémentaire aux professeurs spécialisés au secondaire, sans imposer une standardisation excessive, mais en offrant un socle commun fiable sur lequel chaque école construit sa propre organisation. Elle transforme aussi la relation aux familles, grâce à des paiements mobiles fluides et sécurisés, un accès transparent aux bulletins et aux échéances, et une communication directe avec les enseignants, tout en équipant les directions de tableaux de bord financiers en temps réel, d'alertes automatiques sur les impayés et de projections de trésorerie, pour faire de la gestion un levier stratégique plutôt qu'une charge réactive.
+                  D'ici 2030, nous imaginons des écoles privées sénégalaises qui consacrent <mark className="rounded bg-lime px-1 font-semibold text-forest">moins de temps à la complexité administrative</mark> et disposent d'<mark className="rounded bg-lime px-1 font-semibold text-forest">outils simples</mark> pour organiser leur quotidien, suivre leurs élèves et coordonner leurs équipes, avec Classora comme <mark className="rounded bg-lime px-1 font-semibold text-forest">système nerveux</mark> centralisant la <mark className="rounded bg-lime px-1 font-semibold text-forest">vie administrative, pédagogique et financière</mark> de l'établissement. Cette plateforme s'adapte à chaque cycle, de l'instituteur titulaire à l'élémentaire aux professeurs spécialisés au secondaire, sans imposer une standardisation excessive, mais en offrant un <mark className="rounded bg-lime px-1 font-semibold text-forest">socle commun fiable</mark> sur lequel chaque école construit sa propre organisation.
+                </p>
+                <p>
+                  Elle transforme aussi la relation aux familles, grâce à des <mark className="rounded bg-lime px-1 font-semibold text-forest">paiements mobiles fluides et sécurisés</mark>, un <mark className="rounded bg-lime px-1 font-semibold text-forest">accès transparent aux bulletins et aux échéances</mark>, et une communication directe avec les enseignants, tout en équipant les directions de <mark className="rounded bg-lime px-1 font-semibold text-forest">tableaux de bord financiers en temps réel</mark>, d'alertes automatiques sur les impayés et de projections de trésorerie, pour faire de la gestion un <mark className="rounded bg-lime px-1 font-semibold text-forest">levier stratégique</mark> plutôt qu'une charge réactive.
                 </p>
               </div>
             </header>
@@ -93,7 +98,7 @@ export default function AboutPage() {
           <Reveal delay={200}>
             <blockquote className="mt-16 text-center">
               <p className="text-lg font-semibold text-white/90 italic">
-                "<span className="text-lime">2030</span> n'est pas une destination figée. C'est le cap qui guide chaque évolution de Classora."
+                "<span className="text-lime">2030</span> n'est pas une ligne d'arrivée. C'est une vision qui nous pousse à aller toujours plus loin. Chaque évolution de Classora nous en rapproche."
               </p>
             </blockquote>
           </Reveal>

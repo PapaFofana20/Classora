@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import { callFunction } from "@/lib/functions";
 import { classSubjectsOf, classesOf, db, hydrate, respond, schoolOf, settingsOf, studentsOf } from "./db";
 
+// École : réglages, matricule, classes, matières et coefficients (schools, class_rooms, subjects…).
+
 export interface SchoolOverview {
   levels: Level[];
   classes: ClassRoom[];
@@ -13,6 +15,7 @@ export interface SchoolOverview {
   school: School | null;
 }
 
+// Vue d'ensemble d'une école (niveaux, classes, matières, réglages) depuis le cache.
 export const getSchoolOverview = (schoolId: string): Promise<SchoolOverview> =>
   (async () => {
     const settings = settingsOf(schoolId);
@@ -23,10 +26,13 @@ function subjectsOfCached(schoolId: string): Subject[] {
   return db.subjects.filter((s) => s.schoolId === schoolId);
 }
 
+// Toutes les écoles du cache (liste publique ou admin).
 export const listSchools = (): Promise<School[]> => respond(() => db.schools);
 
+// Une l'école par son id, ou null si elle n'est pas dans le cache.
 export const getSchool = (schoolId: string): Promise<School | null> => respond(() => schoolOf(schoolId) ?? null);
 
+// Met à jour les réglages, les frais et l'identité de l'école (plusieurs tables).
 export function updateSettings(schoolId: string, patch: Partial<SchoolSettings>): Promise<SchoolSettings> {
   return (async () => {
     const settingsPatch: Record<string, unknown> = {};
@@ -93,6 +99,7 @@ interface MatriculeServerSchool {
 
 /** Vérification via l'API (rate-limitée par IP) — le RPC n'est plus exposé à anon. */
 export async function verifyMatricule(raw: string): Promise<MatriculeCheck> {
+  // Nettoie le code saisi (espaces, tirets et 0/O confondues) avant l'envoi à l'API.
   const code = raw.trim().toUpperCase().replace(/[\s-]/g, "").replace(/[01OI]/g, "");
   let result: { ok: boolean; reason: string | null; message: string | null; school?: MatriculeServerSchool };
   try {
@@ -157,6 +164,7 @@ export function setAutoApprove(schoolId: string, value: boolean): Promise<School
   })();
 }
 
+// Met à jour les infos administratives d'une école (nom, ville, contacts, cycles).
 export function updateSchool(schoolId: string, patch: Partial<Pick<School, "name" | "city" | "address" | "phone" | "email" | "cycles">>): Promise<School> {
   return (async () => {
     const body: Record<string, unknown> = {};
@@ -176,6 +184,7 @@ export function updateSchool(schoolId: string, patch: Partial<Pick<School, "name
 /* Classes, matières, coefficients                                      */
 /* ------------------------------------------------------------------ */
 
+// Ajoute ou modifie le coefficient d'une matière pour une classe (ou la retire si null).
 export function setClassSubject(schoolId: string, classId: string, subjectId: string, coefficient: number | null): Promise<ClassSubject[]> {
   return (async () => {
     const cls = classesOf(schoolId).find((c) => c.id === classId);
@@ -217,6 +226,7 @@ export function setClassSubject(schoolId: string, classId: string, subjectId: st
   })();
 }
 
+// Crée une nouvelle matière pour l'école (table subjects).
 export function addSubject(schoolId: string, name: string, cycles: Cycle[]): Promise<Subject> {
   return (async () => {
     if (subjectsOfCached(schoolId).some((s) => s.name.toLowerCase() === name.trim().toLowerCase())) throw new Error("Cette matière existe déjà.");
@@ -246,6 +256,7 @@ export interface NewClassInput {
   capacity: number;
 }
 
+// Crée une classe et copie les coefficients d'une classe du même niveau.
 export function createClass(schoolId: string, input: NewClassInput): Promise<ClassRoom> {
   return (async () => {
     const level = levels.find((l) => l.id === input.levelId);
@@ -288,6 +299,7 @@ export function createClass(schoolId: string, input: NewClassInput): Promise<Cla
   })();
 }
 
+// Supprime une classe vide (refuse si des élèves y sont encore inscrits).
 export function deleteClass(schoolId: string, classId: string): Promise<void> {
   return (async () => {
     if (studentsOf(schoolId).some((s) => s.classId === classId)) throw new Error("Impossible de supprimer une classe qui contient des élèves.");
@@ -299,6 +311,7 @@ export function deleteClass(schoolId: string, classId: string): Promise<void> {
   })();
 }
 
+// Change la capacité d'une classe (refuse si l'effectif actuel est supérieur).
 export function updateClassCapacity(schoolId: string, classId: string, capacity: number): Promise<void> {
   return (async () => {
     const { error } = await supabase.from("class_rooms").update({ capacity }).eq("id", classId).eq("school_id", schoolId);

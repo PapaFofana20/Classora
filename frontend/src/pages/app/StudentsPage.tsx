@@ -1,3 +1,4 @@
+// Liste des élèves de l'école avec recherche et filtres.
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -25,10 +26,12 @@ import { STUDENT_STATUS_LABELS } from "@/utils/payments";
 const PAGE_SIZE = 10;
 const STATUS_TONE = { a_jour: "success", partiel: "warning", impaye: "danger" } as const;
 
+// Composant principal de la page.
 export default function StudentsPage() {
   const user = useCurrentUser();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  // On charge la liste des élèves visibles selon le rôle de l'utilisateur.
   const state = useAsync(() => listStudentRows(user), [user.id]);
   const [q, setQ] = useState("");
   const dq = useDebounce(q, 250);

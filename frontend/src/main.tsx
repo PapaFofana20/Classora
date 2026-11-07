@@ -1,3 +1,4 @@
+// Point d'entrée de l'application : monte React et protège le rendu par une barrière d'erreurs.
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";

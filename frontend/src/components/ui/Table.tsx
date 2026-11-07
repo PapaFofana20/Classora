@@ -1,3 +1,4 @@
+// Tableau responsive : vrai tableau sur desktop, cartes sur mobile.
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
 
@@ -26,11 +27,13 @@ export interface TableProps<T> {
 
 const aligns = { left: "text-left", right: "text-right", center: "text-center" };
 
+// Lit le texte clair d'une colonne, rien si c'est un composant React.
 function headerLabel<T>(column: Column<T>): string | null {
   if (typeof column.header === "string" || typeof column.header === "number") return String(column.header);
   return null;
 }
 
+// Version cartes pour mobile : mêmes colonnes, mais empilées en lecture verticale.
 function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption, stagger }: TableProps<T>) {
   const contentColumns = columns.filter((column) => column.key !== "go");
   const leadKey = contentColumns.find((column) => column.key !== "sel" && column.key !== "actions" && headerLabel(column))?.key;
@@ -110,6 +113,7 @@ function MobileCards<T>({ columns, rows, rowKey, onRowClick, caption, stagger }:
   );
 }
 
+// Version desktop avec en-tête de colonnes, plus les cartes mobiles en dessous.
 export function Table<T>({ columns, rows, rowKey, onRowClick, caption, stagger }: TableProps<T>) {
   return (
     <>

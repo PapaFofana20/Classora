@@ -32,6 +32,7 @@ async function fetchAllEvents(svc) {
   return out;
 }
 
+// Handler principal : GET /admin/finances — revenus d'abonnement réellement encaissés.
 export default route(async (req, res) => {
   if (req.method !== "GET") return ok(res, { error: "MÃ©thode non autorisÃ©e." }, 405);
   const svc = serviceClient();

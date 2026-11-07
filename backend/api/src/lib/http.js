@@ -35,6 +35,7 @@ function allowedOrigin(origin) {
   return process.env.NODE_ENV === "development" || DEV_ORIGINS.has(origin.replace(/\/$/, ""));
 }
 
+/** Middleware CORS : autorise l'origine du front, répond au préflight OPTIONS. */
 export function corsMiddleware(req, res, next) {
   const origin = req.headers.origin;
   const originAllowed = allowedOrigin(origin);
@@ -57,12 +58,15 @@ export function corsMiddleware(req, res, next) {
   return next();
 }
 
+/** Réponse 405 standard quand la méthode HTTP n'est pas admise. */
 export const methodNotAllowed = (res) => res.status(405).json({ error: "Méthode non autorisée." });
 
+/** Réponse JSON de succès. Entrée : res, corps, code HTTP. */
 export function ok(res, body, status = 200) {
   res.status(status).json(body);
 }
 
+/** Réponse 400 avec message d'erreur métier. */
 export const badRequest = (res, message) => ok(res, { error: message }, 400);
 
 export const unauthorized = (res, message = "Session expirée. Reconnectez-vous.") => ok(res, { error: message }, 401);

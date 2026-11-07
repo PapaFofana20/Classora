@@ -1,3 +1,4 @@
+// Page d'inscription selon le rôle choisi (directeur, élève ou parent).
 import { useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "@/components/layout/AuthLayout";
@@ -18,6 +19,7 @@ import type { Role, School } from "@/types";
  * cycles, 600 élèves) a sa page dédiée : /inscription/premium — l'ancien lien
  * /inscription?plan=premium (page tarifs) y redirige.
  */
+// Composant principal de la page.
 export default function RegisterPage() {
   const [params] = useSearchParams();
   const [role, setRole] = useState<Role | null>(null);

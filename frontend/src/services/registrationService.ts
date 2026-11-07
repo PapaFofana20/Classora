@@ -5,6 +5,8 @@ import { ensure } from "./access";
 import { classesOf, db, hydrate, settingsOf } from "./db";
 import { pendingCount } from "./access";
 
+// Demandes d'inscription (table registration_requests) : validation par la direction.
+
 export interface RegistrationRequestRow extends SchoolRegistrationRequest {
   className: string;
   schoolName: string;
@@ -47,6 +49,7 @@ export function listAll(actor: SessionUser): Promise<RegistrationRequestRow[]> {
   })();
 }
 
+// Nombre de demandes en attente (badge du menu).
 export const countPendingFor = (schoolId: string): Promise<number> =>
   (async () => {
     await hydrate("registrationRequests");
@@ -68,6 +71,7 @@ export function approve(actor: SessionUser, requestIds: string[]): Promise<numbe
   })();
 }
 
+// Refuse des demandes (avec motif optionnel) via le RPC côté serveur.
 export function reject(actor: SessionUser, requestIds: string[], reason?: string): Promise<number> {
   return (async () => {
     ensure(canApproveStudents(actor.role), "Seule la direction valide les demandes d'inscription.");

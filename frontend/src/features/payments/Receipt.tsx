@@ -1,3 +1,5 @@
+// Recu de paiement, pense pour etre imprime.
+
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Brand";
 import type { PaymentRow } from "@/services/paymentRows";

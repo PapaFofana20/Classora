@@ -1,3 +1,4 @@
+// Liste et création des classes de l'école, par cycle.
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -20,9 +21,11 @@ import { listStudentRows } from "@/services/studentService";
 import { listTeacherRows } from "@/services/teacherService";
 import type { ClassRoom } from "@/types";
 
+// Composant principal de la page.
 export default function ClassesPage() {
   const user = useCurrentUser();
   const { toast } = useToast();
+  // On charge en parallèle les classes, les élèves et les enseignants.
   const state = useAsync(async () => {
     const [overview, students, teachers] = await Promise.all([getSchoolOverview(user.schoolId), listStudentRows(user), listTeacherRows(user.schoolId)]);
     return { overview, students, teachers };

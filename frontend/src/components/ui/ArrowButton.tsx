@@ -1,3 +1,4 @@
+// Bouton d'appel à l'action avec la flèche dans un cercle.
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";

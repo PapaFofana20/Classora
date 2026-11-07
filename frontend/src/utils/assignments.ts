@@ -1,6 +1,8 @@
+// Signale les classes sans titulaire, les doublons de professeur et les surcharges.
 import type { ClassRoom, ClassSubject, Conflict, Subject, Teacher, TeachingAssignment } from "@/types";
 import { MAX_ASSIGNMENTS_PER_TEACHER } from "./permissions";
 
+// Passe en revue toutes les classes pour lister les problèmes d'affectation.
 export function detectConflicts(
   classes: ClassRoom[],
   classSubjects: ClassSubject[],

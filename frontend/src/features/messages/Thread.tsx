@@ -1,3 +1,5 @@
+// Fil de discussion d'une conversation (parent, enseignant, direction).
+
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Avatar } from "@/components/ui/Brand";
 import { Button } from "@/components/ui/Button";
@@ -14,12 +16,14 @@ interface Props {
   onChanged: () => void;
 }
 
+// Nom de l'interlocuteur affiche selon le role de l'utilisateur connecte.
 export function counterpartName(c: ConversationView, role: string): string {
   if (role === "parent") return c.teacherName;
   if (role === "directeur") return `${c.teacherName} ↔ ${c.parentName}`;
   return c.parentName;
 }
 
+// Discussion en cours : messages, envoi et marquage comme lus.
 export function Thread({ conversation: c, onBack, onChanged }: Props) {
   const user = useCurrentUser();
   const { toast } = useToast();

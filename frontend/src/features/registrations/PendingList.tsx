@@ -1,3 +1,5 @@
+// Demandes d'inscription a valider, en lot ou une par une.
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";

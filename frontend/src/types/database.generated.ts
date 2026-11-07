@@ -1,4 +1,5 @@
 
+// Types générés automatiquement depuis le schéma de la base : ne pas éditer à la main.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {

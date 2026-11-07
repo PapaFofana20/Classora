@@ -1,3 +1,4 @@
+// Page d'accueil publique du site Classora.
 import { AboutSection } from "@/features/landing/AboutSection";
 import { CtaSection } from "@/features/landing/CtaSection";
 import { FaqSection } from "@/features/landing/FaqSection";
@@ -9,6 +10,7 @@ import { StepsBento } from "@/features/landing/StepsBento";
 import { TestimonialsSection } from "@/features/landing/TestimonialsSection";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
+// Composant principal de la page.
 export default function HomePage() {
   usePageMeta({
     title: "Classora",

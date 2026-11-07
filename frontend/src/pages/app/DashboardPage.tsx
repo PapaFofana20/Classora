@@ -1,3 +1,4 @@
+// Tableau de bord d'accueil, différent selon le rôle de l'utilisateur.
 import { useCurrentUser } from "@/context/AuthContext";
 import { AdminDashboard } from "@/features/dashboard/AdminDashboard";
 import { ParentHome } from "@/features/dashboard/ParentHome";

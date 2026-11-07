@@ -1,3 +1,5 @@
+// Grille hebdomadaire des cours, en lecture ou en edition.
+
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
@@ -35,6 +37,7 @@ const PALETTE = [
   "bg-emerald-50 text-emerald-900",
 ];
 
+// Petits convertisseurs entre "HH:MM" et minutes depuis minuit.
 const toMinutes = (value: string): number => {
   const [hours, minutes] = value.split(":").map(Number);
   return hours * 60 + minutes;
@@ -91,6 +94,7 @@ interface TimetableGridProps {
   onDelete: (courseId: string) => Promise<void>;
 }
 
+// Formulaire vierge pour un nouveau cours, avec une heure de fin par defaut.
 const emptyForm = (day: string, startTime: string): CourseInput => {
   const start = toMinutes(startTime);
   return {
@@ -104,6 +108,7 @@ const emptyForm = (day: string, startTime: string): CourseInput => {
   };
 };
 
+// Grille de la semaine : cliquer une case ou un cours ouvre l'editeur.
 export function TimetableGrid({ courses, editable, subjects, teachers, onCreate, onUpdate, onDelete }: TimetableGridProps) {
   const [form, setForm] = useState<CourseInput | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);

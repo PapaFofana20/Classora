@@ -1,3 +1,4 @@
+// Fiche détaillée d'un établissement côté admin.
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -24,6 +25,7 @@ import { Modal } from "@/components/ui/Modal";
 import { StatCard } from "@/components/ui/StatCard";
 import { Table } from "@/components/ui/Table";
 
+// Composant principal de la page.
 export default function AdminSchoolDetailPage() {
   // La route est « ecoles/:id » : lire « id » (l'ancien code lisait
   // « schoolId », toujours undefined → « École introuvable » systématique).

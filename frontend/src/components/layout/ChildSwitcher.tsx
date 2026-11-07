@@ -1,3 +1,4 @@
+// Sélecteur d'élève pour les comptes parents avec plusieurs enfants.
 import { useChild } from "@/context/ChildContext";
 import { Icon } from "@/components/ui/Icon";
 

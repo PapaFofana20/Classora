@@ -3,11 +3,14 @@ import { supabase } from "@/lib/supabase";
 import { subscriptionInfoOf } from "./subscriptionService";
 import { absencesOf, classesOf, hydrate, studentsOf } from "./db";
 
+// Absences des élèves : lecture et ajout (table absences).
+
 export interface AbsenceRow extends AbsenceRecord {
   studentName: string;
   className: string;
 }
 
+// Récupère les absences d'une école, avec le nom de l'élève et de sa classe.
 export function listAbsences(schoolId: string): Promise<AbsenceRow[]> {
   return (async () => {
     await hydrate("absences");
@@ -19,9 +22,11 @@ export function listAbsences(schoolId: string): Promise<AbsenceRow[]> {
   })();
 }
 
+// Ajoute une absence dans la table absences, puis recharge le cache.
 export function addAbsence(schoolId: string, input: Omit<AbsenceRecord, "id" | "schoolId">): Promise<AbsenceRecord> {
   return (async () => {
     const info = subscriptionInfoOf(schoolId);
+    // Bloque l'ajout en lecture seule (abonnement expiré).
     if (info.status === "EXPIRE" && info.readOnly) {
       throw new Error("Mode lecture seule : l'abonnement de votre école est expiré. Les modifications sont désactivées.");
     }

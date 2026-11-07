@@ -6,6 +6,8 @@ import { classesOf, db, hydrate, parentsOf, paymentsOf, respond, studentsOf } fr
 import { cardsForClass } from "./reportService";
 import { supabase } from "@/lib/supabase";
 
+// Élèves : listes, fiche détail et inscription (tables students, parents, payments).
+
 export interface StudentRow extends Student {
   className: string;
   levelLabel: string;
@@ -32,6 +34,7 @@ function toRow(s: Student): StudentRow {
   };
 }
 
+// Liste d'élèves visibles par l'acteur, enrichie (classe, parent, situation de paiement).
 export const listStudentRows = (actor: SessionUser): Promise<StudentRow[]> => respond(() => visibleStudents(actor).map(toRow));
 
 export interface StudentDetail {
@@ -43,6 +46,7 @@ export interface StudentDetail {
   report: ReportCardData | null;
 }
 
+// Fiche complète d'un élève (classe, parent, fratrie, paiements, bulletin).
 export function getStudentDetail(actor: SessionUser, id: string): Promise<StudentDetail> {
   return respond(() => {
     const s = visibleStudents(actor).find((x) => x.id === id);
@@ -111,6 +115,7 @@ export function enrollStudent(actor: SessionUser, input: EnrollInput): Promise<S
   })();
 }
 
+// Parents de l'école (cache local).
 export const listParents = (actor: SessionUser): Promise<Parent[]> => respond(() => parentsOf(actor.schoolId));
 
 /** Code élève d'un inscrit : communiqué aux familles par la direction. */

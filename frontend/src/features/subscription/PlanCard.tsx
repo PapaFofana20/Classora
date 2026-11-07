@@ -1,3 +1,5 @@
+// Carte d'une formule d'abonnement, mensuelle ou annuelle.
+
 import { Badge } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icon";
 import { formatCurrency } from "@/utils/format";

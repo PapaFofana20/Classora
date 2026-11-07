@@ -72,6 +72,7 @@ function parseBirthDate(raw: string): string | null {
   return parseFrDate(v);
 }
 
+// Lit un fichier CSV d'élèves et renvoie les lignes valides plus les erreurs par ligne.
 export function parseStudentsCsv(text: string): CsvParseResult {
   const errors: string[] = [];
   const rows: CsvStudentRow[] = [];
@@ -148,6 +149,7 @@ export const CSV_TEMPLATE = [
   'Moussa,Ndiaye,M,05/07/2014,CP A,Fatou,Ndiaye,76 456 78 90,fatou.ndiaye@exemple.sn',
 ].join("\r\n");
 
+// Télécharge le modèle CSV vierge pour aider la direction à préparer son import.
 export function downloadCsvTemplate(): void {
   const blob = new Blob(["\uFEFF" + CSV_TEMPLATE], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);

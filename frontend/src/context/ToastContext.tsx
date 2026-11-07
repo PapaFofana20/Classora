@@ -1,3 +1,4 @@
+// Notifications temporaires visibles partout dans l'application.
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { ToastViewport, type ToastItem, type ToastTone } from "@/components/ui/Toast";
 
@@ -7,6 +8,7 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
+// Fournit la fonction toast() et affiche la pile de notifications.
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const counter = useRef(0);
@@ -30,6 +32,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Raccourci pour afficher une notification depuis n'importe quel composant.
 export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error("useToast doit être utilisé dans <ToastProvider>.");

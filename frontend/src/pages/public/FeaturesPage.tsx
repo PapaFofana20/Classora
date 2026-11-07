@@ -1,3 +1,4 @@
+// Page publique qui présente les fonctionnalités par rôle d'utilisateur.
 import { PageHero } from "@/components/layout/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
@@ -8,6 +9,7 @@ import { StepsBento } from "@/features/landing/StepsBento";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { cn } from "@/utils/cn";
 
+// Composant principal de la page.
 export default function FeaturesPage() {
   usePageMeta({
     title: "Fonctionnalités de Classora",

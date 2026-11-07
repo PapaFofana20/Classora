@@ -28,6 +28,7 @@ const LOGIN_FAILURES = new Map();
 const LOCKOUT_WINDOW_MS = 15 * 60_000; // 15 minutes
 const MAX_FAILURES = 3;
 
+/** Vrai si l'identifiant a dépassé le seuil d'échecs dans la fenêtre de verrouillage. */
 function isLockedOut(identifier) {
   const entry = LOGIN_FAILURES.get(identifier);
   if (!entry) return false;
@@ -39,6 +40,7 @@ function isLockedOut(identifier) {
   return true;
 }
 
+/** Incrémente le compteur d'échecs de connexion pour cet identifiant. */
 function recordFailure(identifier) {
   const entry = LOGIN_FAILURES.get(identifier) || { failures: 0, lastFailureAt: 0 };
   entry.failures += 1;
@@ -46,6 +48,7 @@ function recordFailure(identifier) {
   LOGIN_FAILURES.set(identifier, entry);
 }
 
+/** Efface le compteur d'échecs après une connexion réussie. */
 function clearFailures(identifier) {
   LOGIN_FAILURES.delete(identifier);
 }
@@ -66,6 +69,7 @@ async function passwordIsValid(email, password) {
   }
 }
 
+// Handler principal : POST /admin/login — connexion admin par matricule ou e-mail.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

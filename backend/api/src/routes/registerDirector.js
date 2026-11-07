@@ -16,6 +16,7 @@ import { readPlatformSettings } from "../lib/platformSettings.js";
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 import { expectObject, optionalString, requireCycles, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
+// Handler principal : POST /register-director — inscription publique d'un directeur et de son école.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

@@ -11,6 +11,7 @@ export class ValidationError extends Error {
   }
 }
 
+/** Vérifie que le corps JSON est un objet ; lève ValidationError sinon. Entrée : body. Sortie : body. */
 export function expectObject(body, message = "Requête invalide.") {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     throw new ValidationError(message);
@@ -18,6 +19,7 @@ export function expectObject(body, message = "Requête invalide.") {
   return body;
 }
 
+/** Lit un champ chaîne obligatoire et borné. Entrée : objet, champ, libellé. Sortie : chaîne nettoyée. */
 export function requireString(obj, field, label, { min = 0, max = 200, trim = true } = {}) {
   const raw = obj[field];
   if (typeof raw !== "string") throw new ValidationError(`${label} est obligatoire.`);
@@ -28,6 +30,7 @@ export function requireString(obj, field, label, { min = 0, max = 200, trim = tr
   return value;
 }
 
+/** Lit un champ chaîne optionnel ; undefined si absent. Entrée : objet, champ, libellé. Sortie : chaîne ou undefined. */
 export function optionalString(obj, field, label, max = 200) {
   const raw = obj[field];
   if (raw === undefined || raw === null) return undefined;
@@ -37,6 +40,7 @@ export function optionalString(obj, field, label, max = 200) {
   return value;
 }
 
+/** Lit et déduplique les cycles scolaires choisis (élémentaire, moyen, secondaire). */
 export function requireCycles(obj) {
   const raw = obj["cycles"];
   const allowed = new Set(["elementaire", "moyen", "secondaire"]);
@@ -50,6 +54,7 @@ export function requireCycles(obj) {
   return Array.from(new Set(cycles));
 }
 
+/** Lit un tableau de chaînes borné (chaque élément max 80 caractères). */
 export function requireStringArray(obj, field, label, { maxItems = 20 } = {}) {
   const raw = obj[field];
   if (raw === undefined || raw === null) return [];
@@ -100,6 +105,7 @@ export function optionalIsoDate(obj, field, label) {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Lit un UUID obligatoire (identifiants école, compte, classe…). */
 export function requireUuid(obj, field, label) {
   const raw = requireString(obj, field, label, { max: 64, trim: true });
   if (!UUID_RE.test(raw)) {
@@ -108,6 +114,7 @@ export function requireUuid(obj, field, label) {
   return raw;
 }
 
+/** Lit un UUID optionnel ; undefined si absent ou vide. */
 export function optionalUuid(obj, field, label) {
   const raw = optionalString(obj, field, label, 64);
   if (raw === undefined || raw === "") return undefined;
@@ -117,6 +124,7 @@ export function optionalUuid(obj, field, label) {
   return raw;
 }
 
+/** Lit un booléen strict ; renvoie la valeur par défaut si le champ est absent. */
 export function bool(obj, field, defaultValue) {
   const raw = obj[field];
   if (raw === undefined || raw === null) return defaultValue;

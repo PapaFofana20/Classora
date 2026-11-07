@@ -1,9 +1,12 @@
+// Cartes tarifaires de la page d'accueil et de la page tarifs.
+
 import { ArrowButton } from "@/components/ui/ArrowButton";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { plans } from "@/data/landing";
 import { cn } from "@/utils/cn";
 
+// Compare les trois formules et envoie vers l'inscription adaptee.
 export function PricingSection({ withHeader = true }: { withHeader?: boolean }) {
   // Sans en-tête (page /tarifs), le H2 #pricing-title n'est pas rendu : ne pas
   // référencer un identifiant absent (aria-labelledby cassé).

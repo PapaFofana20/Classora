@@ -1,3 +1,5 @@
+// Tableau de bord de la direction (ou financier selon le mode).
+
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -22,6 +24,7 @@ import { ClassBars, CycleDonut, CYCLE_COLORS, PaymentsChart } from "./charts";
 import { LatestPayments } from "./LatestPayments";
 import { useState } from "react";
 
+// Charge les statistiques, puis delegue l'affichage au contenu ci-dessous.
 export function AdminDashboard({ finance = false }: { finance?: boolean }) {
   const { schoolId, schoolName } = useSchool();
   const state = useAsync(() => getAdminStats(schoolId, periodInfo(schoolId).current), [schoolId]);
@@ -47,6 +50,7 @@ export function AdminDashboard({ finance = false }: { finance?: boolean }) {
   );
 }
 
+// Assemble les cartes et graphiques a partir des statistiques chargees.
 function Content({ s, finance }: { s: AdminStats; finance: boolean }) {
   const { school, schoolId, reload, settings } = useSchool();
   const { toast } = useToast();

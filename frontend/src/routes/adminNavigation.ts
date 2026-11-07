@@ -1,3 +1,4 @@
+// Menus de la console d'administration et rôles autorisés par page admin.
 import type { AdminAgentRole } from "@/types";
 
 export interface AdminNavItem {
@@ -26,6 +27,7 @@ const ADMIN_NAV: AdminNavItem[] = [
   { to: "/admin/timetables", label: "Emploi du temps", icon: "calendar", section: "Configuration" },
 ];
 
+// Renvoie les liens admin visibles pour ce rôle d'agent.
 export function adminNavFor(role: AdminAgentRole): AdminNavItem[] {
   return ADMIN_NAV.filter((item) => {
     if (item.superAdminOnly && role !== "superadmin") return false;

@@ -1,3 +1,5 @@
+// Case d'acceptation des CGU et de la politique de confidentialite.
+
 import { useId } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "@/components/ui/Icon";

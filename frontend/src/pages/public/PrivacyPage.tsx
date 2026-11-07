@@ -1,3 +1,4 @@
+// Page publique de la politique de confidentialité.
 import { privacy } from "@/data/legal";
 import { LegalPage } from "@/pages/public/LegalPage";
 

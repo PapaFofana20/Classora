@@ -9,6 +9,7 @@ import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE,
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireUuid, ValidationError } from "../lib/validate.js";
 
+// Handler principal : GET/PATCH/POST/DELETE /admin/schools — gestion transversale des écoles.
 export default route(async (req, res) => {
   const svc = serviceClient();
   try {
@@ -293,6 +294,7 @@ export default route(async (req, res) => {
   }
 });
 
+/** Valide l'e-mail d'une école (minuscules, format simple). Entrée : corps. Sortie : e-mail normalisé. */
 function requireEmailField(body) {
   const raw = requireString(body, "email", "L'e-mail", { max: 120, trim: true });
   const email = raw.toLowerCase();
@@ -302,6 +304,7 @@ function requireEmailField(body) {
   return email;
 }
 
+/** Valide les cycles d'une école (liste blanche, sans doublons). */
 function requireCyclesField(body) {
   const raw = body["cycles"];
   const allowed = new Set(["elementaire", "moyen", "secondaire"]);

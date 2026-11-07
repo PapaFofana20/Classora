@@ -1,3 +1,4 @@
+// Fiche détaillée d'un élève : aperçu, notes, paiements et famille.
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -161,9 +162,11 @@ function Detail({ d }: { d: StudentDetail }) {
   );
 }
 
+// Composant principal de la page.
 export default function StudentDetailPage() {
   const { id = "" } = useParams();
   const user = useCurrentUser();
+  // On récupère le détail complet de l'élève demandé.
   const state = useAsync(() => getStudentDetail(user, id), [id, user.id]);
   if (state.error && !state.loading)
     return (

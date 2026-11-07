@@ -1,3 +1,4 @@
+// Page publique des conditions générales d'utilisation (CGU) de Classora.
 import { cgu } from "@/data/legal";
 import { LegalPage } from "@/pages/public/LegalPage";
 

@@ -1,3 +1,4 @@
+// Écran post-inscription du directeur pour choisir et activer son abonnement.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/ui/Brand";
@@ -114,6 +115,7 @@ export default function DirectorSubscriptionPage() {
   const [checking, setChecking] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // On vérifie s'il existe déjà une demande d'abonnement en cours.
   const requestState = useAsync(async () => {
     if (!school.schoolId) return { request: null as SubscriptionRequest | null };
     return { request: await latestSubscriptionRequest(school.schoolId) };

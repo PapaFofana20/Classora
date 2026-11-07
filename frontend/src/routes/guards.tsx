@@ -1,3 +1,4 @@
+// Gardes de route de l'espace école : connexion, rôles, mot de passe et abonnement.
 import { useEffect, type ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -11,7 +12,8 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { logout } from "@/services/authService";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
 
-/** Chargement de session : spinner + libellé (au lieu d'un écran blanc). */
+/** Écran de chargement de session : spinner + libellé (au lieu d'un écran blanc). */
+// Affiche une attente claire pendant que la session se restaure.
 export function SessionLoading() {
   return (
     <div className="grid min-h-screen place-items-center bg-mist p-4" role="status" aria-label="Chargement de votre session">
@@ -134,6 +136,7 @@ export function SubscriptionGuard() {
   return <Outlet />;
 }
 
+// Remonte en haut de page à chaque changement de route, sans animation.
 export function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {

@@ -1,3 +1,4 @@
+// Liste déroulante maison : recherche, clavier et portail, mais même usage qu'un <select>.
 import {
   useCallback,
   useEffect,
@@ -38,6 +39,7 @@ interface Item extends Option {
   placeholder?: boolean;
 }
 
+// On compare sans accents ni casse, pour que « eleve » retrouve « Élève ».
 const normalize = (value: string) =>
   value
     .normalize("NFD")

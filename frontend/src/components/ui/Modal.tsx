@@ -1,3 +1,4 @@
+// Fenêtre modale : verrouille le fond, se ferme avec Échap ou un clic dehors.
 import { useEffect, useRef, type ReactNode } from "react";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
@@ -13,6 +14,7 @@ interface ModalProps {
 
 const widths = { sm: "max-w-md", md: "max-w-xl", lg: "max-w-3xl" };
 
+// Fenêtre de base pour les formulaires et confirmations.
 export function Modal({ open, onClose, title, children, footer, size = "md" }: ModalProps) {
   const ref = useRef<HTMLDivElement>(null);
 

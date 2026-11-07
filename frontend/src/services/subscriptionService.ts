@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { computeSubscriptionInfo, type SubscriptionInfo } from "@/utils/subscription";
 import { db, hydrate, respond, schoolOf, studentsOf } from "./db";
 
+// Abonnements (table subscriptions) et demandes d'activation (subscription_requests).
+
 /** Dernière subscription connue d'une école (la plus récente). */
 export function lastSubscription(schoolId: string): Subscription | null {
   const list = db.subscriptions.filter((s) => s.schoolId === schoolId).sort((a, b) => b.endsAt.localeCompare(a.endsAt));
@@ -16,14 +18,18 @@ export function subscriptionInfoOf(schoolId: string, todayIso: string = todayNow
   return computeSubscriptionInfo(lastSubscription(schoolId), schoolOf(schoolId), studentsOf(schoolId).length, todayIso);
 }
 
+// Statut textuel de l'abonnement (ACTIF, EXPIRE…).
 export function statusOf(schoolId: string): SubscriptionStatus {
   return subscriptionInfoOf(schoolId).status;
 }
 
+// Catalogue des formules (données statiques).
 export const getPlans = (): Promise<Plan[]> => respond(() => plans);
 
+// Infos d'abonnement calculées à partir du cache (statut, quotas, lecture seule).
 export const getStatus = (schoolId: string, todayIso: string = todayNow()): Promise<SubscriptionInfo> => respond(() => subscriptionInfoOf(schoolId, todayIso));
 
+// Historique des abonnements de l'école, le plus récent d'abord.
 export const listSubscriptions = (schoolId: string): Promise<Subscription[]> =>
   respond(() => db.subscriptions.filter((s) => s.schoolId === schoolId).sort((a, b) => b.paidAt.localeCompare(a.paidAt)));
 

@@ -1,3 +1,4 @@
+// Pagination simple : première/dernière pages gardées, le reste en points de suspension.
 import { Fragment } from "react";
 import { Icon } from "./Icon";
 import { cn } from "@/utils/cn";
@@ -9,6 +10,7 @@ interface Props {
   onChange: (page: number) => void;
 }
 
+// On affiche la pagination seulement quand il y a plusieurs pages.
 export function Pagination({ page, pageSize, total, onChange }: Props) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   if (total <= pageSize) return null;

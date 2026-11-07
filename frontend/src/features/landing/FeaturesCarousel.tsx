@@ -1,3 +1,5 @@
+// Apercu des fonctionnalites, en cartes defilantes.
+
 import { Link } from "react-router-dom";
 import { Container } from "@/components/layout/Container";
 import { Reveal } from "@/components/ui/Reveal";

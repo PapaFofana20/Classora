@@ -1,3 +1,4 @@
+// Menus de navigation et droits d'accès par rôle, pour la sidebar et les gardes de route.
 import type { Role } from "@/types";
 
 export interface NavItem {
@@ -125,6 +126,7 @@ export interface NavOptions {
 /** Routes accessibles même sans abonnement actif (director sans abonnement, école expirée). */
 export const ALWAYS_ALLOWED = ["/app/abonnement", "/app/parametres", "/app/mot-de-passe-temporaire"];
 
+// Renvoie les liens de menu du rôle, filtrés selon ses responsabilités et ses badges.
 export function navFor(role: Role, options: NavOptions = {}): NavItem[] {
   const { isHead = false, locked = false, badges = {} } = options;
   return NAV_BY_ROLE[role]
@@ -136,4 +138,5 @@ export function navFor(role: Role, options: NavOptions = {}): NavItem[] {
     });
 }
 
+// Vrai si la page reste accessible même sans abonnement actif.
 export const isAlwaysAllowed = (pathname: string): boolean => ALWAYS_ALLOWED.some((p) => pathname === p || pathname.startsWith(`${p}/`));

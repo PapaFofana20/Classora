@@ -1,3 +1,4 @@
+// Champs texte + zone de texte, avec label, aide et erreur intégrés.
 import { forwardRef, useId, type InputHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "./Icon";
@@ -11,6 +12,7 @@ interface FieldProps {
 
 type InputProps = FieldProps & InputHTMLAttributes<HTMLInputElement>;
 
+// Champ simple ligne, avec icône optionnelle à gauche.
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({ label, error, hint, icon, className, id, ...rest }, ref) {
   const auto = useId();
   const fid = id ?? auto;
@@ -53,6 +55,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({ l
 
 type TextareaProps = FieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>;
 
+// Zone de texte multiligne, même présentation que Input.
 export function Textarea({ label, error, hint, className, id, ...rest }: TextareaProps) {
   const auto = useId();
   const fid = id ?? auto;

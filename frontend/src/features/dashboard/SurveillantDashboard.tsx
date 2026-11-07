@@ -1,3 +1,5 @@
+// Vie scolaire : absences, retards et incidents disciplinaires.
+
 import { useMemo, useState, type FormEvent } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Badge } from "@/components/ui/Badge";

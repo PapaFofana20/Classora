@@ -1,3 +1,4 @@
+// Page de changement obligatoire du mot de passe à la première connexion.
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";

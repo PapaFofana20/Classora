@@ -1,3 +1,4 @@
+// Bulletins des élèves, imprimables, selon le cycle de la classe.
 import { useEffect, useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Button } from "@/components/ui/Button";
@@ -62,6 +63,7 @@ function MetaEditor({ card, onSaved }: { card: ReportCardData; onSaved: () => vo
   );
 }
 
+// Composant principal de la page.
 export default function BulletinsPage() {
   const user = useCurrentUser();
   const { periods, period, setPeriod } = usePeriods();
@@ -71,6 +73,7 @@ export default function BulletinsPage() {
   const isStudent = user.role === "eleve";
   const isRestricted = (isParent || isStudent) && (settings?.blockStudentBulletins ?? false);
   // Sources indépendantes : requêtes en parallèle (et non en séquence).
+  // On charge les classes autorisées pour les bulletins, en parallèle.
   const classes = useAsync(async () => {
     const [list, overview] = await Promise.all([bulletinClasses(user), getSchoolOverview(user.schoolId)]);
     return { list, overview };

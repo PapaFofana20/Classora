@@ -1,6 +1,8 @@
+// Statuts des paiements, restes à payer et réduction fratrie.
 import type { Payment, PaymentStatus, PayMethod, StudentPayStatus } from "@/types";
 import { todayIso } from "@/data/school";
 
+// Déduit le statut d'un paiement selon le montant versé et la date d'échéance.
 export function computeStatus(amount: number, paid: number, dueDate: string, today: string = todayIso()): PaymentStatus {
   if (paid >= amount) return "paye";
   if (paid > 0) return "partiel";
@@ -27,10 +29,12 @@ export const STUDENT_STATUS_LABELS: Record<StudentPayStatus, string> = {
   impaye: "Impayé",
 };
 
+// Montant qu'il reste à régler sur un paiement.
 export function remaining(p: Payment): number {
   return Math.max(0, p.amount - p.paidAmount);
 }
 
+// Statut global d'un élève à partir de ses échéances échues.
 export function studentPayStatus(payments: Payment[]): StudentPayStatus {
   const due = payments.filter((p) => p.dueDate <= todayIso());
   if (due.some((p) => p.status === "en_retard")) return "impaye";
@@ -38,6 +42,7 @@ export function studentPayStatus(payments: Payment[]): StudentPayStatus {
   return "a_jour";
 }
 
+// Addition simple d'une liste de montants.
 export function sum(values: number[]): number {
   return values.reduce((a, b) => a + b, 0);
 }

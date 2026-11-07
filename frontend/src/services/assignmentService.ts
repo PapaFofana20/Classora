@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import { ensureWritable } from "./access";
 import { assignmentsOf, classSubjectsOf, classesOf, hydrate, respond, subjectsOf, teachersOf } from "./db";
 
+// Affectations enseignants : qui enseigne quelle matière dans quelle classe (table teaching_assignments).
+
 export interface AssignmentBoard {
   classes: ClassRoom[];
   subjects: Subject[];
@@ -13,6 +15,7 @@ export interface AssignmentBoard {
   conflicts: Conflict[];
 }
 
+// Construit le plateau d'affectations d'une école à partir du cache local.
 function board(schoolId: string): AssignmentBoard {
   const classes = classesOf(schoolId);
   const subjects = subjectsOf(schoolId);
@@ -22,10 +25,13 @@ function board(schoolId: string): AssignmentBoard {
   return { classes, subjects, classSubjects, assignments, teachers, conflicts: detectConflicts(classes, classSubjects, assignments, teachers, subjects) };
 }
 
+// Plateau complet (classes, matières, enseignants, conflits) pour l'écran d'affectation.
 export const getAssignmentBoard = (schoolId: string): Promise<AssignmentBoard> => respond(() => board(schoolId));
 
+// Toutes les affectations de l'école (cache local).
 export const listAssignments = (schoolId: string): Promise<TeachingAssignment[]> => respond(() => assignmentsOf(schoolId));
 
+// Affectations d'un seul enseignant.
 export function getTeacherAssignments(schoolId: string, teacherId: string): Promise<TeachingAssignment[]> {
   return respond(() => assignmentsOf(schoolId).filter((a) => a.teacherId === teacherId));
 }
@@ -54,6 +60,7 @@ export function setCellTeacher(actor: SessionUser, classId: string, subjectId: s
   })();
 }
 
+// Ajoute (ou remplace, selon la règle « un seul enseignant par matière ») l'enseignant d'une cellule.
 export function addCellTeacher(actor: SessionUser, classId: string, subjectId: string, teacherId: string): Promise<AssignmentBoard> {
   return (async () => {
     await replaceCell(actor, classId, subjectId, [teacherId]);
@@ -61,6 +68,7 @@ export function addCellTeacher(actor: SessionUser, classId: string, subjectId: s
   })();
 }
 
+// Retire un enseignant d'une cellule (classe × matière), via le RPC côté serveur.
 export function removeCellTeacher(actor: SessionUser, classId: string, subjectId: string, teacherId: string): Promise<AssignmentBoard> {
   return (async () => {
     const current = assignmentsOf(actor.schoolId).filter((a) => a.classId === classId && a.subjectId === subjectId).map((a) => a.teacherId);
@@ -92,6 +100,7 @@ export function setTitular(actor: SessionUser, classId: string, teacherId: strin
   })();
 }
 
+// Nomme un professeur principal (moyen/secondaire), via le RPC côté serveur.
 export function setHeadTeacher(actor: SessionUser, classId: string, teacherId: string | null): Promise<AssignmentBoard> {
   return (async () => {
     ensureWritable(actor);

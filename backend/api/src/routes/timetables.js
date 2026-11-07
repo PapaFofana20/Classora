@@ -53,6 +53,7 @@ async function resolveCaller(svc, req, res) {
   return caller;
 }
 
+// Handler principal : /api/timetables — emplois du temps de l'école de l'appelant (lecture et écriture direction).
 export default route(async (req, res) => {
   const svc = serviceClient();
   const caller = await resolveCaller(svc, req, res);

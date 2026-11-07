@@ -1,3 +1,4 @@
+// Finances de la plateforme : encaissements, transactions et reçus.
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -44,12 +45,14 @@ function receiptNumber(event: AdminFinanceEvent): string {
   return event.paymentRef || `REC-${event.id.slice(0, 8).toUpperCase()}`;
 }
 
+// Composant principal de la page.
 export default function AdminFinancesPage() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { status } = usePlatformStatus();
   const [tab, setTab] = useState<TabID>(tabFromPath(pathname));
   const [detail, setDetail] = useState<AdminFinanceEvent | null>(null);
+  // On récupère l'ensemble des données financières en une fois.
   const state = useAsync(() => getAdminFinances(), []);
 
   useEffect(() => {

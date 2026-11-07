@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SERVICE_KEY } from "../config.js";
 import { unauthorized, forbidden } from "./http.js";
 
+/** Client service_role pour les routes admin (même principe que lib/auth.js). Entrée : options. Sortie : client Supabase. */
 export function serviceClient(options = {}) {
   if (!SERVICE_KEY) {
     throw new Error("Configuration serveur incomplète (SUPABASE_SERVICE_ROLE_KEY).");
@@ -18,6 +19,7 @@ export function serviceClient(options = {}) {
   });
 }
 
+/** Vérifie le JWT d'un agent admin auprès de Supabase Auth. Entrée : svc, req. Sortie : utilisateur ou null. */
 export async function getAuthenticatedUser(svc, req) {
   const jwt = (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
   if (!jwt) return null;

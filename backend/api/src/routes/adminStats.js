@@ -6,6 +6,7 @@ import { requireAdminRole, serviceClient } from "../lib/authAdmin.js";
 import { ok, route, serverError, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
+// Handler principal : GET /admin/stats — statistiques transversales de la plateforme.
 export default route(async (req, res) => {
   if (req.method !== "GET") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

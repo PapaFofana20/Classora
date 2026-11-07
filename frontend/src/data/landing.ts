@@ -1,3 +1,4 @@
+// Contenus de la page d'accueil publique : images, fonctionnalités, avis et questions fréquentes.
 const heroImg = "/images/hero.jpg";
 const hero1Img = "/images/hero-1.jpg";
 const hero2Img = "/images/hero-2.jpg";

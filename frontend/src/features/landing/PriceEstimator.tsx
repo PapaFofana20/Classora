@@ -1,3 +1,5 @@
+// Simulateur rapide du budget mensuel selon l'effectif.
+
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/Reveal";

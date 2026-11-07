@@ -1,3 +1,4 @@
+// Comportement des modales : focus piégé, fermeture Échap et retour du focus en arrière-plan.
 import { useEffect, useRef, type RefObject } from "react";
 
 const FOCUSABLE = [
@@ -9,6 +10,7 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
+// Gère l'ouverture d'une modale : verrouille le défilement, place le focus et gère le clavier.
 export function useModalBehavior<T extends HTMLElement>(open: boolean, onClose: () => void, ref: RefObject<T | null>) {
   const closeRef = useRef(onClose);
 

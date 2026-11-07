@@ -1,3 +1,4 @@
+// Paiements de la scolarité, adaptés au rôle de l'utilisateur connecté.
 import { useCurrentUser } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
 import { useChild } from "@/context/ChildContext";
@@ -5,10 +6,12 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { FinancePayments } from "@/features/payments/FinancePayments";
 import { ParentPayments } from "@/features/payments/ParentPayments";
 
+// Composant principal de la page.
 export default function PaymentsPage() {
   const user = useCurrentUser();
   const { schoolName } = useSchool();
   const { activeChild } = useChild();
+  // L'affichage des paiements change selon que l'on est parent, élève ou personnel.
   const isParent = user.role === "parent";
   const isStudent = user.role === "eleve";
   return (

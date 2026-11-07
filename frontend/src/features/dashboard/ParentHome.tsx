@@ -1,3 +1,5 @@
+// Espace parent : suivi des eleves, notes et paiements.
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "@/components/ui/Brand";
@@ -27,8 +29,10 @@ import { averageTone } from "@/utils/grades";
 import { STUDENT_STATUS_LABELS } from "@/utils/payments";
 import type { Cycle } from "@/types";
 
+// Bareme des notes : sur 10 a l'elementaire, sur 20 ensuite.
 const getScale = (cycle?: Cycle | null) => (cycle === "elementaire" ? 10 : 20);
 
+// Page d'accueil du parent : choix de l'enfant, puis son suivi.
 export function ParentHome() {
   const user = useCurrentUser();
   const school = useSchool();

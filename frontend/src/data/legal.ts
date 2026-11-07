@@ -1,3 +1,4 @@
+// Textes des pages légales : conditions générales et politique de confidentialité.
 export interface LegalSection {
   id: string;
   title: string;

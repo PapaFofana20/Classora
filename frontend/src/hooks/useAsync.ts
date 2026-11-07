@@ -1,3 +1,4 @@
+// Exécute un appel async avec données, chargement, erreur et bouton « réessayer ».
 import { useCallback, useEffect, useRef, useState, type DependencyList } from "react";
 
 export interface AsyncState<T> {

@@ -1,3 +1,5 @@
+// Inscription d'un parent rattache a un eleve deja inscrit.
+
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";

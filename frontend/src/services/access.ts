@@ -3,15 +3,19 @@ import { teacherClassIds } from "@/utils/permissions";
 import { assignmentsOf, classesOf, schoolOf, settingsOf, studentsOf, teachersOf, db } from "./db";
 import { subscriptionInfoOf } from "./subscriptionService";
 
+// Contrôles d'accès : qui peut voir ou modifier quoi dans une école.
+
 /** École de la session — toutes les requêtes de données doivent partir d'ici. */
 export function requireSchool(actor: SessionUser): string {
   if (!actor.schoolId) throw new Error("Aucune école associée à ce compte. Contactez le support.");
   return actor.schoolId;
 }
 
+// École et réglages de l'utilisateur connecté (cache local).
 export const schoolOfActor = (actor: SessionUser): School | undefined => schoolOf(actor.schoolId);
 export const settingsOfActor = (actor: SessionUser): SchoolSettings => settingsOf(actor.schoolId);
 
+// Fiche enseignant liée au compte connecté (undefined si ce n'est pas un enseignant).
 export function teacherOf(actor: SessionUser): Teacher | undefined {
   return actor.teacherId ? teachersOf(actor.schoolId).find((t) => t.id === actor.teacherId) : undefined;
 }
@@ -44,6 +48,7 @@ export function visibleStudents(actor: SessionUser): Student[] {
   }
 }
 
+// Vérifie une condition et lève une erreur sinon (petit garde-fou réutilisé partout).
 export function ensure(condition: boolean, message = "Accès refusé."): void {
   if (!condition) throw new Error(message);
 }

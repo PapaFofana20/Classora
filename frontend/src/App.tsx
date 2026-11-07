@@ -1,3 +1,4 @@
+// Racine de l'application : fournisseurs de contexte et toutes les routes.
 import { lazy, type ReactElement } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";

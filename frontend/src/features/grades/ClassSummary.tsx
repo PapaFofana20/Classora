@@ -1,3 +1,5 @@
+// Synthese de classe et aide au conseil de classe, en lecture seule.
+
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -32,6 +34,7 @@ const GROUPS: { id: string; label: string; icon: string; tone: "success" | "info
   { id: "d", label: "En difficulté (< 10)", icon: "support", tone: "danger", test: (a) => a < 10 },
 ];
 
+// Trie les eleves par rang et regroupe les moyennes pour le conseil de classe.
 function Summary({ cards, title }: { cards: ReportCardData[]; title: string }) {
   if (cards.length === 0) return null;
   const subjects = cards[0].lines;

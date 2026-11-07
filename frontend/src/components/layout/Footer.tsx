@@ -1,8 +1,10 @@
+// Pied de page du site public : logo et colonnes de liens.
 import { Link } from "react-router-dom";
 import { footerColumns } from "@/data/landing";
 import { Logo } from "@/components/ui/Brand";
 import { Container } from "./Container";
 
+// Pied de page affiché sur toutes les pages publiques.
 export function Footer() {
   return (
     <footer>

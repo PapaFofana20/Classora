@@ -12,6 +12,7 @@ import { clientIp, enforceRateLimit } from "../lib/rateLimit.js";
 const CACHE_TTL_MS = 30_000;
 let cache = null;
 
+// Handler principal : GET /platform-status — état public de la plateforme (maintenance, inscriptions).
 export default route(async (req, res) => {
   if (req.method !== "GET") return ok(res, { error: "Méthode non autorisée." }, 405);
 

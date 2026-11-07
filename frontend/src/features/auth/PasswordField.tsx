@@ -1,3 +1,5 @@
+// Champs de saisie de mot de passe reutilises dans les formulaires.
+
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";

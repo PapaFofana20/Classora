@@ -1,3 +1,4 @@
+// Liste et gestion de tous les établissements côté admin.
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -23,6 +24,7 @@ import type { AdminSchool } from "@/types";
 import { formatDate } from "@/utils/format";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 
+// Composant principal de la page.
 export default function AdminSchoolsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 

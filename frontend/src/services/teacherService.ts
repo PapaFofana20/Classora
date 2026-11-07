@@ -3,6 +3,8 @@ import { ensureWritable } from "./access";
 import { supabase } from "@/lib/supabase";
 import { assignmentsOf, classesOf, db, hydrate, subjectsOf, teachersOf } from "./db";
 
+// Enseignants : liste enrichie, création et suppression (table teachers).
+
 export interface TeacherRow extends Teacher {
   classNames: string[];
   subjectNames: string[];
@@ -14,6 +16,7 @@ export interface TeacherRow extends Teacher {
   mustChangePassword?: boolean;
 }
 
+// Enseignants de l'école, enrichis (classes, matières, compte d'accès éventuel).
 export function listTeacherRows(schoolId: string): Promise<TeacherRow[]> {
   return (async () => {
     await Promise.all([hydrate("teachers"), hydrate("assignments"), hydrate("classes"), hydrate("users")]);
@@ -45,6 +48,7 @@ export interface NewTeacherInput {
   specialties: string[];
 }
 
+// Crée un enseignant (direction uniquement), puis recharge le cache enseignants.
 export function createTeacher(actor: SessionUser, input: NewTeacherInput): Promise<Teacher> {
   return (async () => {
     ensureWritable(actor);
@@ -65,6 +69,7 @@ export function createTeacher(actor: SessionUser, input: NewTeacherInput): Promi
       .select("id")
       .single();
     if (error) {
+      // Traduit les erreurs SQL brutes en messages clairs pour l'utilisateur.
       if (/row-level security/.test(error.message) || /règle/i.test(error.message)) {
         throw new Error("Seule la direction peut créer un enseignant.");
       }
@@ -80,6 +85,7 @@ export function createTeacher(actor: SessionUser, input: NewTeacherInput): Promi
   })();
 }
 
+// Supprime un enseignant (refuse s'il a encore des affectations).
 export function deleteTeacher(actor: SessionUser, id: string): Promise<void> {
   return (async () => {
     ensureWritable(actor);

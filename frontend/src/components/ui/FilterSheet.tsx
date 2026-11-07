@@ -1,3 +1,4 @@
+// Panneau de filtres qui glisse depuis le bas sur mobile.
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
@@ -18,6 +19,7 @@ export function FilterSheet({ open, onClose, title = "Filtres", children, footer
   useEffect(() => {
     if (!open) return;
     const media = window.matchMedia("(min-width: 768px)");
+    // En desktop les filtres restent fixes : on ferme le panneau pour éviter un écran vide.
     const closeOnDesktop = () => {
       if (media.matches) onClose();
     };

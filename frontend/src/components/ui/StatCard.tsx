@@ -1,3 +1,4 @@
+// Carte chiffrée du tableau de bord : icône, valeur et petit badge d'évolution.
 import { cn } from "@/utils/cn";
 import { Icon } from "./Icon";
 

@@ -1,3 +1,4 @@
+// Onglets horizontaux défilables, accessibles au clavier.
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "./Icon";
@@ -17,6 +18,7 @@ interface TabsProps {
   className?: string;
 }
 
+// Onglets contrôlés de l'extérieur : on affiche l'onglet actif.
 export function Tabs({ items, value, onChange, label, className }: TabsProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ left: false, right: false });
@@ -24,6 +26,7 @@ export function Tabs({ items, value, onChange, label, className }: TabsProps) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    // Petite règle : on montre les dégradés seulement quand il reste du contenu à faire défiler.
     const update = () => setEdges({ left: node.scrollLeft > 2, right: node.scrollLeft + node.clientWidth < node.scrollWidth - 2 });
     update();
     node.addEventListener("scroll", update, { passive: true });

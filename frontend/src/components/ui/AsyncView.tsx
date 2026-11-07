@@ -1,3 +1,4 @@
+// Pont entre l'hook de données et l'affichage : skeleton, erreur ou contenu.
 import type { ReactNode } from "react";
 import type { AsyncState } from "@/hooks/useAsync";
 import { SkeletonCards, SkeletonTable } from "./Skeleton";

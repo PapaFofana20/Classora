@@ -1,3 +1,4 @@
+// Affectations des enseignants aux classes et aux matières.
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -17,6 +18,7 @@ import { useCurrentUser } from "@/context/AuthContext";
 import type { Cycle } from "@/types";
 import { MAX_ASSIGNMENTS_PER_TEACHER } from "@/utils/permissions";
 
+// Composant principal de la page.
 export default function AssignmentsPage() {
   const user = useCurrentUser();
   const state = useAsync(() => getAssignmentBoard(user.schoolId), [user.schoolId]);

@@ -1,3 +1,4 @@
+// Titre de page + sous-titre + boutons d'action éventuels.
 import type { ReactNode } from "react";
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
   actions?: ReactNode;
 }
 
+// En-tête standard des pages de l'espace scolaire.
 export function PageHeader({ title, subtitle, actions }: Props) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">

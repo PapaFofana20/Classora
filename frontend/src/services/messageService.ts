@@ -3,6 +3,8 @@ import { ensure, visibleClassIds } from "./access";
 import { supabase } from "@/lib/supabase";
 import { assignmentsOf, announcementsOf, classesOf, conversationsOf, hydrate, parentsOf, respond, studentsOf, subjectsOf, teachersOf } from "./db";
 
+// Messagerie parents ↔ enseignants et annonces de l'école (conversations, announcements).
+
 /** Notifie l'interface (badge de messages non lus) qu'une conversation a changé. */
 function emitChange(): void {
   window.dispatchEvent(new Event("ec:messages"));
@@ -16,6 +18,7 @@ export function actorIdOf(user: SessionUser): string {
   return user.id;
 }
 
+// Nombre de messages non lus d'une conversation pour un acteur donné.
 export function unreadIn(c: Conversation, actorId: string): number {
   const last = c.lastReadAt[actorId] ?? "";
   return c.messages.filter((m) => m.senderId !== actorId && m.at > last).length;
@@ -63,6 +66,7 @@ function view(actor: SessionUser, c: Conversation, actorId: string): Conversatio
   };
 }
 
+// Conversations visibles par l'acteur, enrichies avec les noms et le compteur non lus.
 export function listConversations(actor: SessionUser): Promise<ConversationView[]> {
   return respond(() => {
     const id = actorIdOf(actor);
@@ -72,6 +76,7 @@ export function listConversations(actor: SessionUser): Promise<ConversationView[
   });
 }
 
+// Total de messages non lus de l'acteur (badge du menu).
 export function countUnread(actor: SessionUser): Promise<number> {
   return respond(() => {
     const id = actorIdOf(actor);
@@ -79,6 +84,7 @@ export function countUnread(actor: SessionUser): Promise<number> {
   });
 }
 
+// Envoie un message dans une conversation (RPC serveur), puis recharge le cache.
 export function sendMessage(actor: SessionUser, conversationId: string, text: string): Promise<ConversationView> {
   return (async () => {
     const id = actorIdOf(actor);
@@ -101,6 +107,7 @@ export function sendMessage(actor: SessionUser, conversationId: string, text: st
   })();
 }
 
+// Marque une conversation comme lue (le directeur ne peut pas écrire ici, donc rien n'est envoyé).
 export function markRead(actor: SessionUser, conversationId: string): Promise<void> {
   return (async () => {
     const c = conversationsFor(actor).find((x) => x.id === conversationId);
@@ -182,6 +189,7 @@ export function startConversation(actor: SessionUser, contact: Contact, subject:
   })();
 }
 
+// Annonces de l'école visibles par le rôle de l'acteur (les plus récentes d'abord).
 export function listAnnouncements(actor: SessionUser): Promise<Announcement[]> {
   return (async () => {
     await hydrate("announcements");
@@ -191,6 +199,7 @@ export function listAnnouncements(actor: SessionUser): Promise<Announcement[]> {
   })();
 }
 
+// Publie une annonce (direction/économe uniquement) via le RPC serveur.
 export function postAnnouncement(actor: SessionUser, input: { title: string; body: string; audience: Role[] | "all" }): Promise<Announcement> {
   return (async () => {
     ensure(actor.role === "directeur" || actor.role === "econome", "Seule la direction peut publier une annonce.");

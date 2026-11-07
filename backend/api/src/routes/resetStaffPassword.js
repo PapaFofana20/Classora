@@ -10,6 +10,7 @@ import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE, logError 
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid } from "../lib/validate.js";
 
+// Handler principal : POST /reset-staff-password — réinitialisation du mot de passe d'un membre du personnel.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

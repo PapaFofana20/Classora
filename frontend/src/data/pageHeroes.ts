@@ -1,3 +1,4 @@
+// Références des images d'illustration des en-têtes de pages publiques.
 const fonctionnalitesHeroImg = "/images/fonctionnalites-hero.webp";
 const tarifsHeroImg = "/images/tarifs-hero.jpg";
 const ecolesHeroImg = "/images/ecoles-hero.jpg";

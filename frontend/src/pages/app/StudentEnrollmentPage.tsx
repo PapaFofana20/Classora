@@ -1,3 +1,4 @@
+// Inscription d'un élève, à l'unité ou par import CSV.
 import { useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -10,9 +11,11 @@ import { listParents, listStudentRows } from "@/services/studentService";
 import { useCurrentUser } from "@/context/AuthContext";
 import { cn } from "@/utils/cn";
 
+// Composant principal de la page.
 export default function StudentEnrollmentPage() {
   const user = useCurrentUser();
   const [mode, setMode] = useState<"unique" | "import">("unique");
+  // On regroupe les données nécessaires à l'inscription en une seule requête.
   const state = useAsync(async () => {
     const [overview, parents, students] = await Promise.all([getSchoolOverview(user.schoolId), listParents(user), listStudentRows(user)]);
     const childrenByParent = students.reduce<Record<string, number>>((acc, s) => ({ ...acc, [s.parentId]: (acc[s.parentId] ?? 0) + 1 }), {});

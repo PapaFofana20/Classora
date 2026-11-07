@@ -1,3 +1,5 @@
+// Liste et detail des emplois du temps, avec publication.
+
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
@@ -38,14 +40,17 @@ const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
 
 const DAY_ORDER = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 
+// Date courte en francais, ou un tiret si elle est absente.
 const formatDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR") : "—");
 
+// Trie les cours par jour de semaine, puis par heure de debut.
 const sortCourses = (courses: TimetableCourse[]) =>
   [...courses].sort((a, b) => {
     const dayDiff = DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
     return dayDiff !== 0 ? dayDiff : a.start_time.localeCompare(b.start_time);
   });
 
+// Sans identifiant, liste les emplois du temps ; sinon affiche le detail.
 export default function TimetableViewPage() {
   const user = useCurrentUser();
   const { id } = useParams<{ id: string }>();

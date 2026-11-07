@@ -1,3 +1,5 @@
+// Liste de premiers pas pour le directeur, cochee automatiquement.
+
 import { Link } from "react-router-dom";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";

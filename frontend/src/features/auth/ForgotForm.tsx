@@ -1,3 +1,5 @@
+// Demande de reinitialisation du mot de passe par e-mail.
+
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
@@ -8,6 +10,7 @@ import { useForm } from "@/hooks/useForm";
 import { requestPasswordReset } from "@/services/authService";
 import { isValidEmail } from "@/utils/format";
 
+// Envoie le lien de reinitialisation, puis affiche un ecran de confirmation.
 export function ForgotForm() {
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);

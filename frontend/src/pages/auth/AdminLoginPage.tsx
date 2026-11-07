@@ -1,3 +1,4 @@
+// Page de connexion réservée aux agents de l'administration Classora.
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "@/components/layout/AuthLayout";
@@ -13,6 +14,7 @@ const TOTP_CODE_RE = /^\d{6}$/;
 
 type MfaStep = "idle" | "waitingTotp";
 
+// Composant principal de la page.
 export default function AdminLoginPage() {
   const navigate = useNavigate();
   const { verify, logout } = useAdminAuth();
@@ -26,6 +28,7 @@ export default function AdminLoginPage() {
   const [preAuthToken, setPreAuthToken] = useState("");
   const [totpCode, setTotpCode] = useState("");
 
+  // On lance la connexion admin, avec un second facteur si nécessaire.
   const doLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

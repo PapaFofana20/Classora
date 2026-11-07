@@ -1,3 +1,5 @@
+// Tableau de bord du secretariat (vue administrative, sans finances).
+
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -56,6 +58,7 @@ export function SecretaireDashboard() {
   );
 }
 
+// Calcule les compteurs et les tableaux a partir des donnees chargees.
 function Content({ students, classes, teacherCount }: { students: StudentRow[]; classes: ClassRoom[]; teacherCount: number }) {
   const now = new Date().toISOString().slice(0, 7);
   const newThisMonth = students.filter((s) => s.enrolledAt.startsWith(now)).length;

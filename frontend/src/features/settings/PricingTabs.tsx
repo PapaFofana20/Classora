@@ -1,3 +1,5 @@
+// Parametres de tarification : coefficients, frais et reductions.
+
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";

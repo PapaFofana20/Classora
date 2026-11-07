@@ -1,3 +1,4 @@
+// Mise en page de la console admin : sidebar, topbar et déconnexion auto après inactivité.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider } from "@/context/SidebarContext";
@@ -10,6 +11,7 @@ import { useIdleLogout } from "@/hooks/useIdleLogout";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { SuspenseOutlet } from "@/components/ui/PageSuspense";
 
+// Assemblage des colonnes et du bandeau de maintenance.
 function Shell() {
   const { agent, logout } = useAdminAuth();
   const { status } = usePlatformStatus();
@@ -44,6 +46,7 @@ function Shell() {
   );
 }
 
+// Layout admin : fournit l'état de la sidebar repliable.
 export function AdminLayout() {
   // Console d'administration : jamais proposée aux moteurs de recherche.
   usePageMeta({ noindex: true });

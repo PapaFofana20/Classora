@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 /** Racine de l'application (backend/api), quel que soit le répertoire courant. */
 const APP_ROOT = fileURLToPath(new URL("../", import.meta.url));
 
+/** Retire les guillemets qui entourent une valeur dans un fichier .env. */
 function unquote(value) {
   const trimmed = value.trim();
   if (trimmed.length >= 2) {

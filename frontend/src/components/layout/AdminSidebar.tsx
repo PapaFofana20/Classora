@@ -1,3 +1,4 @@
+// Menu latéral de la console admin : mêmes principes que la sidebar école.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -13,6 +14,7 @@ import { ConfirmDialog } from "@/components/ui/Modal";
 
 const TOOLTIP_DELAY = 300;
 
+// Entrée de menu admin, avec gestion des filtres dans l'URL pour l'onglet actif.
 function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean; onNavigate?: () => void }) {
   const linkRef = useRef<HTMLAnchorElement>(null);
   const timer = useRef<number | undefined>(undefined);
@@ -22,6 +24,7 @@ function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean
   const toUrl = item.to as string;
   const [toPath, toSearch] = toUrl.split("?");
   const items = (item as any).sectionItems || [];
+  // Petite règle métier : un lien avec filtre (?tab=…) ne doit rester actif que si le filtre correspond.
   const hasSpecificFilterMatch = items.some((i: any) => {
     const [p, s] = (i.to as string).split("?");
     return s && pathname === p && search === `?${s}`;
@@ -81,6 +84,7 @@ function MenuItem({ item, expanded, onNavigate }: { item: any; expanded: boolean
   );
 }
 
+// Contenu de la sidebar admin (logo, sections, déconnexion), partagé desktop/mobile.
 function SidebarContent({ agent, expanded, onNavigate, onLogoClick }: { agent: AdminAgent; expanded: boolean; onNavigate?: () => void; onLogoClick?: () => void }) {
   const { logout } = useAdminAuth();
   const navigate = useNavigate();
@@ -185,6 +189,7 @@ interface Props {
   onClose: () => void;
 }
 
+// Colonne fixe sur desktop + tiroir sur mobile, comme côté école.
 export function AdminSidebar({ agent, drawerOpen, onClose }: Props) {
   const { pathname } = useLocation();
   const sidebar = useSidebar();

@@ -9,6 +9,7 @@ import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE, logError 
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, optionalString, requireString, requireUuid, ValidationError } from "../lib/validate.js";
 
+// Handler principal : POST /update-staff — modification d'un accès personnel par le directeur.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();
@@ -119,6 +120,7 @@ export default route(async (req, res) => {
   }
 });
 
+/** Lit les spécialités en mise à jour : undefined si le champ est absent. */
 function requireStringArrayOptional(body) {
   const raw = body["specialties"];
   if (raw === undefined) return undefined;

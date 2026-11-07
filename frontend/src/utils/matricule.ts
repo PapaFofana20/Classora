@@ -40,7 +40,9 @@ export function generateCode(taken: readonly string[] = [], length: number = MAT
   return candidate;
 }
 
+// Génère un matricule d'école sans doublon avec les codes déjà donnés.
 export const generateMatricule = (taken: readonly string[] = []) => generateCode(taken, MATRICULE_LENGTH);
+// Génère le code élève (un caractère de plus) pour le rattachement parent.
 export const generateChildCode = (taken: readonly string[] = []) => generateCode(taken, CHILD_CODE_LENGTH);
 
 /**
@@ -58,6 +60,7 @@ export function formatMatriculeInput(raw: string, length: number = MATRICULE_LEN
   return cleaned.slice(0, length);
 }
 
+// Vérifie que le code saisi est complet et sans caractère ambigu.
 export function isValidMatricule(raw: string, length: number = MATRICULE_LENGTH): boolean {
   const v = formatMatriculeInput(raw, length);
   if (v.length !== length) return false;

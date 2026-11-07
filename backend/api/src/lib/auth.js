@@ -54,6 +54,7 @@ export async function revokeUserSessions(svc, userId) {
   }
 }
 
+/** Profil de l'appelant (JWT vérifié + ligne profiles). Entrée : svc, req. Sortie : profil normalisé ou null. */
 export async function getCallerProfile(svc, req) {
   const user = await getAuthenticatedUser(svc, req);
   if (!user) return null;
@@ -103,6 +104,7 @@ export async function requireDirecteur(svc, req, res) {
 /** Rôles gérables depuis l'espace direction (jamais parent/élève/directeur). */
 export const STAFF_ROLES = Object.freeze(["professeur", "instituteur", "econome", "secretaire", "surveillant"]);
 
+/** Vrai si le rôle fait partie du personnel gérable par la direction. Entrée : rôle. Sortie : booléen. */
 export function isStaffRole(role) {
   return STAFF_ROLES.includes(role);
 }
@@ -157,6 +159,7 @@ function randomBelow(limit) {
   return b % limit;
 }
 
+/** Valide la solidité d'un mot de passe. Entrée : mot de passe. Sortie : message d'erreur ou null si valide. */
 export function passwordError(value) {
   if (!value) return "Le mot de passe est obligatoire.";
   if (value.length < PASSWORD_MIN) return `Au moins ${PASSWORD_MIN} caractères.`;
@@ -168,6 +171,7 @@ export function passwordError(value) {
   return null;
 }
 
+/** Génère un mot de passe temporaire lisible de 12 caractères. Sortie : chaîne. */
 export function generateTempPassword() {
   const chars = Array.from({ length: 12 }, () => READABLE[randomBelow(READABLE.length)]);
   chars[0] = LOWER[randomBelow(LOWER.length)];

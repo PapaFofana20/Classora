@@ -1,3 +1,5 @@
+// Saisie des notes d'une classe et d'une matiere, avec enregistrement automatique.
+
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Avatar, ProgressBar } from "@/components/ui/Brand";
@@ -24,6 +26,7 @@ interface Props {
   period: string;
 }
 
+// Charge la feuille de notes, puis passe la main au tableau de saisie.
 export function GradeEntry({ classId, subjectId, period }: Props) {
   const user = useCurrentUser();
   const state = useAsync(() => getGradeSheet(user, classId, subjectId, period), [classId, subjectId, period, user.id]);
@@ -31,6 +34,7 @@ export function GradeEntry({ classId, subjectId, period }: Props) {
   return <AsyncView state={state}>{(sheet) => <Sheet key={`${classId}|${subjectId}|${period}`} sheet={sheet} period={period} />}</AsyncView>;
 }
 
+// Tableau de saisie : chaque cellule est enregistree automatiquement.
 function Sheet({ sheet, period }: { sheet: GradeSheet; period: string }) {
   const user = useCurrentUser();
   const { toast } = useToast();

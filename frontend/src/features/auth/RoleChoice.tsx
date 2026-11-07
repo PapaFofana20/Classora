@@ -1,3 +1,5 @@
+// Choix du role a l'inscription (directeur, eleve ou parent).
+
 import { Icon } from "@/components/ui/Icon";
 import type { Role } from "@/types";
 import { cn } from "@/utils/cn";
@@ -17,6 +19,7 @@ export const SIGNUP_OPTIONS: Option[] = [
   { role: "parent", title: "Je suis parent", text: "Rattachez vos élèves avec le matricule et leur code élève.", icon: "family_restroom" },
 ];
 
+// Cartes a cocher pour choisir entre directeur, eleve et parent.
 export function RoleChoice({ value, onChange }: { value: Role | null; onChange: (role: Role) => void }) {
   return (
     <div className="grid gap-3" role="radiogroup" aria-label="Votre situation">

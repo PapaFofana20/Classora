@@ -1,3 +1,4 @@
+// Mise en page de l'espace privé : sidebar, topbar et contenu des pages.
 import { useState } from "react";
 import { ChildProvider } from "@/context/ChildContext";
 import { useCurrentUser } from "@/context/AuthContext";
@@ -11,6 +12,7 @@ import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { SuspenseOutlet } from "@/components/ui/PageSuspense";
 
+// Assemblage des deux colonnes et des bandeaux au-dessus du contenu.
 function Shell() {
   const user = useCurrentUser();
   const { registerContent } = useSidebar();
@@ -40,6 +42,7 @@ function Shell() {
   );
 }
 
+// Layout public : ajoute les fournisseurs d'état de l'espace privé.
 export function DashboardLayout() {
   // Espace scolaire privé : jamais proposé aux moteurs de recherche.
   usePageMeta({ noindex: true });

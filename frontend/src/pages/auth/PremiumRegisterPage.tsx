@@ -1,3 +1,4 @@
+// Page d'inscription dédiée à la formule Premium pour les directeurs.
 import { Link } from "react-router-dom";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Icon } from "@/components/ui/Icon";
@@ -9,6 +10,7 @@ import { DirectorSignupForm } from "@/features/auth/DirectorSignupForm";
  * sans restriction : un ou plusieurs cycles, limite portée à 600 élèves et
  * abonnement Premium activé dès la création du compte (migration 00033).
  */
+// Composant principal de la page.
 export default function PremiumRegisterPage() {
   return (
     <AuthLayout

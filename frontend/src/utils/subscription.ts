@@ -1,3 +1,4 @@
+// Statut et limites d'un abonnement d'école : essai, lecture seule, blocage et plafond d'élèves.
 import type { Plan, School, Subscription, SubscriptionStatus } from "@/types";
 import { planById } from "@/data/plans";
 import { addDaysIso, daysUntil } from "./dates";
@@ -70,6 +71,7 @@ export function computeSubscriptionInfo(
   };
 }
 
+// Libellés affichés pour chaque statut d'abonnement.
 export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   AUCUN: "Aucun abonnement",
   ACTIF: "Abonnement actif",
@@ -77,6 +79,7 @@ export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   EXPIRE: "Abonnement expiré",
 };
 
+// Calcule couleurs d'affichage selon le statut (suivant le même ordre que les libellés).
 export const STATUS_TONES: Record<SubscriptionStatus, "success" | "warning" | "danger" | "neutral"> = {
   AUCUN: "neutral",
   ACTIF: "success",

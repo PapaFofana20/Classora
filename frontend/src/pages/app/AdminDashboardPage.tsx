@@ -1,3 +1,4 @@
+// Tableau de bord de supervision de la plateforme côté admin.
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -13,6 +14,7 @@ import { formatCurrency, formatDate } from "@/utils/format";
 import { cn } from "@/utils/cn";
 import { Table } from "@/components/ui/Table";
 
+// Composant principal de la page.
 export default function AdminDashboardPage() {
   const state = useAsync(() => getAdminOverviewStats(), []);
   return (

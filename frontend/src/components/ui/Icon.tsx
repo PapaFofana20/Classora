@@ -1,3 +1,4 @@
+// Icônes Material Symbols, utilisées partout dans l'interface.
 import { cn } from "@/utils/cn";
 
 interface IconProps {

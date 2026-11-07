@@ -1,3 +1,5 @@
+// Choix d'un nouveau mot de passe apres ouverture du lien recu par e-mail.
+
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
@@ -11,6 +13,7 @@ import { passwordError } from "@/utils/password";
 
 type Status = "checking" | "ready" | "invalid" | "done";
 
+// Verifie d'abord le lien recu, puis laisse choisir le nouveau mot de passe.
 export function ResetPasswordForm() {
   const { logout } = useAuth();
   const { toast } = useToast();

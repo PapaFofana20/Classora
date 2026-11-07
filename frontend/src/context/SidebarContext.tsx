@@ -139,6 +139,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
 }
 
+// Lit l'état de la sidebar (déployée/repliée, survol, épinglage) depuis n'importe quel composant.
 export function useSidebar(): SidebarContextValue {
   const ctx = useContext(SidebarContext);
   if (!ctx) throw new Error("useSidebar doit être utilisé dans <SidebarProvider>.");

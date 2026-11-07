@@ -1,9 +1,12 @@
+// Calculs de notes : moyennes, rangs, appréciations et validation des saisies.
 import type { Cycle, Grade } from "@/types";
 
 type Triple = Pick<Grade, "devoir1" | "devoir2" | "composition">;
 
+// Arrondi à deux décimales, utilisé pour toutes les moyennes.
 export const round2 = (n: number): number => Math.round(n * 100) / 100;
 
+// Moyenne des devoirs seuls, ou null si aucune note n'est encore saisie.
 export function devoirsAverage(g?: Triple): number | null {
   if (!g) return null;
   const v = [g.devoir1, g.devoir2].filter((x): x is number => x !== null);
@@ -23,6 +26,7 @@ export function subjectAverage(g: Triple | undefined, cycle: Cycle): number | nu
   return round2((d + g.composition) / 2);
 }
 
+// Moyenne générale pondérée par les coefficients des matières.
 export function weightedAverage(items: { average: number | null; coefficient: number }[]): number | null {
   const valid = items.filter((i): i is { average: number; coefficient: number } => i.average !== null);
   const total = valid.reduce((a, i) => a + i.coefficient, 0);
@@ -41,6 +45,7 @@ export function computeRanks(entries: { id: string; value: number | null }[]): M
   return ranks;
 }
 
+// Appréciation courte d'une matière selon sa moyenne sur 20.
 export function appreciation(avg: number | null): string {
   if (avg === null) return "—";
   if (avg >= 16) return "Excellent";
@@ -52,6 +57,7 @@ export function appreciation(avg: number | null): string {
   return "Très faible";
 }
 
+// Phrase du conseil de classe pour une moyenne générale.
 export function councilAppreciation(avg: number | null): string {
   if (avg === null) return "Résultats non disponibles.";
   if (avg >= 16) return "Félicitations du conseil de classe. Excellent semestre, continuez ainsi.";
@@ -62,6 +68,7 @@ export function councilAppreciation(avg: number | null): string {
   return "Avertissement travail. Un suivi renforcé avec la famille est nécessaire.";
 }
 
+// Phrase personnalisée pour le bulletin d'un enfant de l'élémentaire.
 export function primaryAppreciation(avg: number | null, firstName: string): string {
   if (avg === null) return "Résultats non disponibles.";
   if (avg >= 14) return `${firstName} fournit un travail remarquable et participe activement en classe. Bravo !`;
@@ -72,6 +79,7 @@ export function primaryAppreciation(avg: number | null, firstName: string): stri
 
 export type Tone = "success" | "info" | "warning" | "danger" | "neutral";
 
+// Couleur de pastille correspondant à une moyenne (vert, orange, rouge…).
 export function averageTone(avg: number | null): Tone {
   if (avg === null) return "neutral";
   if (avg >= 14) return "success";
@@ -92,6 +100,7 @@ export function parseGradeInput(raw: string, max = 20): ParseResult {
   return { ok: true, value: n };
 }
 
+// Pourcentage de notes déjà saisies, utile pour voir l'avancement d'une période.
 export function gradeCompletion(grades: Grade[], studentCount: number, cycle: Cycle): number {
   const perStudent = cycle === "elementaire" ? 1 : 3;
   const expected = studentCount * perStudent;

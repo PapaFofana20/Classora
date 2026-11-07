@@ -1,3 +1,4 @@
+// Messagerie parents-enseignants et annonces de l'école.
 import { useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Avatar } from "@/components/ui/Brand";
@@ -24,6 +25,7 @@ import { cn } from "@/utils/cn";
 import { formatDateTime } from "@/utils/format";
 import { hasFeatureForSchool } from "@/utils/features";
 
+// Composant principal de la page.
 export default function MessagesPage() {
   const user = useCurrentUser();
   const { schoolId } = useSchool();
@@ -41,6 +43,7 @@ export default function MessagesPage() {
   // la navigation (cache rafraîchi, downgrade), React ne doit jamais voir
   // « fewer hooks rendered » — la page ne doit pas crasher. Les callbacks
   // restent no-op tant que la messagerie est verrouillée.
+  // On ne charge les conversations que si la messagerie est débloquée.
   const convs = useAsync(() => (hasMessaging ? listConversations(user) : Promise.resolve([])), [user.id, hasMessaging]);
   const anns = useAsync(() => (hasMessaging ? listAnnouncements(user) : Promise.resolve([])), [user.id, hasMessaging]);
   const contacts = useAsync(() => (hasMessaging && canCompose ? listContacts(user) : Promise.resolve([])), [user.id, hasMessaging]);

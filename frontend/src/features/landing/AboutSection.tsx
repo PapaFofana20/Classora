@@ -1,5 +1,8 @@
+// Section de presentation de Classora sur la page d'accueil.
+
 import { Container } from "@/components/layout/Container";
 import { ArrowButton } from "@/components/ui/ArrowButton";
+import { Counter } from "@/components/ui/Counter";
 import { Reveal } from "@/components/ui/Reveal";
 import { aboutStats, images } from "@/data/landing";
 
@@ -36,11 +39,16 @@ export function AboutSection() {
                 <img src={images.about} alt="Équipe pédagogique d'une école partenaire" className="aspect-[16/10] w-full rounded-[1.25rem] object-cover" loading="lazy" />
               </div>
               <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 rounded-3xl bg-lime p-2">
-                {aboutStats.map((s) => (
-                  <div key={s.label} className="grid place-items-center rounded-2xl bg-white px-2 py-4 text-center text-forest">
-                    <p className="text-4xl font-extrabold tracking-tight sm:text-5xl">{s.value}</p>
-                    <p className="mt-0 text-xs font-medium text-neutral-600 sm:text-sm">{s.label}</p>
-                  </div>
+                {aboutStats.map((s, i) => (
+                  <Counter
+                    key={s.label}
+                    value={s.value}
+                    label={s.label}
+                    delay={i * 150}
+                    className="grid place-items-center rounded-2xl bg-white px-2 py-4 text-forest"
+                    valueClassName="text-4xl sm:text-5xl"
+                    labelClassName="mt-0 text-xs sm:text-sm"
+                  />
                 ))}
               </div>
             </div>

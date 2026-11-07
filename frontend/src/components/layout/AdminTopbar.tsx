@@ -1,3 +1,4 @@
+// Barre du haut de la console admin : agent connecté et menu utilisateur.
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { AdminAgent } from "@/types";
@@ -5,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import { ConfirmDialog } from "@/components/ui/Modal";
 import { usePlatformStatus } from "@/context/PlatformContext";
 
+// En-tête admin : on affiche la date et le nom de la plateforme ici.
 export function AdminTopbar({ agent, onMenu, onLogout }: { agent: AdminAgent; onMenu: () => void; onLogout: () => void }) {
   const navigate = useNavigate();
   const { status } = usePlatformStatus();
@@ -87,6 +89,7 @@ export function AdminTopbar({ agent, onMenu, onLogout }: { agent: AdminAgent; on
   }
 }
 
+// Formate la date du jour en toutes lettres, comme « samedi 7 novembre 2026 ».
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });

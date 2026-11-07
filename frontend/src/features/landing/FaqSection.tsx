@@ -1,8 +1,11 @@
+// Questions frequentes de la page d'accueil, en accordéon.
+
 import { useEffect } from "react";
 import { Accordion } from "@/components/ui/Accordion";
 import { Reveal } from "@/components/ui/Reveal";
 import { faqs } from "@/data/landing";
 
+// Affiche les questions frequentes et les donnees liees pour le SEO.
 export function FaqSection() {
   // Données structurées FAQPage : elles reprennent EXACTEMENT les questions
   // et réponses visibles de l'accordéon, sans contenu additionnel.

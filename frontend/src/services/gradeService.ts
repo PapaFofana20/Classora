@@ -6,6 +6,8 @@ import { ensure, ensureWritable, teacherOf } from "./access";
 import { assignmentsOf, classSubjectsOf, classesOf, gradesOf, hydrate, respond, studentsOf, subjectsOf } from "./db";
 import { subscriptionInfoOf } from "./subscriptionService";
 
+// Notes des élèves (table grades) : lecture du relevé et saisie devoir/composition.
+
 export interface GradeSheet {
   classRoom: ClassRoom;
   subject: Subject;
@@ -17,6 +19,7 @@ export interface GradeSheet {
   readOnly: boolean;
 }
 
+// Récupère le relevé (élèves + notes) d'une classe × matière pour une période.
 export function getGradeSheet(actor: SessionUser, classId: string, subjectId: string, period: string): Promise<GradeSheet> {
   return respond(() => {
     const classRoom = classesOf(actor.schoolId).find((c) => c.id === classId);
@@ -46,6 +49,7 @@ export interface SaveGradeInput {
   value: number | null;
 }
 
+// Enregistre une note (devoir1, devoir2 ou composition) via le RPC serveur.
 export function saveGrade(actor: SessionUser, input: SaveGradeInput): Promise<Grade> {
   return (async () => {
     ensureWritable(actor);

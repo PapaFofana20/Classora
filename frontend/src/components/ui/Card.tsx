@@ -1,3 +1,4 @@
+// Carte blanche de base, avec padding et ombre par défaut.
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/utils/cn";
 
@@ -7,6 +8,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   padded?: boolean;
 }
 
+// Corps de la carte, sans les traits d'en-tête.
 export function Card({ hover, dark, padded = true, className, children, ...rest }: CardProps) {
   return (
     <div
@@ -30,6 +32,7 @@ interface CardHeaderProps {
   action?: ReactNode;
 }
 
+// Titre et sous-titre d'une carte, avec un éventuel bouton à droite.
 export function CardHeader({ title, subtitle, action }: CardHeaderProps) {
   return (
     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">

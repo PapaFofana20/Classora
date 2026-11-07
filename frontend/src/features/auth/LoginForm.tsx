@@ -1,3 +1,5 @@
+// Formulaire de connexion (matricule d'ecole, e-mail et mot de passe).
+
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +11,7 @@ import { useForm } from "@/hooks/useForm";
 import { isValidEmail } from "@/utils/format";
 import { formatMatriculeInput, isValidMatricule, MATRICULE_LENGTH } from "@/utils/matricule";
 
+// Formulaire de connexion de l'espace ecole.
 export function LoginForm() {
   const { login } = useAuth();
   const { toast } = useToast();

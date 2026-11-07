@@ -1,3 +1,5 @@
+// Petit style de mise en valeur d'un mot dans les titres.
+
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
 

@@ -1,3 +1,5 @@
+// Bloc principal de la page d'accueil, avec carrousel d'images.
+
 import { useEffect, useState } from "react";
 import { Container } from "@/components/layout/Container";
 import { ArrowButton } from "@/components/ui/ArrowButton";

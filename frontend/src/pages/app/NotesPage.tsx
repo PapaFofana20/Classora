@@ -1,3 +1,4 @@
+// Notes selon le rôle : saisie pour les enseignants, consultation pour les autres.
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -105,6 +106,7 @@ function AdminBody({ o, classId, setClassId, subjectId, setSubjectId, tab, setTa
   );
 }
 
+// Composant principal de la page.
 export default function NotesPage() {
   const user = useCurrentUser();
   const { periods, period, setPeriod } = usePeriods();

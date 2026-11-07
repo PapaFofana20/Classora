@@ -1,3 +1,4 @@
+// Sélecteur de classe et matière pour les professeurs.
 import type { TeacherContextItem } from "@/hooks/useTeacherAssignments";
 import { Icon } from "./Icon";
 

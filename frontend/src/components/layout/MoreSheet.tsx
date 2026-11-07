@@ -1,3 +1,4 @@
+// Menu « Plus » qui glisse depuis le bas sur mobile, avec tout le reste des liens.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ interface Props {
   user: SessionUser;
 }
 
+// Panneau complet listant toutes les entrées de menu, regroupées par section.
 export function MoreSheet({ open, onClose, user }: Props) {
   const { logout } = useAuth();
   const navigate = useNavigate();

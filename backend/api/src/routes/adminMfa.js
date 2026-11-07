@@ -35,6 +35,7 @@ import {
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireString } from "../lib/validate.js";
 
+/** Enregistre une session MFA vérifiée pour l'agent (utilisée par /admin/auth). */
 async function markMFASessionVerified(svc, agentId) {
   return svc.from("admin_mfa_sessions").insert({
     agent_id: agentId,
@@ -236,6 +237,7 @@ async function handleDisable(svc, req, res) {
   return ok(res, { mfaEnabled: false, message: "MFA désactivé." });
 }
 
+// Aiguillage principal : /admin/mfa/* — distribue vers le handler MFA correspondant.
 export default route(async (req, res) => {
   const svc = serviceClient();
   const path = req.path;

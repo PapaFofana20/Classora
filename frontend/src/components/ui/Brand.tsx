@@ -1,7 +1,9 @@
+// Logo, avatar et petites marques visuelles de l'application.
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
 import { initialsGrapheme } from "@/utils/format";
 
+// Grand logo avec lien vers l'accueil.
 export function Logo({ dark, className, to = "/" }: { dark?: boolean; className?: string; to?: string }) {
   return (
     <Link to={to} aria-label="CLASSORA, retour à l'accueil" className="inline-flex items-center">
@@ -32,6 +34,7 @@ export function LogoMark({ className, alt = "" }: { className?: string; alt?: st
   );
 }
 
+// Rond avec les initiales quand il n'y a pas de photo.
 export function Avatar({ name, size = 40, className }: { name: string; size?: number; className?: string }) {
   const [first, last] = name.trim().split(" ").filter(Boolean);
   const letters = initialsGrapheme(first ?? "", last ?? "");
@@ -42,6 +45,7 @@ export function Avatar({ name, size = 40, className }: { name: string; size?: nu
   );
 }
 
+// Petite barre de progression, bornée entre 0 et 100 pour éviter les débordements.
 export function ProgressBar({ value, className, tone = "leaf" }: { value: number; className?: string; tone?: "leaf" | "warning" | "danger" }) {
   const colors = { leaf: "bg-leaf", warning: "bg-amber-500", danger: "bg-danger" };
   return (

@@ -14,6 +14,7 @@ import { badRequest, forbidden, notFound, ok, route, serverError, RATE_LIMIT_RE,
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireUuid, ValidationError } from "../lib/validate.js";
 
+// Handler principal : POST /delete-staff-account — suppression définitive d'un accès personnel.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

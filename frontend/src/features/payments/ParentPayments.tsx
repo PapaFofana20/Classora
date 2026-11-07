@@ -1,3 +1,5 @@
+// Echeancier et historique des paiements, cote parent ou eleve.
+
 import { useMemo, useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Badge } from "@/components/ui/Badge";
@@ -22,6 +24,7 @@ import { Receipt } from "./Receipt";
 
 export const PAY_TONE = { paye: "success", partiel: "warning", en_retard: "danger", a_venir: "neutral" } as const;
 
+// Echeancier de l'enfant actif, sans les paiements des autres eleves.
 export function ParentPayments({ schoolName, self = false }: { schoolName: string; self?: boolean }) {
   const user = useCurrentUser();
   const { activeChild, children, loading } = useChild();

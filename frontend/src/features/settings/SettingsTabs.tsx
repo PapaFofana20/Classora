@@ -1,3 +1,5 @@
+// Onglets de parametres de l'ecole (infos, cycles, periodes, matieres, profil).
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -23,6 +25,7 @@ interface TabProps {
   onSaved: () => void;
 }
 
+// Petit helper commun : lance une sauvegarde avec toast et rafraichissement.
 function useSave(onSaved: () => void) {
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
@@ -41,6 +44,7 @@ function useSave(onSaved: () => void) {
   return { busy, run };
 }
 
+// Informations de l'ecole et reinitialisation des donnees de demonstration.
 export function SchoolTab({ overview, onSaved }: TabProps) {
   const { schoolId } = useAuth();
   const s = overview.settings;
@@ -104,6 +108,7 @@ export function RegistrationTab({ school, onSaved }: { school: School; onSaved: 
   );
 }
 
+// Cycles proposes par l'ecole ; sur le plan gratuit, un seul cycle est possible.
 export function CyclesTab({ overview, onSaved }: TabProps) {
   const { schoolId } = useAuth();
   const school = useSchool();
@@ -158,6 +163,7 @@ export function CyclesTab({ overview, onSaved }: TabProps) {
   );
 }
 
+// Choix du decoupage de l'annee (semestres ou trimestres) et de la periode en cours.
 export function PeriodsTab({ overview, onSaved }: TabProps) {
   const { schoolId } = useAuth();
   const [type, setType] = useState<PeriodType>(overview.settings.periodType);
@@ -177,6 +183,7 @@ export function PeriodsTab({ overview, onSaved }: TabProps) {
   );
 }
 
+// Liste des matieres et ajout d'une nouvelle matiere.
 export function SubjectsTab({ overview, onSaved }: TabProps) {
   const { schoolId } = useAuth();
   const school = useSchool();
@@ -236,6 +243,7 @@ export function SubjectsTab({ overview, onSaved }: TabProps) {
   );
 }
 
+// Rappel des informations du compte connecte, en lecture seule.
 export function ProfileTab() {
   const user = useCurrentUser();
   const { schoolName } = useSchool();

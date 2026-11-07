@@ -1,3 +1,4 @@
+// Page vide ou en erreur : icône, titre, petit texte et action éventuelle.
 import type { ReactNode } from "react";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
@@ -9,6 +10,7 @@ interface EmptyProps {
   action?: ReactNode;
 }
 
+// État « rien à afficher », quand une liste est vide.
 export function EmptyState({ icon = "inbox", title, text, action }: EmptyProps) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl bg-white px-6 py-14 text-center shadow-card">
@@ -27,6 +29,7 @@ interface ErrorProps {
   onRetry?: () => void;
 }
 
+// État d'erreur avec bouton pour réessayer.
 export function ErrorState({ message = "Une erreur est survenue lors du chargement.", onRetry }: ErrorProps) {
   return (
     <div role="alert" className="flex flex-col items-center justify-center rounded-2xl bg-white px-6 py-14 text-center shadow-card">

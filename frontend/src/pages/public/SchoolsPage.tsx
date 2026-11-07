@@ -1,4 +1,6 @@
+// Page publique de présentation pour les écoles partenaires.
 import { PageHero } from "@/components/layout/PageHero";
+import { Counter } from "@/components/ui/Counter";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { pageHeroes } from "@/data/pageHeroes";
@@ -7,6 +9,7 @@ import { CtaSection } from "@/features/landing/CtaSection";
 import { TestimonialsSection } from "@/features/landing/TestimonialsSection";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
+// Composant principal de la page.
 export default function SchoolsPage() {
   usePageMeta({
     title: "Écoles partenaires au Sénégal",
@@ -34,13 +37,10 @@ export default function SchoolsPage() {
               </h2>
               <div className="mx-auto mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-neutral-700 sm:mt-10">
                 <p>
-                  Classora accompagne les établissements scolaires dans leur transformation numérique, en leur offrant un environnement de gestion moderne, structuré et adapté à leurs réalités. De Dakar à Thiès, en passant par Mbour, Saint-Louis, Rufisque et Kaolack, notre présence s'étend progressivement à travers plusieurs villes du Sénégal.
+                  Classora accompagne les établissements scolaires du Sénégal dans leur transformation numérique, en leur proposant un environnement de gestion moderne, structuré et adapté à leurs réalités. De Dakar à Thiès, en passant par Mbour, Saint-Louis, Rufisque et Kaolack, nous développons progressivement notre présence dans plusieurs villes du pays.
                 </p>
                 <p>
-                  De l'enseignement élémentaire au secondaire, chaque établissement possède ses propres méthodes de fonctionnement et ses exigences pédagogiques. Classora respecte cette diversité en s'adaptant à l'organisation de chaque école : gestion des instituteurs titulaires, suivi des professeurs spécialisés, coefficients propres aux différentes séries et spécificités de chaque niveau d'enseignement.
-                </p>
-                <p>
-                  <em className="font-semibold">Notre ambition est de simplifier durablement le quotidien de toute la communauté éducative.</em> En centralisant les informations et en fluidifiant les processus administratifs et pédagogiques, Classora permet aux directions de mieux piloter leurs établissements, aux enseignants de se concentrer sur l'essentiel et aux familles de suivre plus facilement la scolarité de leurs enfants.
+                  À chaque établissement, de l'enseignement élémentaire au secondaire, Classora s'adapte à son organisation et à ses exigences pédagogiques : gestion des instituteurs titulaires, suivi des professeurs spécialisés, coefficients propres aux différentes séries et spécificités de chaque niveau d'enseignement. <em className="font-semibold">Notre ambition est de simplifier durablement le quotidien de toute la communauté éducative :</em> en centralisant les informations et en fluidifiant les processus administratifs et pédagogiques, nous aidons les directions à mieux piloter leurs établissements, les enseignants à se concentrer sur l'essentiel et les familles à suivre plus facilement la scolarité de leurs enfants.
                 </p>
               </div>
             </div>
@@ -80,11 +80,16 @@ export default function SchoolsPage() {
       </section>
       <section className="mx-auto w-full max-w-[1280px] px-gutter" aria-label="Chiffres clés">
         <div className="grid gap-4 rounded-3xl bg-forest p-6 text-center text-white sm:grid-cols-3 sm:p-10">
-          {aboutStats.map((s) => (
-            <div key={s.label}>
-              <p className="text-6xl font-extrabold tracking-tight text-lime">{s.value}</p>
-              <p className="mt-0 text-sm text-white/80">{s.label}</p>
-            </div>
+          {aboutStats.map((s, i) => (
+            <Counter
+              key={s.label}
+              value={s.value}
+              label={s.label}
+              delay={i * 150}
+              className="bg-transparent p-0 text-white"
+              valueClassName="text-6xl text-lime"
+              labelClassName="mt-0 text-sm text-white/80"
+            />
           ))}
         </div>
       </section>

@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 /**
  * Le schéma réellement déployé sur Supabase utilise `timetables` + `timetable_courses`
  * (et non `timetable_slots`). Toutes les requêtes du module passent par ce service.
+ * Gère les emplois du temps d'une classe (brouillon ou publié).
  */
 
 export interface TimetableClassRef {
@@ -79,16 +80,19 @@ function first<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
+// Nom de la matière d'un cours, avec texte de repli si elle manque.
 export function courseSubject(course: TimetableCourse): string {
   return first(course.subjects)?.name ?? "Matière non spécifiée";
 }
 
+// Nom complet de l'enseignant d'un cours, avec texte de repli si absent.
 export function courseTeacher(course: TimetableCourse): string {
   const teacher = first(course.teachers);
   const name = `${teacher?.first_name ?? ""} ${teacher?.last_name ?? ""}`.trim();
   return name || "Enseignant non assigné";
 }
 
+// Libellé de la classe d'un emploi du temps (« CM2 · Primaire » ou équivalent).
 export function timetableClassLabel(timetable: Timetable): string {
   const room = timetable.class_rooms;
   const level = first(room?.levels)?.label ?? null;
@@ -96,10 +100,12 @@ export function timetableClassLabel(timetable: Timetable): string {
   return room?.name ?? level ?? "Classe non spécifiée";
 }
 
+// Nombre de cours rattachés à un emploi du temps.
 export function timetableCourseCount(timetable: Timetable): number {
   return timetable.timetable_courses?.length ?? 0;
 }
 
+// Tous les emplois du temps d'une école (table timetables), le plus récent d'abord.
 export async function listTimetables(schoolId: string): Promise<Timetable[]> {
   const { data, error } = await supabase
     .from("timetables")
@@ -111,6 +117,7 @@ export async function listTimetables(schoolId: string): Promise<Timetable[]> {
   return (data ?? []) as unknown as Timetable[];
 }
 
+// Un emploi du temps et ses cours (timetable_courses), chargés en parallèle.
 export async function getTimetable(timetableId: string): Promise<{ timetable: Timetable; courses: TimetableCourse[] }> {
   const [{ data: timetable, error: timetableError }, { data: courses, error: coursesError }] = await Promise.all([
     supabase.from("timetables").select(TIMETABLE_SELECT).eq("id", timetableId).single(),
@@ -130,6 +137,7 @@ export async function getTimetable(timetableId: string): Promise<{ timetable: Ti
   };
 }
 
+// Matières de l'école (options pour remplir un cours).
 export async function listTimetableSubjects(schoolId: string): Promise<TimetableSubjectOption[]> {
   const { data, error } = await supabase
     .from("subjects")
@@ -141,6 +149,7 @@ export async function listTimetableSubjects(schoolId: string): Promise<Timetable
   return (data ?? []) as TimetableSubjectOption[];
 }
 
+// Enseignants de l'école (options pour remplir un cours).
 export async function listTimetableTeachers(schoolId: string): Promise<TimetableTeacherOption[]> {
   const { data, error } = await supabase
     .from("teachers")
@@ -198,6 +207,7 @@ export async function ensurePlaceholderTeacher(schoolId: string): Promise<string
   return (data as { id: string }).id;
 }
 
+// Crée un emploi du temps en brouillon pour une classe.
 export async function createTimetable(input: CreateTimetableInput, schoolId: string, actorId: string): Promise<string> {
   const { data, error } = await supabase
     .from("timetables")
@@ -216,6 +226,7 @@ export async function createTimetable(input: CreateTimetableInput, schoolId: str
   return (data as { id: string }).id;
 }
 
+// Publie un emploi du temps (visible par la classe).
 export async function publishTimetable(timetableId: string, schoolId: string): Promise<void> {
   // Defense-in-depth : school_id explicitement scroppé (pas du query, on ne
   // met jamais le school_id venant d'un utilisateur, même si la RLS 00037
@@ -229,6 +240,7 @@ export async function publishTimetable(timetableId: string, schoolId: string): P
   if (error) throw error;
 }
 
+// Repasse un emploi du temps en brouillon (le dépublie).
 export async function unpublishTimetable(timetableId: string, schoolId: string): Promise<void> {
   const { error } = await supabase
     .from("timetables")
@@ -244,6 +256,7 @@ function normalizeTime(value: string): string {
   return value.length === 5 ? `${value}:00` : value;
 }
 
+// Ajoute un cours (matière, enseignant, jour, horaires) à un emploi du temps.
 export async function createCourse(timetableId: string, schoolId: string, input: CourseInput): Promise<void> {
   void schoolId;
   // school_id explicite scroppé : on ne permet pas à un utilisateur de brancher
@@ -263,6 +276,7 @@ export async function createCourse(timetableId: string, schoolId: string, input:
   if (error) throw error;
 }
 
+// Modifie un cours existant (table timetable_courses).
 export async function updateCourse(courseId: string, schoolId: string, input: CourseInput): Promise<void> {
   void schoolId;
   const { error } = await supabase
@@ -281,6 +295,7 @@ export async function updateCourse(courseId: string, schoolId: string, input: Co
   if (error) throw error;
 }
 
+// Supprime un cours d'un emploi du temps.
 export async function deleteCourse(courseId: string, schoolId: string): Promise<void> {
   void schoolId;
   const { error } = await supabase
@@ -290,6 +305,7 @@ export async function deleteCourse(courseId: string, schoolId: string): Promise<
   if (error) throw error;
 }
 
+// Supprime définitivement un emploi du temps (et ses cours, par cascade côté base).
 export async function deleteTimetable(timetableId: string, schoolId: string): Promise<void> {
   const { error } = await supabase
     .from("timetables")

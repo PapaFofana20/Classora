@@ -299,6 +299,7 @@ export async function deleteAdminSchool(input: DeleteSchoolInput): Promise<{
 /* Statistiques transversales                                         */
 /* ------------------------------------------------------------------ */
 
+// Chiffres globaux de la plateforme pour le tableau de bord admin.
 export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
   return callFunction<AdminOverviewStats>("admin/stats", undefined, "GET");
 }
@@ -315,6 +316,7 @@ export interface ListSubscriptionsParams {
   plan?: string;
 }
 
+// Liste des abonnements de toutes les écoles, avec filtres de recherche.
 export async function listAdminSubscriptions(params: ListSubscriptionsParams = {}): Promise<AdminSubscriptionsData> {
   const query = new URLSearchParams();
   if (params.page) query.set("page", String(params.page));
@@ -334,6 +336,7 @@ export interface ActivateSubscriptionInput {
   amount?: number;
 }
 
+// Active un abonnement pour une école (insertion côté serveur dans subscriptions).
 export async function activateSubscription(input: ActivateSubscriptionInput): Promise<{
   message: string;
   activation: {
@@ -353,6 +356,7 @@ export async function activateSubscription(input: ActivateSubscriptionInput): Pr
   return callFunction("admin/subscriptions", { action: "activate", ...input }, "POST");
 }
 
+// Annule une demande d'abonnement en attente.
 export async function cancelSubscriptionRequest(input: { requestId: string; reason?: string }): Promise<{ message: string }> {
   return callFunction("admin/subscriptions", { action: "cancelRequest", ...input }, "POST");
 }
@@ -361,6 +365,7 @@ export async function cancelSubscriptionRequest(input: { requestId: string; reas
 /* Finances                                                           */
 /* ------------------------------------------------------------------ */
 
+// Données financières globales (revenus, impayés) côté admin.
 export async function getAdminFinances(): Promise<AdminFinancesData> {
   return callFunction<AdminFinancesData>("admin/finances", undefined, "GET");
 }
@@ -369,6 +374,7 @@ export async function getAdminFinances(): Promise<AdminFinancesData> {
 /* Analyses                                                           */
 /* ------------------------------------------------------------------ */
 
+// Analyses de la plateforme (croissance, répartition) côté admin.
 export async function getAdminAnalytics(): Promise<AdminAnalyticsData> {
   return callFunction<AdminAnalyticsData>("admin/analytics", undefined, "GET");
 }
@@ -385,6 +391,7 @@ export interface ListAuditParams {
   days?: 7 | 30 | 90;
 }
 
+// Journal d'audit paginé (qui a fait quoi et quand).
 export async function listAdminAudit(params: ListAuditParams = {}): Promise<AdminAuditData> {
   const query = new URLSearchParams();
   if (params.page) query.set("page", String(params.page));
@@ -395,6 +402,7 @@ export async function listAdminAudit(params: ListAuditParams = {}): Promise<Admi
   return callFunction<AdminAuditData>(`admin/audit?${query.toString()}`, undefined, "GET");
 }
 
+// Purge les entrées d'audit plus anciennes que le délai donné.
 export async function purgeAdminAudit(olderThanDays: number): Promise<{ message: string; deleted: number; cutoff: string }> {
   return callFunction("admin/audit", { olderThanDays }, "DELETE");
 }
@@ -403,6 +411,7 @@ export async function purgeAdminAudit(olderThanDays: number): Promise<{ message:
 /* Sécurité                                                           */
 /* ------------------------------------------------------------------ */
 
+// État de sécurité de la plateforme (tentatives, comptes à risque).
 export async function getAdminSecurity(): Promise<AdminSecurityData> {
   return callFunction<AdminSecurityData>("admin/security", undefined, "GET");
 }
@@ -411,10 +420,12 @@ export async function getAdminSecurity(): Promise<AdminSecurityData> {
 /* Paramètres de la plateforme                                        */
 /* ------------------------------------------------------------------ */
 
+// Réglages de la plateforme (maintenance, inscription, session).
 export async function getAdminSettings(): Promise<AdminSettingsData> {
   return callFunction<AdminSettingsData>("admin/settings", undefined, "GET");
 }
 
+// Met à jour les réglages de la plateforme côté serveur.
 export async function updateAdminSettings(patch: Partial<PlatformSettings>): Promise<{
   settings: PlatformSettings;
   updatedAt: string | null;

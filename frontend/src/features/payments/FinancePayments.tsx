@@ -1,3 +1,5 @@
+// Gestion des paiements cote ecole : encaissements, impayes et relances.
+
 import { useEffect, useMemo, useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Badge } from "@/components/ui/Badge";
@@ -42,6 +44,7 @@ interface Debtor {
   maxOverdueDays: number;
 }
 
+// Vue ecole des paiements : filtres, impayes, encaissement et relances WhatsApp.
 export function FinancePayments({ schoolName, canAct }: { schoolName: string; canAct: boolean }) {
   const user = useCurrentUser();
   const { toast } = useToast();

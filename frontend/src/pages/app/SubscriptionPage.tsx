@@ -1,3 +1,4 @@
+// Page de lecture de l'abonnement actuel de l'école (directeur uniquement).
 import { Badge } from "@/components/ui/Badge";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -21,6 +22,7 @@ export default function SubscriptionPage() {
   const { schoolId } = useAuth();
   const school = useSchool();
   const { toast } = useToast();
+  // On charge les infos de l'école pour afficher son matricule et son statut.
   const overview = useAsync(() => getSchoolOverview(schoolId), [schoolId]);
 
   const info = school.status;

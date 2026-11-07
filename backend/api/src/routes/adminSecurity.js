@@ -29,10 +29,12 @@ const SENSITIVE_ACTIONS = [
   "audit_log_purged",
 ];
 
+/** Clé jour (AAAA-MM-JJ) d'une date ISO, pour regrouper les événements par jour. */
 function dayKey(iso) {
   return String(iso).slice(0, 10);
 }
 
+// Handler principal : GET /admin/security — supervision de l'activité de connexion des agents.
 export default route(async (req, res) => {
   if (req.method !== "GET") return ok(res, { error: "MÃ©thode non autorisÃ©e." }, 405);
   const svc = serviceClient();

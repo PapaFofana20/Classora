@@ -1,3 +1,5 @@
+// Matrice d'affectation des enseignants aux classes et aux matieres.
+
 import type { AssignmentBoard } from "@/services/assignmentService";
 import type { Cycle, Subject, Teacher } from "@/types";
 import { cn } from "@/utils/cn";
@@ -13,6 +15,7 @@ interface SelectProps {
   emptyLabel?: string;
 }
 
+// Liste deroulante d'enseignants, avec les specialistes de la matiere en premier.
 export function TeacherSelect({ label, value, onChange, teachers, subjectId, tone = "ok", emptyLabel = "— Non affecté —" }: SelectProps) {
   const specialists = subjectId ? teachers.filter((t) => t.specialties.includes(subjectId)) : [];
   const others = teachers.filter((t) => !specialists.includes(t));
@@ -46,6 +49,7 @@ interface MatrixProps {
   onSetTitular: (classId: string, teacherId: string | null) => void;
 }
 
+// Tableau des affectations : un bloc par classe, selon le cycle.
 export function AssignmentMatrix({ board, cycle, onReplace, onSetHead, onSetTitular }: MatrixProps) {
   const classes = board.classes.filter((c) => c.cycle === cycle);
   const professors = board.teachers.filter((t) => t.kind === "professeur");
@@ -114,13 +118,12 @@ export function AssignmentMatrix({ board, cycle, onReplace, onSetHead, onSetTitu
                       key={s.id}
                       className={cn(
                         "flex flex-col gap-2 rounded-xl border p-3 transition",
-                        tone === "error" ? "border-danger bg-red-50/40" : tone === "warning" ? "border-amber-400 bg-amber-50/40" : "border-neutral-200 bg-white hover:border-lime/60",
+                        tone === "error" ? "border-danger bg-red-50/40" : "border-neutral-200 bg-white hover:border-lime/60",
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm font-bold text-ink">{s.name}</p>
                         {tone === "error" && <Icon name="error" className="text-danger text-[16px]" />}
-                        {tone === "warning" && <Icon name="warning" className="text-amber-500 text-[16px]" />}
                         {tone === "ok" && <Icon name="check_circle" className="text-lime text-[16px]" fill />}
                       </div>
 

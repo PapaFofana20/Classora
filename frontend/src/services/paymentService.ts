@@ -4,12 +4,15 @@ import { hydrate, paymentsOf, respond, studentsOf } from "./db";
 import { supabase } from "@/lib/supabase";
 import { toPaymentRow, type PaymentRow } from "./paymentRows";
 
+// Paiements de l'école (table payments) : lecture, encaissement espèces et relances.
+
 export type { PaymentRow };
 const toRow = toPaymentRow;
 
 /** Paiements de l'école de l'acteur (jamais ceux d'une autre école). */
 export const listPaymentRows = (actor: SessionUser): Promise<PaymentRow[]> => respond(() => paymentsOf(actor.schoolId).map(toRow));
 
+// Paiements visibles par un parent ou un élève (seulement ses enfants / lui-même).
 export function listParentPayments(actor: SessionUser): Promise<PaymentRow[]> {
   return respond(() => {
     const ids = studentsOf(actor.schoolId).filter((s) => (actor.role === "eleve" ? s.id === actor.studentId : s.parentId === actor.parentId)).map((s) => s.id);
@@ -19,6 +22,7 @@ export function listParentPayments(actor: SessionUser): Promise<PaymentRow[]> {
   });
 }
 
+// Paiements bruts d'un élève donné (sans l'enrichissement d'affichage).
 export function listStudentPayments(schoolId: string, studentId: string): Promise<Payment[]> {
   return respond(() => paymentsOf(schoolId).filter((p) => p.studentId === studentId));
 }

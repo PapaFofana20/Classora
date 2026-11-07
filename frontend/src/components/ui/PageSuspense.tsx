@@ -1,3 +1,4 @@
+// Écrans de chargement locaux entre deux pages, sans tout faire clignoter.
 import { Suspense, type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import { Skeleton } from "./Skeleton";

@@ -1,3 +1,5 @@
+// Fenêtre pour demarrer une nouvelle conversation.
+
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -14,6 +16,7 @@ interface Props {
   onCreated: (conversationId: string) => void;
 }
 
+// Choisit le destinataire, l'objet et le premier message.
 export function NewMessageModal({ open, contacts, onClose, onCreated }: Props) {
   const user = useCurrentUser();
   const { toast } = useToast();

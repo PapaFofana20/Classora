@@ -18,6 +18,7 @@ export interface PageMeta {
   noindex?: boolean;
 }
 
+// Crée ou met à jour une balise meta sans la dupliquer.
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
   if (!el) {

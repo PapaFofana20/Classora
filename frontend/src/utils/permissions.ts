@@ -1,3 +1,4 @@
+// Droits d'accès par rôle : qui peut faire quoi (abonnement, personnel, notes).
 import type { ClassRoom, Role, StaffRole, Teacher, TeachingAssignment } from "@/types";
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -26,6 +27,7 @@ export const STAFF_ROLES: StaffRole[] = ["professeur", "instituteur", "econome",
 /** Rôles qui peuvent s'inscrire seul sur /inscription. */
 export const PUBLIC_SIGNUP_ROLES: Role[] = ["directeur", "eleve", "parent"];
 
+// Vrai si c'est un rôle du personnel créé par la direction.
 export const isStaffRole = (role: Role): role is StaffRole => (STAFF_ROLES as Role[]).includes(role);
 
 /** Seul le directeur achète un abonnement. */
@@ -51,6 +53,7 @@ export function canEditGrades(
   return assignments.some((a) => a.teacherId === teacher.id && a.classId === classId && a.subjectId === subjectId);
 }
 
+// Vrai si l'enseignant est le titulaire / professeur principal de cette classe.
 export function isHeadTeacher(teacher: Teacher | null | undefined, classRoom: ClassRoom | undefined): boolean {
   return !!teacher && !!classRoom && classRoom.headTeacherId === teacher.id;
 }
@@ -70,6 +73,7 @@ export function canReadSubject(
   return canReadWholeClass(teacher, classRoom) || canEditGrades(teacher, classRoom.id, subjectId, assignments);
 }
 
+// Liste des classes où l'enseignant a au moins une matière affectée.
 export function teacherClassIds(teacherId: string, assignments: TeachingAssignment[]): string[] {
   return Array.from(new Set(assignments.filter((a) => a.teacherId === teacherId).map((a) => a.classId)));
 }

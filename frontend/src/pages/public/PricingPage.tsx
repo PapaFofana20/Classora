@@ -1,3 +1,4 @@
+// Page publique des tarifs et formules proposées aux écoles.
 import { PageHero } from "@/components/layout/PageHero";
 import { pageHeroes } from "@/data/pageHeroes";
 import { CtaSection } from "@/features/landing/CtaSection";
@@ -6,6 +7,7 @@ import { PricingSection } from "@/features/landing/PricingSection";
 import { Reveal } from "@/components/ui/Reveal";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
+// Composant principal de la page.
 export default function PricingPage() {
   usePageMeta({
     title: "Tarifs et offres scolaires",

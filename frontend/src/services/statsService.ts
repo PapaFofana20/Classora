@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { hydrate, settingsOf } from "./db";
 import { toPaymentRows, type PaymentRow } from "./paymentRows";
 
+// Tableau de bord direction : chiffres calculés côté serveur (RPC admin_dashboard).
+
 export interface AdminStats {
   schoolName: string;
   totalStudents: number;

@@ -1,3 +1,4 @@
+// Contexte d'enseignement : mémorise la classe et la matière choisies par le professeur.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTeacherAssignments, type TeacherContextItem } from "@/hooks/useTeacherAssignments";
 
@@ -12,6 +13,7 @@ interface TeachingContextValue extends TeacherData {
 const TeachingContext = createContext<TeachingContextValue | null>(null);
 const STORAGE_KEY = "classora_active_context";
 
+// Charge les matières du professeur et garde la sélection en session.
 export function TeachingProvider({ children }: { children: ReactNode }) {
   const data = useTeacherAssignments();
   const [activeKey, setKey] = useState<string>(() => sessionStorage.getItem(STORAGE_KEY) ?? "");
@@ -26,6 +28,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
   return <TeachingContext.Provider value={value}>{children}</TeachingContext.Provider>;
 }
 
+// Lit le contexte d'enseignement courant depuis n'importe quel composant.
 export function useTeaching(): TeachingContextValue {
   const ctx = useContext(TeachingContext);
   if (!ctx) throw new Error("useTeaching doit être utilisé dans <TeachingProvider>.");

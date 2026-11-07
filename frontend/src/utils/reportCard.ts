@@ -1,3 +1,4 @@
+// Assemble les données d'un bulletin à partir des notes, matières et affectations d'une classe.
 import type {
   ClassRoom,
   ClassSubject,
@@ -25,6 +26,7 @@ export interface ReportInput {
   period: Period;
 }
 
+// Construit les bulletins d'une classe : moyennes, rangs et appréciations de chaque élève.
 export function buildClassReportCards(input: ReportInput): ReportCardData[] {
   const { classRoom, students, grades, classSubjects, subjects, assignments, teachers, metas, period } = input;
   const cs = classSubjects.filter((x) => x.classId === classRoom.id);

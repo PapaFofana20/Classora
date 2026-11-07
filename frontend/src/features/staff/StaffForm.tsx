@@ -1,3 +1,5 @@
+// Formulaire de creation ou de modification d'un compte du personnel.
+
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";

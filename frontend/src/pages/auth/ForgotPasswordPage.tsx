@@ -1,3 +1,4 @@
+// Page pour demander un lien de réinitialisation du mot de passe.
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { ForgotForm } from "@/features/auth/ForgotForm";
 

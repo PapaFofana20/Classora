@@ -6,6 +6,9 @@ import { supabase } from "@/lib/supabase";
 import { ensure, ensureWritable, teacherOf } from "./access";
 import { assignmentsOf, classesOf, classSubjectsOf, db, gradesOf, hydrate, parentsOf, reportMetasOf, respond, settingsOf, studentsOf, subjectsOf, teachersOf } from "./db";
 
+// Bulletins : calcul à partir des notes (grades) et des mentions (report_metas).
+
+// Périodes de l'école selon son découpage (semestre ou trimestre).
 export function currentPeriods(schoolId: string): Period[] {
   return getPeriods(settingsOf(schoolId).periodType);
 }
@@ -44,6 +47,7 @@ export function bulletinClasses(actor: SessionUser): Promise<ClassRoom[]> {
   return respond(() => classesOf(actor.schoolId).filter((c) => classAllowed(actor, c)));
 }
 
+// Bulletins d'une classe pour une période, filtrés selon qui regarde (parent, élève ou personnel).
 export function getClassReportCards(actor: SessionUser, classId: string, periodId: string): Promise<ReportCardData[]> {
   return respond(() => {
     const classRoom = classesOf(actor.schoolId).find((c) => c.id === classId);

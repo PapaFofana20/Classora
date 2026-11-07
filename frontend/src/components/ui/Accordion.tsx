@@ -1,3 +1,4 @@
+// Liste de questions/réponses dépliables, une seule ouverte à la fois.
 import { useId, useState } from "react";
 import { cn } from "@/utils/cn";
 import { Icon } from "./Icon";

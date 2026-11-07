@@ -12,6 +12,7 @@ import { audit, getAuthenticatedUser, serviceClient } from "../lib/auth.js";
 import { methodNotAllowed, ok, route, serverError, unauthorized, RATE_LIMIT_RE, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
+// Handler principal : POST /login-guard — vérifie le statut du compte après connexion.
 export default route(async (req, res) => {
   if (req.method !== "POST") return methodNotAllowed(res);
   const svc = serviceClient();

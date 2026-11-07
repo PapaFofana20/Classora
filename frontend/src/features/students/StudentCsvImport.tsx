@@ -1,3 +1,5 @@
+// Import en masse des eleves depuis un fichier CSV.
+
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";

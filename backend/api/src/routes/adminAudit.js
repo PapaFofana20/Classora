@@ -10,6 +10,7 @@ import { expectObject, ValidationError } from "../lib/validate.js";
 
 const PERIOD_DAYS = new Set([7, 30, 90]);
 
+/** Nettoie le terme de recherche pour éviter les caractères spéciaux PostgREST. */
 function sanitizeSearch(value) {
   return String(value ?? "")
     .trim()
@@ -17,6 +18,7 @@ function sanitizeSearch(value) {
     .replace(/[,()\\%_]/g, " ");
 }
 
+// Handler principal : GET/DELETE /admin/audit — lecture et purge du journal d'audit.
 export default route(async (req, res) => {
   const svc = serviceClient();
   try {

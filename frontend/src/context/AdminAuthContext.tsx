@@ -26,6 +26,7 @@ interface AdminAuthContextValue {
 
 const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
 
+// Vérifie l'agent admin au démarrage et expose verify/logout pour la console.
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [agent, setAgent] = useState<AdminAgent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +85,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
 }
 
+// Lit l'agent admin connecté depuis n'importe quel composant.
 export function useAdminAuth(): AdminAuthContextValue {
   const ctx = useContext(AdminAuthContext);
   if (!ctx) throw new Error("useAdminAuth doit être utilisé dans <AdminAuthProvider>.");

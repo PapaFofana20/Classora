@@ -1,3 +1,5 @@
+// Notes d'un eleve vues par son parent (ou par l'eleve lui-meme).
+
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";

@@ -1,3 +1,5 @@
+// Creation d'un nouvel emploi du temps (brouillon).
+
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
@@ -16,11 +18,13 @@ interface ClassOption {
   name: string;
 }
 
+// Extrait un message lisible d'une erreur inconnue.
 const errorMessage = (e: unknown) =>
   e && typeof e === "object" && "message" in e && typeof (e as { message?: unknown }).message === "string"
     ? (e as { message: string }).message
     : "Création impossible.";
 
+// Formulaire court : nom, classe et annee scolaire du futur emploi du temps.
 export default function TimetableCreationPage() {
   const user = useCurrentUser();
   const { toast } = useToast();

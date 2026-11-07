@@ -14,11 +14,13 @@ const CYCLE_LABELS = {
   secondaire: "Secondaire",
 };
 
+/** Pourcentage arrondi à une décimale, 0 si le total est nul. */
 function pct(part, total) {
   if (!total) return 0;
   return Math.round((part / total) * 1000) / 10;
 }
 
+// Handler principal : GET /admin/analytics — tableau de bord analytique réservé aux agents admin.
 export default route(async (req, res) => {
   if (req.method !== "GET") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

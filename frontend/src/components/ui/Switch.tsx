@@ -1,3 +1,4 @@
+// Interrupteur on/off avec libellé, prêt pour l'accessibilité.
 import { cn } from "@/utils/cn";
 
 interface Props {

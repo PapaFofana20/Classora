@@ -1,3 +1,4 @@
+// Gestion des agents de l'administration Classora.
 import { useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -19,6 +20,7 @@ import {
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { Modal } from "@/components/ui/Modal";
 
+// Composant principal de la page.
 export default function AdminAgentsPage() {
   const { isSuperAdmin } = useAdminAuth();
   const [showCreate, setShowCreate] = useState(false);
@@ -56,6 +58,7 @@ export default function AdminAgentsPage() {
     }
   };
 
+  // Seul un superadministrateur peut voir et gérer les agents.
   if (!isSuperAdmin) {
     return (
       <Card>

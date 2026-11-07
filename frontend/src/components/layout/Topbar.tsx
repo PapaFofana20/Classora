@@ -1,3 +1,4 @@
+// Barre du haut de l'espace scolaire : école, messages et menu utilisateur.
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -15,6 +16,7 @@ import { Icon } from "@/components/ui/Icon";
 import { ConfirmDialog } from "@/components/ui/Modal";
 import { ChildSwitcher } from "./ChildSwitcher";
 
+// Barre supérieure : on affiche l'école, les compteurs et le profil ici.
 export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void }) {
   const { logout } = useAuth();
   const navigate = useNavigate();

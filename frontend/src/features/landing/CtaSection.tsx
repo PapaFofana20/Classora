@@ -1,7 +1,10 @@
+// Bandeau d'appel a l'action en bas des pages publiques.
+
 import { ArrowButton } from "@/components/ui/ArrowButton";
 import { Reveal } from "@/components/ui/Reveal";
 import { Container } from "@/components/layout/Container";
 
+// Encourage le visiteur a creer son compte, en un clic.
 export function CtaSection() {
   return (
     <section className="pb-6 pt-10" aria-labelledby="cta-title">

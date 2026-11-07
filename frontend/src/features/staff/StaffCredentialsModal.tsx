@@ -1,3 +1,5 @@
+// Affichage unique des identifiants apres creation ou reinitialisation.
+
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";

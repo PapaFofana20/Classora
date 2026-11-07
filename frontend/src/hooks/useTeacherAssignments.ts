@@ -1,3 +1,4 @@
+// Affectations de l'enseignant connecté : ses classes, ses matières et ce qu'il peut saisir.
 import { useCallback, useMemo } from "react";
 import type { ClassRoom, Teacher, TeachingAssignment } from "@/types";
 import { useAuth } from "@/context/AuthContext";
@@ -16,6 +17,7 @@ export interface TeacherContextItem {
   label: string;
 }
 
+// Petit identifiant stable pour le couple classe + matière (utilisé comme clé d'interface).
 export const contextKey = (classId: string, subjectId: string) => `${classId}|${subjectId}`;
 
 interface Loaded {

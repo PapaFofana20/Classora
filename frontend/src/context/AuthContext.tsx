@@ -1,3 +1,4 @@
+// Session utilisateur : connexion, inscriptions et déconnexion, école incluse.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { SessionUser } from "@/types";
 import * as authService from "@/services/authService";
@@ -25,6 +26,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Restaure la session au démarrage et expose les fonctions d'authentification.
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
@@ -125,12 +127,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// Lit la session courante depuis n'importe quel composant.
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth doit être utilisé dans <AuthProvider>.");
   return ctx;
 }
 
+// Raccourci quand on est sûr qu'un utilisateur est connecté (lève, prof, parent…).
 export function useCurrentUser(): SessionUser {
   const { user } = useAuth();
   if (!user) throw new Error("Aucun utilisateur connecté.");

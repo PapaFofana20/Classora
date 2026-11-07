@@ -1,3 +1,4 @@
+// Navigation du bas sur mobile : trois accès rapides + bouton « Plus ».
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useSchool } from "@/context/SchoolContext";
@@ -33,11 +34,13 @@ const SHORT_LABELS: Record<string, string> = {
   "/app/abonnement": "Abo",
 };
 
+// Petite règle métier : on raccourcit les libellés pour qu'ils tiennent dans la barre du bas.
 function shortLabel(item: NavItem): string {
   if (SHORT_LABELS[item.to]) return SHORT_LABELS[item.to];
   return item.label.length > 12 ? item.label.split(" ")[0] : item.label;
 }
 
+// On garde les trois pages préférées du rôle, le reste reste accessible via « Plus ».
 function primaryItems(items: NavItem[], role: Role): NavItem[] {
   const preferred = PRIMARY_PATHS[role]
     .map((path) => items.find((item) => item.to === path))
@@ -46,6 +49,7 @@ function primaryItems(items: NavItem[], role: Role): NavItem[] {
   return [...preferred, ...rest].slice(0, 3);
 }
 
+// Barre de navigation mobile, visible seulement sur petit écran.
 export function BottomNav({ user }: { user: SessionUser }) {
   const { headClasses } = useTeaching();
   const school = useSchool();

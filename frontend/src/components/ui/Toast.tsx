@@ -1,3 +1,4 @@
+// Zone où s'empilent les petites notifications temporaires.
 import { cn } from "@/utils/cn";
 import { Icon } from "./Icon";
 
@@ -19,6 +20,7 @@ interface Props {
   onDismiss: (id: number) => void;
 }
 
+// On affiche les notifications en cours, avec bouton pour fermer.
 export function ToastViewport({ items, onDismiss }: Props) {
   return (
     <div className="no-print pointer-events-none fixed inset-x-0 bottom-20 z-toast flex flex-col items-center gap-2 px-4 lg:bottom-6 lg:items-end lg:pr-6" aria-live="polite" role="status">

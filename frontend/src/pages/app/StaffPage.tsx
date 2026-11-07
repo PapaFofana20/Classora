@@ -1,3 +1,4 @@
+// Gestion du personnel de l'école : comptes d'accès et enseignants.
 import { useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Avatar } from "@/components/ui/Brand";

@@ -1,3 +1,4 @@
+// Menu latéral de l'espace scolaire : repliable sur desktop, tiroir sur mobile.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -88,6 +89,7 @@ function MenuItem({ item, expanded, onNavigate }: { item: NavItem; expanded: boo
   );
 }
 
+// Contenu du menu (logo, sections, déconnexion), partagé entre desktop et mobile.
 function SidebarContent({ user, pending, expanded, onNavigate, onLogoClick }: { user: SessionUser; pending: number; expanded: boolean; onNavigate?: () => void; onLogoClick?: () => void }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -160,6 +162,7 @@ interface Props {
   onClose: () => void;
 }
 
+// Colonne fixe sur desktop + tiroir latéral sur mobile.
 export function Sidebar({ user, drawerOpen, onClose }: Props) {
   const { pathname } = useLocation();
   const { user: current } = useAuth();

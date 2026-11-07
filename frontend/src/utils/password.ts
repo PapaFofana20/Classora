@@ -41,6 +41,7 @@ function randomBelow(limit: number): number {
   return b % limit;
 }
 
+// Calcule la force d'un mot de passe et indique les règles déjà satisfaites.
 export function passwordStrength(value: string): StrengthResult {
   const satisfied = PASSWORD_RULES.filter((r) => r.test(value)).map((r) => r.id);
   const score = satisfied.length;
@@ -48,6 +49,7 @@ export function passwordStrength(value: string): StrengthResult {
   return { strength, score, label: `Mot de passe ${strength}`, satisfied };
 }
 
+// Renvoie le premier problème de mot de passe, en français, ou null si tout va bien.
 export function passwordError(value: string, confirm?: string): string | null {
   if (!value) return "Le mot de passe est obligatoire.";
   if (value.length < PASSWORD_MIN) return `Au moins ${PASSWORD_MIN} caractères.`;

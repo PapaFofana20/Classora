@@ -1,3 +1,4 @@
+// Page d'erreur 404 quand l'adresse demandée n'existe pas.
 import { Link } from "react-router-dom";
 import { Container } from "@/components/layout/Container";
 import { Icon } from "@/components/ui/Icon";

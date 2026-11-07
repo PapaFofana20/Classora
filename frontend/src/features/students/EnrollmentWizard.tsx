@@ -1,3 +1,5 @@
+// Inscription d'un eleve en trois etapes (eleve, parent, classe et frais).
+
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
@@ -25,6 +27,7 @@ interface Props {
   childrenByParent: Record<string, number>;
 }
 
+// Guide l'inscription eleve par eleve, avec le recapitulatif des frais.
 export function EnrollmentWizard({ overview, parents, childrenByParent }: Props) {
   const user = useCurrentUser();
   const { toast } = useToast();

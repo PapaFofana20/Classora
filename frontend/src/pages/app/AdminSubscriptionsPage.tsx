@@ -1,3 +1,4 @@
+// Gestion des abonnements et des demandes d'activation côté admin.
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -50,6 +51,7 @@ const PLAN_OPTIONS = (plans: AdminPlan[], cycle: "monthly" | "yearly") =>
     label: `${p.name} — ${formatCurrency(cycle === "monthly" ? p.monthlyPrice : p.yearlyPrice)} / ${cycle === "monthly" ? "mois" : "an"}`,
   }));
 
+// Composant principal de la page.
 export default function AdminSubscriptionsPage() {
   const { pathname } = useLocation();
   const { agent } = useAdminAuth();
@@ -64,6 +66,7 @@ export default function AdminSubscriptionsPage() {
   const [activation, setActivation] = useState<ActivationTarget | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // On charge les abonnements avec les filtres et la pagination courants.
   const state = useAsync(
     () => listAdminSubscriptions({ page, pageSize: 20, search: debouncedSearch || undefined, status, plan: plan || undefined }),
     [page, debouncedSearch, status, plan],

@@ -1,3 +1,4 @@
+// Page de connexion/inscription : formulaire d'un côté, visuel de l'autre.
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { images } from "@/data/landing";

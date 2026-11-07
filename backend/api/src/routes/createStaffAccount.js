@@ -11,6 +11,7 @@ import { badRequest, forbidden, ok, route, serverError, RATE_LIMIT_RE, logError 
 import { enforceRateLimit } from "../lib/rateLimit.js";
 import { expectObject, requireEmail, requireSnPhone, requireString, requireStringArray, ValidationError } from "../lib/validate.js";
 
+// Handler principal : POST /create-staff-account — création d'un accès personnel par le directeur.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

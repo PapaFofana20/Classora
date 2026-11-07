@@ -1,3 +1,4 @@
+// Types partagés du frontend : écoles, notes, paiements, abonnements et espaces admin.
 export type Cycle = "elementaire" | "moyen" | "secondaire";
 export type Role = "directeur" | "econome" | "secretaire" | "surveillant" | "instituteur" | "professeur" | "eleve" | "parent";
 /** Rôles que seul le directeur peut créer via un accès du personnel. */

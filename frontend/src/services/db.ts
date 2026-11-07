@@ -28,6 +28,7 @@ import { supabase } from "@/lib/supabase";
  * autorisé à lire (fonction hydrate). Les lectures de l'interface passent par
  * les helpers `xOf(schoolId)` exactement comme avant ; les écritures passent
  * par les RPCs du back-end puis re-hydratent l'entité concernée.
+ * Chaque map*() convertit une ligne Supabase (snake_case) en type front (camelCase).
  */
 
 export interface Database {
@@ -467,6 +468,7 @@ async function hydrateSettings(): Promise<void> {
   );
 }
 
+// Recharge UNE table (ou une entité spéciale) depuis Supabase vers le cache.
 export function hydrate(entity: keyof Database): Promise<void> {
   if (entity === "conversations") return hydrateConversations().catch(() => undefined);
   if (entity === "settings") return hydrateSettings().catch(() => undefined);
@@ -497,6 +499,7 @@ export async function hydrateAll(): Promise<void> {
   ]);
 }
 
+// Vide entièrement le cache local (déconnexion, changement d'école).
 export async function clearCache(): Promise<void> {
   (Object.keys(db) as (keyof Database)[]).forEach((k) => {
     (db[k] as unknown[]).splice(0, (db[k] as unknown[]).length);
@@ -508,10 +511,12 @@ export function persist(): void {
   window.dispatchEvent(new Event("ec:data"));
 }
 
+// Réinitialise le cache puis le recharge depuis Supabase.
 export function resetDatabase(): void {
   clearCache().then(() => hydrateAll());
 }
 
+// Génère un identifiant unique côté client (utile pour les clés d'affichage).
 export function uid(prefix: string): string {
   const suffix =
     typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -535,6 +540,7 @@ export function respond<T>(fn: () => T): Promise<T> {
 /* Requêtes de base, systématiquement filtrées par école                */
 /* ------------------------------------------------------------------ */
 
+// Helpers de lecture filtrés par école (toujours depuis le cache, jamais un nouvel appel SQL).
 export const classesOf = (schoolId: string, limit?: number): ClassRoom[] => {
   const filtered = db.classes.filter((c) => c.schoolId === schoolId);
   return limit ? filtered.slice(0, limit) : filtered;

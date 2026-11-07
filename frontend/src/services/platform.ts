@@ -18,6 +18,7 @@ export const DEFAULT_PLATFORM_STATUS: PlatformStatus = {
   migrationApplied: false,
 };
 
+// Récupère l'état public de la plateforme (avec valeur par défaut si l'API tombe).
 export async function getPlatformStatus(): Promise<PlatformStatus> {
   try {
     return await callFunction<PlatformStatus>("platform-status", undefined, "GET");

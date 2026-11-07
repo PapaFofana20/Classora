@@ -1,3 +1,5 @@
+// Formulaire de contact public (envoi d'un message a l'equipe).
+
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -10,6 +12,7 @@ import { isValidEmail, isValidSnPhone } from "@/utils/format";
 
 const initial = { name: "", email: "", phone: "", school: "", subject: subjectsContact[0], message: "" };
 
+// Valide le message, l'envoie, puis propose d'en ecrire un autre.
 export function ContactForm() {
   const { toast } = useToast();
   const [sending, setSending] = useState(false);

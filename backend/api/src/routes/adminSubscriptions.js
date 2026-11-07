@@ -19,6 +19,7 @@ const METHODS = new Set(["wave", "orange_money", "free_money", "especes"]);
 const STATUSES = new Set(["all", "ACTIF", "EXPIRE", "AUCUN", "BIENTOT", "SUSPENDUE"]);
 const MAX_AMOUNT = 10_000_000;
 
+/** Nettoie le terme de recherche avant filtrage en mémoire. */
 function sanitizeSearch(value) {
   return String(value ?? "")
     .trim()
@@ -26,10 +27,12 @@ function sanitizeSearch(value) {
     .replace(/[,()\\%]/g, " ");
 }
 
+/** Prix mensuel d'une formule, 0 si absent (évite les NaN dans les totaux). */
 function planPrice(plan) {
   return Number(plan?.monthly_price ?? 0);
 }
 
+/** Valide le montant saisi pour une activation manuelle. Entrée : corps. Sortie : entier ou null si absent. */
 function requestAmount(body) {
   if (body.amount === undefined || body.amount === null || body.amount === "") return null;
   const n = Number(body.amount);
@@ -39,6 +42,7 @@ function requestAmount(body) {
   return n;
 }
 
+// Handler principal : GET/POST /admin/subscriptions — consultation et activation manuelle.
 export default route(async (req, res) => {
   const svc = serviceClient();
   try {
@@ -158,6 +162,7 @@ export default route(async (req, res) => {
   }
 });
 
+/** Assemple la liste paginée des abonnements avec filtres et résumé. Entrée : svc, res, req. */
 async function listSubscriptions(svc, res, req) {
   const today = todayIso();
 

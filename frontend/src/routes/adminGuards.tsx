@@ -1,3 +1,4 @@
+// Gardes de route de la console admin : connexion et rôles d'agent.
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { EmptyState } from "@/components/ui/EmptyState";

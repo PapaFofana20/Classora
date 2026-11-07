@@ -1,10 +1,11 @@
 /** Petits calculs de dates ISO (AAAA-MM-JJ), sans dépendance. */
-
+// Convertit une date ISO en instant UTC pour éviter les décalages d'heure.
 export function toUtc(iso: string): number {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
   return Date.UTC(y, (m || 1) - 1, d || 1);
 }
 
+// Ajoute un nombre de jours à une date ISO et renvoie la date au même format.
 export function addDaysIso(iso: string, days: number): string {
   const d = new Date(toUtc(iso) + days * 86_400_000);
   return d.toISOString().slice(0, 10);

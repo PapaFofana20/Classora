@@ -1,3 +1,4 @@
+// Paramètres de l'école, ou profil personnel selon le rôle.
 import { useState } from "react";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -18,11 +19,13 @@ const TABS = [
   { id: "tarifs", label: "Tarifs", icon: "sell" },
 ];
 
+// Composant principal de la page.
 export default function SettingsPage() {
   const user = useCurrentUser();
   const state = useAsync(() => getSchoolOverview(user.schoolId), [user.schoolId]);
   const [tab, setTab] = useState("ecole");
 
+  // Seul le directeur voit les paramètres de l'école, les autres voient leur profil.
   if (user.role !== "directeur")
     return (
       <>

@@ -1,3 +1,4 @@
+// Petits boutons du design system : un seul endroit pour les formes et les couleurs.
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/utils/cn";
@@ -20,6 +21,7 @@ const sizes: Record<ButtonSize, string> = {
   lg: "min-h-12 px-8 text-base",
 };
 
+// Reconstruit les classes d'un bouton selon sa variante et sa taille.
 export function buttonClasses(variant: ButtonVariant = "primary", size: ButtonSize = "md", className?: string) {
   return cn(
     "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-full font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
@@ -41,6 +43,7 @@ interface ButtonProps extends CommonProps, Omit<ButtonHTMLAttributes<HTMLButtonE
   loading?: boolean;
 }
 
+// Vrai bouton : gère l'état de chargement et désactive le double clic.
 export function Button({ variant, size, icon, className, children, loading, disabled, type = "button", ...rest }: ButtonProps) {
   return (
     <button type={type} disabled={disabled || loading} aria-busy={loading || undefined} className={buttonClasses(variant, size, className)} {...rest}>
@@ -55,6 +58,7 @@ interface LinkButtonProps extends CommonProps {
   "aria-label"?: string;
 }
 
+// Même rendu qu'un bouton, mais sous forme de lien interne.
 export function LinkButton({ to, variant, size, icon, className, children, ...rest }: LinkButtonProps) {
   return (
     <Link

@@ -1,3 +1,4 @@
+// Gabarit commun qui affiche un document légal (CGU ou confidentialité).
 import { Link } from "react-router-dom";
 import { Container } from "@/components/layout/Container";
 import { PageHero } from "@/components/layout/PageHero";

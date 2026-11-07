@@ -1,6 +1,7 @@
 import type { Payment } from "@/types";
 import { db } from "./db";
 
+// Enrichit un paiement avec le nom de l'élève, sa classe et son parent.
 export interface PaymentRow extends Payment {
   studentName: string;
   className: string;
@@ -8,6 +9,7 @@ export interface PaymentRow extends Payment {
   parentPhone: string;
 }
 
+// Convertit un paiement brut (cache) en ligne affichable, avec ses libellés.
 export function toPaymentRow(p: Payment): PaymentRow {
   const s = db.students.find((x) => x.id === p.studentId);
   const c = s ? db.classes.find((x) => x.id === s.classId) : undefined;
@@ -21,4 +23,5 @@ export function toPaymentRow(p: Payment): PaymentRow {
   };
 }
 
+// Même conversion pour une liste entière de paiements.
 export const toPaymentRows = (list: Payment[]): PaymentRow[] => list.map(toPaymentRow);

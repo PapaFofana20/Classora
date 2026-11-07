@@ -1,3 +1,5 @@
+// Liste courte des derniers paiements enregistres.
+
 import { Avatar } from "@/components/ui/Brand";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -5,6 +7,7 @@ import type { PaymentRow } from "@/services/paymentRows";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { PAY_METHOD_LABELS } from "@/utils/payments";
 
+// Affiche les derniers paiements, ou un etat vide s'il n'y en a aucun.
 export function LatestPayments({ rows }: { rows: PaymentRow[] }) {
   if (rows.length === 0) return <EmptyState icon="receipt_long" title="Aucun paiement récent" />;
   return (

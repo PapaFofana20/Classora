@@ -1,3 +1,4 @@
+// Page de confirmation après une inscription élève ou parent.
 import { Link, useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";

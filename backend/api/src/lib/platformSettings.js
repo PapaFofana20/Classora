@@ -20,6 +20,7 @@ export const DEFAULT_PLATFORM_SETTINGS = {
 
 const TABLE_MISSING_RE = /does not exist|schema cache|relation .* not found|Could not find the table/i;
 
+/** Convertit une ligne platform_settings (snake_case) en objet applicatif (camelCase). */
 function mapRow(row) {
   if (!row) return null;
   return {

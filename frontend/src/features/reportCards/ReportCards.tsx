@@ -1,3 +1,5 @@
+// Bulletins imprimables, selon le cycle (elementaire ou autre).
+
 import type { ReactNode } from "react";
 import type { ReportCardData } from "@/types";
 import { SCHOOL_YEAR } from "@/data/school";
@@ -14,6 +16,7 @@ interface Props {
 const rankLabel = (r: number | null, n: number) => (r === null ? "—" : `${r}${r === 1 ? "er" : "e"} / ${n}`);
 const num = (v: number | null) => (v === null ? "—" : formatNumber(v));
 
+// En-tete officiel du bulletin, commun aux deux cycles.
 function Header({ card, schoolName, title }: { card: ReportCardData; schoolName: string; title: string }) {
   return (
     <header className="border-b-2 border-forest pb-4 text-center">
@@ -28,6 +31,7 @@ function Header({ card, schoolName, title }: { card: ReportCardData; schoolName:
   );
 }
 
+// Identite de l'eleve et de sa classe, avec un champ supplementaire selon le cycle.
 function StudentBlock({ card, extra }: { card: ReportCardData; extra: ReactNode }) {
   const s = card.student;
   return (
@@ -42,6 +46,7 @@ function StudentBlock({ card, extra }: { card: ReportCardData; extra: ReactNode 
   );
 }
 
+// Emplacements pointilles pour les signatures en bas du bulletin.
 function Signatures({ labels }: { labels: string[] }) {
   return (
     <div className="mt-8 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-center text-xs text-neutral-600">
@@ -55,6 +60,7 @@ function Signatures({ labels }: { labels: string[] }) {
   );
 }
 
+// Bulletin elementaire : notes sur 10, sans coefficients.
 export function ElementaryReport({ card, schoolName, exam }: Props) {
   const scale = 10;
   return (

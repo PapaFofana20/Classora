@@ -1,7 +1,10 @@
+// Temoignages de directeurs d'ecole partenaires.
+
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { testimonials } from "@/data/landing";
 
+// Trois temoignages avec photo, citation et fonction de la personne.
 export function TestimonialsSection() {
   return (
     <section className="mx-auto w-full max-w-[1280px] px-gutter py-16" aria-labelledby="testi-title">

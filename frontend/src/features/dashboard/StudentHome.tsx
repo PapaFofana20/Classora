@@ -1,3 +1,5 @@
+// Espace eleve : scolarite, notes et prochaines echeances.
+
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -102,6 +104,7 @@ export function StudentHome() {
   );
 }
 
+// Une ligne d'echeance a venir, avec le reste a payer.
 function PaymentLine({ payment }: { payment: Payment }) {
   return (
     <li className="flex items-center justify-between gap-3 py-2.5 text-sm">

@@ -1,3 +1,4 @@
+// État d'un formulaire : valeurs, erreurs de validation et aide aux champs.
 import { useState, type ChangeEvent } from "react";
 
 type Errors<T> = Partial<Record<keyof T, string>>;

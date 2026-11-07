@@ -62,21 +62,25 @@ export const ACTION_LABELS: Record<string, string> = {
   staff_updated: "Compte personnel modifié",
 };
 
+// Traduit une action du journal d'audit en libelle lisible.
 export function actionLabel(action: string | null | undefined): string {
   if (!action) return "—";
   return ACTION_LABELS[action] ?? action.replace(/_/g, " ");
 }
 
+// Traduit un role technique en libelle affiche a l'ecran.
 export function roleLabel(role: string | null | undefined): string {
   if (!role) return "—";
   return ROLE_LABELS[role] ?? role.replace(/_/g, " ");
 }
 
+// Traduit un moyen de paiement en libelle affiche a l'ecran.
 export function methodLabel(method: string | null | undefined): string {
   if (!method) return "—";
   return METHOD_LABELS[method] ?? method.replace(/_/g, " ");
 }
 
+// Traduit un type d'evenement d'abonnement en libelle lisible.
 export function eventLabel(type: string | null | undefined): string {
   if (!type) return "—";
   return EVENT_TYPE_LABELS[type] ?? type.replace(/_/g, " ");

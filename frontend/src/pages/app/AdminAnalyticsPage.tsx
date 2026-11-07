@@ -1,3 +1,4 @@
+// Analyses de croissance et d'adoption de la plateforme.
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -13,6 +14,7 @@ import { CycleShareChart, GrowthChart } from "@/features/admin/charts";
 import { formatCurrency, formatNumber } from "@/utils/format";
 import { cn } from "@/utils/cn";
 
+// Composant principal de la page.
 export default function AdminAnalyticsPage() {
   const state = useAsync(() => getAdminAnalytics(), []);
 

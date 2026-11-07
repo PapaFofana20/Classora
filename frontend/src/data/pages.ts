@@ -1,3 +1,4 @@
+// Textes du site public : rôles, fonctionnalités, frise d'histoire et simulateur de tarif.
 export const roleHighlights = [
   { role: "Directeur", text: "Vue complète : effectifs, recouvrement, classes, enseignants, affectations et paramètres." },
   { role: "Économe", text: "Échéanciers, encaissements, relances, reçus et suivi des impayés." },

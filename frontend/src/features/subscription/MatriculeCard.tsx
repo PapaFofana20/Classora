@@ -1,3 +1,5 @@
+// Matricule de l'ecole, a copier ou a partager avec les familles.
+
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";

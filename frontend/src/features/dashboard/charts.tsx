@@ -1,3 +1,5 @@
+// Graphiques du tableau de bord de l'ecole (paiements, cycles, effectifs).
+
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CYCLE_LABELS } from "@/data/school";
 import type { AdminStats } from "@/services/statsService";
@@ -9,6 +11,7 @@ const axis = { fontSize: 12, fill: "#6b7280" };
 /** Les graphiques ne se recalculent qu'une fois la transition de sidebar termin�e (250 ms). */
 export const CHART_DEBOUNCE = 250;
 
+// Barres mensuels : montants attendus et montants encaisses.
 export function PaymentsChart({ data }: { data: AdminStats["paymentsByMonth"] }) {
   return (
     <div className="h-72" role="img" aria-label="Graphique des mensualités attendues et encaissées par mois">
@@ -27,6 +30,7 @@ export function PaymentsChart({ data }: { data: AdminStats["paymentsByMonth"] })
   );
 }
 
+// Camembert de la repartition des eleves par cycle.
 export function CycleDonut({ data }: { data: AdminStats["byCycle"] }) {
   const items = data.map((d) => ({ name: CYCLE_LABELS[d.cycle], value: d.count, cycle: d.cycle }));
   return (
@@ -45,6 +49,7 @@ export function CycleDonut({ data }: { data: AdminStats["byCycle"] }) {
   );
 }
 
+// Barres horizontales de l'effectif de chaque classe.
 export function ClassBars({ data }: { data: AdminStats["studentsByClass"] }) {
   return (
     <div className="h-80" role="img" aria-label="Effectif par classe">

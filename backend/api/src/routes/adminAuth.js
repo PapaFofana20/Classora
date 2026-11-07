@@ -8,6 +8,7 @@ import { auditAdmin } from "../lib/authAdmin.js";
 import { ok, RATE_LIMIT_RE, route, serverError, unauthorized, logError } from "../lib/http.js";
 import { enforceRateLimit } from "../lib/rateLimit.js";
 
+// Handler principal : POST /admin/auth — vérifie la session d'un agent admin.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

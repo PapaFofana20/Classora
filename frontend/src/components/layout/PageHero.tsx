@@ -1,3 +1,4 @@
+// Grande image d'en-tête des pages publiques, avec titre et boutons d'action.
 import { ArrowButton } from "@/components/ui/ArrowButton";
 import { Container } from "@/components/layout/Container";
 import { cn } from "@/utils/cn";

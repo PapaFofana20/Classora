@@ -21,6 +21,7 @@ import { hydrate, hydrateAll, db, clearCache } from "./db";
  *   - inscriptions     : Edge Functions `register-*` (transactions RPC
  *     `finish_*_registration`) ; les demandes restent EN_ATTENTE.
  * Le DENGISTE UI reste : SessionUser dérivé de `profiles`.
+ * Gère aussi les comptes du personnel créés par la direction (table profiles).
  */
 
 export interface DirectorInput {
@@ -78,6 +79,7 @@ export async function currentSession(): Promise<SessionUser | null> {
   return toSession(profile);
 }
 
+// Déconnecte la session Supabase Auth (les données restent en cache jusqu'au prochain clear).
 export function logout(): void {
   void supabase.auth.signOut();
 }
@@ -346,6 +348,7 @@ export async function createStaffAccount(actor: SessionUser, input: StaffAccount
   return { ...credentials, password: input.password.trim() };
 }
 
+// Met à jour les infos d'un compte du personnel, via l'Edge Function côté serveur.
 export async function updateStaff(
   actor: SessionUser,
   userId: string,
@@ -422,6 +425,7 @@ export async function changePassword(actor: SessionUser, currentPassword: string
   if (flagError) throw new Error("Impossible de changer le mot de passe. Réessayez.");
 }
 
+// Met à jour le profil de l'utilisateur connecté (table profiles).
 export function updateProfile(
   actor: SessionUser,
   patch: { firstName?: string; lastName?: string; email?: string; phone?: string },
@@ -443,6 +447,7 @@ export function updateProfile(
   })();
 }
 
+// Envoie l'e-mail de réinitialisation (ne révèle pas si l'adresse existe).
 export async function requestPasswordReset(email: string): Promise<void> {
   const redirectTo = `${window.location.origin}/reinitialiser-mot-de-passe`;
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
@@ -450,6 +455,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   if (error) throw new Error("Impossible d'envoyer l'e-mail de réinitialisation. Réessayez.");
 }
 
+// Définit le nouveau mot de passe après ouverture du lien de réinitialisation.
 export async function resetPassword(nextPassword: string): Promise<void> {
   const { error } = await supabase.auth.updateUser({ password: nextPassword });
   if (error) throw new Error("Impossible de réinitialiser le mot de passe. Le lien a peut-être expiré.");

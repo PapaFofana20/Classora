@@ -1,3 +1,4 @@
+// Petites étiquettes de statut ou de couleur, très utilisées dans les listes.
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
 
@@ -20,6 +21,7 @@ interface BadgeProps {
   className?: string;
 }
 
+// On affiche juste le texte avec le bon fond coloré.
 export function Badge({ tone = "neutral", children, className }: BadgeProps) {
   return <span className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold", tones[tone], className)}>{children}</span>;
 }

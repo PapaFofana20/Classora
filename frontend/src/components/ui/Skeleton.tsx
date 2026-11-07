@@ -1,9 +1,12 @@
+// Écrans de chargement gris : on réserve la place pendant que les données arrivent.
 import { cn } from "@/utils/cn";
 
+// Bloc de chargement générique, réutilisé partout.
 export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden="true" className={cn("skeleton rounded-xl", className)} />;
 }
 
+// Grille de cartes fantômes pendant un chargement de liste.
 export function SkeletonCards({ count = 4, className }: { count?: number; className?: string }) {
   return (
     <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-4", className)} role="status" aria-label="Chargement en cours">
@@ -18,6 +21,7 @@ export function SkeletonCards({ count = 4, className }: { count?: number; classN
   );
 }
 
+// Tableau fantôme : tient la place d'un tableau pendant le chargement.
 export function SkeletonTable({ rows = 6 }: { rows?: number }) {
   return (
     <div className="rounded-2xl bg-white p-5 shadow-card" role="status" aria-label="Chargement du tableau">

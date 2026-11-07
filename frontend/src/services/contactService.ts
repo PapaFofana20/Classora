@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
+// Formulaire public de contact (table contact_messages).
+
 export interface ContactMessage {
   name: string;
   email: string;

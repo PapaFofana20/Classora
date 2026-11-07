@@ -13,6 +13,7 @@ import { badRequest, ok, route, serverError, RATE_LIMIT_RE, logError } from "../
 import { enforceRateLimit, clientIp } from "../lib/rateLimit.js";
 import { expectObject, optionalString, optionalUuid, requireEmail, requireSnPhone, requireString } from "../lib/validate.js";
 
+// Handler principal : POST /register-enrolled-student — compte d'un élève déjà inscrit.
 export default route(async (req, res) => {
   if (req.method !== "POST") return ok(res, { error: "Méthode non autorisée." }, 405);
   const svc = serviceClient();

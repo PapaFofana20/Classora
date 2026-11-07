@@ -1,3 +1,5 @@
+// Ecrans de blocage lies a l'abonnement (sans formule, expire, etc.).
+
 import type { ReactNode } from "react";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -26,6 +28,7 @@ function BlurredPreview() {
   );
 }
 
+// Mise en page commune des ecrans de blocage lies a l'abonnement.
 function Frame({ icon, title, children, action }: { icon: string; title: ReactNode; children?: ReactNode; action?: ReactNode }) {
   return (
     <div className="mx-auto max-w-3xl py-6">

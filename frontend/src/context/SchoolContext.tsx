@@ -1,3 +1,4 @@
+// Données de l'école connectée : infos, abonnement et limites d'effectif.
 import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
 import type { Plan, School, SchoolSettings, SubscriptionStatus } from "@/types";
 import { useAsync } from "@/hooks/useAsync";
@@ -110,6 +111,7 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
   return <SchoolContext.Provider value={value}>{children}</SchoolContext.Provider>;
 }
 
+// Lit les données de l'école courante, chargées une seule fois au niveau app.
 export function useSchool(): SchoolContextValue {
   const ctx = useContext(SchoolContext);
   if (!ctx) throw new Error("useSchool doit être utilisé dans <SchoolProvider>.");

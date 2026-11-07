@@ -1,3 +1,4 @@
+// Journal d'audit des actions réalisées dans la console admin.
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
@@ -42,6 +43,7 @@ function csvCell(value: unknown): string {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
+// Composant principal de la page.
 export default function AdminAuditPage() {
   const { isSuperAdmin } = useAdminAuth();
   const [page, setPage] = useState(1);
@@ -53,6 +55,7 @@ export default function AdminAuditPage() {
   const [purgeOpen, setPurgeOpen] = useState(false);
   const [notice, setNotice] = useState("");
 
+  // On charge le journal d'audit selon la période et les filtres choisis.
   const state = useAsync(
     () => listAdminAudit({ page, pageSize: 25, days, action: action || undefined, search: search || undefined }),
     [page, days, action, search],

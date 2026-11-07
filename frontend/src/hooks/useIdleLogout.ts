@@ -1,3 +1,4 @@
+// Déconnexion automatique après inactivité : chaque geste de l'utilisateur relance le compte à rebours.
 import { useEffect, useRef } from "react";
 
 const ACTIVITY_EVENTS = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"] as const;

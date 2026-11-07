@@ -1,3 +1,4 @@
+// Fait apparaître le contenu doucement quand il entre à l'écran.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 

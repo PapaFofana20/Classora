@@ -1,3 +1,4 @@
+// Vue de sécurité : accès admin, tentatives bloquées et actions sensibles.
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AsyncView } from "@/components/ui/AsyncView";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -25,6 +26,7 @@ function alertReason(payload: Record<string, unknown>): string {
   return typeof reason === "string" && reason.trim() ? reason : "Tentative refusée par le contrôle d'accès.";
 }
 
+// Composant principal de la page.
 export default function AdminSecurityPage() {
   const state = useAsync(() => getAdminSecurity(), []);
 

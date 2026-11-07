@@ -1,3 +1,5 @@
+// Graphiques du tableau de bord administrateur (revenus, croissance, cycles, connexions).
+
 import {
   Bar,
   BarChart,

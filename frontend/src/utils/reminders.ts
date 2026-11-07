@@ -26,16 +26,19 @@ export interface ReminderInput {
   maxOverdueDays: number;
 }
 
+// Choix du ton de relance selon l'ancienneté de la plus vieille échéance impayée.
 export function reminderLevelOf(maxOverdueDays: number): ReminderLevel {
   if (maxOverdueDays >= 30) return "urgent";
   if (maxOverdueDays >= 7) return "ferme";
   return "doux";
 }
 
+// Titre du message de relance, assorti au niveau de ton.
 export function reminderSubject(level: ReminderLevel): string {
   return level === "urgent" ? "Relance urgente — impayés" : level === "ferme" ? "Relance — impayés" : "Rappel — échéances";
 }
 
+// Rédige le message WhatsApp de relance avec le détail des sommes dues.
 export function buildReminderMessage(input: ReminderInput): string {
   const level = reminderLevelOf(input.maxOverdueDays);
   const detail = input.lines
@@ -70,6 +73,7 @@ export function toIntlPhone(snPhone: string): string {
   return digits;
 }
 
+// Construit le lien WhatsApp prêt à ouvrir, ou null si le numéro est introuvable.
 export function whatsappReminderLink(snPhone: string, message: string): string | null {
   const intl = toIntlPhone(snPhone);
   if (!intl) return null;
@@ -84,6 +88,7 @@ export function debtorsToCsv(rows: Array<{ studentName: string; className: strin
   return [header.join(";"), ...lines].join("\r\n");
 }
 
+// Télécharge la liste des familles débiteur fiche CSV pour un suivi hors ligne.
 export function downloadDebtorsCsv(rows: Array<{ studentName: string; className: string; parentName: string; parentPhone: string; count: number; total: number }>): void {
   const blob = new Blob(["\uFEFF" + debtorsToCsv(rows)], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -96,6 +101,7 @@ export function downloadDebtorsCsv(rows: Array<{ studentName: string; className:
   URL.revokeObjectURL(url);
 }
 
+// Retrouve la plus vieille échéance pour décider du ton de la relance.
 export function maxOverdueDays(dueDates: string[], todayIso: string): number {
   if (dueDates.length === 0) return 0;
   const oldest = dueDates.reduce((min, d) => (d < min ? d : min), dueDates[0]!);
