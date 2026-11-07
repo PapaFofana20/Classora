@@ -49,13 +49,16 @@ export function ProtectedRoute() {
 
 /** /connexion, /inscription : redirige vers /app si déjà connecté. */
 export function PublicOnlyRoute() {
-  const { user, loadingSession } = useAuth();
+  const { user, loadingSession, sessionChecked, hasSession } = useAuth();
   // Hooks AVANT tout return conditionnel (ordre stable des hooks).
   usePageMeta({ noindex: true });
-  // Attendre la restauration pour éviter le flash « formulaire de connexion »
-  // puis rebond vers /app au rechargement d'une page publique.
-  if (loadingSession) return <SessionLoading />;
   if (user) return <Navigate to="/app" replace />;
+  // Visiteur sans jeton local : la page s'affiche aussitôt, sans attendre
+  // l'hydratation complète des données de l'école (réservée à /app).
+  if (sessionChecked && !hasSession) return <Outlet />;
+  // Jeton présent mais profil pas encore restauré : on attend, puis on
+  // redirigera vers /app (évite le flash du formulaire).
+  if (loadingSession) return <SessionLoading />;
   return <Outlet />;
 }
 

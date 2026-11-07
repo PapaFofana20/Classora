@@ -56,7 +56,7 @@ export const countPendingFor = (schoolId: string): Promise<number> =>
     return pendingCount(schoolId);
   })();
 
-/** Approbation : RPC transactionnelle (limite du forfait, échéancier, annonce). */
+/** Approbation : RPC transactionnelle (limite du forfait, échéancier). */
 export function approve(actor: SessionUser, requestIds: string[]): Promise<number> {
   return (async () => {
     ensure(canApproveStudents(actor.role), "Seule la direction valide les demandes d'inscription.");

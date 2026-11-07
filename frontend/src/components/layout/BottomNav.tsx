@@ -14,7 +14,7 @@ const PRIMARY_PATHS: Record<Role, string[]> = {
   directeur: ["/app", "/app/eleves", "/app/paiements"],
   econome: ["/app", "/app/eleves", "/app/paiements"],
   secretaire: ["/app", "/app/eleves", "/app/parametres"],
-  surveillant: ["/app", "/app/eleves", "/app/messages"],
+  surveillant: ["/app", "/app/eleves", "/app/parametres"],
   instituteur: ["/app", "/app/eleves", "/app/notes"],
   professeur: ["/app", "/app/eleves", "/app/notes"],
   eleve: ["/app", "/app/notes", "/app/bulletins"],
@@ -29,7 +29,6 @@ const SHORT_LABELS: Record<string, string> = {
   "/app/notes": "Notes",
   "/app/bulletins": "Bulletins",
   "/app/paiements": "Paiements",
-  "/app/messages": "Messages",
   "/app/parametres": "Profil",
   "/app/abonnement": "Abo",
 };

@@ -4,7 +4,7 @@
 -- ============================================================================
 
 begin;
-select plan(30);
+select plan(29);
 
 create or replace function temp_setup() returns void
 language plpgsql volatile as $$
@@ -248,11 +248,6 @@ select is(
   (select count(*) from public.students where school_id = 'aaaaaa11-0000-0000-0000-000000000001'),
   4::bigint, 'l''élève Ndèye est inscrit avec un matricule'
 ) as t25_eleve_inscrit;
-select is(
-  (select count(*) from public.announcements where title = 'Inscription(s) validée(s)' and school_id = 'aaaaaa11-0000-0000-0000-000000000001'),
-  1::bigint, 'l''annonce « Inscription(s) validée(s) » est créée'
-) as t26_annonce_validation;
-
 -- 27-29 : refus (compte désactivé + motif enregistré).
 select is(
   public.decide_registration_requests(array['aaaaaa11-0000-0000-0000-000000001a1a']::uuid[], false, 'Capacité atteinte en CM1.'),

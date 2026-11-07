@@ -9,6 +9,9 @@ interface AuthContextValue {
   user: SessionUser | null;
   /** Vrai tant que la session n'a pas été restaurée depuis Supabase. */
   loadingSession: boolean;
+  /** Vérification rapide faite : un jeton Auth existe-t-il en local ? */
+  sessionChecked: boolean;
+  hasSession: boolean;
   /** École de la session : toutes les lectures de données passent par cet identifiant. */
   schoolId: string;
   /** Vrai juste après une déconnexion : on retourne alors sur la landing page. */
@@ -30,14 +33,32 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
   const [justLoggedOut, setJustLoggedOut] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Vérification rapide d'abord (jeton local uniquement) : les pages
+      // publiques /connexion et /inscription peuvent s'afficher aussitôt
+      // pour un visiteur non connecté, sans attendre l'hydratation complète
+      // des 18 tables (currentSession ci-dessous, réservée à /app).
+      try {
+        const exists = await authService.hasAuthSession();
+        if (!cancelled) {
+          setHasSession(exists);
+          setSessionChecked(true);
+        }
+      } catch {
+        if (!cancelled) setSessionChecked(true);
+      }
       try {
         const session = await authService.currentSession();
-        if (!cancelled) setUser(session);
+        if (!cancelled) {
+          setUser(session);
+          if (!session) setHasSession(false);
+        }
       } catch {
         if (!cancelled) setUser(null);
       } finally {
@@ -52,6 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string, matricule?: string) => {
     const u = await authService.login(email, password, matricule);
     setUser(u);
+    setHasSession(true);
+    setSessionChecked(true);
     setJustLoggedOut(false);
     return u;
   }, []);
@@ -59,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerDirector = useCallback(async (input: DirectorInput) => {
     const u = await authService.registerDirector(input);
     setUser(u);
+    setHasSession(true);
+    setSessionChecked(true);
     setJustLoggedOut(false);
     // Notifier le SchoolProvider de recharger l'école pour récupérer le matricule fraîchement généré
     window.dispatchEvent(new CustomEvent("school:reload"));
@@ -68,6 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerStudent = useCallback(async (input: StudentSignupInput) => {
     const { user: u, childCode } = await authService.registerStudent(input);
     setUser(u);
+    setHasSession(true);
+    setSessionChecked(true);
     setJustLoggedOut(false);
     return { user: u, childCode };
   }, []);
@@ -75,6 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerEnrolledStudent = useCallback(async (input: EnrolledStudentSignupInput) => {
     const { user: u, studentId, studentMatricule } = await authService.registerEnrolledStudent(input);
     setUser(u);
+    setHasSession(true);
+    setSessionChecked(true);
     setJustLoggedOut(false);
     return { user: u, studentId, studentMatricule };
   }, []);
@@ -82,6 +111,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerParent = useCallback(async (input: ParentSignupInput) => {
     const { user: u, childName } = await authService.registerParent(input);
     setUser(u);
+    setHasSession(true);
+    setSessionChecked(true);
     setJustLoggedOut(false);
     return { user: u, childName };
   }, []);
@@ -118,11 +149,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void clearCache();
     setJustLoggedOut(true);
     setUser(null);
+    setHasSession(false);
   }, []);
 
   const value = useMemo(
-    () => ({ user, loadingSession, schoolId: user?.schoolId ?? "", justLoggedOut, login, registerDirector, registerStudent, registerEnrolledStudent, registerParent, changePassword, createStaffAccount, refresh, logout }),
-    [user, loadingSession, justLoggedOut, login, registerDirector, registerStudent, registerEnrolledStudent, registerParent, changePassword, createStaffAccount, refresh, logout],
+    () => ({ user, loadingSession, sessionChecked, hasSession, schoolId: user?.schoolId ?? "", justLoggedOut, login, registerDirector, registerStudent, registerEnrolledStudent, registerParent, changePassword, createStaffAccount, refresh, logout }),
+    [user, loadingSession, sessionChecked, hasSession, justLoggedOut, login, registerDirector, registerStudent, registerEnrolledStudent, registerParent, changePassword, createStaffAccount, refresh, logout],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

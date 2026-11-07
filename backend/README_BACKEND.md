@@ -97,7 +97,7 @@ Secrets Edge Functions (Dashboard > Edge Functions > Secrets) : `PAYMENT_WEBHOOK
 | `00007_subscriptions` | abonnements, matricule d'école, `verify_matricule`, `apply_paid_subscription` |
 | `00008_grades` | `save_grade`, `update_report_meta`, `class_report_cards` |
 | `00009_family_payments` | `record_cash_payment`, `start_installment_payments`, `apply_paid_installment`, `send_reminders` |
-| `00010_messagerie_absences` | conversations/annonces (`list_conversations`, `start_conversation`, `send_message`, `mark_conversation_read`, `post_announcement`), absences (surveillant), `admin_dashboard` |
+| `00010_messagerie_absences` | absences (surveillant), `admin_dashboard` (messagerie et annonces retirées en `20260101000045_retrait_messagerie`) |
 | `00011_function_execute_durcissement` | droits d'exécution des fonctions `security definer` : aucune n'est accessible à `anon` en dehors des surfaces publiques (`verify_matricule`, `open_classes`) |
 | `00012_fix_student_matricule` | correctif matricule élève |
 | `00013_referentiels_globaux` | insertions idempotentes des référentiels `levels` et `plans` (données de production ; sorties du seed) |
@@ -130,8 +130,6 @@ Toutes répondent en JSON `{...}` ou `{error: "<message FR>"}` avec code HTTP.
 - Élèves : `enroll_student`, `decide_registration_requests(p_ids, p_approve, p_reason)`
 - Notes : `save_grade`, `update_report_meta`
 - Paiements : `record_cash_payment`, `send_reminders`
-- Messagerie : `list_conversations`, `start_conversation`, `send_message`,
-  `mark_conversation_read`, `post_announcement`
 - Tableau de bord : `admin_dashboard('S1'|'S2')`
 
 ## 6. Côté front (`src/`)

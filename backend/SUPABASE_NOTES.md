@@ -160,7 +160,7 @@ Conséquences :
 
 * **QR code** du matricule : génération sans dépendance possible mais volumineuse ; à ajouter
   plus tard (`qrcode` ou `qrcode.react`) si le besoin se confirme.
-* **WebSocket temps réel** : la messagerie se rafraîchit par événement local (`ec:messages`).
-  En production : Supabase Realtime, filtré par `school_id`.
+* **WebSocket temps réel** : à brancher si un besoin temps réel apparaît
+  (Supabase Realtime, filtré par `school_id`).
 * **Limitation de débit** sur la vérification de matricule et la connexion (à mettre en place
   côté Edge Functions avant la mise en production).

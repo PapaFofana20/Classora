@@ -43,7 +43,6 @@ const LOADERS: Record<string, Loader> = {
   "/app/notes": () => import("@/pages/app/NotesPage"),
   "/app/bulletins": () => import("@/pages/app/BulletinsPage"),
   "/app/paiements": () => import("@/pages/app/PaymentsPage"),
-  "/app/messages": () => import("@/pages/app/MessagesPage"),
   "/app/parametres": () => import("@/pages/app/SettingsPage"),
   "/app/timetables/nouveau": () => import("@/features/timetables/TimetableCreationPage"),
   "/app/timetables/": () => import("@/features/timetables/TimetableViewPage"),

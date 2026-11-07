@@ -42,7 +42,6 @@ const AssignmentsPage = lazy(() => import("@/pages/app/AssignmentsPage"));
 const NotesPage = lazy(() => import("@/pages/app/NotesPage"));
 const BulletinsPage = lazy(() => import("@/pages/app/BulletinsPage"));
 const PaymentsPage = lazy(() => import("@/pages/app/PaymentsPage"));
-const MessagesPage = lazy(() => import("@/pages/app/MessagesPage"));
 const SettingsPage = lazy(() => import("@/pages/app/SettingsPage"));
 const SubscriptionPage = lazy(() => import("@/pages/app/SubscriptionPage"));
 const TimetableViewPage = lazy(() => import("@/features/timetables/TimetableViewPage"));
@@ -170,7 +169,6 @@ export default function App() {
                       <Route path="notes" element={guard("notes", <NotesPage />)} />
                       <Route path="bulletins" element={guard("bulletins", <BulletinsPage />)} />
                       <Route path="paiements" element={guard("paiements", <PaymentsPage />)} />
-                      <Route path="messages" element={guard("messages", <MessagesPage />)} />
 
 
                       <Route path="parametres" element={guard("parametres", <SettingsPage />)} />

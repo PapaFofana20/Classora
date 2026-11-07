@@ -32,26 +32,6 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"announcements": {
-                  Row: {
-                    "audience_all": boolean,"audience_roles": (string)[],"author": string,"body": string,"created_at": string,"id": string,"school_id": string,"title": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "audience_all"?: boolean,"audience_roles"?: (string)[],"author"?: string,"body": string,"created_at"?: string,"id"?: string,"school_id": string,"title": string
-                  }
-                  Update: {
-                    "audience_all"?: boolean,"audience_roles"?: (string)[],"author"?: string,"body"?: string,"created_at"?: string,"id"?: string,"school_id"?: string,"title"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "announcements_school_id_fkey"
-      columns: ["school_id"]
-isOneToOne: false
-      referencedRelation: "schools"
-      referencedColumns: ["id"]
-    }
-                  ]
                 },"audit_log": {
                   Row: {
                     "action": string,"actor_id": string | null,"actor_role": string | null,"created_at": string,"entity": string,"entity_id": string | null,"id": string,"payload": NonNullable<Json>,"school_id": string | null
@@ -143,64 +123,6 @@ isOneToOne: false
                   }
                   Relationships: [
                     
-                  ]
-                },"conversation_reads": {
-                  Row: {
-                    "actor_id": string,"conversation_id": string,"last_read_at": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "actor_id": string,"conversation_id": string,"last_read_at"?: string
-                  }
-                  Update: {
-                    "actor_id"?: string,"conversation_id"?: string,"last_read_at"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "conversation_reads_conversation_id_fkey"
-      columns: ["conversation_id"]
-isOneToOne: false
-      referencedRelation: "conversations"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"conversations": {
-                  Row: {
-                    "created_at": string,"id": string,"parent_id": string,"school_id": string,"student_id": string,"subject": string,"teacher_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "created_at"?: string,"id"?: string,"parent_id": string,"school_id": string,"student_id": string,"subject"?: string,"teacher_id": string
-                  }
-                  Update: {
-                    "created_at"?: string,"id"?: string,"parent_id"?: string,"school_id"?: string,"student_id"?: string,"subject"?: string,"teacher_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "conversations_parent_id_fkey"
-      columns: ["parent_id"]
-isOneToOne: false
-      referencedRelation: "parents"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "conversations_school_id_fkey"
-      columns: ["school_id"]
-isOneToOne: false
-      referencedRelation: "schools"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "conversations_student_id_fkey"
-      columns: ["student_id"]
-isOneToOne: false
-      referencedRelation: "students"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "conversations_teacher_id_fkey"
-      columns: ["teacher_id"]
-isOneToOne: false
-      referencedRelation: "teachers"
-      referencedColumns: ["id"]
-    }
                   ]
                 },"counters": {
                   Row: {
@@ -299,32 +221,6 @@ isOneToOne: false
                   }
                   Relationships: [
                     
-                  ]
-                },"messages": {
-                  Row: {
-                    "conversation_id": string,"created_at": string,"id": string,"school_id": string,"sender_id": string,"text": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "conversation_id": string,"created_at"?: string,"id"?: string,"school_id": string,"sender_id": string,"text": string
-                  }
-                  Update: {
-                    "conversation_id"?: string,"created_at"?: string,"id"?: string,"school_id"?: string,"sender_id"?: string,"text"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "messages_conversation_id_fkey"
-      columns: ["conversation_id"]
-isOneToOne: false
-      referencedRelation: "conversations"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "messages_school_id_fkey"
-      columns: ["school_id"]
-isOneToOne: false
-      referencedRelation: "schools"
-      referencedColumns: ["id"]
-    }
                   ]
                 },"parents": {
                   Row: {
@@ -738,9 +634,7 @@ isOneToOne: false
 "build_payment_plan":
 { Args: { "p_student_id": string }; Returns: number
                            },
-"can_see_conversation":
-{ Args: { "p_conversation_id": string }; Returns: boolean
-                           },
+
 "class_report_cards":
 { Args: { "p_class_id": string,"p_period": string }; Returns: Json
                            },
@@ -801,15 +695,9 @@ isOneToOne: false
 "link_child":
 { Args: { "p_child_code": string }; Returns: string
                            },
-"list_conversations":
-{ Args: Record<PropertyKey, never>; Returns: Json
-                           },
-"mark_conversation_read":
-{ Args: { "p_conversation_id": string }; Returns: undefined
-                           },
-"message_actor_id":
-{ Args: Record<PropertyKey, never>; Returns: string
-                           },
+
+
+
 "new_payment_reference":
 { Args: { "p_method": string }; Returns: string
                            },
@@ -827,9 +715,7 @@ isOneToOne: false
 "payment_status_of":
 { Args: { "p_amount": number,"p_due": string,"p_paid": number,"p_today"?: string }; Returns: unknown
                            },
-"post_announcement":
-{ Args: { "p_audience_all": boolean,"p_audience_roles": (string)[],"p_body": string,"p_title": string }; Returns: Json
-                           },
+
 "record_cash_payment":
 { Args: { "p_amount": number,"p_payment_id": string }; Returns: Json
                            },
@@ -851,18 +737,14 @@ isOneToOne: false
 "school_year_label":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
-"send_message":
-{ Args: { "p_conversation_id": string,"p_text": string }; Returns: undefined
-                           },
+
 "send_reminders":
 { Args: { "p_student_ids": (string)[] }; Returns: number
                            },
 "set_class_head_teacher":
 { Args: { "p_class_id": string,"p_mode": string,"p_teacher_id": string }; Returns: undefined
                            },
-"start_conversation":
-{ Args: { "p_parent_id": string,"p_student_id": string,"p_subject": string,"p_teacher_id": string,"p_text": string }; Returns: string
-                           },
+
 "start_installment_payments":
 { Args: { "p_method": string,"p_payment_ids": (string)[],"p_phone": string }; Returns: Json
                            },

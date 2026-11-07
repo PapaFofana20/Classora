@@ -15,7 +15,7 @@ export default function HomePage() {
   usePageMeta({
     title: "Classora",
     description:
-      "Classora digitalise votre école privée au Sénégal : inscriptions, bulletins automatiques, suivi des paiements et messagerie parents-enseignants, du CI à la Terminale.",
+      "Classora digitalise votre école privée au Sénégal : inscriptions, bulletins automatiques et suivi des paiements, du CI à la Terminale.",
     path: "/",
   });
   return (

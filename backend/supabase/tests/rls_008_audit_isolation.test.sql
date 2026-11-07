@@ -12,7 +12,7 @@
 begin;
 set local search_path = pgtap, public, extensions;
 grant usage on schema pgtap to public;
-select plan(57);
+select plan(54);
 
 -- ----------------------------------------------------------------------------
 -- Jeu d'essai : deux écoles A et B, jeux de données complets.
@@ -90,14 +90,6 @@ begin
     (tx_kind, school_id, payment_id, provider, provider_ref, amount, method, phone, status) values
     ('installment', a, null, 'wave', 'WV-1111-1111', 20000, 'wave', '771234567', 'pending'),
     ('installment', b, null, 'wave', 'WV-2222-2222', 20000, 'wave', '771234567', 'pending');
-  insert into public.conversations (id, school_id, teacher_id, parent_id, student_id, subject) values
-    ('77777766-0000-0000-0000-0000000000a1', a, 'dddddd44-0000-0000-0000-0000000000aa', 'eeeeee55-0000-0000-0000-0000000000ea', 'eeeeee55-0000-0000-0000-0000000000a1', 'Sujet A'),
-    ('77777766-0000-0000-0000-0000000000b1', b, 'dddddd44-0000-0000-0000-0000000000ba', 'eeeeee55-0000-0000-0000-0000000000eb', 'eeeeee55-0000-0000-0000-0000000000b1', 'Sujet B');
-  insert into public.messages (school_id, conversation_id, sender_id, text) values
-    (a, '77777766-0000-0000-0000-0000000000a1', 'faa11111-0000-0000-0000-0000000000a1', 'Message A'),
-    (b, '77777766-0000-0000-0000-0000000000b1', 'faa11111-0000-0000-0000-0000000000a2', 'Message B');
-  insert into public.announcements (school_id, title, body) values
-    (a, 'Annonce A', 'Corps A'), (b, 'Annonce B', 'Corps B');
   insert into public.absences (school_id, student_id, absence_date, absence_type, motif) values
     (a, 'eeeeee55-0000-0000-0000-0000000000a1', current_date, 'absence', 'Maladie'),
     (b, 'eeeeee55-0000-0000-0000-0000000000b1', current_date, 'absence', 'Maladie');
@@ -204,9 +196,6 @@ select is(pg_temp.temp_visible_b('grades') <= 0, true, 'A ne voit aucune note de
 select is(pg_temp.temp_visible_b('report_metas') <= 0, true, 'A ne voit aucune meta de bulletin de B (report_metas)') as a10;
 select is(pg_temp.temp_visible_b('payments') <= 0, true, 'A ne voit aucune échéance de B (payments)') as a11;
 select is(pg_temp.temp_visible_b('payment_transactions') <= 0, true, 'A ne voit aucune transaction de B (payment_transactions)') as a12;
-select is(pg_temp.temp_visible_b('conversations') <= 0, true, 'A ne voit aucune conversation de B (conversations)') as a13;
-select is(pg_temp.temp_visible_b('messages') <= 0, true, 'A ne voit aucun message de B (messages)') as a14;
-select is(pg_temp.temp_visible_b('announcements') <= 0, true, 'A ne voit aucune annonce de B (announcements)') as a15;
 select is(pg_temp.temp_visible_b('absences') <= 0, true, 'A ne voit aucune absence de B (absences)') as a16;
 select is(pg_temp.temp_visible_b('registration_requests') <= 0, true, 'A ne voit aucune demande de B (registration_requests)') as a17;
 select is(pg_temp.temp_visible_b('profiles') <= 0, true, 'A ne voit aucun profil de B (profiles)') as a18;

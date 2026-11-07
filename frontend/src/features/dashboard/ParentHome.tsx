@@ -137,7 +137,6 @@ export function ParentHome() {
                   <div className="grid gap-2">
                     <Link to="/app/bulletins" className="flex min-h-12 items-center gap-3 rounded-xl bg-lime-soft px-4 text-sm font-semibold hover:bg-lime">Voir le bulletin</Link>
                     <Link to="/app/paiements" className="flex min-h-12 items-center gap-3 rounded-xl bg-lime-soft px-4 text-sm font-semibold hover:bg-lime">Payer une mensualité</Link>
-                    <Link to="/app/messages" className="flex min-h-12 items-center gap-3 rounded-xl bg-lime-soft px-4 text-sm font-semibold hover:bg-lime">Écrire à un enseignant</Link>
                   </div>
                 </Card>
               </div>

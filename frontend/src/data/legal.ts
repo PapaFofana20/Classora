@@ -205,7 +205,7 @@ export const privacy: LegalDocument = {
         "Données d'identification et de contact : nom, prénom, adresse e-mail, numéro de téléphone, adresse postale, ville.",
         "Données relatives à l'établissement : nom de l'école, cycles, classes, matricule, coordonnées et informations administratives.",
         "Données scolaires de l'élève : nom, prénom, sexe, date de naissance, classe, notes, moyennes, rangs, appréciations, absences, bulletins et décisions d'inscription.",
-        "Données de vie scolaire et de communication : messages échangés, annonces, notifications, justificatifs et pièces transmises.",
+        "Données de vie scolaire : notes, absences, paiements, justificatifs et pièces transmises.",
         "Données financières : montant des frais de scolarité, échéances, statut des paiements et références de transactions. Les données bancaires ou de portefeuille électronique complètes ne sont pas conservées par Classora ; elles sont traitées par les opérateurs de paiement.",
         "Données de connexion et de sécurité : identifiant, adresse IP, date et heure de connexion, journaux d'accès et d'activité, appareil et navigateur utilisés.",
         "Données de préférence : paramètres du compte, choix de cycle, préférences d'affichage et de notification.",

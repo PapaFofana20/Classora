@@ -27,7 +27,6 @@ export const plans: Plan[] = [
       "Jusqu'à 300 élèves",
       "Affectations et emplois du temps",
       "Paiements Wave / Orange Money / Free Money",
-      "Messagerie parents-enseignants",
       "Rappels automatiques des impayés",
     ],
   },

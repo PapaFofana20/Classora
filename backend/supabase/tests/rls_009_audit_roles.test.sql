@@ -11,7 +11,7 @@
 begin;
 set local search_path = pgtap, public, extensions;
 grant usage on schema pgtap to public;
-select plan(43);
+select plan(39);
 
 -- ----------------------------------------------------------------------------
 -- Jeu d'essai : école A (2 classes, 2 enseignants, parent, élève) + école B
@@ -256,16 +256,6 @@ select is(
 ) as b15;
 
 -- ===========================================================================
--- 5. DIRECTEUR : hors des conversations enseignant-parent (lecture seule)
--- ===========================================================================
-select pg_temp.temp_statu('faa11111-0000-0000-0000-0000000000a1');
-select is(
-  (select pg_temp.temp_try($$select public.send_message(
-       (select id from public.conversations limit 1), 'Message injecté')$$)),
-  'refusé'::text, 'le directeur n''écrit pas dans les conversations enseignant-parent'
-) as b16;
-
--- ===========================================================================
 -- 6. COMPTES NON ACTIFS : aucun accès côté serveur
 -- ===========================================================================
 select pg_temp.temp_statu('faa11111-0000-0000-0000-0000000000a9'); -- DESACTIVE
@@ -370,42 +360,6 @@ select is(
      where (j->>'generalAverage') is not null$$)),
   0::bigint, 'étape 3 : le bulletin de B ne contient AUCUNE moyenne injectée par A (0 = pas de note forgée)'
 ) as b28;
-
--- ===========================================================================
--- 9. Messagerie : un parent ne peut pas ouvrir un fil avec un enseignant
---    d'une autre école ni avec un enseignant non affecté à son enfant.
--- ===========================================================================
-select pg_temp.temp_statu('faa11111-0000-0000-0000-0000000000a5'); -- parent
-select is(
-  (select pg_temp.temp_try($$select public.start_conversation(
-       'dddddd44-0000-0000-0000-0000000000ba',
-       'eeeeee55-0000-0000-0000-0000000000ea',
-       'eeeeee55-0000-0000-0000-0000000000a1', 'Sujet', 'Bonjour')$$)),
-  'refusé'::text, 'un parent ne peut pas ouvrir de fil avec un enseignant d''une autre école'
-) as b29;
-
-select is(
-  (select pg_temp.temp_try($$select public.start_conversation(
-       'dddddd44-0000-0000-0000-0000000000ac',
-       'eeeeee55-0000-0000-0000-0000000000ea',
-       'eeeeee55-0000-0000-0000-0000000000a1', 'Sujet', 'Bonjour')$$)),
-  'refusé'::text, 'un parent ne peut pas ouvrir de fil avec un enseignant non affecté à son enfant'
-) as b30;
-
--- Un parent ne doit pas pouvoir lire les conversations d'un autre parent.
-select pg_temp.temp_role('postgres');
-insert into public.conversations (id, school_id, teacher_id, parent_id, student_id, subject) values
-  ('77777766-0000-0000-0000-0000000000a1', 'aaaaaa11-0000-0000-0000-0000000000a1',
-   'dddddd44-0000-0000-0000-0000000000aa', 'eeeeee55-0000-0000-0000-0000000000ea',
-   'eeeeee55-0000-0000-0000-0000000000a2', 'Sujet A');
-insert into public.messages (school_id, conversation_id, sender_id, text) values
-  ('aaaaaa11-0000-0000-0000-0000000000a1', '77777766-0000-0000-0000-0000000000a1',
-   'faa11111-0000-0000-0000-0000000000a1', 'Message privé');
-select pg_temp.temp_statu('faa11111-0000-0000-0000-0000000000a6'); -- élève
-select is(
-  (select count(*) from public.messages),
-  0::bigint, 'un élève ne lit pas les messages d''une conversation qui n''est pas la sienne'
-) as b31;
 
 -- ===========================================================================
 -- 10. Le directeur ne peut pas approuver une demande d'une autre école

@@ -14,7 +14,7 @@ export default function FeaturesPage() {
   usePageMeta({
     title: "Fonctionnalités de Classora",
     description:
-      "Inscriptions en ligne, bulletins automatiques, suivi des paiements et messagerie : tout ce que Classora apporte à la direction, aux enseignants et aux parents.",
+      "Inscriptions en ligne, bulletins automatiques et suivi des paiements : tout ce que Classora apporte à la direction, aux enseignants et aux parents.",
     path: "/fonctionnalites",
   });
   return (

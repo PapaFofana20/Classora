@@ -8,7 +8,6 @@ import type { PlanId } from "@/types";
  */
 export type FeatureKey =
   /** Plans Pro+ */
-  | "messaging"                 // Messagerie parents-enseignants
   | "mobile_payments"           // Paiements Wave / Orange Money / Free Money
   | "auto_reminders"            // Rappels automatiques des impayés
   | "scheduling"                // Affectations et emplois du temps
@@ -23,7 +22,6 @@ const PLAN_ORDER: PlanId[] = ["essentiel", "pro", "premium", "illimite"];
 
 /** Niveau minimum requis pour chaque fonctionnalité */
 const FEATURE_REQUIREMENTS: Record<FeatureKey, PlanId> = {
-  messaging: "pro",
   mobile_payments: "pro",
   auto_reminders: "pro",
   scheduling: "pro",

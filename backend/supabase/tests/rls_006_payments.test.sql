@@ -4,7 +4,7 @@
 -- ============================================================================
 
 begin;
-select plan(24);
+select plan(23);
 
 create or replace function temp_setup() returns void
 language plpgsql volatile as $$
@@ -286,10 +286,5 @@ select is(
   public.send_reminders(array['eeeeee55-0000-0000-0000-000000001212']::uuid[]),
   1, 'la relance touche 1 famille'
 ) as t21_relances;
-select is(
-  (select count(*) from public.announcements where title = 'Relance de paiement'),
-  1::bigint, 'l''annonce de relance est créée'
-) as t22_annonce_relance;
-
 select * from finish();
 rollback;

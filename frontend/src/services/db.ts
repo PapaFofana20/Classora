@@ -1,10 +1,7 @@
 import type {
   AbsenceRecord,
-  Announcement,
-  ChatMessage,
   ClassRoom,
   ClassSubject,
-  Conversation,
   Cycle,
   Grade,
   Parent,
@@ -46,8 +43,6 @@ export interface Database {
   grades: Grade[];
   reportMetas: ReportMeta[];
   payments: Payment[];
-  conversations: Conversation[];
-  announcements: Announcement[];
   absences: AbsenceRecord[];
   settings: SchoolSettings[];
 }
@@ -68,8 +63,6 @@ export const db: Database = {
   grades: [],
   reportMetas: [],
   payments: [],
-  conversations: [],
-  announcements: [],
   absences: [],
   settings: [],
 };
@@ -316,50 +309,6 @@ function mapAbsence(r: any): AbsenceRecord {
   };
 }
 
-function mapAnnouncement(r: any): Announcement {
-  return {
-    schoolId: r.school_id,
-    id: r.id,
-    title: r.title,
-    body: r.body,
-    at: iso(r.created_at).slice(0, 16),
-    author: r.author,
-    audience: r.audience_all ? "all" : ((r.audience_roles ?? []) as Announcement["audience"]),
-  };
-}
-
-async function hydrateConversations(): Promise<void> {
-  const { data, error } = await supabase.rpc("list_conversations");
-  if (error) {
-    console.error("[db] hydratation conversations refusée :", error.message);
-    return;
-  }
-  const rows = (data ?? []) as any[];
-  const conversations: Conversation[] = rows.map((c) => {
-    const messages: ChatMessage[] = ((c.messages ?? []) as any[]).map((m) => ({
-      id: m.id,
-      senderId: m.senderId,
-      text: m.text,
-      at: iso(m.at).slice(0, 16),
-    }));
-    const lastReadAt: Record<string, string> = {};
-    Object.entries((c.lastReadAt ?? {}) as Record<string, string>).forEach(([actorId, at]) => {
-      lastReadAt[actorId] = iso(at).slice(0, 16);
-    });
-    return {
-      schoolId: c.schoolId,
-      id: c.id,
-      teacherId: c.teacherId,
-      parentId: c.parentId,
-      studentId: c.studentId,
-      subject: c.subject ?? "",
-      messages,
-      lastReadAt,
-    };
-  });
-  replace("conversations", conversations);
-}
-
 const HYDRATION_PAGE_SIZE = 500;
 const HYDRATION_MAX_ROWS = 100_000;
 
@@ -408,8 +357,6 @@ const MAPPERS: Record<keyof Database, (r: any) => any> = {
   grades: mapGrade,
   reportMetas: mapReportMeta,
   payments: mapPayment,
-  conversations: (r: any) => r,
-  announcements: mapAnnouncement,
   absences: mapAbsence,
   settings: mapSettings,
 };
@@ -429,7 +376,6 @@ const TABLES: Partial<Record<keyof Database, string>> = {
   grades: "grades",
   reportMetas: "report_metas",
   payments: "payments",
-  announcements: "announcements",
   absences: "absences",
   settings: "school_settings",
 };
@@ -470,7 +416,6 @@ async function hydrateSettings(): Promise<void> {
 
 // Recharge UNE table (ou une entité spéciale) depuis Supabase vers le cache.
 export function hydrate(entity: keyof Database): Promise<void> {
-  if (entity === "conversations") return hydrateConversations().catch(() => undefined);
   if (entity === "settings") return hydrateSettings().catch(() => undefined);
   return assign(entity);
 }
@@ -492,8 +437,6 @@ export async function hydrateAll(): Promise<void> {
     hydrate("grades"),
     hydrate("reportMetas"),
     hydrate("payments"),
-    hydrate("conversations"),
-    hydrate("announcements"),
     hydrate("absences"),
     hydrate("settings"),
   ]);
@@ -579,14 +522,6 @@ export const reportMetasOf = (schoolId: string, limit?: number): ReportMeta[] =>
 };
 export const paymentsOf = (schoolId: string, limit?: number): Payment[] => {
   const filtered = db.payments.filter((p) => p.schoolId === schoolId);
-  return limit ? filtered.slice(0, limit) : filtered;
-};
-export const conversationsOf = (schoolId: string, limit?: number): Conversation[] => {
-  const filtered = db.conversations.filter((c) => c.schoolId === schoolId);
-  return limit ? filtered.slice(0, limit) : filtered;
-};
-export const announcementsOf = (schoolId: string, limit?: number): Announcement[] => {
-  const filtered = db.announcements.filter((a) => a.schoolId === schoolId);
   return limit ? filtered.slice(0, limit) : filtered;
 };
 export const absencesOf = (schoolId: string, limit?: number): AbsenceRecord[] => {

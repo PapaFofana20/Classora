@@ -47,14 +47,13 @@ export function recordCashPayment(actor: SessionUser, paymentId: string, amount:
   })();
 }
 
-/** Relances impayés (direction / économe) : RPC + annonce Économat. */
+/** Relances impayés (direction / économe) : RPC serveur. */
 export function sendReminders(studentIds: string[]): Promise<number> {
   return (async () => {
     const { data, error } = await supabase.rpc("send_reminders", {
       p_student_ids: studentIds,
     });
     if (error) throw new Error("Impossible d'envoyer les relances. Réessayez.");
-    await hydrate("announcements");
     return Number(data ?? studentIds.length);
   })();
 }

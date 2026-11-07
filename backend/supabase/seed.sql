@@ -167,10 +167,6 @@ begin
   values (v_school, 'pro', current_date, current_date + 90, 300, 300000, 'WV-1234-5678', 'wave', now())
   on conflict (school_id) do nothing;
 
-  insert into public.announcements (school_id, title, body, author, audience_all)
-  values (v_school, 'Réunion de rentrée', 'Réunion des familles samedi à 10h dans la cour.', 'Direction', true)
-  on conflict do nothing;
-
   insert into public.registration_requests (school_id, user_id, role, first_name, last_name, email, phone, class_id, status)
   values (v_school, v_user_student, 'eleve', 'Mara', 'Sow', 'parent.demande@scol.sn', '775550000', v_class1, 'EN_ATTENTE')
   on conflict do nothing;

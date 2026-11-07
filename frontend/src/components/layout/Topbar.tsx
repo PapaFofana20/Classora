@@ -1,12 +1,10 @@
-// Barre du haut de l'espace scolaire : école, messages et menu utilisateur.
+// Barre du haut de l'espace scolaire : école et menu utilisateur.
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useSchool } from "@/context/SchoolContext";
 import { useTeaching } from "@/context/TeachingContext";
 import { todayIso } from "@/data/school";
-import { useAsync } from "@/hooks/useAsync";
-import { countUnread } from "@/services/messageService";
 import type { SessionUser } from "@/types";
 import { formatLongDate } from "@/utils/format";
 import { ROLE_LABELS } from "@/utils/permissions";
@@ -20,20 +18,11 @@ import { ChildSwitcher } from "./ChildSwitcher";
 export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const { contexts, active, setActiveKey } = useTeaching();
   const school = useSchool();
-  const unread = useAsync(() => countUnread(user), [user.id, pathname]);
   const [menu, setMenu] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const count = unread.data ?? 0;
-
-  useEffect(() => {
-    const refresh = () => unread.reload();
-    window.addEventListener("ec:messages", refresh);
-    return () => window.removeEventListener("ec:messages", refresh);
-  }, [unread.reload]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -62,10 +51,6 @@ export function Topbar({ user, onMenu }: { user: SessionUser; onMenu: () => void
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
           {user.role === "professeur" && <ContextSwitcher id="ctx-desktop" contexts={contexts} value={active?.key} onChange={setActiveKey} className="hidden w-60 md:block" />}
           {user.role === "parent" && <ChildSwitcher id="child-desktop" className="hidden w-52 md:block" />}
-          <Link to="/app/messages" aria-label={count ? `Messages, ${count} non lu${count > 1 ? "s" : ""}` : "Messages"} className="relative grid size-11 place-items-center rounded-full bg-white shadow-card transition hover:bg-lime-soft">
-            <Icon name="mail" />
-            {count > 0 && <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-danger px-1 text-[11px] font-bold leading-5 text-white">{count}</span>}
-          </Link>
           <div className="relative" ref={ref}>
             <button type="button" onClick={() => setMenu((m) => !m)} aria-haspopup="menu" aria-expanded={menu} className="flex min-h-11 items-center gap-3 rounded-full bg-white py-1 pl-1 pr-1 shadow-card sm:pr-4">
               <Avatar name={fullName} size={36} />

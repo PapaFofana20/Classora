@@ -59,18 +59,18 @@ export default function SchoolsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {schoolPartners.map((s, i) => (
             <Reveal key={s.id} delay={i * 60}>
-              <article className="relative h-full rounded-3xl border-2 border-forest/10 shadow-pop bg-lime p-6">
+              <article className="relative h-full rounded-3xl border-2 border-forest/10 shadow-pop bg-lime p-6 text-forest">
                 <div className="relative z-10 flex items-center gap-4">
                   <div>
-                    <h2 className="font-bold leading-snug">{s.name}</h2>
-                    <p className="flex items-center gap-1 text-sm text-neutral-600">
+                    <h2 className="font-bold leading-snug text-forest">{s.name}</h2>
+                    <p className="flex items-center gap-1 text-sm font-medium text-forest">
                       <Icon name="location_on" className="text-[16px]" />
                       {s.city}
                     </p>
                   </div>
                 </div>
                 <p className="relative z-10 mt-5 text-sm font-semibold text-forest">{s.cycles.join(" · ")}</p>
-                <p className="relative z-10 mt-4 text-sm text-neutral-600">
+                <p className="relative z-10 mt-4 text-sm font-medium text-forest">
                   <strong className="text-forest">{s.students}</strong> élèves suivis
                 </p>
               </article>

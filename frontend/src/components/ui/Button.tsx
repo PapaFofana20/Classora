@@ -66,6 +66,8 @@ export function LinkButton({ to, variant, size, icon, className, children, ...re
       className={buttonClasses(variant, size, className)}
       onMouseEnter={() => preloadRoute(to)}
       onFocus={() => preloadRoute(to)}
+      onPointerDown={() => preloadRoute(to)}
+      onTouchStart={() => preloadRoute(to)}
       {...rest}
     >
       {icon && <Icon name={icon} className="text-[20px]" />}

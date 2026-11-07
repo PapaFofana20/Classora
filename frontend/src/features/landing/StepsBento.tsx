@@ -6,7 +6,7 @@ import { steps } from "@/data/landing";
 import { cn } from "@/utils/cn";
 
 const tones = ["bg-lime text-forest", "bg-lime text-forest", "bg-lime text-forest"];
-const features = ["Bulletins", "Échéancier", "Messagerie"];
+const features = ["Bulletins", "Échéancier"];
 
 /** Grille bento « Comment ça marche » : la dernière carte, large, est en vert foncé. */
 export function StepsBento() {

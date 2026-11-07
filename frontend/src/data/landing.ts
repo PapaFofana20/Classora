@@ -12,7 +12,6 @@ const authBackgroundImg = "/images/auth-background.svg";
 const inscriptionsImg = "/images/feature-inscriptions.jpg";
 const bulletinsImg = "/images/feature-bulletins.jpg";
 const paiementsImg = "/images/feature-paiements.jpg";
-const messagerieImg = "/images/feature-messagerie.jpg";
 const enseignantsImg = "/images/feature-enseignants.jpg";
 
 export const images = { hero: heroImg, about: aboutImg, auth: authImg, authBackground: authBackgroundImg };
@@ -32,7 +31,7 @@ export const heroSlides: HeroSlide[] = [
 ];
 
 export const CONTACT = {
-  phone: "+221 77 000 12 34",
+  phone: "+221 78 568 99 88",
   email: "contact@classora.sn",
   address: "Immeuble Teranga, Point E, Dakar, Sénégal",
   hours: "Du lundi au vendredi, 8 h – 18 h",
@@ -98,13 +97,6 @@ export const features: Feature[] = [
     bullets: ["Wave, Orange Money, Free Money", "Échéancier sur 10 mois", "Reçus instantanés", "Relances des impayés"],
   },
   {
-    id: "messagerie",
-    title: "Messagerie parents-enseignants",
-    description: "Conversations directes, annonces de l'école et notifications pour garder les familles informées.",
-    image: messagerieImg,
-    bullets: ["Conversations par élève", "Annonces ciblées par rôle", "Badge de messages non lus", "Historique conservé"],
-  },
-  {
     id: "enseignants",
     title: "Enseignants et affectations",
     description: "Matrice classes × matières, professeurs principaux, instituteurs titulaires et détection des conflits.",
@@ -117,7 +109,7 @@ export const steps = [
   { id: 1, icon: "tune", title: "Configurez votre école", text: "Choisissez vos cycles, vos périodes (semestres ou trimestres), vos matières et vos tarifs par niveau." },
   { id: 2, icon: "assignment_ind", title: "Affectez vos enseignants", text: "Un instituteur titulaire par classe à l'élémentaire, des professeurs par matière au moyen et au secondaire." },
   { id: 3, icon: "edit_note", title: "Saisissez les notes", text: "Chaque enseignant ne voit que ses classes. Moyennes, rangs et bulletins sont générés automatiquement." },
-  { id: 4, icon: "savings", title: "Encaissez et communiquez", text: "Les parents paient par mobile money, reçoivent leurs reçus et échangent avec les enseignants, depuis un seul compte, même avec plusieurs élèves." },
+  { id: 4, icon: "savings", title: "Encaissez et communiquez", text: "Les parents paient par mobile money, reçoivent leurs reçus, depuis un seul compte, même avec plusieurs élèves." },
 ];
 
 export interface Plan {
@@ -146,7 +138,7 @@ export const plans: Plan[] = [
     unit: "par élève / mois",
     description: "Tous les modules Pro + comptes du personnel, export et accompagnement dédié.",
     highlight: true,
-    items: ["Élèves illimités", "Tous les modules du plan Découverte", "Messagerie parents-enseignants", "Paiements Wave / Orange Money / Free Money", "Affectations et emplois du temps", "Rappels automatiques des impayés", "Comptes économe, secrétaire et surveillant inclus", "Export des données et rapports", "Accompagnement dédié"],
+    items: ["Élèves illimités", "Tous les modules du plan Découverte", "Paiements Wave / Orange Money / Free Money", "Affectations et emplois du temps", "Rappels automatiques des impayés", "Comptes économe, secrétaire et surveillant inclus", "Export des données et rapports", "Accompagnement dédié"],
   },
   {
     id: "reseau",

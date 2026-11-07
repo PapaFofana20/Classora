@@ -94,5 +94,5 @@ export function periodInfo(schoolId: string): { periods: Period[]; current: stri
   return { periods: currentPeriods(schoolId), current: settingsOf(schoolId).currentPeriod };
 }
 
-/** Parent d'un élève (pour les fiches et la messagerie). */
+/** Parent d'un élève (pour les fiches). */
 export const parentOf = (schoolId: string, parentId: string) => parentsOf(schoolId).find((p) => p.id === parentId);

@@ -2,7 +2,7 @@
 export const roleHighlights = [
   { role: "Directeur", text: "Vue complète : effectifs, recouvrement, classes, enseignants, affectations et paramètres." },
   { role: "Économe", text: "Échéanciers, encaissements, relances, reçus et suivi des impayés." },
-  { role: "Instituteur", text: "Toutes les matières de sa classe en onglets, bulletins et messagerie avec ses parents." },
+  { role: "Instituteur", text: "Toutes les matières de sa classe en onglets et bulletins." },
   { role: "Professeur", text: "Saisie limitée à ses couples classe · matière, plus la synthèse de sa classe principale." },
   { role: "Surveillant général", text: "Absences, retards et discipline suivis au quotidien." },
   { role: "Parent", text: "Un compte, plusieurs élèves, tous cycles confondus : notes, bulletins et paiements." },
@@ -48,16 +48,15 @@ export const roleFeatures: RoleFeature[] = [
     id: "professeurs",
     role: "Professeurs",
     icon: "school",
-    title: "Enseigner, noter et échanger avec les familles",
+    title: "Enseigner, noter et suivre ses classes",
     description:
-      "Chaque enseignant retrouve uniquement ses classes et ses matières. Il saisit les notes, consulte ses affectations et dialogue avec les parents, sans jamais sortir de son périmètre.",
+      "Chaque enseignant retrouve uniquement ses classes et ses matières. Il saisit les notes et consulte ses affectations, sans jamais sortir de son périmètre.",
     image: enseignantsImg,
     imageAlt: "Deux enseignants sénégalais échangeant dans une salle de classe",
     bullets: [
       "Accès limité à ses classes et à ses matières",
       "Saisie des notes par période et par coefficient",
       "Appréciations et synthèse de sa classe principale",
-      "Messagerie directe avec les parents",
     ],
   },
   {
@@ -82,14 +81,14 @@ export const roleFeatures: RoleFeature[] = [
     icon: "family_restroom",
     title: "Suivre ses enfants, payer et rester informé",
     description:
-      "Un seul compte pour tous les enfants, quel que soit le cycle. Les parents suivent les notes, règlent les échéances par mobile money et échangent directement avec l'école.",
+      "Un seul compte pour tous les enfants, quel que soit le cycle. Les parents suivent les notes et règlent les échéances par mobile money.",
     image: parentsImg,
     imageAlt: "Parent consultant ses paiements sur son téléphone",
     bullets: [
       "Plusieurs élèves rattachés à un même compte",
       "Notes, bulletins et absences en temps réel",
       "Paiement Wave, Orange Money ou Free Money",
-      "Reçus, relances et messagerie avec les enseignants",
+      "Reçus et relances des impayés",
     ],
   },
 ];

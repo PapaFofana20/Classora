@@ -17,7 +17,6 @@ export interface NavItem {
 }
 
 const dashboard = (label: string, icon = "dashboard"): NavItem => ({ to: "/app", label, icon, section: "Menu" });
-const messages: NavItem = { to: "/app/messages", label: "Messages", icon: "forum", section: "Outils" };
 const profile: NavItem = { to: "/app/parametres", label: "Mon profil", icon: "account_circle", section: "Outils" };
 const subscription: NavItem = { to: "/app/abonnement", label: "Abonnement", icon: "workspace_premium", section: "École", directorOnly: true };
 
@@ -35,14 +34,12 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },
-    messages,
     { to: "/app/parametres", label: "Paramètres", icon: "settings", section: "Outils" },
   ],
   econome: [
     dashboard("Tableau de bord"),
     { to: "/app/eleves", label: "Élèves", icon: "groups", section: "Menu" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },
-    messages,
     profile,
   ],
   secretaire: [
@@ -53,7 +50,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   surveillant: [
     dashboard("Vie scolaire", "shield_person"),
     { to: "/app/eleves", label: "Élèves", icon: "groups", section: "Menu" },
-    messages,
     profile,
   ],
   instituteur: [
@@ -62,7 +58,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/notes", label: "Notes", icon: "edit_note", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/timetables", label: "Emploi du temps", icon: "calendar_month", section: "Scolarité" },
-    messages,
     profile,
   ],
   professeur: [
@@ -71,7 +66,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/eleves", label: "Mes élèves", icon: "groups", section: "Scolarité" },
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité", requiresHead: true },
     { to: "/app/timetables", label: "Emploi du temps", icon: "calendar_month", section: "Scolarité" },
-    messages,
     profile,
   ],
   eleve: [
@@ -80,7 +74,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/timetables", label: "Emploi du temps", icon: "calendar_month", section: "Scolarité" },
     { to: "/app/paiements", label: "Mes paiements", icon: "payments", section: "Finances" },
-    messages,
     profile,
   ],
   parent: [
@@ -89,7 +82,6 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { to: "/app/bulletins", label: "Bulletins", icon: "description", section: "Scolarité" },
     { to: "/app/timetables", label: "Emploi du temps", icon: "calendar_month", section: "Scolarité" },
     { to: "/app/paiements", label: "Paiements", icon: "payments", section: "Finances" },
-    messages,
     profile,
   ],
 };
@@ -112,7 +104,6 @@ export const ROUTE_ROLES = {
   notes: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],
   bulletins: ["directeur", "instituteur", "professeur", "eleve", "parent"] as Role[],
   paiements: ["directeur", "econome", "eleve", "parent"] as Role[],
-  messages: ALL,
   parametres: ALL,
 };
 

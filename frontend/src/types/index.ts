@@ -209,34 +209,6 @@ export interface Payment {
   reference?: string;
 }
 
-export interface ChatMessage {
-  id: string;
-  senderId: string;
-  text: string;
-  at: string;
-}
-
-export interface Conversation {
-  schoolId: string;
-  id: string;
-  teacherId: string;
-  parentId: string;
-  studentId: string;
-  subject: string;
-  messages: ChatMessage[];
-  lastReadAt: Record<string, string>;
-}
-
-export interface Announcement {
-  schoolId: string;
-  id: string;
-  title: string;
-  body: string;
-  at: string;
-  author: string;
-  audience: Role[] | "all";
-}
-
 export interface AbsenceRecord {
   schoolId: string;
   id: string;

@@ -50,6 +50,12 @@ const lower = (s: string) => s.trim().toLowerCase();
 /* Session                                                              */
 /* ------------------------------------------------------------------ */
 
+/** Y a-t-il un jeton de session Auth en local ? (sans hydrater les données) */
+export async function hasAuthSession(): Promise<boolean> {
+  const { data } = await supabase.auth.getSession();
+  return !!data.session?.user;
+}
+
 /** Profils de la session courante ; null si non connecté. */
 export async function currentSession(): Promise<SessionUser | null> {
   const { data } = await supabase.auth.getSession();

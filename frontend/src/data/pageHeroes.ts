@@ -32,7 +32,7 @@ export interface PageHeroData {
 export const pageHeroes: Record<"fonctionnalites" | "tarifs" | "ecoles" | "apropos" | "contact", PageHeroData> = {
   fonctionnalites: {
     title: "Tout ce qu'il faut pour gérer votre *école*",
-    description: "Inscriptions, bulletins, paiements mobile money et messagerie : un seul outil pour la direction, les enseignants et les parents.",
+    description: "Inscriptions, bulletins, paiements mobile money : un seul outil pour la direction, les enseignants et les parents.",
     primaryCta: { label: "Créer un compte", to: "/inscription" },
     secondaryCta: { label: "Voir les tarifs", to: "/tarifs" },
     image: { src: fonctionnalitesHeroImg, alt: "Enseignant travaillant sur un ordinateur portable dans une bibliothèque", objectPosition: "60% 30%", width: 2816, height: 1584 },

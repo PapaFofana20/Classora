@@ -43,7 +43,7 @@ export function ArrowButton({ tone = "lime", to, className, children, icon = "ar
   );
   if (to) {
     return (
-      <Link to={to} className={classes} onMouseEnter={() => preloadRoute(to)} onFocus={() => preloadRoute(to)}>
+      <Link to={to} className={classes} onMouseEnter={() => preloadRoute(to)} onFocus={() => preloadRoute(to)} onPointerDown={() => preloadRoute(to)} onTouchStart={() => preloadRoute(to)}>
         {inner}
       </Link>
     );

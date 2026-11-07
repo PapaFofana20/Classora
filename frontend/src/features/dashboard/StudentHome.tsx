@@ -21,7 +21,7 @@ import { averageTone } from "@/utils/grades";
 import { PAY_STATUS_LABELS, remaining } from "@/utils/payments";
 import type { Payment } from "@/types";
 
-/** Espace élève : école, notes, prochaines échéances, messagerie. */
+/** Espace élève : école, notes et prochaines échéances. */
 export function StudentHome() {
   const user = useCurrentUser();
   const school = useSchool();

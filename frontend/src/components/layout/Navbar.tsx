@@ -36,6 +36,17 @@ export function Navbar() {
   // Fermeture au changement de route.
   useEffect(() => setOpen(false), [pathname]);
 
+  // Préchargement en arrière-plan des pages d'authentification : le chunk
+  // est téléchargé pendant que l'utilisateur lit la page, le clic devient
+  // instantané (y compris sur mobile, où il n'y a pas de survol).
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      preloadRoute("/connexion");
+      preloadRoute("/inscription");
+    }, 800);
+    return () => window.clearTimeout(t);
+  }, []);
+
   // Menu mobile : défilement bloqué, Échap ferme et rend le focus au bouton.
   useEffect(() => {
     if (!open) return;
