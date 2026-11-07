@@ -19,7 +19,7 @@ export default function SchoolsPage() {
       <PageHero {...pageHeroes.ecoles} />
       <section className="mx-auto w-full max-w-[1280px] px-gutter pb-14 md:pb-16" aria-labelledby="schools-partners-title">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 text-center sm:pt-14 md:pt-16 pb-12 sm:pb-14 md:pb-16">
+          <div className="relative overflow-hidden rounded-3xl bg-lime-pale px-6 pt-12 text-center sm:pt-14 md:pt-16">
             <div
               aria-hidden="true"
               className="absolute inset-0 opacity-50 [background-image:radial-gradient(#c6f068_1.5px,transparent_1.5px)] [background-size:18px_18px]"
@@ -30,7 +30,7 @@ export default function SchoolsPage() {
             />
             <div className="relative">
               <h2 id="schools-partners-title" className="text-balance text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
-                Des <span className="font-serif font-semibold italic text-forest-500">établissements</span> qui avancent avec <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" />
+                Des <span className="font-serif font-semibold italic text-forest-500">établissements</span> qui avancent <br className="hidden lg:inline" /> avec <img src="/images/logo-dark.png" alt="Classora" width={240} height={46} className="inline-block h-[0.85em] w-auto align-[-0.1em]" />
               </h2>
               <div className="mx-auto mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-neutral-700 sm:mt-10">
                 <p>
@@ -44,6 +44,14 @@ export default function SchoolsPage() {
                 </p>
               </div>
             </div>
+            <img
+              src="/images/ecoles-eleves.png"
+              alt="Quatre élèves en uniforme vert réunis autour d'un ordinateur portable et de leurs cahiers"
+              width={1672}
+              height={941}
+              decoding="async"
+              className="relative -mx-[30%] mt-8 block h-auto w-[160%] max-w-none sm:mx-auto sm:h-72 sm:w-auto md:h-[380px] lg:h-[520px]"
+            />
           </div>
         </Reveal>
       </section>
